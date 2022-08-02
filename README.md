@@ -31,7 +31,7 @@ This should work without any other setup.
 
 You may need to run the following command to install [X11](https://en.wikipedia.org/wiki/X_Window_System) (a window manager for Linux).
 
-```sh
+```bash
 sudo apt-get install libxrandr-dev libxi-dev libxcursor-dev libxinerama-dev
 ```
 
