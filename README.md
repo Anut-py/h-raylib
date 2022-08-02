@@ -4,7 +4,7 @@ This library includes low-level bindings to the [Raylib](https://www.raylib.com/
 
 ## Usage
 
-To use this package, include it as a dependency in you cabal file.
+To use this package, include it as a dependency in your cabal file.
 
 ```cabal
 build-depends:
