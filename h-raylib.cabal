@@ -29,17 +29,10 @@ library
     raylib/utils.c
     lib/bindings.c
 
-  if !os(linux)
-    include-dirs:
-      lib
-      raylib
-      raylib/external
-      raylib/external/glfw/include
-  else
-    include-dirs:
-      lib
-      raylib
-      raylib/external/glfw/include
+  include-dirs:
+    lib
+    raylib
+    raylib/external/glfw/include
 
 executable example
   default-language:   Haskell2010
