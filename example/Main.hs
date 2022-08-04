@@ -15,8 +15,6 @@ import Raylib
     windowShouldClose,
   )
 
-foreign import ccall unsafe "bindings.h test" test :: Ptr Color -> IO()
-
 main = do
   str <- newCString "Hello world"
   initWindow 600 450 str
