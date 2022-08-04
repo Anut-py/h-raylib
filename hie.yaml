@@ -1,7 +1,0 @@
-cradle:
-  cabal:
-    - path: "./app"
-      component: "lib:h-raylib"
-
-    - path: "./example"
-      component: "h-raylib:exe:example"
