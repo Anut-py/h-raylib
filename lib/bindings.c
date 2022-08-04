@@ -3,24 +3,28 @@
  */
 
 #include "bindings.h"
+#include <stdlib.h>
 
 void SetWindowIcon_(Image* a) {
     SetWindowIcon(*a);
 }
 
 Vector2* GetMonitorPosition_(int a) {
-    Vector2 val = GetMonitorPosition(a);
-    return &val;
+    Vector2* ptr = (Vector2*) malloc(sizeof (Vector2));
+    *ptr = GetMonitorPosition(a);
+    return ptr;
 }
 
 Vector2* GetWindowPosition_() {
-    Vector2 val = GetWindowPosition();
-    return &val;
+    Vector2* ptr = (Vector2*) malloc(sizeof (Vector2));
+    *ptr = GetWindowPosition();
+    return ptr;
 }
 
 Vector2* GetWindowScaleDPI_() {
-    Vector2 val = GetWindowScaleDPI();
-    return &val;
+    Vector2* ptr = (Vector2*) malloc(sizeof (Vector2));
+    *ptr = GetWindowScaleDPI();
+    return ptr;
 }
 
 void ClearBackground_(Color* a) {
@@ -48,8 +52,9 @@ void BeginVrStereoMode_(VrStereoConfig* a) {
 }
 
 VrStereoConfig* LoadVrStereoConfig_(VrDeviceInfo* a) {
-    VrStereoConfig val = LoadVrStereoConfig(*a);
-    return &val;
+    VrStereoConfig* ptr = (VrStereoConfig*) malloc(sizeof (VrStereoConfig));
+    *ptr = LoadVrStereoConfig(*a);
+    return ptr;
 }
 
 void UnloadVrStereoConfig_(VrStereoConfig* a) {
@@ -57,21 +62,23 @@ void UnloadVrStereoConfig_(VrStereoConfig* a) {
 }
 
 Shader* LoadShader_(string a, string b) {
-    Shader val = LoadShader(a, b);
-    return &val;
+    Shader* ptr = (Shader*) malloc(sizeof (Shader));
+    *ptr = LoadShader(a, b);
+    return ptr;
 }
 
 Shader* LoadShaderFromMemory_(string a, string b) {
-    Shader val = LoadShaderFromMemory(a, b);
-    return &val;
+    Shader* ptr = (Shader*) malloc(sizeof (Shader));
+    *ptr = LoadShaderFromMemory(a, b);
+    return ptr;
 }
 
 int GetShaderLocation_(Shader* a, string b) {
-    GetShaderLocation(*a, b);
+    return GetShaderLocation(*a, b);
 }
 
 int GetShaderLocationAttrib_(Shader* a, string b) {
-    GetShaderLocationAttrib(*a, b);
+    return GetShaderLocationAttrib(*a, b);
 }
 
 void SetShaderValue_(Shader* a, int b, const void* c, int d) {
@@ -95,13 +102,15 @@ void UnloadShader_(Shader* a) {
 }
 
 Ray* GetMouseRay_(Vector2* a, Camera3D* b) {
-    Ray val = GetMouseRay(*a, *b);
-    return &val;
+    Ray* ptr = (Ray*) malloc(sizeof (Ray));
+    *ptr = GetMouseRay(*a, *b);
+    return ptr;
 }
 
 Matrix* GetCameraMatrix_(Camera3D* a) {
-    Matrix val = GetCameraMatrix(*a);
-    return &val;
+    Matrix* ptr = (Matrix*) malloc(sizeof (Matrix));
+    *ptr = GetCameraMatrix(*a);
+    return ptr;
 }
 
 Matrix* GetCameraMatrix2D_(Camera2D* a) {
@@ -109,8 +118,9 @@ Matrix* GetCameraMatrix2D_(Camera2D* a) {
 }
 
 Vector2* GetWorldToScreen_(Vector3* a, Camera3D* b) {
-    Vector2 val = GetWorldToScreen(*a, *b);
-    return &val;
+    Vector2* ptr = (Vector2*) malloc(sizeof (Vector2));
+    *ptr = GetWorldToScreen(*a, *b);
+    return ptr;
 }
 
 Vector2* GetScreenToWorld2D_(Vector2* a, Camera2D* b) {
@@ -118,8 +128,9 @@ Vector2* GetScreenToWorld2D_(Vector2* a, Camera2D* b) {
 }
 
 Vector2* GetWorldToScreenEx_(Vector3* a, Camera3D* b, int c, int d) {
-    Vector2 val = GetWorldToScreenEx(*a, *b, c, d);
-    return &val;
+    Vector2* ptr = (Vector2*) malloc(sizeof (Vector2));
+    *ptr = GetWorldToScreenEx(*a, *b, c, d);
+    return ptr;
 }
 
 Vector2* GetWorldToScreen2D_(Vector2* a, Camera2D* b) {
@@ -127,13 +138,15 @@ Vector2* GetWorldToScreen2D_(Vector2* a, Camera2D* b) {
 }
 
 FilePathList* LoadDirectoryFiles_(string a) {
-    FilePathList val = LoadDirectoryFiles(a);
-    return &val;
+    FilePathList* ptr = (FilePathList*) malloc(sizeof (FilePathList));
+    *ptr = LoadDirectoryFiles(a);
+    return ptr;
 }
 
 FilePathList* LoadDirectoryFilesEx_(string a, string b, int c) {
-    FilePathList val = LoadDirectoryFilesEx(a, b, c);
-    return &val;
+    FilePathList* ptr = (FilePathList*) malloc(sizeof (FilePathList));
+    *ptr = LoadDirectoryFilesEx(a, b, c);
+    return ptr;
 }
 
 void UnloadDirectoryFiles_(FilePathList* a) {
@@ -141,8 +154,9 @@ void UnloadDirectoryFiles_(FilePathList* a) {
 }
 
 FilePathList* LoadDroppedFiles_() {
-    FilePathList val = LoadDroppedFiles();
-    return &val;
+    FilePathList* ptr = (FilePathList*) malloc(sizeof (FilePathList));
+    *ptr = LoadDroppedFiles();
+    return ptr;
 }
 
 void UnloadDroppedFiles_(FilePathList* a) {
@@ -150,33 +164,39 @@ void UnloadDroppedFiles_(FilePathList* a) {
 }
 
 Vector2* GetMousePosition_() {
-    Vector2 val = GetMousePosition();
-    return &val;
+    Vector2* ptr = (Vector2*) malloc(sizeof (Vector2));
+    *ptr = GetMousePosition();
+    return ptr;
 }
 
 Vector2* GetMouseDelta_() {
-    Vector2 val = GetMouseDelta();
-    return &val;
+    Vector2* ptr = (Vector2*) malloc(sizeof (Vector2));
+    *ptr = GetMouseDelta();
+    return ptr;
 }
 
 Vector2* GetMouseWheelMoveV_() {
-    Vector2 val = GetMouseWheelMoveV();
-    return &val;
+    Vector2* ptr = (Vector2*) malloc(sizeof (Vector2));
+    *ptr = GetMouseWheelMoveV();
+    return ptr;
 }
 
 Vector2* GetTouchPosition_(int a) {
-    Vector2 val = GetTouchPosition(a);
-    return &val;
+    Vector2* ptr = (Vector2*) malloc(sizeof (Vector2));
+    *ptr = GetTouchPosition(a);
+    return ptr;
 }
 
 Vector2* GetGestureDragVector_() {
-    Vector2 val = GetGestureDragVector();
-    return &val;
+    Vector2* ptr = (Vector2*) malloc(sizeof (Vector2));
+    *ptr = GetGestureDragVector();
+    return ptr;
 }
 
 Vector2* GetGesturePinchVector_() {
-    Vector2 val = GetGesturePinchVector();
-    return &val;
+    Vector2* ptr = (Vector2*) malloc(sizeof (Vector2));
+    *ptr = GetGesturePinchVector();
+    return ptr;
 }
 
 void SetCameraMode_(Camera3D* a, int b) {
@@ -336,70 +356,77 @@ void DrawPolyLinesEx_(Vector2* a, int b, float c, float d, float e, Color* f) {
 }
 
 int CheckCollisionRecs_(Rectangle* a, Rectangle* b) {
-    CheckCollisionRecs(*a, *b);
+    return CheckCollisionRecs(*a, *b);
 }
 
 int CheckCollisionCircles_(Vector2* a, float b, Vector2* c, float d) {
-    CheckCollisionCircles(*a, b, *c, d);
+    return CheckCollisionCircles(*a, b, *c, d);
 }
 
 int CheckCollisionCircleRec_(Vector2* a, float b, Rectangle* c) {
-    CheckCollisionCircleRec(*a, b, *c);
+    return CheckCollisionCircleRec(*a, b, *c);
 }
 
 int CheckCollisionPointRec_(Vector2* a, Rectangle* b) {
-    CheckCollisionPointRec(*a, *b);
+    return CheckCollisionPointRec(*a, *b);
 }
 
 int CheckCollisionPointCircle_(Vector2* a, Vector2* b, float c) {
-    CheckCollisionPointCircle(*a, *b, c);
+    return CheckCollisionPointCircle(*a, *b, c);
 }
 
 int CheckCollisionPointTriangle_(Vector2* a, Vector2* b, Vector2* c, Vector2* d) {
-    CheckCollisionPointTriangle(*a, *b, *c, *d);
+    return CheckCollisionPointTriangle(*a, *b, *c, *d);
 }
 
 int CheckCollisionLines_(Vector2* a, Vector2* b, Vector2* c, Vector2* d, Vector2* e) {
-    CheckCollisionLines(*a, *b, *c, *d, e);
+    return CheckCollisionLines(*a, *b, *c, *d, e);
 }
 
 int CheckCollisionPointLine_(Vector2* a, Vector2* b, Vector2* c, int d) {
-    CheckCollisionPointLine(*a, *b, *c, d);
+    return CheckCollisionPointLine(*a, *b, *c, d);
 }
 
 Rectangle* GetCollisionRec_(Rectangle* a, Rectangle* b) {
-    Rectangle val = GetCollisionRec(*a, *b);
-    return &val;
+    Rectangle* ptr = (Rectangle*) malloc(sizeof (Rectangle));
+    *ptr = GetCollisionRec(*a, *b);
+    return ptr;
 }
 
 Image* LoadImage_(string a) {
-    Image val = LoadImage(a);
-    return &val;
+    Image* ptr = (Image*) malloc(sizeof (Image));
+    *ptr = LoadImage(a);
+    return ptr;
 }
 
 Image* LoadImageRaw_(string a, int b, int c, int d, int e) {
-    Image val = LoadImageRaw(a, b, c, d, e);
-    return &val;
+    Image* ptr = (Image*) malloc(sizeof (Image));
+    *ptr = LoadImageRaw(a, b, c, d, e);
+    return ptr;
 }
 
 Image* LoadImageAnim_(string a, int* b) {
-    Image val = LoadImageAnim(a, b);
-    return &val;
+    Image* ptr = (Image*) malloc(sizeof (Image));
+    *ptr = LoadImageAnim(a, b);
+    return ptr;
 }
 
 Image* LoadImageFromMemory_(string a, unsigned char* b, int c) {
-    Image val = LoadImageFromMemory(a, b, c);
-    return &val;
+    Image* ptr = (Image*) malloc(sizeof (Image));
+    *ptr = LoadImageFromMemory(a, b, c);
+    return ptr;
 }
 
 Image* LoadImageFromTexture_(Texture* a) {
-    Image val = LoadImageFromTexture(*a);
-    return &val;
+    Image* ptr = (Image*) malloc(sizeof (Image));
+    *ptr = LoadImageFromTexture(*a);
+    return ptr;
 }
 
 Image* LoadImageFromScreen_() {
-    Image val = LoadImageFromScreen();
-    return &val;
+    Image* ptr = (Image*) malloc(sizeof (Image));
+    *ptr = LoadImageFromScreen();
+    return ptr;
 }
 
 void UnloadImage_(Image* a) {
@@ -407,66 +434,77 @@ void UnloadImage_(Image* a) {
 }
 
 int ExportImage_(Image* a, string b) {
-    ExportImage(*a, b);
+    return ExportImage(*a, b);
 }
 
 int ExportImageAsCode_(Image* a, string b) {
-    ExportImageAsCode(*a, b);
+    return ExportImageAsCode(*a, b);
 }
 
 Image* GenImageColor_(int a, int b, Color* c) {
-    Image val = GenImageColor(a, b, *c);
-    return &val;
+    Image* ptr = (Image*) malloc(sizeof (Image));
+    *ptr = GenImageColor(a, b, *c);
+    return ptr;
 }
 
 Image* GenImageGradientV_(int a, int b, Color* c, Color* d) {
-    Image val = GenImageGradientV(a, b, *c, *d);
-    return &val;
+    Image* ptr = (Image*) malloc(sizeof (Image));
+    *ptr = GenImageGradientV(a, b, *c, *d);
+    return ptr;
 }
 
 Image* GenImageGradientH_(int a, int b, Color* c, Color* d) {
-    Image val = GenImageGradientH(a, b, *c, *d);
-    return &val;
+    Image* ptr = (Image*) malloc(sizeof (Image));
+    *ptr = GenImageGradientH(a, b, *c, *d);
+    return ptr;
 }
 
 Image* GenImageGradientRadial_(int a, int b, float c, Color* d, Color* e) {
-    Image val = GenImageGradientRadial(a, b, c, *d, *e);
-    return &val;
+    Image* ptr = (Image*) malloc(sizeof (Image));
+    *ptr = GenImageGradientRadial(a, b, c, *d, *e);
+    return ptr;
 }
 
 Image* GenImageChecked_(int a, int b, int c, int d, Color* e, Color* f) {
-    Image val = GenImageChecked(a, b, c, d, *e, *f);
-    return &val;
+    Image* ptr = (Image*) malloc(sizeof (Image));
+    *ptr = GenImageChecked(a, b, c, d, *e, *f);
+    return ptr;
 }
 
 Image* GenImageWhiteNoise_(int a, int b, float c) {
-    Image val = GenImageWhiteNoise(a, b, c);
-    return &val;
+    Image* ptr = (Image*) malloc(sizeof (Image));
+    *ptr = GenImageWhiteNoise(a, b, c);
+    return ptr;
 }
 
 Image* GenImageCellular_(int a, int b, int c) {
-    Image val = GenImageCellular(a, b, c);
-    return &val;
+    Image* ptr = (Image*) malloc(sizeof (Image));
+    *ptr = GenImageCellular(a, b, c);
+    return ptr;
 }
 
 Image* ImageCopy_(Image* a) {
-    Image val = ImageCopy(*a);
-    return &val;
+    Image* ptr = (Image*) malloc(sizeof (Image));
+    *ptr = ImageCopy(*a);
+    return ptr;
 }
 
 Image* ImageFromImage_(Image* a, Rectangle* b) {
-    Image val = ImageFromImage(*a, *b);
-    return &val;
+    Image* ptr = (Image*) malloc(sizeof (Image));
+    *ptr = ImageFromImage(*a, *b);
+    return ptr;
 }
 
 Image* ImageText_(string a, int b, Color* c) {
-    Image val = ImageText(a, b, *c);
-    return &val;
+    Image* ptr = (Image*) malloc(sizeof (Image));
+    *ptr = ImageText(a, b, *c);
+    return ptr;
 }
 
 Image* ImageTextEx_(Font* a, string b, float c, float d, Color* e) {
-    Image val = ImageTextEx(*a, b, c, d, *e);
-    return &val;
+    Image* ptr = (Image*) malloc(sizeof (Image));
+    *ptr = ImageTextEx(*a, b, c, d, *e);
+    return ptr;
 }
 
 void ImageToPOT_(Image* a, Color* b) {
@@ -506,13 +544,15 @@ Color* LoadImagePalette_(Image* a, int b, int* c) {
 }
 
 Rectangle* GetImageAlphaBorder_(Image* a, float b) {
-    Rectangle val = GetImageAlphaBorder(*a, b);
-    return &val;
+    Rectangle* ptr = (Rectangle*) malloc(sizeof (Rectangle));
+    *ptr = GetImageAlphaBorder(*a, b);
+    return ptr;
 }
 
 Color* GetImageColor_(Image* a, int b, int c) {
-    Color val = GetImageColor(*a, b, c);
-    return &val;
+    Color* ptr = (Color*) malloc(sizeof (Color));
+    *ptr = GetImageColor(*a, b, c);
+    return ptr;
 }
 
 void ImageClearBackground_(Image* a, Color* b) {
@@ -572,23 +612,27 @@ void ImageDrawTextEx_(Image* a, Font* b, string c, Vector2* d, float e, float f,
 }
 
 Texture* LoadTexture_(string a) {
-    Texture val = LoadTexture(a);
-    return &val;
+    Texture* ptr = (Texture*) malloc(sizeof (Texture));
+    *ptr = LoadTexture(a);
+    return ptr;
 }
 
 Texture* LoadTextureFromImage_(Image* a) {
-    Texture val = LoadTextureFromImage(*a);
-    return &val;
+    Texture* ptr = (Texture*) malloc(sizeof (Texture));
+    *ptr = LoadTextureFromImage(*a);
+    return ptr;
 }
 
 Texture* LoadTextureCubemap_(Image* a, int b) {
-    Texture val = LoadTextureCubemap(*a, b);
-    return &val;
+    Texture* ptr = (Texture*) malloc(sizeof (Texture));
+    *ptr = LoadTextureCubemap(*a, b);
+    return ptr;
 }
 
 RenderTexture* LoadRenderTexture_(int a, int b) {
-    RenderTexture val = LoadRenderTexture(a, b);
-    return &val;
+    RenderTexture* ptr = (RenderTexture*) malloc(sizeof (RenderTexture));
+    *ptr = LoadRenderTexture(a, b);
+    return ptr;
 }
 
 void UnloadTexture_(Texture* a) {
@@ -652,86 +696,101 @@ void DrawTexturePoly_(Texture* a, Vector2* b, Vector2* c, Vector2* d, int e, Col
 }
 
 Color* Fade_(Color* a, float b) {
-    Color val = Fade(*a, b);
-    return &val;
+    Color* ptr = (Color*) malloc(sizeof (Color));
+    *ptr = Fade(*a, b);
+    return ptr;
 }
 
 int ColorToInt_(Color* a) {
-    ColorToInt(*a);
+    return ColorToInt(*a);
 }
 
 Vector4* ColorNormalize_(Color* a) {
-    Vector4 val = ColorNormalize(*a);
-    return &val;
+    Vector4* ptr = (Vector4*) malloc(sizeof (Vector4));
+    *ptr = ColorNormalize(*a);
+    return ptr;
 }
 
 Color* ColorFromNormalized_(Vector4* a) {
-    Color val = ColorFromNormalized(*a);
-    return &val;
+    Color* ptr = (Color*) malloc(sizeof (Color));
+    *ptr = ColorFromNormalized(*a);
+    return ptr;
 }
 
 Vector3* ColorToHSV_(Color* a) {
-    Vector3 val = ColorToHSV(*a);
-    return &val;
+    Vector3* ptr = (Vector3*) malloc(sizeof (Vector3));
+    *ptr = ColorToHSV(*a);
+    return ptr;
 }
 
 Color* ColorFromHSV_(float a, float b, float c) {
-    Color val = ColorFromHSV(a, b, c);
-    return &val;
+    Color* ptr = (Color*) malloc(sizeof (Color));
+    *ptr = ColorFromHSV(a, b, c);
+    return ptr;
 }
 
 Color* ColorAlpha_(Color* a, float b) {
-    Color val = ColorAlpha(*a, b);
-    return &val;
+    Color* ptr = (Color*) malloc(sizeof (Color));
+    *ptr = ColorAlpha(*a, b);
+    return ptr;
 }
 
 Color* ColorAlphaBlend_(Color* a, Color* b, Color* c) {
-    Color val = ColorAlphaBlend(*a, *b, *c);
-    return &val;
+    Color* ptr = (Color*) malloc(sizeof (Color));
+    *ptr = ColorAlphaBlend(*a, *b, *c);
+    return ptr;
 }
 
 Color* GetColor_(unsigned int a) {
-    Color val = GetColor(a);
-    return &val;
+    Color* ptr = (Color*) malloc(sizeof (Color));
+    *ptr = GetColor(a);
+    return ptr;
 }
 
-Color* GetPixelColor_(const void* a, int b) {
-    Color val = GetPixelColor(a, b);
-    return &val;
+Color* GetPixelColor_(void* a, int b) {
+    Color* ptr = (Color*) malloc(sizeof (Color));
+    *ptr = GetPixelColor(a, b);
+    return ptr;
 }
 
-void SetPixelColor_(const void* a, Color* b, int c) {
+void SetPixelColor_(void* a, Color* b, int c) {
     SetPixelColor(a, *b, c);
 }
 
 Font* GetFontDefault_() {
-    Font val = GetFontDefault();
-    return &val;
+    Font* ptr = (Font*) malloc(sizeof (Font));
+    *ptr = GetFontDefault();
+    return ptr;
 }
 
 Font* LoadFont_(string a) {
-    Font val = LoadFont(a);
-    return &val;
+    Font* ptr = (Font*) malloc(sizeof (Font));
+    *ptr = LoadFont(a);
+    return ptr;
 }
 
 Font* LoadFontEx_(string a, int b, int* c, int d) {
-    Font val = LoadFontEx(a, b, c, d);
-    return &val;
+    Font* ptr = (Font*) malloc(sizeof (Font));
+    *ptr = LoadFontEx(a, b, c, d);
+    return ptr;
 }
 
 Font* LoadFontFromImage_(Image* a, Color* b, int c) {
-    Font val = LoadFontFromImage(*a, *b, c);
-    return &val;
+    Font* ptr = (Font*) malloc(sizeof (Font));
+    *ptr = LoadFontFromImage(*a, *b, c);
+    return ptr;
 }
 
 Font* LoadFontFromMemory_(string a, unsigned char* b, int c, int d, int* e, int f) {
-    Font val = LoadFontFromMemory(a, b, c, d, e, f);
-    return &val;
+    Font* ptr = (Font*) malloc(sizeof (Font));
+    *ptr = LoadFontFromMemory(a, b, c, d, e, f);
+    return ptr;
 }
 
 Image* GenImageFontAtlas_(GlyphInfo* a, Rectangle** b, int c, int d, int e, int f) {
-    Image val = GenImageFontAtlas(a, b, c, d, e, f);
-    return &val;
+    Image* ptr = (Image*) malloc(sizeof (Image));
+    *ptr = GenImageFontAtlas(a, b, c, d, e, f);
+    return ptr;
 }
 
 void UnloadFont_(Font* a) {
@@ -739,7 +798,7 @@ void UnloadFont_(Font* a) {
 }
 
 int ExportFontAsCode_(Font* a, string b) {
-    ExportFontAsCode(*a, b);
+    return ExportFontAsCode(*a, b);
 }
 
 void DrawText_(string a, int b, int c, int d, Color* e) {
@@ -763,22 +822,25 @@ void DrawTextCodepoints_(Font* a, int* b, int c, Vector2* d, float e, float f, C
 }
 
 Vector2* MeasureTextEx_(Font* a, string b, float c, float d) {
-    Vector2 val = MeasureTextEx(*a, b, c, d);
-    return &val;
+    Vector2* ptr = (Vector2*) malloc(sizeof (Vector2));
+    *ptr = MeasureTextEx(*a, b, c, d);
+    return ptr;
 }
 
 int GetGlyphIndex_(Font* a, int b) {
-    GetGlyphIndex(*a, b);
+    return GetGlyphIndex(*a, b);
 }
 
 GlyphInfo* GetGlyphInfo_(Font* a, int b) {
-    GlyphInfo val = GetGlyphInfo(*a, b);
-    return &val;
+    GlyphInfo* ptr = (GlyphInfo*) malloc(sizeof (GlyphInfo));
+    *ptr = GetGlyphInfo(*a, b);
+    return ptr;
 }
 
 Rectangle* GetGlyphAtlasRec_(Font* a, int b) {
-    Rectangle val = GetGlyphAtlasRec(*a, b);
-    return &val;
+    Rectangle* ptr = (Rectangle*) malloc(sizeof (Rectangle));
+    *ptr = GetGlyphAtlasRec(*a, b);
+    return ptr;
 }
 
 void DrawLine3D_(Vector3* a, Vector3* b, Color* c) {
@@ -862,13 +924,15 @@ void DrawRay_(Ray* a, Color* b) {
 }
 
 Model* LoadModel_(string a) {
-    Model val = LoadModel(a);
-    return &val;
+    Model* ptr = (Model*) malloc(sizeof (Model));
+    *ptr = LoadModel(a);
+    return ptr;
 }
 
 Model* LoadModelFromMesh_(Mesh* a) {
-    Model val = LoadModelFromMesh(*a);
-    return &val;
+    Model* ptr = (Model*) malloc(sizeof (Model));
+    *ptr = LoadModelFromMesh(*a);
+    return ptr;
 }
 
 void UnloadModel_(Model* a) {
@@ -880,8 +944,9 @@ void UnloadModelKeepMeshes_(Model* a) {
 }
 
 BoundingBox* GetModelBoundingBox_(Model* a) {
-    BoundingBox val = GetModelBoundingBox(*a);
-    return &val;
+    BoundingBox* ptr = (BoundingBox*) malloc(sizeof (BoundingBox));
+    *ptr = GetModelBoundingBox(*a);
+    return ptr;
 }
 
 void DrawModel_(Model* a, Vector3* b, float c, Color* d) {
@@ -933,72 +998,85 @@ void DrawMeshInstanced_(Mesh* a, Material* b, Matrix* c, int d) {
 }
 
 int ExportMesh_(Mesh* a, string b) {
-    ExportMesh(*a, b);
+    return ExportMesh(*a, b);
 }
 
 BoundingBox* GetMeshBoundingBox_(Mesh* a) {
-    BoundingBox val = GetMeshBoundingBox(*a);
-    return &val;
+    BoundingBox* ptr = (BoundingBox*) malloc(sizeof (BoundingBox));
+    *ptr = GetMeshBoundingBox(*a);
+    return ptr;
 }
 
 Mesh* GenMeshPoly_(int a, float b) {
-    Mesh val = GenMeshPoly(a, b);
-    return &val;
+    Mesh* ptr = (Mesh*) malloc(sizeof (Mesh));
+    *ptr = GenMeshPoly(a, b);
+    return ptr;
 }
 
 Mesh* GenMeshPlane_(float a, float b, int c, int d) {
-    Mesh val = GenMeshPlane(a, b, c, d);
-    return &val;
+    Mesh* ptr = (Mesh*) malloc(sizeof (Mesh));
+    *ptr = GenMeshPlane(a, b, c, d);
+    return ptr;
 }
 
 Mesh* GenMeshCube_(float a, float b, float c) {
-    Mesh val = GenMeshCube(a, b, c);
-    return &val;
+    Mesh* ptr = (Mesh*) malloc(sizeof (Mesh));
+    *ptr = GenMeshCube(a, b, c);
+    return ptr;
 }
 
 Mesh* GenMeshSphere_(float a, int b, int c) {
-    Mesh val = GenMeshSphere(a, b, c);
-    return &val;
+    Mesh* ptr = (Mesh*) malloc(sizeof (Mesh));
+    *ptr = GenMeshSphere(a, b, c);
+    return ptr;
 }
 
 Mesh* GenMeshHemiSphere_(float a, int b, int c) {
-    Mesh val = GenMeshHemiSphere(a, b, c);
-    return &val;
+    Mesh* ptr = (Mesh*) malloc(sizeof (Mesh));
+    *ptr = GenMeshHemiSphere(a, b, c);
+    return ptr;
 }
 
 Mesh* GenMeshCylinder_(float a, float b, int c) {
-    Mesh val = GenMeshCylinder(a, b, c);
-    return &val;
+    Mesh* ptr = (Mesh*) malloc(sizeof (Mesh));
+    *ptr = GenMeshCylinder(a, b, c);
+    return ptr;
 }
 
 Mesh* GenMeshCone_(float a, float b, int c) {
-    Mesh val = GenMeshCone(a, b, c);
-    return &val;
+    Mesh* ptr = (Mesh*) malloc(sizeof (Mesh));
+    *ptr = GenMeshCone(a, b, c);
+    return ptr;
 }
 
 Mesh* GenMeshTorus_(float a, float b, int c, int d) {
-    Mesh val = GenMeshTorus(a, b, c, d);
-    return &val;
+    Mesh* ptr = (Mesh*) malloc(sizeof (Mesh));
+    *ptr = GenMeshTorus(a, b, c, d);
+    return ptr;
 }
 
 Mesh* GenMeshKnot_(float a, float b, int c, int d) {
-    Mesh val = GenMeshKnot(a, b, c, d);
-    return &val;
+    Mesh* ptr = (Mesh*) malloc(sizeof (Mesh));
+    *ptr = GenMeshKnot(a, b, c, d);
+    return ptr;
 }
 
 Mesh* GenMeshHeightmap_(Image* a, Vector3* b) {
-    Mesh val = GenMeshHeightmap(*a, *b);
-    return &val;
+    Mesh* ptr = (Mesh*) malloc(sizeof (Mesh));
+    *ptr = GenMeshHeightmap(*a, *b);
+    return ptr;
 }
 
 Mesh* GenMeshCubicmap_(Image* a, Vector3* b) {
-    Mesh val = GenMeshCubicmap(*a, *b);
-    return &val;
+    Mesh* ptr = (Mesh*) malloc(sizeof (Mesh));
+    *ptr = GenMeshCubicmap(*a, *b);
+    return ptr;
 }
 
 Material* LoadMaterialDefault_() {
-    Material val = LoadMaterialDefault();
-    return &val;
+    Material* ptr = (Material*) malloc(sizeof (Material));
+    *ptr = LoadMaterialDefault();
+    return ptr;
 }
 
 void UnloadMaterial_(Material* a) {
@@ -1018,64 +1096,73 @@ void UnloadModelAnimation_(ModelAnimation* a) {
 }
 
 int IsModelAnimationValid_(Model* a, ModelAnimation* b) {
-    IsModelAnimationValid(*a, *b);
+    return IsModelAnimationValid(*a, *b);
 }
 
 int CheckCollisionSpheres_(Vector3* a, float b, Vector3* c, float d) {
-    CheckCollisionSpheres(*a, b, *c, d);
+    return CheckCollisionSpheres(*a, b, *c, d);
 }
 
 int CheckCollisionBoxes_(BoundingBox* a, BoundingBox* b) {
-    CheckCollisionBoxes(*a, *b);
+    return CheckCollisionBoxes(*a, *b);
 }
 
 int CheckCollisionBoxSphere_(BoundingBox* a, Vector3* b, float c) {
-    CheckCollisionBoxSphere(*a, *b, c);
+    return CheckCollisionBoxSphere(*a, *b, c);
 }
 
 RayCollision* GetRayCollisionSphere_(Ray* a, Vector3* b, float c) {
-    RayCollision val = GetRayCollisionSphere(*a, *b, c);
-    return &val;
+    RayCollision* ptr = (RayCollision*) malloc(sizeof (RayCollision));
+    *ptr = GetRayCollisionSphere(*a, *b, c);
+    return ptr;
 }
 
 RayCollision* GetRayCollisionBox_(Ray* a, BoundingBox* b) {
-    RayCollision val = GetRayCollisionBox(*a, *b);
-    return &val;
+    RayCollision* ptr = (RayCollision*) malloc(sizeof (RayCollision));
+    *ptr = GetRayCollisionBox(*a, *b);
+    return ptr;
 }
 
 RayCollision* GetRayCollisionMesh_(Ray* a, Mesh* b, Matrix* c) {
-    RayCollision val = GetRayCollisionMesh(*a, *b, *c);
-    return &val;
+    RayCollision* ptr = (RayCollision*) malloc(sizeof (RayCollision));
+    *ptr = GetRayCollisionMesh(*a, *b, *c);
+    return ptr;
 }
 
 RayCollision* GetRayCollisionTriangle_(Ray* a, Vector3* b, Vector3* c, Vector3* d) {
-    RayCollision val = GetRayCollisionTriangle(*a, *b, *c, *d);
-    return &val;
+    RayCollision* ptr = (RayCollision*) malloc(sizeof (RayCollision));
+    *ptr = GetRayCollisionTriangle(*a, *b, *c, *d);
+    return ptr;
 }
 
 RayCollision* GetRayCollisionQuad_(Ray* a, Vector3* b, Vector3* c, Vector3* d, Vector3* e) {
-    RayCollision val = GetRayCollisionQuad(*a, *b, *c, *d, *e);
-    return &val;
+    RayCollision* ptr = (RayCollision*) malloc(sizeof (RayCollision));
+    *ptr = GetRayCollisionQuad(*a, *b, *c, *d, *e);
+    return ptr;
 }
 
 Wave* LoadWave_(string a) {
-    Wave val = LoadWave(a);
-    return &val;
+    Wave* ptr = (Wave*) malloc(sizeof (Wave));
+    *ptr = LoadWave(a);
+    return ptr;
 }
 
 Wave* LoadWaveFromMemory_(string a, unsigned char* b, int c) {
-    Wave val = LoadWaveFromMemory(a, b, c);
-    return &val;
+    Wave* ptr = (Wave*) malloc(sizeof (Wave));
+    *ptr = LoadWaveFromMemory(a, b, c);
+    return ptr;
 }
 
 Sound* LoadSound_(string a) {
-    Sound val = LoadSound(a);
-    return &val;
+    Sound* ptr = (Sound*) malloc(sizeof (Sound));
+    *ptr = LoadSound(a);
+    return ptr;
 }
 
 Sound* LoadSoundFromWave_(Wave* a) {
-    Sound val = LoadSoundFromWave(*a);
-    return &val;
+    Sound* ptr = (Sound*) malloc(sizeof (Sound));
+    *ptr = LoadSoundFromWave(*a);
+    return ptr;
 }
 
 void UpdateSound_(Sound* a, const void* b, int c) {
@@ -1091,11 +1178,11 @@ void UnloadSound_(Sound* a) {
 }
 
 int ExportWave_(Wave* a, string b) {
-    ExportWave(*a, b);
+    return ExportWave(*a, b);
 }
 
 int ExportWaveAsCode_(Wave* a, string b) {
-    ExportWaveAsCode(*a, b);
+    return ExportWaveAsCode(*a, b);
 }
 
 void PlaySound_(Sound* a) {
@@ -1119,7 +1206,7 @@ void PlaySoundMulti_(Sound* a) {
 }
 
 int IsSoundPlaying_(Sound* a) {
-    IsSoundPlaying(*a);
+    return IsSoundPlaying(*a);
 }
 
 void SetSoundVolume_(Sound* a, float b) {
@@ -1135,8 +1222,9 @@ void SetSoundPan_(Sound* a, float b) {
 }
 
 Wave* WaveCopy_(Wave* a) {
-    Wave val = WaveCopy(*a);
-    return &val;
+    Wave* ptr = (Wave*) malloc(sizeof (Wave));
+    *ptr = WaveCopy(*a);
+    return ptr;
 }
 
 float* LoadWaveSamples_(Wave* a) {
@@ -1144,13 +1232,15 @@ float* LoadWaveSamples_(Wave* a) {
 }
 
 Music* LoadMusicStream_(string a) {
-    Music val = LoadMusicStream(a);
-    return &val;
+    Music* ptr = (Music*) malloc(sizeof (Music));
+    *ptr = LoadMusicStream(a);
+    return ptr;
 }
 
 Music* LoadMusicStreamFromMemory_(string a, unsigned char* b, int c) {
-    Music val = LoadMusicStreamFromMemory(a, b, c);
-    return &val;
+    Music* ptr = (Music*) malloc(sizeof (Music));
+    *ptr = LoadMusicStreamFromMemory(a, b, c);
+    return ptr;
 }
 
 void UnloadMusicStream_(Music* a) {
@@ -1162,7 +1252,7 @@ void PlayMusicStream_(Music* a) {
 }
 
 int IsMusicStreamPlaying_(Music* a) {
-    IsMusicStreamPlaying(*a);
+    return IsMusicStreamPlaying(*a);
 }
 
 void UpdateMusicStream_(Music* a) {
@@ -1198,16 +1288,17 @@ void SetMusicPan_(Music* a, float b) {
 }
 
 float GetMusicTimeLength_(Music* a) {
-    GetMusicTimeLength(*a);
+    return GetMusicTimeLength(*a);
 }
 
 float GetMusicTimePlayed_(Music* a) {
-    GetMusicTimePlayed(*a);
+    return GetMusicTimePlayed(*a);
 }
 
 AudioStream* LoadAudioStream_(unsigned int a, unsigned int b, unsigned int c) {
-    AudioStream val = LoadAudioStream(a, b, c);
-    return &val;
+    AudioStream* ptr = (AudioStream*) malloc(sizeof (AudioStream));
+    *ptr = LoadAudioStream(a, b, c);
+    return ptr;
 }
 
 void UnloadAudioStream_(AudioStream* a) {
@@ -1219,7 +1310,7 @@ void UpdateAudioStream_(AudioStream* a, const void* b, int c) {
 }
 
 int IsAudioStreamProcessed_(AudioStream* a) {
-    IsAudioStreamProcessed(*a);
+    return IsAudioStreamProcessed(*a);
 }
 
 void PlayAudioStream_(AudioStream* a) {
@@ -1235,7 +1326,7 @@ void ResumeAudioStream_(AudioStream* a) {
 }
 
 int IsAudioStreamPlaying_(AudioStream* a) {
-    IsAudioStreamPlaying(*a);
+    return IsAudioStreamPlaying(*a);
 }
 
 void StopAudioStream_(AudioStream* a) {

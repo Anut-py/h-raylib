@@ -331,9 +331,9 @@ Color* ColorAlphaBlend_(Color* a, Color* b, Color* c);
 
 Color* GetColor_(unsigned int a);
 
-Color* GetPixelColor_(const void* a, int b);
+Color* GetPixelColor_(void* a, int b);
 
-void SetPixelColor_(const void* a, Color* b, int c);
+void SetPixelColor_(void* a, Color* b, int c);
 
 Font* GetFontDefault_();
 
