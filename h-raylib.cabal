@@ -42,6 +42,7 @@ executable example
     extra-libraries: gdi32 opengl32 winmm kernel32
   if os(linux)
     extra-libraries: pthread m dl rt X11
+    cc-options: -Wunused-result
   build-depends:
     base,
     h-raylib
