@@ -1,18 +1,15 @@
 cabal-version:      2.4
 name:               h-raylib
-version:            0.1.0.0
-synopsis: Raylib bindings for Haskell
-
--- A longer description of the package. (Will fill later)
--- description:
+version:            4.2.0.1
+synopsis:           Raylib bindings for Haskell
 
 bug-reports:          https://github.com/Anut-py/h-raylib/issues
 license:              Apache-2.0
-author:               Anut-py
-extra-source-files:   CHANGELOG.md
+author:               Anut
+maintainer:           Anut
 
 library
-  exposed-modules:    Raylib
+  exposed-modules:    Raylib Raylib.Colors
   build-depends:
     base
   hs-source-dirs:     src

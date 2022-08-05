@@ -1,7 +1,7 @@
 module Main where
 
 import Control.Monad (unless)
-import Foreign (nullPtr, toBool, with, Ptr)
+import Foreign (Ptr, nullPtr, toBool, with)
 import Foreign.C (newCString)
 import Raylib
   ( Color (Color),
@@ -14,20 +14,20 @@ import Raylib
     setTargetFPS,
     windowShouldClose,
   )
+import Raylib.Colors (lightGray, rayWhite)
 
 main = do
   str <- newCString "Hello world"
   initWindow 600 450 str
   setTargetFPS 60
-  with (Color 255 255 255 255) (with (Color 200 200 200 255) . gameLoop)
+  gameLoop
   closeWindow
 
-gameLoop :: Ptr Color -> Ptr Color -> IO ()
-gameLoop white gray = do
+gameLoop = do
   beginDrawing
-  clearBackground white
+  with rayWhite clearBackground
   str <- newCString "Testing Raylib"
-  drawText str 190 200 20 gray
+  with lightGray $ drawText str 190 200 20
   endDrawing
   shouldClose <- windowShouldClose
-  unless (toBool shouldClose) (gameLoop white gray)
+  unless (toBool shouldClose) gameLoop
