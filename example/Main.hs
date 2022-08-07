@@ -2,7 +2,7 @@ module Main where
 
 import Control.Monad (unless)
 import Foreign (Ptr, nullPtr, toBool, with)
-import Foreign.C (newCString)
+import Foreign.C (newCString, withCString)
 import Raylib
   ( Color (Color),
     beginDrawing,
@@ -10,24 +10,30 @@ import Raylib
     closeWindow,
     drawText,
     endDrawing,
+    getMonitorPhysicalWidth,
+    getMonitorPosition,
+    getMonitorWidth,
     initWindow,
     setTargetFPS,
-    windowShouldClose,
+    setWindowOpacity,
+    windowShouldClose, getWindowPosition, saveFileData
   )
 import Raylib.Colors (lightGray, rayWhite)
 
 main = do
-  str <- newCString "Hello world"
-  initWindow 600 450 str
+  initWindow 600 450 "Hello world"
+  pos <- getWindowPosition
+  print pos
+  setWindowOpacity 0.5
   setTargetFPS 60
   gameLoop
   closeWindow
 
 gameLoop = do
   beginDrawing
-  with rayWhite clearBackground
+  clearBackground rayWhite
   str <- newCString "Testing Raylib"
   with lightGray $ drawText str 190 200 20
   endDrawing
   shouldClose <- windowShouldClose
-  unless (toBool shouldClose) gameLoop
+  unless shouldClose gameLoop

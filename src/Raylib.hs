@@ -2,7 +2,9 @@
 
 module Raylib where
 
-import Foreign.C.String (CString, CStringLen, CWString, CWStringLen)
+import Foreign (castPtr, toBool, with, fromBool)
+import Foreign.C (withCString)
+import Foreign.C.String (CString, CStringLen, CWString, CWStringLen, peekCString)
 import Foreign.C.Types
   ( CChar (..),
     CDouble (..),
@@ -14,7 +16,7 @@ import Foreign.C.Types
     CUShort,
   )
 import Foreign.Marshal.Alloc (alloca)
-import Foreign.Marshal.Array (peekArray, pokeArray)
+import Foreign.Marshal.Array (peekArray, pokeArray, withArray)
 import Foreign.Ptr (FunPtr, Ptr, plusPtr)
 import Foreign.Storable
   ( Storable
@@ -26,6 +28,7 @@ import Foreign.Storable
         sizeOf
       ),
   )
+import Unsafe.Coerce (unsafeCoerce)
 
 {- typedef struct Vector2 {
             float x; float y;
@@ -3242,6 +3245,7 @@ npatch'threePatchHorizontal = 2
 
 npatch'threePatchHorizontal :: (Num a) => a
 
+-- Haskell doesn't support varargs in foreign calls, so these functions are impossible to call from FFI
 -- type TraceLogCallback = FunPtr (CInt -> CString -> __builtin_va_list -> IO ())
 -- foreign import ccall unsafe "wrapper"
 --   mk'TraceLogCallback ::
@@ -3290,16 +3294,22 @@ foreign import ccall unsafe "dynamic"
     SaveFileTextCallback -> (CString -> CString -> IO CInt)
 
 foreign import ccall unsafe "raylib.h InitWindow"
-  initWindow ::
+  c'initWindow ::
     CInt -> CInt -> CString -> IO ()
+
+initWindow :: Int -> Int -> String -> IO ()
+initWindow width height title = withCString title $ c'initWindow (fromIntegral width) (fromIntegral height)
 
 foreign import ccall unsafe "raylib.h &InitWindow"
   p'initWindow ::
     FunPtr (CInt -> CInt -> CString -> IO ())
 
 foreign import ccall unsafe "raylib.h WindowShouldClose"
-  windowShouldClose ::
+  c'windowShouldClose ::
     IO CInt
+
+windowShouldClose :: IO Bool
+windowShouldClose = toBool <$> c'windowShouldClose
 
 foreign import ccall unsafe "raylib.h &WindowShouldClose"
   p'windowShouldClose ::
@@ -3314,80 +3324,110 @@ foreign import ccall unsafe "raylib.h &CloseWindow"
     FunPtr (IO ())
 
 foreign import ccall unsafe "raylib.h IsWindowReady"
-  isWindowReady ::
+  c'isWindowReady ::
     IO CInt
+
+isWindowReady :: IO Bool
+isWindowReady = toBool <$> c'isWindowReady
 
 foreign import ccall unsafe "raylib.h &IsWindowReady"
   p'isWindowReady ::
     FunPtr (IO CInt)
 
 foreign import ccall unsafe "raylib.h IsWindowFullscreen"
-  isWindowFullscreen ::
+  c'isWindowFullscreen ::
     IO CInt
+
+isWindowFullscreen :: IO Bool
+isWindowFullscreen = toBool <$> c'isWindowFullscreen
 
 foreign import ccall unsafe "raylib.h &IsWindowFullscreen"
   p'isWindowFullscreen ::
     FunPtr (IO CInt)
 
 foreign import ccall unsafe "raylib.h IsWindowHidden"
-  isWindowHidden ::
+  c'isWindowHidden ::
     IO CInt
+
+isWindowHidden :: IO Bool
+isWindowHidden = toBool <$> c'isWindowHidden
 
 foreign import ccall unsafe "raylib.h &IsWindowHidden"
   p'isWindowHidden ::
     FunPtr (IO CInt)
 
 foreign import ccall unsafe "raylib.h IsWindowMinimized"
-  isWindowMinimized ::
+  c'isWindowMinimized ::
     IO CInt
+
+isWindowMinimized :: IO Bool
+isWindowMinimized = toBool <$> c'isWindowMinimized
 
 foreign import ccall unsafe "raylib.h &IsWindowMinimized"
   p'isWindowMinimized ::
     FunPtr (IO CInt)
 
 foreign import ccall unsafe "raylib.h IsWindowMaximized"
-  isWindowMaximized ::
+  c'isWindowMaximized ::
     IO CInt
+
+isWindowMaximized :: IO Bool
+isWindowMaximized = toBool <$> c'isWindowMaximized
 
 foreign import ccall unsafe "raylib.h &IsWindowMaximized"
   p'isWindowMaximized ::
     FunPtr (IO CInt)
 
 foreign import ccall unsafe "raylib.h IsWindowFocused"
-  isWindowFocused ::
+  c'isWindowFocused ::
     IO CInt
+
+isWindowFocused :: IO Bool
+isWindowFocused = toBool <$> c'isWindowFocused
 
 foreign import ccall unsafe "raylib.h &IsWindowFocused"
   p'isWindowFocused ::
     FunPtr (IO CInt)
 
 foreign import ccall unsafe "raylib.h IsWindowResized"
-  isWindowResized ::
+  c'isWindowResized ::
     IO CInt
+
+isWindowResized :: IO Bool
+isWindowResized = toBool <$> c'isWindowResized
 
 foreign import ccall unsafe "raylib.h &IsWindowResized"
   p'isWindowResized ::
     FunPtr (IO CInt)
 
 foreign import ccall unsafe "raylib.h IsWindowState"
-  isWindowState ::
+  c'isWindowState ::
     CUInt -> IO CInt
+
+isWindowState :: Integer -> IO Bool
+isWindowState flag = toBool <$> c'isWindowState (fromIntegral flag)
 
 foreign import ccall unsafe "raylib.h &IsWindowState"
   p'isWindowState ::
     FunPtr (CUInt -> IO CInt)
 
 foreign import ccall unsafe "raylib.h SetWindowState"
-  setWindowState ::
+  c'setWindowState ::
     CUInt -> IO ()
+
+setWindowState :: Integer -> IO ()
+setWindowState = c'setWindowState . fromIntegral
 
 foreign import ccall unsafe "raylib.h &SetWindowState"
   p'setWindowState ::
     FunPtr (CUInt -> IO ())
 
 foreign import ccall unsafe "raylib.h ClearWindowState"
-  clearWindowState ::
+  c'clearWindowState ::
     CUInt -> IO ()
+
+clearWindowState :: Integer -> IO ()
+clearWindowState = c'clearWindowState . fromIntegral
 
 foreign import ccall unsafe "raylib.h &ClearWindowState"
   p'clearWindowState ::
@@ -3425,55 +3465,76 @@ foreign import ccall unsafe "raylib.h &RestoreWindow"
   p'restoreWindow ::
     FunPtr (IO ())
 
-foreign import ccall unsafe "bindings.h SetWindowIcon_" setWindowIcon :: Ptr Image -> IO ()
+foreign import ccall unsafe "bindings.h SetWindowIcon_" c'setWindowIcon :: Ptr Image -> IO ()
+
+setWindowIcon :: Image -> IO ()
+setWindowIcon image = with image c'setWindowIcon
 
 foreign import ccall unsafe "raylib.h &SetWindowIcon"
   p'setWindowIcon ::
     FunPtr (Image -> IO ())
 
 foreign import ccall unsafe "raylib.h SetWindowTitle"
-  setWindowTitle ::
+  c'setWindowTitle ::
     CString -> IO ()
+
+setWindowTitle :: String -> IO ()
+setWindowTitle title = withCString title c'setWindowTitle
 
 foreign import ccall unsafe "raylib.h &SetWindowTitle"
   p'setWindowTitle ::
     FunPtr (CString -> IO ())
 
 foreign import ccall unsafe "raylib.h SetWindowPosition"
-  setWindowPosition ::
+  c'setWindowPosition ::
     CInt -> CInt -> IO ()
+
+setWindowPosition :: Int -> Int -> IO ()
+setWindowPosition x y = c'setWindowPosition (fromIntegral x) (fromIntegral y)
 
 foreign import ccall unsafe "raylib.h &SetWindowPosition"
   p'setWindowPosition ::
     FunPtr (CInt -> CInt -> IO ())
 
 foreign import ccall unsafe "raylib.h SetWindowMonitor"
-  setWindowMonitor ::
+  c'setWindowMonitor ::
     CInt -> IO ()
+
+setWindowMonitor :: Int -> IO ()
+setWindowMonitor = c'setWindowMonitor . fromIntegral
 
 foreign import ccall unsafe "raylib.h &SetWindowMonitor"
   p'setWindowMonitor ::
     FunPtr (CInt -> IO ())
 
 foreign import ccall unsafe "raylib.h SetWindowMinSize"
-  setWindowMinSize ::
+  c'setWindowMinSize ::
     CInt -> CInt -> IO ()
+
+setWindowMinSize :: Int -> Int -> IO ()
+setWindowMinSize x y = c'setWindowMinSize (fromIntegral x) (fromIntegral y)
 
 foreign import ccall unsafe "raylib.h &SetWindowMinSize"
   p'setWindowMinSize ::
     FunPtr (CInt -> CInt -> IO ())
 
 foreign import ccall unsafe "raylib.h SetWindowSize"
-  setWindowSize ::
+  c'setWindowSize ::
     CInt -> CInt -> IO ()
+
+setWindowSize :: Int -> Int -> IO ()
+setWindowSize x y = c'setWindowSize (fromIntegral x) (fromIntegral y)
 
 foreign import ccall unsafe "raylib.h &SetWindowSize"
   p'setWindowSize ::
     FunPtr (CInt -> CInt -> IO ())
 
 foreign import ccall unsafe "raylib.h SetWindowOpacity"
-  setWindowOpacity ::
+  c'setWindowOpacity ::
     CFloat -> IO ()
+
+setWindowOpacity :: Float -> IO ()
+setWindowOpacity opacity = c'setWindowOpacity $ realToFrac opacity
 
 foreign import ccall unsafe "raylib.h &SetWindowOpacity"
   p'setWindowOpacity ::
@@ -3488,130 +3549,181 @@ foreign import ccall unsafe "raylib.h &GetWindowHandle"
     FunPtr (IO (Ptr ()))
 
 foreign import ccall unsafe "raylib.h GetScreenWidth"
-  getScreenWidth ::
+  c'getScreenWidth ::
     IO CInt
+
+getScreenWidth :: IO Int
+getScreenWidth = fromIntegral <$> c'getScreenWidth
 
 foreign import ccall unsafe "raylib.h &GetScreenWidth"
   p'getScreenWidth ::
     FunPtr (IO CInt)
 
 foreign import ccall unsafe "raylib.h GetScreenHeight"
-  getScreenHeight ::
+  c'getScreenHeight ::
     IO CInt
+
+getScreenHeight :: IO Int
+getScreenHeight = fromIntegral <$> c'getScreenHeight
 
 foreign import ccall unsafe "raylib.h &GetScreenHeight"
   p'getScreenHeight ::
     FunPtr (IO CInt)
 
 foreign import ccall unsafe "raylib.h GetRenderWidth"
-  getRenderWidth ::
+  c'getRenderWidth ::
     IO CInt
+
+getRenderWidth :: IO Int
+getRenderWidth = fromIntegral <$> c'getRenderWidth
 
 foreign import ccall unsafe "raylib.h &GetRenderWidth"
   p'getRenderWidth ::
     FunPtr (IO CInt)
 
 foreign import ccall unsafe "raylib.h GetRenderHeight"
-  getRenderHeight ::
+  c'getRenderHeight ::
     IO CInt
+
+getRenderHeight :: IO Int
+getRenderHeight = fromIntegral <$> c'getRenderHeight
 
 foreign import ccall unsafe "raylib.h &GetRenderHeight"
   p'getRenderHeight ::
     FunPtr (IO CInt)
 
 foreign import ccall unsafe "raylib.h GetMonitorCount"
-  getMonitorCount ::
+  c'getMonitorCount ::
     IO CInt
+
+getMonitorCount :: IO Int
+getMonitorCount = fromIntegral <$> c'getMonitorCount
 
 foreign import ccall unsafe "raylib.h &GetMonitorCount"
   p'getMonitorCount ::
     FunPtr (IO CInt)
 
 foreign import ccall unsafe "raylib.h GetCurrentMonitor"
-  getCurrentMonitor ::
+  c'getCurrentMonitor ::
     IO CInt
+
+getCurrentMonitor :: IO Int
+getCurrentMonitor = fromIntegral <$> c'getCurrentMonitor
 
 foreign import ccall unsafe "raylib.h &GetCurrentMonitor"
   p'getCurrentMonitor ::
     FunPtr (IO CInt)
 
-foreign import ccall unsafe "bindings.h GetMonitorPosition_" getMonitorPosition :: CInt -> IO (Ptr Vector2)
+foreign import ccall unsafe "bindings.h GetMonitorPosition_" c'getMonitorPosition :: CInt -> IO (Ptr Vector2)
+
+getMonitorPosition :: Int -> IO Vector2
+getMonitorPosition monitor = c'getMonitorPosition (fromIntegral monitor) >>= peek
 
 foreign import ccall unsafe "raylib.h &GetMonitorPosition"
   p'getMonitorPosition ::
     FunPtr (CInt -> IO Vector2)
 
 foreign import ccall unsafe "raylib.h GetMonitorWidth"
-  getMonitorWidth ::
+  c'getMonitorWidth ::
     CInt -> IO CInt
+
+getMonitorWidth :: Int -> IO Int
+getMonitorWidth monitor = fromIntegral <$> c'getMonitorWidth (fromIntegral monitor)
 
 foreign import ccall unsafe "raylib.h &GetMonitorWidth"
   p'getMonitorWidth ::
     FunPtr (CInt -> IO CInt)
 
 foreign import ccall unsafe "raylib.h GetMonitorHeight"
-  getMonitorHeight ::
+  c'getMonitorHeight ::
     CInt -> IO CInt
+
+getMonitorHeight :: Int -> IO CInt
+getMonitorHeight monitor = fromIntegral <$> c'getMonitorHeight (fromIntegral monitor)
 
 foreign import ccall unsafe "raylib.h &GetMonitorHeight"
   p'getMonitorHeight ::
     FunPtr (CInt -> IO CInt)
 
 foreign import ccall unsafe "raylib.h GetMonitorPhysicalWidth"
-  getMonitorPhysicalWidth ::
+  c'getMonitorPhysicalWidth ::
     CInt -> IO CInt
+
+getMonitorPhysicalWidth :: Int -> IO CInt
+getMonitorPhysicalWidth monitor = fromIntegral <$> c'getMonitorPhysicalWidth (fromIntegral monitor)
 
 foreign import ccall unsafe "raylib.h &GetMonitorPhysicalWidth"
   p'getMonitorPhysicalWidth ::
     FunPtr (CInt -> IO CInt)
 
 foreign import ccall unsafe "raylib.h GetMonitorPhysicalHeight"
-  getMonitorPhysicalHeight ::
+  c'getMonitorPhysicalHeight ::
     CInt -> IO CInt
+
+getMonitorPhysicalHeight :: Int -> IO Int
+getMonitorPhysicalHeight monitor = fromIntegral <$> c'getMonitorPhysicalHeight (fromIntegral monitor)
 
 foreign import ccall unsafe "raylib.h &GetMonitorPhysicalHeight"
   p'getMonitorPhysicalHeight ::
     FunPtr (CInt -> IO CInt)
 
 foreign import ccall unsafe "raylib.h GetMonitorRefreshRate"
-  getMonitorRefreshRate ::
+  c'getMonitorRefreshRate ::
     CInt -> IO CInt
+
+getMonitorRefreshRate :: Int -> IO Int
+getMonitorRefreshRate monitor = fromIntegral <$> c'getMonitorRefreshRate (fromIntegral monitor)
 
 foreign import ccall unsafe "raylib.h &GetMonitorRefreshRate"
   p'getMonitorRefreshRate ::
     FunPtr (CInt -> IO CInt)
 
-foreign import ccall unsafe "bindings.h GetWindowPosition_" getWindowPosition :: IO (Ptr Vector2)
+foreign import ccall unsafe "bindings.h GetWindowPosition_" c'getWindowPosition :: IO (Ptr Vector2)
+
+getWindowPosition :: IO Vector2
+getWindowPosition = c'getWindowPosition >>= peek
 
 foreign import ccall unsafe "raylib.h &GetWindowPosition"
   p'getWindowPosition ::
     FunPtr (IO Vector2)
 
-foreign import ccall unsafe "bindings.h GetWindowScaleDPI_" getWindowScaleDPI :: IO (Ptr Vector2)
+foreign import ccall unsafe "bindings.h GetWindowScaleDPI_" c'getWindowScaleDPI :: IO (Ptr Vector2)
+
+getWindowScaleDPI :: IO Vector2
+getWindowScaleDPI = c'getWindowScaleDPI >>= peek
 
 foreign import ccall unsafe "raylib.h &GetWindowScaleDPI"
   p'getWindowScaleDPI ::
     FunPtr (IO Vector2)
 
 foreign import ccall unsafe "raylib.h GetMonitorName"
-  getMonitorName ::
+  c'getMonitorName ::
     CInt -> IO CString
+
+getMonitorName :: Int -> IO String
+getMonitorName monitor = c'getMonitorName (fromIntegral monitor) >>= peekCString
 
 foreign import ccall unsafe "raylib.h &GetMonitorName"
   p'getMonitorName ::
     FunPtr (CInt -> IO CString)
 
 foreign import ccall unsafe "raylib.h SetClipboardText"
-  setClipboardText ::
+  c'setClipboardText ::
     CString -> IO ()
+
+setClipboardText :: String -> IO ()
+setClipboardText text = withCString text c'setClipboardText
 
 foreign import ccall unsafe "raylib.h &SetClipboardText"
   p'setClipboardText ::
     FunPtr (CString -> IO ())
 
 foreign import ccall unsafe "raylib.h GetClipboardText"
-  getClipboardText ::
+  c'getClipboardText ::
     IO CString
+
+getClipboardText :: IO String
+getClipboardText = c'getClipboardText >>= peekCString
 
 foreign import ccall unsafe "raylib.h &GetClipboardText"
   p'getClipboardText ::
@@ -3650,8 +3762,11 @@ foreign import ccall unsafe "raylib.h &PollInputEvents"
     FunPtr (IO ())
 
 foreign import ccall unsafe "raylib.h WaitTime"
-  waitTime ::
+  c'waitTime ::
     CDouble -> IO ()
+
+waitTime :: Double -> IO ()
+waitTime seconds = c'waitTime $ realToFrac seconds
 
 foreign import ccall unsafe "raylib.h &WaitTime"
   p'waitTime ::
@@ -3674,8 +3789,11 @@ foreign import ccall unsafe "raylib.h &HideCursor"
     FunPtr (IO ())
 
 foreign import ccall unsafe "raylib.h IsCursorHidden"
-  isCursorHidden ::
+  c'isCursorHidden ::
     IO CInt
+
+isCursorHidden :: IO Bool
+isCursorHidden = toBool <$> c'isCursorHidden
 
 foreign import ccall unsafe "raylib.h &IsCursorHidden"
   p'isCursorHidden ::
@@ -3698,14 +3816,20 @@ foreign import ccall unsafe "raylib.h &DisableCursor"
     FunPtr (IO ())
 
 foreign import ccall unsafe "raylib.h IsCursorOnScreen"
-  isCursorOnScreen ::
+  c'isCursorOnScreen ::
     IO CInt
+
+isCursorOnScreen :: IO Bool
+isCursorOnScreen = toBool <$> c'isCursorOnScreen
 
 foreign import ccall unsafe "raylib.h &IsCursorOnScreen"
   p'isCursorOnScreen ::
     FunPtr (IO CInt)
 
-foreign import ccall unsafe "bindings.h ClearBackground_" clearBackground :: Ptr Color -> IO ()
+foreign import ccall unsafe "bindings.h ClearBackground_" c'clearBackground :: Ptr Color -> IO ()
+
+clearBackground :: Color -> IO ()
+clearBackground color = with color c'clearBackground
 
 foreign import ccall unsafe "raylib.h &ClearBackground"
   p'clearBackground ::
@@ -3727,7 +3851,10 @@ foreign import ccall unsafe "raylib.h &EndDrawing"
   p'endDrawing ::
     FunPtr (IO ())
 
-foreign import ccall unsafe "bindings.h BeginMode2D_" beginMode2D :: Ptr Camera2D -> IO ()
+foreign import ccall unsafe "bindings.h BeginMode2D_" c'beginMode2D :: Ptr Camera2D -> IO ()
+
+beginMode2D :: Camera2D -> IO ()
+beginMode2D camera = with camera c'beginMode2D
 
 foreign import ccall unsafe "raylib.h &BeginMode2D"
   p'beginMode2D ::
@@ -3741,7 +3868,10 @@ foreign import ccall unsafe "raylib.h &EndMode2D"
   p'endMode2D ::
     FunPtr (IO ())
 
-foreign import ccall unsafe "bindings.h BeginMode3D_" beginMode3D :: Ptr Camera3D -> IO ()
+foreign import ccall unsafe "bindings.h BeginMode3D_" c'beginMode3D :: Ptr Camera3D -> IO ()
+
+beginMode3D :: Camera3D -> IO ()
+beginMode3D camera = with camera c'beginMode3D
 
 foreign import ccall unsafe "raylib.h &BeginMode3D"
   p'beginMode3D ::
@@ -3755,7 +3885,10 @@ foreign import ccall unsafe "raylib.h &EndMode3D"
   p'endMode3D ::
     FunPtr (IO ())
 
-foreign import ccall unsafe "bindings.h BeginTextureMode_" beginTextureMode :: Ptr RenderTexture -> IO ()
+foreign import ccall unsafe "bindings.h BeginTextureMode_" c'beginTextureMode :: Ptr RenderTexture -> IO ()
+
+beginTextureMode :: RenderTexture -> IO ()
+beginTextureMode renderTexture = with renderTexture c'beginTextureMode
 
 foreign import ccall unsafe "raylib.h &BeginTextureMode"
   p'beginTextureMode ::
@@ -3769,7 +3902,10 @@ foreign import ccall unsafe "raylib.h &EndTextureMode"
   p'endTextureMode ::
     FunPtr (IO ())
 
-foreign import ccall unsafe "bindings.h BeginShaderMode_" beginShaderMode :: Ptr Shader -> IO ()
+foreign import ccall unsafe "bindings.h BeginShaderMode_" c'beginShaderMode :: Ptr Shader -> IO ()
+
+beginShaderMode :: Shader -> IO ()
+beginShaderMode shader = with shader c'beginShaderMode
 
 foreign import ccall unsafe "raylib.h &BeginShaderMode"
   p'beginShaderMode ::
@@ -3784,8 +3920,11 @@ foreign import ccall unsafe "raylib.h &EndShaderMode"
     FunPtr (IO ())
 
 foreign import ccall unsafe "raylib.h BeginBlendMode"
-  beginBlendMode ::
+  c'beginBlendMode ::
     CInt -> IO ()
+
+beginBlendMode :: Int -> IO ()
+beginBlendMode = c'beginBlendMode . fromIntegral
 
 foreign import ccall unsafe "raylib.h &BeginBlendMode"
   p'beginBlendMode ::
@@ -3800,8 +3939,11 @@ foreign import ccall unsafe "raylib.h &EndBlendMode"
     FunPtr (IO ())
 
 foreign import ccall unsafe "raylib.h BeginScissorMode"
-  beginScissorMode ::
+  c'beginScissorMode ::
     CInt -> CInt -> CInt -> CInt -> IO ()
+
+beginScissorMode :: Int -> Int -> Int -> Int -> IO ()
+beginScissorMode x y width height = c'beginScissorMode (fromIntegral x) (fromIntegral y) (fromIntegral width) (fromIntegral height)
 
 foreign import ccall unsafe "raylib.h &BeginScissorMode"
   p'beginScissorMode ::
@@ -3815,7 +3957,10 @@ foreign import ccall unsafe "raylib.h &EndScissorMode"
   p'endScissorMode ::
     FunPtr (IO ())
 
-foreign import ccall unsafe "bindings.h BeginVrStereoMode_" beginVrStereoMode :: Ptr VrStereoConfig -> IO ()
+foreign import ccall unsafe "bindings.h BeginVrStereoMode_" c'beginVrStereoMode :: Ptr VrStereoConfig -> IO ()
+
+beginVrStereoMode :: VrStereoConfig -> IO ()
+beginVrStereoMode config = with config c'beginVrStereoMode
 
 foreign import ccall unsafe "raylib.h &BeginVrStereoMode"
   p'beginVrStereoMode ::
@@ -3829,232 +3974,330 @@ foreign import ccall unsafe "raylib.h &EndVrStereoMode"
   p'endVrStereoMode ::
     FunPtr (IO ())
 
-foreign import ccall unsafe "bindings.h LoadVrStereoConfig_" loadVrStereoConfig :: Ptr VrDeviceInfo -> IO (Ptr VrStereoConfig)
+foreign import ccall unsafe "bindings.h LoadVrStereoConfig_" c'loadVrStereoConfig :: Ptr VrDeviceInfo -> IO (Ptr VrStereoConfig)
+
+loadVrStereoConfig :: VrDeviceInfo -> IO VrStereoConfig
+loadVrStereoConfig deviceInfo = with deviceInfo c'loadVrStereoConfig >>= peek
 
 foreign import ccall unsafe "raylib.h &LoadVrStereoConfig"
   p'loadVrStereoConfig ::
     FunPtr (VrDeviceInfo -> IO VrStereoConfig)
 
-foreign import ccall unsafe "bindings.h UnloadVrStereoConfig_" unloadVrStereoConfig :: Ptr VrStereoConfig -> IO ()
+foreign import ccall unsafe "bindings.h UnloadVrStereoConfig_" c'unloadVrStereoConfig :: Ptr VrStereoConfig -> IO ()
+
+unloadVrStereoConfig :: VrStereoConfig -> IO ()
+unloadVrStereoConfig config = with config c'unloadVrStereoConfig
 
 foreign import ccall unsafe "raylib.h &UnloadVrStereoConfig"
   p'unloadVrStereoConfig ::
     FunPtr (VrStereoConfig -> IO ())
 
-foreign import ccall unsafe "bindings.h LoadShader_" loadShader :: CString -> CString -> IO (Ptr Shader)
+foreign import ccall unsafe "bindings.h LoadShader_" c'loadShader :: CString -> CString -> IO (Ptr Shader)
+
+loadShader :: String -> String -> IO Shader
+loadShader vsFileName fsFileName = withCString vsFileName (withCString fsFileName . c'loadShader) >>= peek
 
 foreign import ccall unsafe "raylib.h &LoadShader"
   p'loadShader ::
     FunPtr (CString -> CString -> IO Shader)
 
-foreign import ccall unsafe "bindings.h LoadShaderFromMemory_" loadShaderFromMemory :: CString -> CString -> IO (Ptr Shader)
+foreign import ccall unsafe "bindings.h LoadShaderFromMemory_" c'loadShaderFromMemory :: CString -> CString -> IO (Ptr Shader)
+
+loadShaderFromMemory :: String -> String -> IO Shader
+loadShaderFromMemory vsCode fsCode = withCString vsCode (withCString fsCode . c'loadShaderFromMemory) >>= peek
 
 foreign import ccall unsafe "raylib.h &LoadShaderFromMemory"
   p'loadShaderFromMemory ::
     FunPtr (CString -> CString -> IO Shader)
 
-foreign import ccall unsafe "bindings.h GetShaderLocation_" getShaderLocation :: Ptr Shader -> CString -> IO CInt
+foreign import ccall unsafe "bindings.h GetShaderLocation_" c'getShaderLocation :: Ptr Shader -> CString -> IO CInt
+
+getShaderLocation :: Shader -> String -> IO Int
+getShaderLocation shader uniformName = fromIntegral <$> with shader (withCString uniformName . c'getShaderLocation)
 
 foreign import ccall unsafe "raylib.h &GetShaderLocation"
   p'getShaderLocation ::
     FunPtr (Shader -> CString -> IO CInt)
 
-foreign import ccall unsafe "bindings.h GetShaderLocationAttrib_" getShaderLocationAttrib :: Ptr Shader -> CString -> IO CInt
+foreign import ccall unsafe "bindings.h GetShaderLocationAttrib_" c'getShaderLocationAttrib :: Ptr Shader -> CString -> IO CInt
+
+getShaderLocationAttrib :: Shader -> String -> IO Int
+getShaderLocationAttrib shader attribName = fromIntegral <$> with shader (withCString attribName . c'getShaderLocationAttrib)
 
 foreign import ccall unsafe "raylib.h &GetShaderLocationAttrib"
   p'getShaderLocationAttrib ::
     FunPtr (Shader -> CString -> IO CInt)
 
-foreign import ccall unsafe "bindings.h SetShaderValue_" setShaderValue :: Ptr Shader -> CInt -> Ptr () -> CInt -> IO ()
+foreign import ccall unsafe "bindings.h SetShaderValue_" c'setShaderValue :: Ptr Shader -> CInt -> Ptr () -> CInt -> IO ()
+
+setShaderValue :: (Storable a) => Shader -> Int -> a -> Int -> IO ()
+setShaderValue shader locIndex value uniformType = with value (\v -> with shader (\s -> c'setShaderValue s (fromIntegral locIndex) (castPtr v) (fromIntegral uniformType)))
 
 foreign import ccall unsafe "raylib.h &SetShaderValue"
   p'setShaderValue ::
     FunPtr (Shader -> CInt -> Ptr () -> CInt -> IO ())
 
-foreign import ccall unsafe "bindings.h SetShaderValueV_" setShaderValueV :: Ptr Shader -> CInt -> Ptr () -> CInt -> CInt -> IO ()
+foreign import ccall unsafe "bindings.h SetShaderValueV_" c'setShaderValueV :: Ptr Shader -> CInt -> Ptr () -> CInt -> CInt -> IO ()
+
+setShaderValueV :: (Storable a) => Shader -> Int -> a -> Int -> Int -> IO ()
+setShaderValueV shader locIndex value uniformType count = with value (\v -> with shader (\s -> c'setShaderValueV s (fromIntegral locIndex) (castPtr v) (fromIntegral uniformType) (fromIntegral count)))
 
 foreign import ccall unsafe "raylib.h &SetShaderValueV"
   p'setShaderValueV ::
     FunPtr (Shader -> CInt -> Ptr () -> CInt -> CInt -> IO ())
 
-foreign import ccall unsafe "bindings.h SetShaderValueMatrix_" setShaderValueMatrix :: Ptr Shader -> CInt -> Ptr Matrix -> IO ()
+foreign import ccall unsafe "bindings.h SetShaderValueMatrix_" c'setShaderValueMatrix :: Ptr Shader -> CInt -> Ptr Matrix -> IO ()
+
+setShaderValueMatrix :: Shader -> Int -> Matrix -> IO ()
+setShaderValueMatrix shader locIndex mat = with shader (\s -> with mat (c'setShaderValueMatrix s (fromIntegral locIndex)))
 
 foreign import ccall unsafe "raylib.h &SetShaderValueMatrix"
   p'setShaderValueMatrix ::
     FunPtr (Shader -> CInt -> Matrix -> IO ())
 
-foreign import ccall unsafe "bindings.h SetShaderValueTexture_" setShaderValueTexture :: Ptr Shader -> CInt -> Ptr Texture -> IO ()
+foreign import ccall unsafe "bindings.h SetShaderValueTexture_" c'setShaderValueTexture :: Ptr Shader -> CInt -> Ptr Texture -> IO ()
+
+setShaderValueTexture :: Shader -> Int -> Texture -> IO ()
+setShaderValueTexture shader locIndex tex = with shader (\s -> with tex (c'setShaderValueTexture s (fromIntegral locIndex)))
 
 foreign import ccall unsafe "raylib.h &SetShaderValueTexture"
   p'setShaderValueTexture ::
     FunPtr (Shader -> CInt -> Texture -> IO ())
 
-foreign import ccall unsafe "bindings.h UnloadShader_" unloadShader :: Ptr Shader -> IO ()
+foreign import ccall unsafe "bindings.h UnloadShader_" c'unloadShader :: Ptr Shader -> IO ()
+
+unloadShader :: Shader -> IO ()
+unloadShader shader = with shader c'unloadShader
 
 foreign import ccall unsafe "raylib.h &UnloadShader"
   p'unloadShader ::
     FunPtr (Shader -> IO ())
 
-foreign import ccall unsafe "bindings.h GetMouseRay_" getMouseRay :: Ptr Vector2 -> Ptr Camera3D -> IO (Ptr Ray)
+foreign import ccall unsafe "bindings.h GetMouseRay_" c'getMouseRay :: Ptr Vector2 -> Ptr Camera3D -> IO (Ptr Ray)
+
+getMouseRay :: Vector2 -> Camera3D -> IO Ray
+getMouseRay mousePosition camera = with mousePosition (with camera . c'getMouseRay) >>= peek
 
 foreign import ccall unsafe "raylib.h &GetMouseRay"
   p'getMouseRay ::
     FunPtr (Vector2 -> Camera3D -> IO Ray)
 
-foreign import ccall unsafe "bindings.h GetCameraMatrix_" getCameraMatrix :: Ptr Camera3D -> IO (Ptr Matrix)
+foreign import ccall unsafe "bindings.h GetCameraMatrix_" c'getCameraMatrix :: Ptr Camera3D -> IO (Ptr Matrix)
+
+getCameraMatrix :: Camera3D -> IO Matrix
+getCameraMatrix camera = with camera c'getCameraMatrix >>= peek
 
 foreign import ccall unsafe "raylib.h &GetCameraMatrix"
   p'getCameraMatrix ::
     FunPtr (Camera3D -> IO Matrix)
 
-foreign import ccall unsafe "bindings.h GetCameraMatrix2D_" getCameraMatrix2D :: Ptr Camera2D -> IO (Ptr Matrix)
+foreign import ccall unsafe "bindings.h GetCameraMatrix2D_" c'getCameraMatrix2D :: Ptr Camera2D -> IO (Ptr Matrix)
+
+getCameraMatrix2D :: Camera2D -> IO Matrix
+getCameraMatrix2D camera = with camera c'getCameraMatrix2D >>= peek
 
 foreign import ccall unsafe "raylib.h &GetCameraMatrix2D"
   p'getCameraMatrix2D ::
     FunPtr (Camera2D -> IO Matrix)
 
-foreign import ccall unsafe "bindings.h GetWorldToScreen_" getWorldToScreen :: Ptr Vector3 -> Ptr Camera3D -> IO (Ptr Vector2)
+foreign import ccall unsafe "bindings.h GetWorldToScreen_" c'getWorldToScreen :: Ptr Vector3 -> Ptr Camera3D -> IO (Ptr Vector2)
+
+getWorldToScreen :: Vector3 -> Camera3D -> IO Vector2
+getWorldToScreen position camera = with position (with camera . c'getWorldToScreen) >>= peek
 
 foreign import ccall unsafe "raylib.h &GetWorldToScreen"
   p'getWorldToScreen ::
     FunPtr (Vector3 -> Camera3D -> IO Vector2)
 
-foreign import ccall unsafe "bindings.h GetScreenToWorld2D_" getScreenToWorld2D :: Ptr Vector2 -> Ptr Camera2D -> IO (Ptr Vector2)
+foreign import ccall unsafe "bindings.h GetScreenToWorld2D_" c'getScreenToWorld2D :: Ptr Vector2 -> Ptr Camera2D -> IO (Ptr Vector2)
+
+getScreenToWorld2D :: Vector2 -> Camera2D -> IO Vector2
+getScreenToWorld2D position camera = with position (with camera . c'getScreenToWorld2D) >>= peek
 
 foreign import ccall unsafe "raylib.h &GetScreenToWorld2D"
   p'getScreenToWorld2D ::
     FunPtr (Vector2 -> Camera2D -> IO Vector2)
 
-foreign import ccall unsafe "bindings.h GetWorldToScreenEx_" getWorldToScreenEx :: Ptr Vector3 -> Ptr Camera3D -> CInt -> CInt -> IO (Ptr Vector2)
+foreign import ccall unsafe "bindings.h GetWorldToScreenEx_" c'getWorldToScreenEx :: Ptr Vector3 -> Ptr Camera3D -> CInt -> CInt -> IO (Ptr Vector2)
+
+getWorldToScreenEx :: Vector3 -> Camera3D -> Int -> Int -> IO Vector2
+getWorldToScreenEx position camera width height = with position (\p -> with camera (\c -> c'getWorldToScreenEx p c (fromIntegral width) (fromIntegral height))) >>= peek
 
 foreign import ccall unsafe "raylib.h &GetWorldToScreenEx"
   p'getWorldToScreenEx ::
     FunPtr (Vector3 -> Camera3D -> CInt -> CInt -> IO Vector2)
 
-foreign import ccall unsafe "bindings.h GetWorldToScreen2D_" getWorldToScreen2D :: Ptr Vector2 -> Ptr Camera2D -> IO (Ptr Vector2)
+foreign import ccall unsafe "bindings.h GetWorldToScreen2D_" c'getWorldToScreen2D :: Ptr Vector2 -> Ptr Camera2D -> IO (Ptr Vector2)
+
+getWorldToScreen2D :: Vector2 -> Camera2D -> IO Vector2
+getWorldToScreen2D position camera = with position (with camera . c'getWorldToScreen2D) >>= peek
 
 foreign import ccall unsafe "raylib.h &GetWorldToScreen2D"
   p'getWorldToScreen2D ::
     FunPtr (Vector2 -> Camera2D -> IO Vector2)
 
 foreign import ccall unsafe "raylib.h SetTargetFPS"
-  setTargetFPS ::
+  c'setTargetFPS ::
     CInt -> IO ()
+
+setTargetFPS :: Int -> IO ()
+setTargetFPS fps = c'setTargetFPS $ fromIntegral fps
 
 foreign import ccall unsafe "raylib.h &SetTargetFPS"
   p'setTargetFPS ::
     FunPtr (CInt -> IO ())
 
 foreign import ccall unsafe "raylib.h GetFPS"
-  getFPS ::
+  c'getFPS ::
     IO CInt
+
+getFPS :: IO Int
+getFPS = fromIntegral <$> c'getFPS
 
 foreign import ccall unsafe "raylib.h &GetFPS"
   p'getFPS ::
     FunPtr (IO CInt)
 
 foreign import ccall unsafe "raylib.h GetFrameTime"
-  getFrameTime ::
+  c'getFrameTime ::
     IO CFloat
+
+getFrameTime :: IO Float
+getFrameTime = realToFrac <$> c'getFrameTime
 
 foreign import ccall unsafe "raylib.h &GetFrameTime"
   p'getFrameTime ::
     FunPtr (IO CFloat)
 
 foreign import ccall unsafe "raylib.h GetTime"
-  getTime ::
+  c'getTime ::
     IO CDouble
+
+getTime :: IO Double
+getTime = realToFrac <$> c'getTime
 
 foreign import ccall unsafe "raylib.h &GetTime"
   p'getTime ::
     FunPtr (IO CDouble)
 
 foreign import ccall unsafe "raylib.h GetRandomValue"
-  getRandomValue ::
+  c'getRandomValue ::
     CInt -> CInt -> IO CInt
+
+getRandomValue :: Int -> Int -> IO Int
+getRandomValue min max = fromIntegral <$> c'getRandomValue (fromIntegral min) (fromIntegral max)
 
 foreign import ccall unsafe "raylib.h &GetRandomValue"
   p'getRandomValue ::
     FunPtr (CInt -> CInt -> IO CInt)
 
 foreign import ccall unsafe "raylib.h SetRandomSeed"
-  setRandomSeed ::
+  c'setRandomSeed ::
     CUInt -> IO ()
+
+setRandomSeed :: Integer -> IO ()
+setRandomSeed seed = c'setRandomSeed $ fromIntegral seed
 
 foreign import ccall unsafe "raylib.h &SetRandomSeed"
   p'setRandomSeed ::
     FunPtr (CUInt -> IO ())
 
 foreign import ccall unsafe "raylib.h TakeScreenshot"
-  takeScreenshot ::
+  c'takeScreenshot ::
     CString -> IO ()
+
+takeScreenshot :: String -> IO ()
+takeScreenshot fileName = withCString fileName c'takeScreenshot
 
 foreign import ccall unsafe "raylib.h &TakeScreenshot"
   p'takeScreenshot ::
     FunPtr (CString -> IO ())
 
 foreign import ccall unsafe "raylib.h SetConfigFlags"
-  setConfigFlags ::
+  c'setConfigFlags ::
     CUInt -> IO ()
+
+setConfigFlags :: Integer -> IO ()
+setConfigFlags flags = c'setConfigFlags $ fromIntegral flags
 
 foreign import ccall unsafe "raylib.h &SetConfigFlags"
   p'setConfigFlags ::
     FunPtr (CUInt -> IO ())
 
 foreign import ccall unsafe "raylib.h TraceLog"
-  traceLog ::
-    CInt -> CString -> IO ()
+  c'traceLog ::
+    CInt -> CString -> IO () -- Uses varags, can't implement complete functionality
+
+traceLog :: Int -> String -> IO ()
+traceLog logLevel text = withCString text $ c'traceLog $ fromIntegral logLevel
 
 foreign import ccall unsafe "raylib.h &TraceLog"
   p'traceLog ::
     FunPtr (CInt -> CString -> IO ())
 
 foreign import ccall unsafe "raylib.h SetTraceLogLevel"
-  setTraceLogLevel ::
+  c'setTraceLogLevel ::
     CInt -> IO ()
+
+setTraceLogLevel :: Int -> IO ()
+setTraceLogLevel logLevel = c'setTraceLogLevel $ fromIntegral logLevel
 
 foreign import ccall unsafe "raylib.h &SetTraceLogLevel"
   p'setTraceLogLevel ::
     FunPtr (CInt -> IO ())
 
 foreign import ccall unsafe "raylib.h MemAlloc"
-  memAlloc ::
+  c'memAlloc ::
     CInt -> IO (Ptr ())
+
+memAlloc :: (Storable a) => Int -> IO (Ptr a)
+memAlloc size = castPtr <$> c'memAlloc (fromIntegral size)
 
 foreign import ccall unsafe "raylib.h &MemAlloc"
   p'memAlloc ::
     FunPtr (CInt -> IO (Ptr ()))
 
 foreign import ccall unsafe "raylib.h MemRealloc"
-  memRealloc ::
+  c'memRealloc ::
     Ptr () -> CInt -> IO (Ptr ())
+
+memRealloc :: (Storable a, Storable b) => Ptr a -> Int -> IO (Ptr b)
+memRealloc ptr size = castPtr <$> c'memRealloc (castPtr ptr) (fromIntegral size)
 
 foreign import ccall unsafe "raylib.h &MemRealloc"
   p'memRealloc ::
     FunPtr (Ptr () -> CInt -> IO (Ptr ()))
 
 foreign import ccall unsafe "raylib.h MemFree"
-  memFree ::
+  c'memFree ::
     Ptr () -> IO ()
+
+memFree :: (Storable a) => Ptr a -> IO ()
+memFree = c'memFree . castPtr
 
 foreign import ccall unsafe "raylib.h &MemFree"
   p'memFree ::
     FunPtr (Ptr () -> IO ())
 
 foreign import ccall unsafe "raylib.h OpenURL"
-  openURL ::
+  c'openURL ::
     CString -> IO ()
+
+openURL :: String -> IO ()
+openURL url = withCString url c'openURL
 
 foreign import ccall unsafe "raylib.h &OpenURL"
   p'openURL ::
     FunPtr (CString -> IO ())
 
+-- These functions use varargs so they can't be implemented through FFI
 -- foreign import ccall unsafe "raylib.h SetTraceLogCallback"
 --   SetTraceLogCallback ::
 --     TraceLogCallback -> IO ()
 -- foreign import ccall unsafe "raylib.h &SetTraceLogCallback"
 --   p'SetTraceLogCallback ::
 --     FunPtr (TraceLogCallback -> IO ())
+
 foreign import ccall unsafe "raylib.h SetLoadFileDataCallback"
   setLoadFileDataCallback ::
     LoadFileDataCallback -> IO ()
@@ -4088,8 +4331,18 @@ foreign import ccall unsafe "raylib.h &SetSaveFileTextCallback"
     FunPtr (SaveFileTextCallback -> IO ())
 
 foreign import ccall unsafe "raylib.h LoadFileData"
-  loadFileData ::
+  c'loadFileData ::
     CString -> Ptr CUInt -> IO (Ptr CUChar)
+
+{-| Returns the file data and size in bytes in a tuple, e.g. (\"Contents\", 8) -}
+loadFileData :: String -> IO (String, Integer)
+loadFileData fileName = with 0 (\size -> do
+  withCString fileName (\path -> do
+    contents <- c'loadFileData path size >>= peekCString . castPtr
+    bytesRead <- fromIntegral <$> peek size
+    return (contents, bytesRead)
+    )
+  )
 
 foreign import ccall unsafe "raylib.h &LoadFileData"
   p'loadFileData ::
@@ -4104,782 +4357,1198 @@ foreign import ccall unsafe "raylib.h &UnloadFileData"
     FunPtr (Ptr CUChar -> IO ())
 
 foreign import ccall unsafe "raylib.h SaveFileData"
-  saveFileData ::
+  c'saveFileData ::
     CString -> Ptr () -> CUInt -> IO CInt
+
+saveFileData :: (Storable a) => String -> Ptr a -> Integer -> IO Bool
+saveFileData fileName contents bytesToWrite =
+  toBool <$> withCString fileName (\s -> c'saveFileData s (castPtr contents) (fromIntegral bytesToWrite))
 
 foreign import ccall unsafe "raylib.h &SaveFileData"
   p'saveFileData ::
     FunPtr (CString -> Ptr () -> CUInt -> IO CInt)
 
 foreign import ccall unsafe "raylib.h ExportDataAsCode"
-  exportDataAsCode ::
+  c'exportDataAsCode ::
     CString -> CUInt -> CString -> IO CInt
+
+exportDataAsCode :: String -> Integer -> String -> IO Bool
+exportDataAsCode contents size fileName =
+  toBool <$> withCString contents (\c -> withCString fileName (c'exportDataAsCode c (fromIntegral size)))
 
 foreign import ccall unsafe "raylib.h &ExportDataAsCode"
   p'exportDataAsCode ::
     FunPtr (CString -> CUInt -> CString -> IO CInt)
 
 foreign import ccall unsafe "raylib.h LoadFileText"
-  loadFileText ::
+  c'loadFileText ::
     CString -> IO CString
+
+loadFileText :: String -> IO String
+loadFileText fileName = withCString fileName c'loadFileText >>= peekCString
 
 foreign import ccall unsafe "raylib.h &LoadFileText"
   p'loadFileText ::
     FunPtr (CString -> IO CString)
 
 foreign import ccall unsafe "raylib.h UnloadFileText"
-  unloadFileText ::
+  c'unloadFileText ::
     CString -> IO ()
+
+unloadFileText :: String -> IO ()
+unloadFileText text = withCString text c'unloadFileText
 
 foreign import ccall unsafe "raylib.h &UnloadFileText"
   p'unloadFileText ::
     FunPtr (CString -> IO ())
 
 foreign import ccall unsafe "raylib.h SaveFileText"
-  saveFileText ::
+  c'saveFileText ::
     CString -> CString -> IO CInt
+
+saveFileText :: String -> String -> IO Bool
+saveFileText fileName text = toBool <$> withCString fileName (withCString text . c'saveFileText)
 
 foreign import ccall unsafe "raylib.h &SaveFileText"
   p'saveFileText ::
     FunPtr (CString -> CString -> IO CInt)
 
 foreign import ccall unsafe "raylib.h FileExists"
-  fileExists ::
+  c'fileExists ::
     CString -> IO CInt
+
+fileExists :: String -> IO Bool
+fileExists fileName = toBool <$> withCString fileName c'fileExists
 
 foreign import ccall unsafe "raylib.h &FileExists"
   p'fileExists ::
     FunPtr (CString -> IO CInt)
 
 foreign import ccall unsafe "raylib.h DirectoryExists"
-  directoryExists ::
+  c'directoryExists ::
     CString -> IO CInt
+
+directoryExists :: String -> IO Bool
+directoryExists dirPath = toBool <$> withCString dirPath c'directoryExists
 
 foreign import ccall unsafe "raylib.h &DirectoryExists"
   p'directoryExists ::
     FunPtr (CString -> IO CInt)
 
 foreign import ccall unsafe "raylib.h IsFileExtension"
-  isFileExtension ::
+  c'isFileExtension ::
     CString -> CString -> IO CInt
+
+isFileExtension :: String -> String -> IO Bool
+isFileExtension fileName ext = toBool <$> withCString fileName (withCString ext . c'isFileExtension)
 
 foreign import ccall unsafe "raylib.h &IsFileExtension"
   p'isFileExtension ::
     FunPtr (CString -> CString -> IO CInt)
 
 foreign import ccall unsafe "raylib.h GetFileLength"
-  getFileLength ::
+  c'getFileLength ::
     CString -> IO CInt
+
+getFileLength :: String -> IO Bool
+getFileLength fileName = toBool <$> withCString fileName c'getFileLength
 
 foreign import ccall unsafe "raylib.h &GetFileLength"
   p'getFileLength ::
     FunPtr (CString -> IO CInt)
 
 foreign import ccall unsafe "raylib.h GetFileExtension"
-  getFileExtension ::
+  c'getFileExtension ::
     CString -> IO CString
+
+getFileExtension :: String -> IO String
+getFileExtension fileName = withCString fileName c'getFileExtension >>= peekCString
 
 foreign import ccall unsafe "raylib.h &GetFileExtension"
   p'getFileExtension ::
     FunPtr (CString -> IO CString)
 
 foreign import ccall unsafe "raylib.h GetFileName"
-  getFileName ::
+  c'getFileName ::
     CString -> IO CString
+
+getFileName :: String -> IO String
+getFileName filePath = withCString filePath c'getFileName >>= peekCString
 
 foreign import ccall unsafe "raylib.h &GetFileName"
   p'getFileName ::
     FunPtr (CString -> IO CString)
 
 foreign import ccall unsafe "raylib.h GetFileNameWithoutExt"
-  getFileNameWithoutExt ::
+  c'getFileNameWithoutExt ::
     CString -> IO CString
+
+getFileNameWithoutExt :: String -> IO String
+getFileNameWithoutExt fileName = withCString fileName c'getFileNameWithoutExt >>= peekCString
 
 foreign import ccall unsafe "raylib.h &GetFileNameWithoutExt"
   p'getFileNameWithoutExt ::
     FunPtr (CString -> IO CString)
 
 foreign import ccall unsafe "raylib.h GetDirectoryPath"
-  getDirectoryPath ::
+  c'getDirectoryPath ::
     CString -> IO CString
+
+getDirectoryPath :: String -> IO String
+getDirectoryPath filePath = withCString filePath c'getDirectoryPath >>= peekCString
 
 foreign import ccall unsafe "raylib.h &GetDirectoryPath"
   p'getDirectoryPath ::
     FunPtr (CString -> IO CString)
 
 foreign import ccall unsafe "raylib.h GetPrevDirectoryPath"
-  getPrevDirectoryPath ::
+  c'getPrevDirectoryPath ::
     CString -> IO CString
+
+getPrevDirectoryPath :: String -> IO String
+getPrevDirectoryPath dirPath = withCString dirPath c'getPrevDirectoryPath >>= peekCString
 
 foreign import ccall unsafe "raylib.h &GetPrevDirectoryPath"
   p'getPrevDirectoryPath ::
     FunPtr (CString -> IO CString)
 
 foreign import ccall unsafe "raylib.h GetWorkingDirectory"
-  getWorkingDirectory ::
+  c'getWorkingDirectory ::
     IO CString
+
+getWorkingDirectory :: IO String
+getWorkingDirectory = c'getWorkingDirectory >>= peekCString
 
 foreign import ccall unsafe "raylib.h &GetWorkingDirectory"
   p'getWorkingDirectory ::
     FunPtr (IO CString)
 
 foreign import ccall unsafe "raylib.h GetApplicationDirectory"
-  getApplicationDirectory ::
+  c'getApplicationDirectory ::
     IO CString
+
+getApplicationDirectory :: IO String
+getApplicationDirectory = c'getApplicationDirectory >>= peekCString
 
 foreign import ccall unsafe "raylib.h &GetApplicationDirectory"
   p'getApplicationDirectory ::
     FunPtr (IO CString)
 
 foreign import ccall unsafe "raylib.h ChangeDirectory"
-  changeDirectory ::
+  c'changeDirectory ::
     CString -> IO CInt
+
+changeDirectory :: String -> IO Bool
+changeDirectory dir = toBool <$> withCString dir c'changeDirectory
 
 foreign import ccall unsafe "raylib.h &ChangeDirectory"
   p'changeDirectory ::
     FunPtr (CString -> IO CInt)
 
 foreign import ccall unsafe "raylib.h IsPathFile"
-  isPathFile ::
+  c'isPathFile ::
     CString -> IO CInt
+
+isPathFile :: String -> IO Bool
+isPathFile path = toBool <$> withCString path c'isPathFile
 
 foreign import ccall unsafe "raylib.h &IsPathFile"
   p'isPathFile ::
     FunPtr (CString -> IO CInt)
 
-foreign import ccall unsafe "bindings.h LoadDirectoryFiles_" loadDirectoryFiles :: CString -> IO (Ptr FilePathList)
+foreign import ccall unsafe "bindings.h LoadDirectoryFiles_" c'loadDirectoryFiles :: CString -> IO (Ptr FilePathList)
+
+loadDirectoryFiles :: String -> IO FilePathList
+loadDirectoryFiles dirPath = withCString dirPath c'loadDirectoryFiles >>= peek
 
 foreign import ccall unsafe "raylib.h &LoadDirectoryFiles"
   p'loadDirectoryFiles ::
     FunPtr (CString -> IO FilePathList)
 
-foreign import ccall unsafe "bindings.h LoadDirectoryFilesEx_" loadDirectoryFilesEx :: CString -> CString -> CInt -> IO (Ptr FilePathList)
+foreign import ccall unsafe "bindings.h LoadDirectoryFilesEx_" c'loadDirectoryFilesEx :: CString -> CString -> CInt -> IO (Ptr FilePathList)
+
+loadDirectoryFilesEx :: String -> String -> Bool -> IO FilePathList
+loadDirectoryFilesEx basePath filter scanSubdirs =
+  withCString basePath (\b -> withCString filter (\f -> c'loadDirectoryFilesEx b f (fromBool scanSubdirs))) >>= peek
 
 foreign import ccall unsafe "raylib.h &LoadDirectoryFilesEx"
   p'loadDirectoryFilesEx ::
     FunPtr (CString -> CString -> CInt -> IO FilePathList)
 
-foreign import ccall unsafe "bindings.h UnloadDirectoryFiles_" unloadDirectoryFiles :: Ptr FilePathList -> IO ()
+foreign import ccall unsafe "bindings.h UnloadDirectoryFiles_" c'unloadDirectoryFiles :: Ptr FilePathList -> IO ()
+
+unloadDirectoryFiles :: FilePathList -> IO ()
+unloadDirectoryFiles files = with files c'unloadDirectoryFiles
 
 foreign import ccall unsafe "raylib.h &UnloadDirectoryFiles"
   p'unloadDirectoryFiles ::
     FunPtr (FilePathList -> IO ())
 
 foreign import ccall unsafe "raylib.h IsFileDropped"
-  isFileDropped ::
+  c'isFileDropped ::
     IO CInt
+
+isFileDropped :: IO Bool
+isFileDropped = toBool <$> c'isFileDropped
 
 foreign import ccall unsafe "raylib.h &IsFileDropped"
   p'isFileDropped ::
     FunPtr (IO CInt)
 
-foreign import ccall unsafe "bindings.h LoadDroppedFiles_" loadDroppedFiles :: IO (Ptr FilePathList)
+foreign import ccall unsafe "bindings.h LoadDroppedFiles_" c'loadDroppedFiles :: IO (Ptr FilePathList)
+
+loadDroppedFiles :: IO FilePathList
+loadDroppedFiles = c'loadDroppedFiles >>= peek
 
 foreign import ccall unsafe "raylib.h &LoadDroppedFiles"
   p'loadDroppedFiles ::
     FunPtr (IO FilePathList)
 
-foreign import ccall unsafe "bindings.h UnloadDroppedFiles_" unloadDroppedFiles :: Ptr FilePathList -> IO ()
+foreign import ccall unsafe "bindings.h UnloadDroppedFiles_" c'unloadDroppedFiles :: Ptr FilePathList -> IO ()
+
+unloadDroppedFiles :: FilePathList -> IO ()
+unloadDroppedFiles files = with files c'unloadDroppedFiles
 
 foreign import ccall unsafe "raylib.h &UnloadDroppedFiles"
   p'unloadDroppedFiles ::
     FunPtr (FilePathList -> IO ())
 
 foreign import ccall unsafe "raylib.h GetFileModTime"
-  getFileModTime ::
+  c'getFileModTime ::
     CString -> IO CLong
+
+getFileModTime :: String -> IO Integer
+getFileModTime fileName = fromIntegral <$> withCString fileName c'getFileModTime
 
 foreign import ccall unsafe "raylib.h &GetFileModTime"
   p'getFileModTime ::
     FunPtr (CString -> IO CLong)
 
 foreign import ccall unsafe "raylib.h CompressData"
-  compressData ::
+  c'compressData ::
     Ptr CUChar -> CInt -> Ptr CInt -> IO (Ptr CUChar)
+
+compressData :: String -> Int -> IO (String, Integer)
+compressData contents size = do
+  withCString contents (\c -> do
+    with 0 (\ptr -> do
+      compressed <- c'compressData (castPtr c) (fromIntegral size) ptr >>= peekCString . castPtr
+      compressedSize <- fromIntegral <$> peek ptr
+      return (compressed, compressedSize)
+      )
+    )
 
 foreign import ccall unsafe "raylib.h &CompressData"
   p'compressData ::
     FunPtr (Ptr CUChar -> CInt -> Ptr CInt -> IO (Ptr CUChar))
 
 foreign import ccall unsafe "raylib.h DecompressData"
-  decompressData ::
+  c'decompressData ::
     Ptr CUChar -> CInt -> Ptr CInt -> IO (Ptr CUChar)
+
+decompressData :: String -> Int -> IO (String, Integer)
+decompressData compressedData size = do
+  withCString compressedData (\c -> do
+    with 0 (\ptr -> do
+      decompressed <- c'decompressData (castPtr c) (fromIntegral size) ptr >>= peekCString . castPtr
+      decompressedSize <- fromIntegral <$> peek ptr
+      return (decompressed, decompressedSize)
+      )
+    )
 
 foreign import ccall unsafe "raylib.h &DecompressData"
   p'decompressData ::
     FunPtr (Ptr CUChar -> CInt -> Ptr CInt -> IO (Ptr CUChar))
 
 foreign import ccall unsafe "raylib.h EncodeDataBase64"
-  encodeDataBase64 ::
+  c'encodeDataBase64 ::
     Ptr CUChar -> CInt -> Ptr CInt -> IO CString
+
+encodeDataBase64 :: String -> Int -> IO (String, Integer)
+encodeDataBase64 contents size = do
+  withCString contents (\c -> do
+    with 0 (\ptr -> do
+      encoded <- c'encodeDataBase64 (castPtr c) (fromIntegral size) ptr >>= peekCString . castPtr
+      encodedSize <- fromIntegral <$> peek ptr
+      return (encoded, encodedSize)
+      )
+    )
 
 foreign import ccall unsafe "raylib.h &EncodeDataBase64"
   p'encodeDataBase64 ::
     FunPtr (Ptr CUChar -> CInt -> Ptr CInt -> IO CString)
 
 foreign import ccall unsafe "raylib.h DecodeDataBase64"
-  decodeDataBase64 ::
+  c'decodeDataBase64 ::
     Ptr CUChar -> Ptr CInt -> IO (Ptr CUChar)
+
+decodeDataBase64 :: String -> IO (String, Integer)
+decodeDataBase64 encodedData = do
+  withCString encodedData (\c -> do
+    with 0 (\ptr -> do
+      decoded <- c'decodeDataBase64 (castPtr c) ptr >>= peekCString . castPtr
+      decodedSize <- fromIntegral <$> peek ptr
+      return (decoded, decodedSize)
+      )
+    )
 
 foreign import ccall unsafe "raylib.h &DecodeDataBase64"
   p'decodeDataBase64 ::
     FunPtr (Ptr CUChar -> Ptr CInt -> IO (Ptr CUChar))
 
 foreign import ccall unsafe "raylib.h IsKeyPressed"
-  isKeyPressed ::
+  c'isKeyPressed ::
     CInt -> IO CInt
+
+isKeyPressed :: Int -> IO Bool
+isKeyPressed key = toBool <$> c'isKeyPressed (fromIntegral key)
 
 foreign import ccall unsafe "raylib.h &IsKeyPressed"
   p'isKeyPressed ::
     FunPtr (CInt -> IO CInt)
 
 foreign import ccall unsafe "raylib.h IsKeyDown"
-  isKeyDown ::
+  c'isKeyDown ::
     CInt -> IO CInt
+
+isKeyDown :: Int -> IO Bool
+isKeyDown key = toBool <$> c'isKeyDown (fromIntegral key)
 
 foreign import ccall unsafe "raylib.h &IsKeyDown"
   p'isKeyDown ::
     FunPtr (CInt -> IO CInt)
 
 foreign import ccall unsafe "raylib.h IsKeyReleased"
-  isKeyReleased ::
+  c'isKeyReleased ::
     CInt -> IO CInt
+
+isKeyReleased :: Int -> IO Bool
+isKeyReleased key = toBool <$> c'isKeyReleased (fromIntegral key)
 
 foreign import ccall unsafe "raylib.h &IsKeyReleased"
   p'isKeyReleased ::
     FunPtr (CInt -> IO CInt)
 
 foreign import ccall unsafe "raylib.h IsKeyUp"
-  isKeyUp ::
+  c'isKeyUp ::
     CInt -> IO CInt
+
+isKeyUp :: Int -> IO Bool
+isKeyUp key = toBool <$> c'isKeyUp (fromIntegral key)
 
 foreign import ccall unsafe "raylib.h &IsKeyUp"
   p'isKeyUp ::
     FunPtr (CInt -> IO CInt)
 
 foreign import ccall unsafe "raylib.h SetExitKey"
-  setExitKey ::
+  c'setExitKey ::
     CInt -> IO ()
+
+setExitKey :: Int -> IO ()
+setExitKey = c'setExitKey . fromIntegral
 
 foreign import ccall unsafe "raylib.h &SetExitKey"
   p'setExitKey ::
     FunPtr (CInt -> IO ())
 
 foreign import ccall unsafe "raylib.h GetKeyPressed"
-  getKeyPressed ::
+  c'getKeyPressed ::
     IO CInt
+
+getKeyPressed :: IO Int
+getKeyPressed = fromIntegral <$> c'getKeyPressed
 
 foreign import ccall unsafe "raylib.h &GetKeyPressed"
   p'getKeyPressed ::
     FunPtr (IO CInt)
 
 foreign import ccall unsafe "raylib.h GetCharPressed"
-  getCharPressed ::
+  c'getCharPressed ::
     IO CInt
+
+getCharPressed :: IO Int
+getCharPressed = fromIntegral <$> c'getCharPressed
 
 foreign import ccall unsafe "raylib.h &GetCharPressed"
   p'getCharPressed ::
     FunPtr (IO CInt)
 
 foreign import ccall unsafe "raylib.h IsGamepadAvailable"
-  isGamepadAvailable ::
+  c'isGamepadAvailable ::
     CInt -> IO CInt
+
+isGamepadAvailable :: Int -> IO Bool
+isGamepadAvailable gamepad = toBool <$> c'isGamepadAvailable (fromIntegral gamepad)
 
 foreign import ccall unsafe "raylib.h &IsGamepadAvailable"
   p'isGamepadAvailable ::
     FunPtr (CInt -> IO CInt)
 
 foreign import ccall unsafe "raylib.h GetGamepadName"
-  getGamepadName ::
+  c'getGamepadName ::
     CInt -> IO CString
+
+getGamepadName :: Int -> IO String
+getGamepadName gamepad = c'getGamepadName (fromIntegral gamepad) >>= peekCString
 
 foreign import ccall unsafe "raylib.h &GetGamepadName"
   p'getGamepadName ::
     FunPtr (CInt -> IO CString)
 
 foreign import ccall unsafe "raylib.h IsGamepadButtonPressed"
-  isGamepadButtonPressed ::
+  c'isGamepadButtonPressed ::
     CInt -> CInt -> IO CInt
+
+isGamepadButtonPressed :: Int -> Int -> IO Bool
+isGamepadButtonPressed gamepad button = toBool <$> c'isGamepadButtonPressed (fromIntegral gamepad) (fromIntegral button)
 
 foreign import ccall unsafe "raylib.h &IsGamepadButtonPressed"
   p'isGamepadButtonPressed ::
     FunPtr (CInt -> CInt -> IO CInt)
 
 foreign import ccall unsafe "raylib.h IsGamepadButtonDown"
-  isGamepadButtonDown ::
+  c'isGamepadButtonDown ::
     CInt -> CInt -> IO CInt
+
+isGamepadButtonDown :: Int -> Int -> IO Bool
+isGamepadButtonDown gamepad button = toBool <$> c'isGamepadButtonDown (fromIntegral gamepad) (fromIntegral button)
 
 foreign import ccall unsafe "raylib.h &IsGamepadButtonDown"
   p'isGamepadButtonDown ::
     FunPtr (CInt -> CInt -> IO CInt)
 
 foreign import ccall unsafe "raylib.h IsGamepadButtonReleased"
-  isGamepadButtonReleased ::
+  c'isGamepadButtonReleased ::
     CInt -> CInt -> IO CInt
+
+isGamepadButtonReleased :: Int -> Int -> IO Bool
+isGamepadButtonReleased gamepad button = toBool <$> c'isGamepadButtonReleased (fromIntegral gamepad) (fromIntegral button)
 
 foreign import ccall unsafe "raylib.h &IsGamepadButtonReleased"
   p'isGamepadButtonReleased ::
     FunPtr (CInt -> CInt -> IO CInt)
 
 foreign import ccall unsafe "raylib.h IsGamepadButtonUp"
-  isGamepadButtonUp ::
+  c'isGamepadButtonUp ::
     CInt -> CInt -> IO CInt
+
+isGamepadButtonUp :: Int -> Int -> IO Bool
+isGamepadButtonUp gamepad button = toBool <$> c'isGamepadButtonUp (fromIntegral gamepad) (fromIntegral button)
 
 foreign import ccall unsafe "raylib.h &IsGamepadButtonUp"
   p'isGamepadButtonUp ::
     FunPtr (CInt -> CInt -> IO CInt)
 
 foreign import ccall unsafe "raylib.h GetGamepadButtonPressed"
-  getGamepadButtonPressed ::
+  c'getGamepadButtonPressed ::
     IO CInt
+
+getGamepadButtonPressed :: IO Int
+getGamepadButtonPressed = fromIntegral <$> c'getGamepadButtonPressed
 
 foreign import ccall unsafe "raylib.h &GetGamepadButtonPressed"
   p'getGamepadButtonPressed ::
     FunPtr (IO CInt)
 
 foreign import ccall unsafe "raylib.h GetGamepadAxisCount"
-  getGamepadAxisCount ::
+  c'getGamepadAxisCount ::
     CInt -> IO CInt
+
+getGamepadAxisCount :: Int -> IO Int
+getGamepadAxisCount gamepad = fromIntegral <$> c'getGamepadAxisCount (fromIntegral gamepad)
 
 foreign import ccall unsafe "raylib.h &GetGamepadAxisCount"
   p'getGamepadAxisCount ::
     FunPtr (CInt -> IO CInt)
 
 foreign import ccall unsafe "raylib.h GetGamepadAxisMovement"
-  getGamepadAxisMovement ::
+  c'getGamepadAxisMovement ::
     CInt -> CInt -> IO CFloat
+
+getGamepadAxisMovement :: Int -> Int -> IO Float
+getGamepadAxisMovement gamepad axis = realToFrac <$> c'getGamepadAxisMovement (fromIntegral gamepad) (fromIntegral axis)
 
 foreign import ccall unsafe "raylib.h &GetGamepadAxisMovement"
   p'getGamepadAxisMovement ::
     FunPtr (CInt -> CInt -> IO CFloat)
 
 foreign import ccall unsafe "raylib.h SetGamepadMappings"
-  setGamepadMappings ::
+  c'setGamepadMappings ::
     CString -> IO CInt
+
+setGamepadMappings :: String -> IO Int
+setGamepadMappings mappings = fromIntegral <$> withCString mappings c'setGamepadMappings
 
 foreign import ccall unsafe "raylib.h &SetGamepadMappings"
   p'setGamepadMappings ::
     FunPtr (CString -> IO CInt)
 
 foreign import ccall unsafe "raylib.h IsMouseButtonPressed"
-  isMouseButtonPressed ::
+  c'isMouseButtonPressed ::
     CInt -> IO CInt
+
+isMouseButtonPressed :: Int -> IO Bool
+isMouseButtonPressed button = toBool <$> c'isMouseButtonPressed (fromIntegral button)
 
 foreign import ccall unsafe "raylib.h &IsMouseButtonPressed"
   p'isMouseButtonPressed ::
     FunPtr (CInt -> IO CInt)
 
 foreign import ccall unsafe "raylib.h IsMouseButtonDown"
-  isMouseButtonDown ::
+  c'isMouseButtonDown ::
     CInt -> IO CInt
+
+isMouseButtonDown :: Int -> IO Bool
+isMouseButtonDown button = toBool <$> c'isMouseButtonDown (fromIntegral button)
 
 foreign import ccall unsafe "raylib.h &IsMouseButtonDown"
   p'isMouseButtonDown ::
     FunPtr (CInt -> IO CInt)
 
 foreign import ccall unsafe "raylib.h IsMouseButtonReleased"
-  isMouseButtonReleased ::
+  c'isMouseButtonReleased ::
     CInt -> IO CInt
+
+isMouseButtonReleased :: Int -> IO Bool
+isMouseButtonReleased button = toBool <$> c'isMouseButtonReleased (fromIntegral button)
 
 foreign import ccall unsafe "raylib.h &IsMouseButtonReleased"
   p'isMouseButtonReleased ::
     FunPtr (CInt -> IO CInt)
 
 foreign import ccall unsafe "raylib.h IsMouseButtonUp"
-  isMouseButtonUp ::
+  c'isMouseButtonUp ::
     CInt -> IO CInt
+
+isMouseButtonUp :: Int -> IO Bool
+isMouseButtonUp button = toBool <$> c'isMouseButtonUp (fromIntegral button)
 
 foreign import ccall unsafe "raylib.h &IsMouseButtonUp"
   p'isMouseButtonUp ::
     FunPtr (CInt -> IO CInt)
 
 foreign import ccall unsafe "raylib.h GetMouseX"
-  getMouseX ::
+  c'getMouseX ::
     IO CInt
+
+getMouseX :: IO Int
+getMouseX = fromIntegral <$> c'getMouseX
 
 foreign import ccall unsafe "raylib.h &GetMouseX"
   p'getMouseX ::
     FunPtr (IO CInt)
 
 foreign import ccall unsafe "raylib.h GetMouseY"
-  getMouseY ::
+  c'getMouseY ::
     IO CInt
+
+getMouseY :: IO Int
+getMouseY = fromIntegral <$> c'getMouseY
 
 foreign import ccall unsafe "raylib.h &GetMouseY"
   p'getMouseY ::
     FunPtr (IO CInt)
 
-foreign import ccall unsafe "bindings.h GetMousePosition_" getMousePosition :: IO (Ptr Vector2)
+foreign import ccall unsafe "bindings.h GetMousePosition_" c'getMousePosition :: IO (Ptr Vector2)
+
+getMousePosition :: IO Vector2
+getMousePosition = c'getMousePosition >>= peek
 
 foreign import ccall unsafe "raylib.h &GetMousePosition"
   p'getMousePosition ::
     FunPtr (IO Vector2)
 
-foreign import ccall unsafe "bindings.h GetMouseDelta_" getMouseDelta :: IO (Ptr Vector2)
+foreign import ccall unsafe "bindings.h GetMouseDelta_" c'getMouseDelta :: IO (Ptr Vector2)
+
+getMouseDelta :: IO Vector2
+getMouseDelta = c'getMouseDelta >>= peek
 
 foreign import ccall unsafe "raylib.h &GetMouseDelta"
   p'getMouseDelta ::
     FunPtr (IO Vector2)
 
 foreign import ccall unsafe "raylib.h SetMousePosition"
-  setMousePosition ::
+  c'setMousePosition ::
     CInt -> CInt -> IO ()
+
+setMousePosition :: Int -> Int -> IO ()
+setMousePosition x y = c'setMousePosition (fromIntegral x) (fromIntegral y)
 
 foreign import ccall unsafe "raylib.h &SetMousePosition"
   p'setMousePosition ::
     FunPtr (CInt -> CInt -> IO ())
 
 foreign import ccall unsafe "raylib.h SetMouseOffset"
-  setMouseOffset ::
+  c'setMouseOffset ::
     CInt -> CInt -> IO ()
+
+setMouseOffset :: Int -> Int -> IO ()
+setMouseOffset x y = c'setMouseOffset (fromIntegral x) (fromIntegral y)
 
 foreign import ccall unsafe "raylib.h &SetMouseOffset"
   p'setMouseOffset ::
     FunPtr (CInt -> CInt -> IO ())
 
 foreign import ccall unsafe "raylib.h SetMouseScale"
-  setMouseScale ::
+  c'setMouseScale ::
     CFloat -> CFloat -> IO ()
+
+setMouseScale :: Float -> Float -> IO ()
+setMouseScale x y = c'setMouseScale (realToFrac x) (realToFrac y)
 
 foreign import ccall unsafe "raylib.h &SetMouseScale"
   p'setMouseScale ::
     FunPtr (CFloat -> CFloat -> IO ())
 
 foreign import ccall unsafe "raylib.h GetMouseWheelMove"
-  getMouseWheelMove ::
+  c'getMouseWheelMove ::
     IO CFloat
+
+getMouseWheelMove :: IO Float
+getMouseWheelMove = realToFrac <$> c'getMouseWheelMove
 
 foreign import ccall unsafe "raylib.h &GetMouseWheelMove"
   p'getMouseWheelMove ::
     FunPtr (IO CFloat)
 
-foreign import ccall unsafe "bindings.h GetMouseWheelMoveV_" getMouseWheelMoveV :: IO (Ptr Vector2)
+foreign import ccall unsafe "bindings.h GetMouseWheelMoveV_" c'getMouseWheelMoveV :: IO (Ptr Vector2)
+
+getMouseWheelMoveV :: IO Vector2
+getMouseWheelMoveV = c'getMouseWheelMoveV >>= peek
 
 foreign import ccall unsafe "raylib.h &GetMouseWheelMoveV"
   p'getMouseWheelMoveV ::
     FunPtr (IO Vector2)
 
 foreign import ccall unsafe "raylib.h SetMouseCursor"
-  setMouseCursor ::
+  c'setMouseCursor ::
     CInt -> IO ()
+
+setMouseCursor :: Int -> IO ()
+setMouseCursor cursor = c'setMouseCursor $ fromIntegral cursor
 
 foreign import ccall unsafe "raylib.h &SetMouseCursor"
   p'setMouseCursor ::
     FunPtr (CInt -> IO ())
 
 foreign import ccall unsafe "raylib.h GetTouchX"
-  getTouchX ::
+  c'getTouchX ::
     IO CInt
+
+getTouchX :: IO Int
+getTouchX = fromIntegral <$> c'getTouchX
 
 foreign import ccall unsafe "raylib.h &GetTouchX"
   p'getTouchX ::
     FunPtr (IO CInt)
 
 foreign import ccall unsafe "raylib.h GetTouchY"
-  getTouchY ::
+  c'getTouchY ::
     IO CInt
+
+getTouchY :: IO Int
+getTouchY = fromIntegral <$> c'getTouchY
 
 foreign import ccall unsafe "raylib.h &GetTouchY"
   p'getTouchY ::
     FunPtr (IO CInt)
 
-foreign import ccall unsafe "bindings.h GetTouchPosition_" getTouchPosition :: CInt -> IO (Ptr Vector2)
+foreign import ccall unsafe "bindings.h GetTouchPosition_" c'getTouchPosition :: CInt -> IO (Ptr Vector2)
+
+getTouchPosition :: Int -> IO Vector2
+getTouchPosition index = c'getTouchPosition (fromIntegral index) >>= peek
 
 foreign import ccall unsafe "raylib.h &GetTouchPosition"
   p'getTouchPosition ::
     FunPtr (CInt -> IO Vector2)
 
 foreign import ccall unsafe "raylib.h GetTouchPointId"
-  getTouchPointId ::
+  c'getTouchPointId ::
     CInt -> IO CInt
+
+getTouchPointId :: Int -> IO Int
+getTouchPointId index = fromIntegral <$> c'getTouchPointId (fromIntegral index)
 
 foreign import ccall unsafe "raylib.h &GetTouchPointId"
   p'getTouchPointId ::
     FunPtr (CInt -> IO CInt)
 
 foreign import ccall unsafe "raylib.h GetTouchPointCount"
-  getTouchPointCount ::
+  c'getTouchPointCount ::
     IO CInt
+
+getTouchPointCount :: IO Int
+getTouchPointCount = fromIntegral <$> c'getTouchPointCount
 
 foreign import ccall unsafe "raylib.h &GetTouchPointCount"
   p'getTouchPointCount ::
     FunPtr (IO CInt)
 
 foreign import ccall unsafe "raylib.h SetGesturesEnabled"
-  setGesturesEnabled ::
+  c'setGesturesEnabled ::
     CUInt -> IO ()
+
+setGesturesEnabled :: Integer -> IO ()
+setGesturesEnabled flags = c'setGesturesEnabled (fromIntegral flags)
 
 foreign import ccall unsafe "raylib.h &SetGesturesEnabled"
   p'setGesturesEnabled ::
     FunPtr (CUInt -> IO ())
 
 foreign import ccall unsafe "raylib.h IsGestureDetected"
-  isGestureDetected ::
+  c'isGestureDetected ::
     CInt -> IO CInt
+
+isGestureDetected :: Int -> IO Bool
+isGestureDetected gesture = toBool <$> c'isGestureDetected (fromIntegral gesture)
 
 foreign import ccall unsafe "raylib.h &IsGestureDetected"
   p'isGestureDetected ::
     FunPtr (CInt -> IO CInt)
 
 foreign import ccall unsafe "raylib.h GetGestureDetected"
-  getGestureDetected ::
+  c'getGestureDetected ::
     IO CInt
+
+getGestureDetected :: IO Int
+getGestureDetected = fromIntegral <$> c'getGestureDetected
 
 foreign import ccall unsafe "raylib.h &GetGestureDetected"
   p'getGestureDetected ::
     FunPtr (IO CInt)
 
 foreign import ccall unsafe "raylib.h GetGestureHoldDuration"
-  getGestureHoldDuration ::
+  c'getGestureHoldDuration ::
     IO CFloat
+
+getGestureHoldDuration :: IO Float
+getGestureHoldDuration = realToFrac <$> c'getGestureHoldDuration
 
 foreign import ccall unsafe "raylib.h &GetGestureHoldDuration"
   p'getGestureHoldDuration ::
     FunPtr (IO CFloat)
 
-foreign import ccall unsafe "bindings.h GetGestureDragVector_" getGestureDragVector :: IO (Ptr Vector2)
+foreign import ccall unsafe "bindings.h GetGestureDragVector_" c'getGestureDragVector :: IO (Ptr Vector2)
+
+getGestureDragVector :: IO Vector2
+getGestureDragVector = c'getGestureDragVector >>= peek
 
 foreign import ccall unsafe "raylib.h &GetGestureDragVector"
   p'getGestureDragVector ::
     FunPtr (IO Vector2)
 
 foreign import ccall unsafe "raylib.h GetGestureDragAngle"
-  getGestureDragAngle ::
+  c'getGestureDragAngle ::
     IO CFloat
+
+getGestureDragAngle :: IO Float
+getGestureDragAngle = realToFrac <$> c'getGestureDragAngle
 
 foreign import ccall unsafe "raylib.h &GetGestureDragAngle"
   p'getGestureDragAngle ::
     FunPtr (IO CFloat)
 
-foreign import ccall unsafe "bindings.h GetGesturePinchVector_" getGesturePinchVector :: IO (Ptr Vector2)
+foreign import ccall unsafe "bindings.h GetGesturePinchVector_" c'getGesturePinchVector :: IO (Ptr Vector2)
+
+getGesturePinchVector :: IO Vector2
+getGesturePinchVector = c'getGesturePinchVector >>= peek
 
 foreign import ccall unsafe "raylib.h &GetGesturePinchVector"
   p'getGesturePinchVector ::
     FunPtr (IO Vector2)
 
 foreign import ccall unsafe "raylib.h GetGesturePinchAngle"
-  getGesturePinchAngle ::
+  c'getGesturePinchAngle ::
     IO CFloat
+
+getGesturePinchAngle :: IO Float
+getGesturePinchAngle = realToFrac <$> c'getGesturePinchAngle
 
 foreign import ccall unsafe "raylib.h &GetGesturePinchAngle"
   p'getGesturePinchAngle ::
     FunPtr (IO CFloat)
 
-foreign import ccall unsafe "bindings.h SetCameraMode_" setCameraMode :: Ptr Camera3D -> CInt -> IO ()
+foreign import ccall unsafe "bindings.h SetCameraMode_" c'setCameraMode :: Ptr Camera3D -> CInt -> IO ()
+
+setCameraMode :: Camera3D -> Int -> IO ()
+setCameraMode camera mode = with camera (\c -> c'setCameraMode c (fromIntegral mode))
 
 foreign import ccall unsafe "raylib.h &SetCameraMode"
   p'setCameraMode ::
     FunPtr (Camera3D -> CInt -> IO ())
 
 foreign import ccall unsafe "raylib.h UpdateCamera"
-  updateCamera ::
+  c'updateCamera ::
     Ptr Camera3D -> IO ()
+
+updateCamera :: Camera3D -> IO Camera3D
+updateCamera camera = with camera (\c -> do
+  c'updateCamera c
+  peek c
+  )
 
 foreign import ccall unsafe "raylib.h &UpdateCamera"
   p'updateCamera ::
     FunPtr (Ptr Camera3D -> IO ())
 
 foreign import ccall unsafe "raylib.h SetCameraPanControl"
-  setCameraPanControl ::
+  c'setCameraPanControl ::
     CInt -> IO ()
+
+setCameraPanControl :: Int -> IO ()
+setCameraPanControl keyPan = c'setCameraPanControl $ fromIntegral keyPan
 
 foreign import ccall unsafe "raylib.h &SetCameraPanControl"
   p'setCameraPanControl ::
     FunPtr (CInt -> IO ())
 
 foreign import ccall unsafe "raylib.h SetCameraAltControl"
-  setCameraAltControl ::
+  c'setCameraAltControl ::
     CInt -> IO ()
+
+setCameraAltControl :: Int -> IO ()
+setCameraAltControl keyAlt = c'setCameraAltControl $ fromIntegral keyAlt
 
 foreign import ccall unsafe "raylib.h &SetCameraAltControl"
   p'setCameraAltControl ::
     FunPtr (CInt -> IO ())
 
 foreign import ccall unsafe "raylib.h SetCameraSmoothZoomControl"
-  setCameraSmoothZoomControl ::
+  c'setCameraSmoothZoomControl ::
     CInt -> IO ()
+
+setCameraSmoothZoomControl :: Int -> IO ()
+setCameraSmoothZoomControl keySmoothZoom = c'setCameraSmoothZoomControl $ fromIntegral keySmoothZoom
 
 foreign import ccall unsafe "raylib.h &SetCameraSmoothZoomControl"
   p'setCameraSmoothZoomControl ::
     FunPtr (CInt -> IO ())
 
 foreign import ccall unsafe "raylib.h SetCameraMoveControls"
-  setCameraMoveControls ::
+  c'setCameraMoveControls ::
     CInt -> CInt -> CInt -> CInt -> CInt -> CInt -> IO ()
+
+setCameraMoveControls :: Int -> Int -> Int -> Int -> Int -> Int -> IO ()
+setCameraMoveControls keyFront keyBack keyRight keyLeft keyUp keyDown =
+  c'setCameraMoveControls
+    (fromIntegral keyFront)
+    (fromIntegral keyBack)
+    (fromIntegral keyRight)
+    (fromIntegral keyLeft)
+    (fromIntegral keyUp)
+    (fromIntegral keyDown)
 
 foreign import ccall unsafe "raylib.h &SetCameraMoveControls"
   p'setCameraMoveControls ::
     FunPtr (CInt -> CInt -> CInt -> CInt -> CInt -> CInt -> IO ())
 
-foreign import ccall unsafe "bindings.h SetShapesTexture_" setShapesTexture :: Ptr Texture -> Ptr Rectangle -> IO ()
+foreign import ccall unsafe "bindings.h SetShapesTexture_" c'setShapesTexture :: Ptr Texture -> Ptr Rectangle -> IO ()
+
+setShapesTexture :: Texture -> Rectangle -> IO ()
+setShapesTexture tex source = with tex (with source . c'setShapesTexture)
 
 foreign import ccall unsafe "raylib.h &SetShapesTexture"
   p'setShapesTexture ::
     FunPtr (Texture -> Rectangle -> IO ())
 
-foreign import ccall unsafe "bindings.h DrawPixel_" drawPixel :: CInt -> CInt -> Ptr Color -> IO ()
+foreign import ccall unsafe "bindings.h DrawPixel_" c'drawPixel :: CInt -> CInt -> Ptr Color -> IO ()
+
+drawPixel :: Int -> Int -> Color -> IO ()
+drawPixel x y color = with color $ c'drawPixel (fromIntegral x) (fromIntegral y)
 
 foreign import ccall unsafe "raylib.h &DrawPixel"
   p'drawPixel ::
     FunPtr (CInt -> CInt -> Color -> IO ())
 
-foreign import ccall unsafe "bindings.h DrawPixelV_" drawPixelV :: Ptr Vector2 -> Ptr Color -> IO ()
+foreign import ccall unsafe "bindings.h DrawPixelV_" c'drawPixelV :: Ptr Vector2 -> Ptr Color -> IO ()
+
+drawPixelV :: Vector2 -> Color -> IO ()
+drawPixelV position color = with position (with color . c'drawPixelV)
 
 foreign import ccall unsafe "raylib.h &DrawPixelV"
   p'drawPixelV ::
     FunPtr (Vector2 -> Color -> IO ())
 
-foreign import ccall unsafe "bindings.h DrawLine_" drawLine :: CInt -> CInt -> CInt -> CInt -> Ptr Color -> IO ()
+foreign import ccall unsafe "bindings.h DrawLine_" c'drawLine :: CInt -> CInt -> CInt -> CInt -> Ptr Color -> IO ()
+
+drawLine :: Int -> Int -> Int -> Int -> Color -> IO ()
+drawLine startX startY endX endY color =
+  with color $ c'drawLine (fromIntegral startX) (fromIntegral startY) (fromIntegral endX) (fromIntegral endY)
 
 foreign import ccall unsafe "raylib.h &DrawLine"
   p'drawLine ::
     FunPtr (CInt -> CInt -> CInt -> CInt -> Color -> IO ())
 
-foreign import ccall unsafe "bindings.h DrawLineV_" drawLineV :: Ptr Vector2 -> Ptr Vector2 -> Ptr Color -> IO ()
+foreign import ccall unsafe "bindings.h DrawLineV_" c'drawLineV :: Ptr Vector2 -> Ptr Vector2 -> Ptr Color -> IO ()
+
+drawLineV :: Vector2 -> Vector2 -> Color -> IO ()
+drawLineV start end color = with start (\s -> with end (with color . c'drawLineV s))
 
 foreign import ccall unsafe "raylib.h &DrawLineV"
   p'drawLineV ::
     FunPtr (Vector2 -> Vector2 -> Color -> IO ())
 
-foreign import ccall unsafe "bindings.h DrawLineEx_" drawLineEx :: Ptr Vector2 -> Ptr Vector2 -> CFloat -> Ptr Color -> IO ()
+foreign import ccall unsafe "bindings.h DrawLineEx_" c'drawLineEx :: Ptr Vector2 -> Ptr Vector2 -> CFloat -> Ptr Color -> IO ()
+
+drawLineEx :: Vector2 -> Vector2 -> Float -> Color -> IO ()
+drawLineEx start end thickness color =
+  with start (\s -> with end (\e -> with color (c'drawLineEx s e (realToFrac thickness))))
 
 foreign import ccall unsafe "raylib.h &DrawLineEx"
   p'drawLineEx ::
     FunPtr (Vector2 -> Vector2 -> CFloat -> Color -> IO ())
 
-foreign import ccall unsafe "bindings.h DrawLineBezier_" drawLineBezier :: Ptr Vector2 -> Ptr Vector2 -> CFloat -> Ptr Color -> IO ()
+foreign import ccall unsafe "bindings.h DrawLineBezier_" c'drawLineBezier :: Ptr Vector2 -> Ptr Vector2 -> CFloat -> Ptr Color -> IO ()
+
+drawLineBezier :: Vector2 -> Vector2 -> Float -> Color -> IO ()
+drawLineBezier start end thickness color =
+  with start (\s -> with end (\e -> with color (c'drawLineBezier s e (realToFrac thickness))))
 
 foreign import ccall unsafe "raylib.h &DrawLineBezier"
   p'drawLineBezier ::
     FunPtr (Vector2 -> Vector2 -> CFloat -> Color -> IO ())
 
-foreign import ccall unsafe "bindings.h DrawLineBezierQuad_" drawLineBezierQuad :: Ptr Vector2 -> Ptr Vector2 -> Ptr Vector2 -> CFloat -> Ptr Color -> IO ()
+foreign import ccall unsafe "bindings.h DrawLineBezierQuad_" c'drawLineBezierQuad :: Ptr Vector2 -> Ptr Vector2 -> Ptr Vector2 -> CFloat -> Ptr Color -> IO ()
+
+drawLineBezierQuad :: Vector2 -> Vector2 -> Vector2 -> Float -> Color -> IO ()
+drawLineBezierQuad start end control thickness color =
+  with start (\s -> with end (\e -> with control (\c -> with color (c'drawLineBezierQuad s e c (realToFrac thickness)))))
 
 foreign import ccall unsafe "raylib.h &DrawLineBezierQuad"
   p'drawLineBezierQuad ::
     FunPtr (Vector2 -> Vector2 -> Vector2 -> CFloat -> Color -> IO ())
 
-foreign import ccall unsafe "bindings.h DrawLineBezierCubic_" drawLineBezierCubic :: Ptr Vector2 -> Ptr Vector2 -> Ptr Vector2 -> Ptr Vector2 -> CFloat -> Ptr Color -> IO ()
+foreign import ccall unsafe "bindings.h DrawLineBezierCubic_" c'drawLineBezierCubic :: Ptr Vector2 -> Ptr Vector2 -> Ptr Vector2 -> Ptr Vector2 -> CFloat -> Ptr Color -> IO ()
+
+drawLineBezierCubic :: Vector2 -> Vector2 -> Vector2 -> Vector2 -> Float -> Color -> IO ()
+drawLineBezierCubic start end startControl endControl thickness color =
+  with start (
+    \s -> with end (
+      \e -> with startControl (
+        \sc -> with endControl (
+          \ec -> with color (
+            c'drawLineBezierCubic s e sc ec (realToFrac thickness))))))
 
 foreign import ccall unsafe "raylib.h &DrawLineBezierCubic"
   p'drawLineBezierCubic ::
     FunPtr (Vector2 -> Vector2 -> Vector2 -> Vector2 -> CFloat -> Color -> IO ())
 
-foreign import ccall unsafe "bindings.h DrawLineStrip_" drawLineStrip :: Ptr Vector2 -> CInt -> Ptr Color -> IO ()
+foreign import ccall unsafe "bindings.h DrawLineStrip_" c'drawLineStrip :: Ptr Vector2 -> CInt -> Ptr Color -> IO ()
+
+drawLineStrip :: [Vector2] -> Color -> IO ()
+drawLineStrip points color = withArray points (\p -> with color $ c'drawLineStrip p (fromIntegral $ length points))
 
 foreign import ccall unsafe "raylib.h &DrawLineStrip"
   p'drawLineStrip ::
     FunPtr (Ptr Vector2 -> CInt -> Color -> IO ())
 
-foreign import ccall unsafe "bindings.h DrawCircle_" drawCircle :: CInt -> CInt -> CFloat -> Ptr Color -> IO ()
+foreign import ccall unsafe "bindings.h DrawCircle_" c'drawCircle :: CInt -> CInt -> CFloat -> Ptr Color -> IO ()
+
+drawCircle :: Int -> Int -> Float -> Color -> IO ()
+drawCircle centerX centerY radius color = with color (c'drawCircle (fromIntegral centerX) (fromIntegral centerY) (realToFrac radius))
 
 foreign import ccall unsafe "raylib.h &DrawCircle"
   p'drawCircle ::
     FunPtr (CInt -> CInt -> CFloat -> Color -> IO ())
 
-foreign import ccall unsafe "bindings.h DrawCircleSector_" drawCircleSector :: Ptr Vector2 -> CFloat -> CFloat -> CFloat -> CInt -> Ptr Color -> IO ()
+foreign import ccall unsafe "bindings.h DrawCircleSector_" c'drawCircleSector :: Ptr Vector2 -> CFloat -> CFloat -> CFloat -> CInt -> Ptr Color -> IO ()
+
+drawCircleSector :: Vector2 -> Float -> Float -> Float -> Int -> Color -> IO ()
+drawCircleSector center radius startAngle endAngle segments color =
+  with center (\c ->
+    with color (
+      c'drawCircleSector c (realToFrac radius) (realToFrac startAngle) (realToFrac endAngle) (fromIntegral segments)))
 
 foreign import ccall unsafe "raylib.h &DrawCircleSector"
   p'drawCircleSector ::
     FunPtr (Vector2 -> CFloat -> CFloat -> CFloat -> CInt -> Color -> IO ())
 
-foreign import ccall unsafe "bindings.h DrawCircleSectorLines_" drawCircleSectorLines :: Ptr Vector2 -> CFloat -> CFloat -> CFloat -> CInt -> Ptr Color -> IO ()
+foreign import ccall unsafe "bindings.h DrawCircleSectorLines_" c'drawCircleSectorLines :: Ptr Vector2 -> CFloat -> CFloat -> CFloat -> CInt -> Ptr Color -> IO ()
+
+drawCircleSectorLines :: Vector2 -> Float -> Float -> Float -> Int -> Color -> IO ()
+drawCircleSectorLines center radius startAngle endAngle segments color =
+  with center (\c ->
+    with color (
+      c'drawCircleSectorLines c (realToFrac radius) (realToFrac startAngle) (realToFrac endAngle) (fromIntegral segments)))
 
 foreign import ccall unsafe "raylib.h &DrawCircleSectorLines"
   p'drawCircleSectorLines ::
     FunPtr (Vector2 -> CFloat -> CFloat -> CFloat -> CInt -> Color -> IO ())
 
-foreign import ccall unsafe "bindings.h DrawCircleGradient_" drawCircleGradient :: CInt -> CInt -> CFloat -> Ptr Color -> Ptr Color -> IO ()
+foreign import ccall unsafe "bindings.h DrawCircleGradient_" c'drawCircleGradient :: CInt -> CInt -> CFloat -> Ptr Color -> Ptr Color -> IO ()
+
+drawCircleGradient :: Int -> Int -> Float -> Color -> Color -> IO ()
+drawCircleGradient centerX centerY radius color1 color2 =
+  with color1 (with color2 . c'drawCircleGradient (fromIntegral centerX) (fromIntegral centerY) (realToFrac radius))
 
 foreign import ccall unsafe "raylib.h &DrawCircleGradient"
   p'drawCircleGradient ::
     FunPtr (CInt -> CInt -> CFloat -> Color -> Color -> IO ())
 
-foreign import ccall unsafe "bindings.h DrawCircleV_" drawCircleV :: Ptr Vector2 -> CFloat -> Ptr Color -> IO ()
+foreign import ccall unsafe "bindings.h DrawCircleV_" c'drawCircleV :: Ptr Vector2 -> CFloat -> Ptr Color -> IO ()
+
+drawCircleV :: Vector2 -> Float -> Color -> IO ()
+drawCircleV center radius color =
+  with center (\c -> with color (c'drawCircleV c (realToFrac radius)))
 
 foreign import ccall unsafe "raylib.h &DrawCircleV"
   p'drawCircleV ::
     FunPtr (Vector2 -> CFloat -> Color -> IO ())
 
-foreign import ccall unsafe "bindings.h DrawCircleLines_" drawCircleLines :: CInt -> CInt -> CFloat -> Ptr Color -> IO ()
+foreign import ccall unsafe "bindings.h DrawCircleLines_" c'drawCircleLines :: CInt -> CInt -> CFloat -> Ptr Color -> IO ()
+
+drawCircleLines :: Int -> Int -> Float -> Color -> IO ()
+drawCircleLines centerX centerY radius color =
+  with color (c'drawCircleLines (fromIntegral centerX) (fromIntegral centerY) (realToFrac radius))
 
 foreign import ccall unsafe "raylib.h &DrawCircleLines"
   p'drawCircleLines ::
     FunPtr (CInt -> CInt -> CFloat -> Color -> IO ())
 
-foreign import ccall unsafe "bindings.h DrawEllipse_" drawEllipse :: CInt -> CInt -> CFloat -> CFloat -> Ptr Color -> IO ()
+foreign import ccall unsafe "bindings.h DrawEllipse_" c'drawEllipse :: CInt -> CInt -> CFloat -> CFloat -> Ptr Color -> IO ()
+
+drawEllipse :: Int -> Int -> Float -> Float -> Color -> IO ()
+drawEllipse centerX centerY radiusH radiusV color =
+  with color (c'drawEllipse (fromIntegral centerX) (fromIntegral centerY) (realToFrac radiusH) (realToFrac radiusV))
 
 foreign import ccall unsafe "raylib.h &DrawEllipse"
   p'drawEllipse ::
     FunPtr (CInt -> CInt -> CFloat -> CFloat -> Color -> IO ())
 
-foreign import ccall unsafe "bindings.h DrawEllipseLines_" drawEllipseLines :: CInt -> CInt -> CFloat -> CFloat -> Ptr Color -> IO ()
+foreign import ccall unsafe "bindings.h DrawEllipseLines_" c'drawEllipseLines :: CInt -> CInt -> CFloat -> CFloat -> Ptr Color -> IO ()
+
+drawEllipseLines :: Int -> Int -> Float -> Float -> Color -> IO ()
+drawEllipseLines centerX centerY radiusH radiusV color =
+  with color (c'drawEllipseLines (fromIntegral centerX) (fromIntegral centerY) (realToFrac radiusH) (realToFrac radiusV))
 
 foreign import ccall unsafe "raylib.h &DrawEllipseLines"
   p'drawEllipseLines ::
     FunPtr (CInt -> CInt -> CFloat -> CFloat -> Color -> IO ())
 
-foreign import ccall unsafe "bindings.h DrawRing_" drawRing :: Ptr Vector2 -> CFloat -> CFloat -> CFloat -> CFloat -> CInt -> Ptr Color -> IO ()
+foreign import ccall unsafe "bindings.h DrawRing_" c'drawRing :: Ptr Vector2 -> CFloat -> CFloat -> CFloat -> CFloat -> CInt -> Ptr Color -> IO ()
+
+drawRing :: Vector2 -> Float -> Float -> Float -> Float -> Int -> Color -> IO ()
+drawRing center innerRadius outerRadius startAngle endAngle segments color =
+  with center (\c ->
+    with color (
+      c'drawRing c
+        (realToFrac innerRadius)
+        (realToFrac outerRadius)
+        (realToFrac startAngle)
+        (realToFrac endAngle)
+        (fromIntegral segments)))
 
 foreign import ccall unsafe "raylib.h &DrawRing"
   p'drawRing ::
     FunPtr (Vector2 -> CFloat -> CFloat -> CFloat -> CFloat -> CInt -> Color -> IO ())
 
-foreign import ccall unsafe "bindings.h DrawRingLines_" drawRingLines :: Ptr Vector2 -> CFloat -> CFloat -> CFloat -> CFloat -> CInt -> Ptr Color -> IO ()
+foreign import ccall unsafe "bindings.h DrawRingLines_" c'drawRingLines :: Ptr Vector2 -> CFloat -> CFloat -> CFloat -> CFloat -> CInt -> Ptr Color -> IO ()
+
+drawRingLines :: Vector2 -> Float -> Float -> Float -> Float -> Int -> Color -> IO ()
+drawRingLines center innerRadius outerRadius startAngle endAngle segments color =
+  with center (\c ->
+    with color (
+      c'drawRingLines c
+        (realToFrac innerRadius)
+        (realToFrac outerRadius)
+        (realToFrac startAngle)
+        (realToFrac endAngle)
+        (fromIntegral segments)))
 
 foreign import ccall unsafe "raylib.h &DrawRingLines"
   p'drawRingLines ::
     FunPtr (Vector2 -> CFloat -> CFloat -> CFloat -> CFloat -> CInt -> Color -> IO ())
 
-foreign import ccall unsafe "bindings.h DrawRectangle_" drawRectangle :: CInt -> CInt -> CInt -> CInt -> Ptr Color -> IO ()
+foreign import ccall unsafe "bindings.h DrawRectangle_" c'drawRectangle :: CInt -> CInt -> CInt -> CInt -> Ptr Color -> IO ()
+
+drawRectangle :: Int -> Int -> Int -> Int -> Color -> IO ()
+drawRectangle posX posY width height color =
+  with color (c'drawRectangle (fromIntegral posX) (fromIntegral posY) (fromIntegral width) (fromIntegral height))
 
 foreign import ccall unsafe "raylib.h &DrawRectangle"
   p'drawRectangle ::
     FunPtr (CInt -> CInt -> CInt -> CInt -> Color -> IO ())
 
-foreign import ccall unsafe "bindings.h DrawRectangleV_" drawRectangleV :: Ptr Vector2 -> Ptr Vector2 -> Ptr Color -> IO ()
+foreign import ccall unsafe "bindings.h DrawRectangleV_" c'drawRectangleV :: Ptr Vector2 -> Ptr Vector2 -> Ptr Color -> IO ()
+
+drawRectangleV :: Vector2 -> Vector2 -> Color -> IO ()
+drawRectangleV position size color = with position (\p -> with size (with color . c'drawRectangleV p))
 
 foreign import ccall unsafe "raylib.h &DrawRectangleV"
   p'drawRectangleV ::
     FunPtr (Vector2 -> Vector2 -> Color -> IO ())
 
-foreign import ccall unsafe "bindings.h DrawRectangleRec_" drawRectangleRec :: Ptr Rectangle -> Ptr Color -> IO ()
+foreign import ccall unsafe "bindings.h DrawRectangleRec_" c'drawRectangleRec :: Ptr Rectangle -> Ptr Color -> IO ()
+
+drawRectangleRec :: Rectangle -> Color -> IO ()
+drawRectangleRec rect color = with rect (with color . c'drawRectangleRec)
 
 foreign import ccall unsafe "raylib.h &DrawRectangleRec"
   p'drawRectangleRec ::
     FunPtr (Rectangle -> Color -> IO ())
 
-foreign import ccall unsafe "bindings.h DrawRectanglePro_" drawRectanglePro :: Ptr Rectangle -> Ptr Vector2 -> CFloat -> Ptr Color -> IO ()
+foreign import ccall unsafe "bindings.h DrawRectanglePro_" c'drawRectanglePro :: Ptr Rectangle -> Ptr Vector2 -> CFloat -> Ptr Color -> IO ()
+
+drawRectanglePro :: Rectangle -> Vector2 -> Float -> Color -> IO ()
+drawRectanglePro rect origin rotation color =
+  with color (\c -> with rect (\r -> with origin (\o -> c'drawRectanglePro r o (realToFrac rotation) c)))
 
 foreign import ccall unsafe "raylib.h &DrawRectanglePro"
   p'drawRectanglePro ::
     FunPtr (Rectangle -> Vector2 -> CFloat -> Color -> IO ())
 
-foreign import ccall unsafe "bindings.h DrawRectangleGradientV_" drawRectangleGradientV :: CInt -> CInt -> CInt -> CInt -> Ptr Color -> Ptr Color -> IO ()
+foreign import ccall unsafe "bindings.h DrawRectangleGradientV_" c'drawRectangleGradientV :: CInt -> CInt -> CInt -> CInt -> Ptr Color -> Ptr Color -> IO ()
+
+drawRectangleGradientV :: Int -> Int -> Int -> Int -> Color -> Color -> IO ()
+drawRectangleGradientV posX posY width height color1 color2 =
+  with color1 (
+    with color2 . c'drawRectangleGradientV
+      (fromIntegral posX) (fromIntegral posY) (fromIntegral width) (fromIntegral height))
 
 foreign import ccall unsafe "raylib.h &DrawRectangleGradientV"
   p'drawRectangleGradientV ::
     FunPtr (CInt -> CInt -> CInt -> CInt -> Color -> Color -> IO ())
 
-foreign import ccall unsafe "bindings.h DrawRectangleGradientH_" drawRectangleGradientH :: CInt -> CInt -> CInt -> CInt -> Ptr Color -> Ptr Color -> IO ()
+foreign import ccall unsafe "bindings.h DrawRectangleGradientH_" c'drawRectangleGradientH :: CInt -> CInt -> CInt -> CInt -> Ptr Color -> Ptr Color -> IO ()
+
+drawRectangleGradientH :: Int -> Int -> Int -> Int -> Color -> Color -> IO ()
+drawRectangleGradientH posX posY width height color1 color2 =
+  with color1 (
+    with color2 . c'drawRectangleGradientH
+      (fromIntegral posX) (fromIntegral posY) (fromIntegral width) (fromIntegral height))
 
 foreign import ccall unsafe "raylib.h &DrawRectangleGradientH"
   p'drawRectangleGradientH ::
     FunPtr (CInt -> CInt -> CInt -> CInt -> Color -> Color -> IO ())
 
-foreign import ccall unsafe "bindings.h DrawRectangleGradientEx_" drawRectangleGradientEx :: Ptr Rectangle -> Ptr Color -> Ptr Color -> Ptr Color -> Ptr Color -> IO ()
+foreign import ccall unsafe "bindings.h DrawRectangleGradientEx_" c'drawRectangleGradientEx :: Ptr Rectangle -> Ptr Color -> Ptr Color -> Ptr Color -> Ptr Color -> IO ()
+
+drawRectangleGradientEx :: Rectangle -> Color -> Color -> Color -> Color -> IO ()
+drawRectangleGradientEx rect col1 col2 col3 col4 =
+  with rect (\r ->
+    with col1 (\c1 -> 
+      with col2 (\c2 ->
+        with col3 (with col4 . c'drawRectangleGradientEx r c1 c2))))
 
 foreign import ccall unsafe "raylib.h &DrawRectangleGradientEx"
   p'drawRectangleGradientEx ::
     FunPtr (Rectangle -> Color -> Color -> Color -> Color -> IO ())
 
-foreign import ccall unsafe "bindings.h DrawRectangleLines_" drawRectangleLines :: CInt -> CInt -> CInt -> CInt -> Ptr Color -> IO ()
+foreign import ccall unsafe "bindings.h DrawRectangleLines_" c'drawRectangleLines :: CInt -> CInt -> CInt -> CInt -> Ptr Color -> IO ()
+
+drawRectangleLines :: Int -> Int -> Int -> Int -> Color -> IO ()
+drawRectangleLines posX posY width height color =
+  with color (c'drawRectangleLines (fromIntegral posX) (fromIntegral posY) (fromIntegral width) (fromIntegral height))
 
 foreign import ccall unsafe "raylib.h &DrawRectangleLines"
   p'drawRectangleLines ::
     FunPtr (CInt -> CInt -> CInt -> CInt -> Color -> IO ())
 
-foreign import ccall unsafe "bindings.h DrawRectangleLinesEx_" drawRectangleLinesEx :: Ptr Rectangle -> CFloat -> Ptr Color -> IO ()
+foreign import ccall unsafe "bindings.h DrawRectangleLinesEx_" c'drawRectangleLinesEx :: Ptr Rectangle -> CFloat -> Ptr Color -> IO ()
+
+drawRectangleLinesEx :: Rectangle -> Float -> Color -> IO ()
+drawRectangleLinesEx rect thickness color =
+  with color (\c -> with rect (\r -> c'drawRectangleLinesEx r (realToFrac thickness) c))
 
 foreign import ccall unsafe "raylib.h &DrawRectangleLinesEx"
   p'drawRectangleLinesEx ::
