@@ -114,7 +114,9 @@ Matrix* GetCameraMatrix_(Camera3D* a) {
 }
 
 Matrix* GetCameraMatrix2D_(Camera2D* a) {
-    GetCameraMatrix2D(*a);
+    Matrix* ptr = (Matrix*) malloc(sizeof (Matrix));
+    *ptr = GetCameraMatrix2D(*a);
+    return ptr;
 }
 
 Vector2* GetWorldToScreen_(Vector3* a, Camera3D* b) {
@@ -124,7 +126,9 @@ Vector2* GetWorldToScreen_(Vector3* a, Camera3D* b) {
 }
 
 Vector2* GetScreenToWorld2D_(Vector2* a, Camera2D* b) {
-    GetScreenToWorld2D(*a, *b);
+    Vector2* ptr = (Vector2*) malloc(sizeof (Vector2));
+    *ptr = GetScreenToWorld2D(*a, *b);
+    return ptr;
 }
 
 Vector2* GetWorldToScreenEx_(Vector3* a, Camera3D* b, int c, int d) {
@@ -134,7 +138,9 @@ Vector2* GetWorldToScreenEx_(Vector3* a, Camera3D* b, int c, int d) {
 }
 
 Vector2* GetWorldToScreen2D_(Vector2* a, Camera2D* b) {
-    GetWorldToScreen2D(*a, *b);
+    Vector2* ptr = (Vector2*) malloc(sizeof (Vector2));
+    *ptr = GetWorldToScreen2D(*a, *b);
+    return ptr;
 }
 
 FilePathList* LoadDirectoryFiles_(string a) {
@@ -536,11 +542,11 @@ void ImageColorReplace_(Image* a, Color* b, Color* c) {
 }
 
 Color* LoadImageColors_(Image* a) {
-    LoadImageColors(*a);
+    return LoadImageColors(*a);
 }
 
 Color* LoadImagePalette_(Image* a, int b, int* c) {
-    LoadImagePalette(*a, b, c);
+    return LoadImagePalette(*a, b, c);
 }
 
 Rectangle* GetImageAlphaBorder_(Image* a, float b) {
@@ -1228,7 +1234,7 @@ Wave* WaveCopy_(Wave* a) {
 }
 
 float* LoadWaveSamples_(Wave* a) {
-    LoadWaveSamples(*a);
+    return LoadWaveSamples(*a);
 }
 
 Music* LoadMusicStream_(string a) {
