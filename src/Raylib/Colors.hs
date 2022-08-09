@@ -1,6 +1,6 @@
 module Raylib.Colors where
 
-import Raylib ( Color(Color) )
+import Raylib.Types ( Color(Color) )
 import Foreign (castPtr, castStablePtrToPtr, newStablePtr, Ptr)
 
 -- Simple color palette defined in raylib.h
