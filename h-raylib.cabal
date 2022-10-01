@@ -1,6 +1,6 @@
 cabal-version:        2.4
 name:                 h-raylib
-version:              4.2.0.1
+version:              4.2.0.0
 synopsis:             Raylib bindings for Haskell
 
 bug-reports:          https://github.com/Anut-py/h-raylib/issues
@@ -9,8 +9,8 @@ author:               Anut
 maintainer:           Anut
 extra-doc-files:      README.md
 
-flag no-autosetup
-  description:        Do not automatically set up Raylib with the required libraries
+flag disable-autosetup
+  description:        Raylib will automatically be set up with platform-specific dependencies if this flag is off
   default:            False
   manual:             True
 
@@ -31,20 +31,20 @@ library
       -- Unsupported OS, do nothing. If you can get it working on an
       -- OS that isn't on here, please add it here.
   c-sources:
-    raylib/raudio.c
-    raylib/rmodels.c
-    raylib/rglfw.c
-    raylib/rshapes.c
-    raylib/rtext.c
-    raylib/rtextures.c
-    raylib/rcore.c
-    raylib/utils.c
+    raylib/src/raudio.c
+    raylib/src/rmodels.c
+    raylib/src/rglfw.c
+    raylib/src/rshapes.c
+    raylib/src/rtext.c
+    raylib/src/rtextures.c
+    raylib/src/rcore.c
+    raylib/src/utils.c
     lib/bindings.c
 
   include-dirs:
     lib
-    raylib
-    raylib/external/glfw/include
+    raylib/src
+    raylib/src/external/glfw/include
 
 executable example
   default-language:   Haskell2010

@@ -483,6 +483,12 @@ Image* GenImageWhiteNoise_(int a, int b, float c) {
     return ptr;
 }
 
+Image* GenImagePerlinNoise_(int a, int b, int c, int d, float e) {
+    Image* ptr = (Image*) malloc(sizeof (Image));
+    *ptr = GenImagePerlinNoise(a, b, c, d, e);
+    return ptr;
+}
+
 Image* GenImageCellular_(int a, int b, int c) {
     Image* ptr = (Image*) malloc(sizeof (Image));
     *ptr = GenImageCellular(a, b, c);
@@ -587,6 +593,14 @@ void ImageDrawCircle_(Image* a, int b, int c, int d, Color* e) {
 
 void ImageDrawCircleV_(Image* a, Vector2* b, int c, Color* d) {
     ImageDrawCircleV(a, *b, c, *d);
+}
+
+void ImageDrawCircleLines_(Image* a, int b, int c, int d, Color* e) {
+    ImageDrawCircleLines(a, b, c, d, *e);
+}
+
+void ImageDrawCircleLinesV_(Image* a, Vector2* b, int c, Color* d) {
+    ImageDrawCircleLinesV(a, *b, c, *d);
 }
 
 void ImageDrawRectangle_(Image* a, int b, int c, int d, int e, Color* f) {

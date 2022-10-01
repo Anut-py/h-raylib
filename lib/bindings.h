@@ -9,7 +9,7 @@
  */
 
 #define string char*
-#include "../raylib/raylib.h"
+#include "raylib.h"
 
 void SetWindowIcon_(Image* a);
 
@@ -215,6 +215,8 @@ Image* GenImageChecked_(int a, int b, int c, int d, Color* e, Color* f);
 
 Image* GenImageWhiteNoise_(int a, int b, float c);
 
+Image* GenImagePerlinNoise_(int a, int b, int c, int d, float e);
+
 Image* GenImageCellular_(int a, int b, int c);
 
 Image* ImageCopy_(Image* a);
@@ -260,6 +262,10 @@ void ImageDrawLineV_(Image* a, Vector2* b, Vector2* c, Color* d);
 void ImageDrawCircle_(Image* a, int b, int c, int d, Color* e);
 
 void ImageDrawCircleV_(Image* a, Vector2* b, int c, Color* d);
+
+void ImageDrawCircleLines_(Image* a, int b, int c, int d, Color* e);
+
+void ImageDrawCircleLinesV_(Image* a, Vector2* b, int c, Color* d);
 
 void ImageDrawRectangle_(Image* a, int b, int c, int d, int e, Color* f);
 

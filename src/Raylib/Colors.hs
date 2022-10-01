@@ -1,7 +1,35 @@
-module Raylib.Colors where
+module Raylib.Colors
+  ( lightGray,
+    gray,
+    darkGray,
+    yellow,
+    gold,
+    orange,
+    pink,
+    red,
+    maroon,
+    green,
+    lime,
+    darkGreen,
+    skyBlue,
+    blue,
+    darkBlue,
+    purple,
+    violet,
+    darkPurple,
+    beige,
+    brown,
+    darkBrown,
+    white,
+    black,
+    blank,
+    magenta,
+    rayWhite,
+  )
+where
 
-import Raylib.Types ( Color(Color) )
-import Foreign (castPtr, castStablePtrToPtr, newStablePtr, Ptr)
+import Foreign (Ptr, castPtr, castStablePtrToPtr, newStablePtr)
+import Raylib.Types (Color (Color))
 
 -- Simple color palette defined in raylib.h
 
@@ -81,4 +109,4 @@ magenta :: Color
 magenta = Color 255 0 255 255
 
 rayWhite :: Color
-rayWhite = Color 245 245 245   255
+rayWhite = Color 245 245 245 255

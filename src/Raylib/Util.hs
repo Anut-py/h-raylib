@@ -1,4 +1,4 @@
-module Raylib.Util where
+module Raylib.Util (c'free, pop) where
 import Foreign (Ptr, Storable (peek), castPtr)
 
 -- Internal utility functions
