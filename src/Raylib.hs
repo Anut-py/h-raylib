@@ -15,6 +15,7 @@ import Foreign
     toBool,
     with,
     withArray,
+    withArrayLen,
   )
 import Foreign.C
   ( CChar (..),
@@ -60,7 +61,7 @@ import Raylib.Types
     VrStereoConfig,
     Wave,
   )
-import Raylib.Util (pop)
+import Raylib.Util (pop, withArray2D)
 
 -- Haskell doesn't support varargs in foreign calls, so these functions are impossible to call from FFI
 -- type TraceLogCallback = FunPtr (CInt -> CString -> __builtin_va_list -> IO ())
@@ -3148,7 +3149,7 @@ foreign import ccall unsafe "raylib.h &LoadImagePalette"
   p'loadImagePalette ::
     FunPtr (Image -> CInt -> Ptr CInt -> IO (Ptr Color))
 
-{-|NOTE: You usually won't need to use this. `loadImageColors` unloads the colors automatically. Only use this when you are using `c'loadImageColors` to load the colors.-}
+-- | NOTE: You usually won't need to use this. `loadImageColors` unloads the colors automatically. Only use this when you are using `c'loadImageColors` to load the colors.
 foreign import ccall unsafe "raylib.h UnloadImageColors"
   unloadImageColors ::
     Ptr Color -> IO ()
@@ -3157,7 +3158,7 @@ foreign import ccall unsafe "raylib.h &UnloadImageColors"
   p'unloadImageColors ::
     FunPtr (Ptr Color -> IO ())
 
-{-|NOTE: You usually won't need to use this. `loadImagePalette` unloads the colors automatically. Only use this when you are using `c'loadImagePalette` to load the colors.-}
+-- | NOTE: You usually won't need to use this. `loadImagePalette` unloads the colors automatically. Only use this when you are using `c'loadImagePalette` to load the colors.
 foreign import ccall unsafe "raylib.h UnloadImagePalette"
   unloadImagePalette ::
     Ptr Color -> IO ()
@@ -3429,225 +3430,333 @@ foreign import ccall unsafe "raylib.h &SetTextureWrap"
   p'setTextureWrap ::
     FunPtr (Texture -> CInt -> IO ())
 
-foreign import ccall unsafe "bindings.h DrawTexture_" drawTexture :: Ptr Texture -> CInt -> CInt -> Ptr Color -> IO ()
+foreign import ccall unsafe "bindings.h DrawTexture_" c'drawTexture :: Ptr Texture -> CInt -> CInt -> Ptr Color -> IO ()
+
+drawTexture :: Texture -> CInt -> CInt -> Color -> IO ()
+drawTexture texture x y tint = with texture (\t -> with tint (c'drawTexture t (fromIntegral x) (fromIntegral y)))
 
 foreign import ccall unsafe "raylib.h &DrawTexture"
   p'drawTexture ::
     FunPtr (Texture -> CInt -> CInt -> Color -> IO ())
 
-foreign import ccall unsafe "bindings.h DrawTextureV_" drawTextureV :: Ptr Texture -> Ptr Vector2 -> Ptr Color -> IO ()
+foreign import ccall unsafe "bindings.h DrawTextureV_" c'drawTextureV :: Ptr Texture -> Ptr Vector2 -> Ptr Color -> IO ()
+
+drawTextureV :: Texture -> Vector2 -> Color -> IO ()
+drawTextureV texture position color = with texture (\t -> with position (with color . c'drawTextureV t))
 
 foreign import ccall unsafe "raylib.h &DrawTextureV"
   p'drawTextureV ::
     FunPtr (Texture -> Vector2 -> Color -> IO ())
 
-foreign import ccall unsafe "bindings.h DrawTextureEx_" drawTextureEx :: Ptr Texture -> Ptr Vector2 -> CFloat -> CFloat -> Ptr Color -> IO ()
+foreign import ccall unsafe "bindings.h DrawTextureEx_" c'drawTextureEx :: Ptr Texture -> Ptr Vector2 -> CFloat -> CFloat -> Ptr Color -> IO ()
+
+drawTextureEx :: Texture -> Vector2 -> Float -> Float -> Color -> IO ()
+drawTextureEx texture position rotation scale tint = with texture (\t -> with position (\p -> with tint (c'drawTextureEx t p (realToFrac rotation) (realToFrac scale))))
 
 foreign import ccall unsafe "raylib.h &DrawTextureEx"
   p'drawTextureEx ::
     FunPtr (Texture -> Vector2 -> CFloat -> CFloat -> Color -> IO ())
 
-foreign import ccall unsafe "bindings.h DrawTextureRec_" drawTextureRec :: Ptr Texture -> Ptr Rectangle -> Ptr Vector2 -> Ptr Color -> IO ()
+foreign import ccall unsafe "bindings.h DrawTextureRec_" c'drawTextureRec :: Ptr Texture -> Ptr Rectangle -> Ptr Vector2 -> Ptr Color -> IO ()
+
+drawTextureRec :: Texture -> Rectangle -> Vector2 -> Color -> IO ()
+drawTextureRec texture source position tint = with texture (\t -> with source (\s -> with position (with tint . c'drawTextureRec t s)))
 
 foreign import ccall unsafe "raylib.h &DrawTextureRec"
   p'drawTextureRec ::
     FunPtr (Texture -> Rectangle -> Vector2 -> Color -> IO ())
 
-foreign import ccall unsafe "bindings.h DrawTextureQuad_" drawTextureQuad :: Ptr Texture -> Ptr Vector2 -> Ptr Vector2 -> Ptr Rectangle -> Ptr Color -> IO ()
+foreign import ccall unsafe "bindings.h DrawTextureQuad_" c'drawTextureQuad :: Ptr Texture -> Ptr Vector2 -> Ptr Vector2 -> Ptr Rectangle -> Ptr Color -> IO ()
+
+drawTextureQuad :: Texture -> Vector2 -> Vector2 -> Rectangle -> Color -> IO ()
+drawTextureQuad texture tiling offset quad tint = with texture (\t -> with tiling (\ti -> with offset (\o -> with quad (with tint . c'drawTextureQuad t ti o))))
 
 foreign import ccall unsafe "raylib.h &DrawTextureQuad"
   p'drawTextureQuad ::
     FunPtr (Texture -> Vector2 -> Vector2 -> Rectangle -> Color -> IO ())
 
-foreign import ccall unsafe "bindings.h DrawTextureTiled_" drawTextureTiled :: Ptr Texture -> Ptr Rectangle -> Ptr Rectangle -> Ptr Vector2 -> CFloat -> CFloat -> Ptr Color -> IO ()
+foreign import ccall unsafe "bindings.h DrawTextureTiled_" c'drawTextureTiled :: Ptr Texture -> Ptr Rectangle -> Ptr Rectangle -> Ptr Vector2 -> CFloat -> CFloat -> Ptr Color -> IO ()
+
+drawTextureTiled :: Texture -> Rectangle -> Rectangle -> Vector2 -> Float -> Float -> Color -> IO ()
+drawTextureTiled texture source dest origin rotation scale tint = with texture (\t -> with source (\s -> with dest (\d -> with origin (\o -> with tint (c'drawTextureTiled t s d o (realToFrac rotation) (realToFrac scale))))))
 
 foreign import ccall unsafe "raylib.h &DrawTextureTiled"
   p'drawTextureTiled ::
     FunPtr (Texture -> Rectangle -> Rectangle -> Vector2 -> CFloat -> CFloat -> Color -> IO ())
 
-foreign import ccall unsafe "bindings.h DrawTexturePro_" drawTexturePro :: Ptr Texture -> Ptr Rectangle -> Ptr Rectangle -> Ptr Vector2 -> CFloat -> Ptr Color -> IO ()
+foreign import ccall unsafe "bindings.h DrawTexturePro_" c'drawTexturePro :: Ptr Texture -> Ptr Rectangle -> Ptr Rectangle -> Ptr Vector2 -> CFloat -> Ptr Color -> IO ()
+
+drawTexturePro :: Texture -> Rectangle -> Rectangle -> Vector2 -> Float -> Color -> IO ()
+drawTexturePro texture source dest origin rotation tint = with texture (\t -> with source (\s -> with dest (\d -> with origin (\o -> with tint (c'drawTexturePro t s d o (realToFrac rotation))))))
 
 foreign import ccall unsafe "raylib.h &DrawTexturePro"
   p'drawTexturePro ::
     FunPtr (Texture -> Rectangle -> Rectangle -> Vector2 -> CFloat -> Color -> IO ())
 
-foreign import ccall unsafe "bindings.h DrawTextureNPatch_" drawTextureNPatch :: Ptr Texture -> Ptr NPatchInfo -> Ptr Rectangle -> Ptr Vector2 -> CFloat -> Ptr Color -> IO ()
+foreign import ccall unsafe "bindings.h DrawTextureNPatch_" c'drawTextureNPatch :: Ptr Texture -> Ptr NPatchInfo -> Ptr Rectangle -> Ptr Vector2 -> CFloat -> Ptr Color -> IO ()
+
+drawTextureNPatch :: Texture -> NPatchInfo -> Rectangle -> Vector2 -> Float -> Color -> IO ()
+drawTextureNPatch texture nPatchInfo dest origin rotation tint = with texture (\t -> with nPatchInfo (\n -> with dest (\d -> with origin (\o -> with tint (c'drawTextureNPatch t n d o (realToFrac rotation))))))
 
 foreign import ccall unsafe "raylib.h &DrawTextureNPatch"
   p'drawTextureNPatch ::
     FunPtr (Texture -> NPatchInfo -> Rectangle -> Vector2 -> CFloat -> Color -> IO ())
 
-foreign import ccall unsafe "bindings.h DrawTexturePoly_" drawTexturePoly :: Ptr Texture -> Ptr Vector2 -> Ptr Vector2 -> Ptr Vector2 -> CInt -> Ptr Color -> IO ()
+foreign import ccall unsafe "bindings.h DrawTexturePoly_" c'drawTexturePoly :: Ptr Texture -> Ptr Vector2 -> Ptr Vector2 -> Ptr Vector2 -> CInt -> Ptr Color -> IO ()
+
+drawTexturePoly :: Texture -> Vector2 -> [Vector2] -> [Vector2] -> Color -> IO ()
+drawTexturePoly texture center points texcoords tint = with texture (\t -> with center (\c -> withArrayLen points (\numPoints pArr -> withArray texcoords (\tc -> with tint (c'drawTexturePoly t c pArr tc (fromIntegral numPoints))))))
 
 foreign import ccall unsafe "raylib.h &DrawTexturePoly"
   p'drawTexturePoly ::
     FunPtr (Texture -> Vector2 -> Ptr Vector2 -> Ptr Vector2 -> CInt -> Color -> IO ())
 
-foreign import ccall unsafe "bindings.h Fade_" fade :: Ptr Color -> CFloat -> IO (Ptr Color)
+foreign import ccall unsafe "bindings.h Fade_" c'fade :: Ptr Color -> CFloat -> IO (Ptr Color)
+
+fade :: Color -> Float -> Color
+fade color alpha = unsafePerformIO $ with color (\c -> c'fade c (realToFrac alpha)) >>= pop
 
 foreign import ccall unsafe "raylib.h &Fade"
   p'fade ::
     FunPtr (Color -> CFloat -> IO Color)
 
-foreign import ccall unsafe "bindings.h ColorToInt_" colorToInt :: Ptr Color -> IO CInt
+foreign import ccall unsafe "bindings.h ColorToInt_" c'colorToInt :: Ptr Color -> IO CInt
+
+colorToInt :: Color -> Int
+colorToInt color = unsafePerformIO $ fromIntegral <$> with color c'colorToInt
 
 foreign import ccall unsafe "raylib.h &ColorToInt"
   p'colorToInt ::
     FunPtr (Color -> IO CInt)
 
-foreign import ccall unsafe "bindings.h ColorNormalize_" colorNormalize :: Ptr Color -> IO (Ptr Vector4)
+foreign import ccall unsafe "bindings.h ColorNormalize_" c'colorNormalize :: Ptr Color -> IO (Ptr Vector4)
+
+colorNormalize :: Color -> Vector4
+colorNormalize color = unsafePerformIO $ with color c'colorNormalize >>= pop
 
 foreign import ccall unsafe "raylib.h &ColorNormalize"
   p'colorNormalize ::
     FunPtr (Color -> IO Vector4)
 
-foreign import ccall unsafe "bindings.h ColorFromNormalized_" colorFromNormalized :: Ptr Vector4 -> IO (Ptr Color)
+foreign import ccall unsafe "bindings.h ColorFromNormalized_" c'colorFromNormalized :: Ptr Vector4 -> IO (Ptr Color)
+
+colorFromNormalized :: Vector4 -> Color
+colorFromNormalized normalized = unsafePerformIO $ with normalized c'colorFromNormalized >>= pop
 
 foreign import ccall unsafe "raylib.h &ColorFromNormalized"
   p'colorFromNormalized ::
     FunPtr (Vector4 -> IO Color)
 
-foreign import ccall unsafe "bindings.h ColorToHSV_" colorToHSV :: Ptr Color -> IO (Ptr Vector3)
+foreign import ccall unsafe "bindings.h ColorToHSV_" c'colorToHSV :: Ptr Color -> IO (Ptr Vector3)
+
+colorToHSV :: Color -> Vector3
+colorToHSV color = unsafePerformIO $ with color c'colorToHSV >>= pop
 
 foreign import ccall unsafe "raylib.h &ColorToHSV"
   p'colorToHSV ::
     FunPtr (Color -> IO Vector3)
 
-foreign import ccall unsafe "bindings.h ColorFromHSV_" colorFromHSV :: CFloat -> CFloat -> CFloat -> IO (Ptr Color)
+foreign import ccall unsafe "bindings.h ColorFromHSV_" c'colorFromHSV :: CFloat -> CFloat -> CFloat -> IO (Ptr Color)
+
+colorFromHSV :: Float -> Float -> Float -> Color
+colorFromHSV hue saturation value = unsafePerformIO $ c'colorFromHSV (realToFrac hue) (realToFrac saturation) (realToFrac value) >>= pop
 
 foreign import ccall unsafe "raylib.h &ColorFromHSV"
   p'colorFromHSV ::
     FunPtr (CFloat -> CFloat -> CFloat -> IO Color)
 
-foreign import ccall unsafe "bindings.h ColorAlpha_" colorAlpha :: Ptr Color -> CFloat -> IO (Ptr Color)
+foreign import ccall unsafe "bindings.h ColorAlpha_" c'colorAlpha :: Ptr Color -> CFloat -> IO (Ptr Color)
+
+colorAlpha :: Color -> Float -> Color
+colorAlpha color alpha = unsafePerformIO $ with color (\c -> c'colorAlpha c (realToFrac alpha)) >>= pop
 
 foreign import ccall unsafe "raylib.h &ColorAlpha"
   p'colorAlpha ::
     FunPtr (Color -> CFloat -> IO Color)
 
-foreign import ccall unsafe "bindings.h ColorAlphaBlend_" colorAlphaBlend :: Ptr Color -> Ptr Color -> Ptr Color -> IO (Ptr Color)
+foreign import ccall unsafe "bindings.h ColorAlphaBlend_" c'colorAlphaBlend :: Ptr Color -> Ptr Color -> Ptr Color -> IO (Ptr Color)
+
+colorAlphaBlend :: Color -> Color -> Color -> Color
+colorAlphaBlend dst src tint = unsafePerformIO $ with dst (\d -> with src (with tint . c'colorAlphaBlend d)) >>= pop
 
 foreign import ccall unsafe "raylib.h &ColorAlphaBlend"
   p'colorAlphaBlend ::
     FunPtr (Color -> Color -> Color -> IO Color)
 
-foreign import ccall unsafe "bindings.h GetColor_" getColor :: CUInt -> IO (Ptr Color)
+foreign import ccall unsafe "bindings.h GetColor_" c'getColor :: CUInt -> IO (Ptr Color)
+
+getColor :: Integer -> Color
+getColor hexValue = unsafePerformIO $ c'getColor (fromIntegral hexValue) >>= pop
 
 foreign import ccall unsafe "raylib.h &GetColor"
   p'getColor ::
     FunPtr (CUInt -> IO Color)
 
-foreign import ccall unsafe "bindings.h GetPixelColor_" getPixelColor :: Ptr () -> CInt -> IO (Ptr Color)
+foreign import ccall unsafe "bindings.h GetPixelColor_" c'getPixelColor :: Ptr () -> CInt -> IO (Ptr Color)
+
+getPixelColor :: Ptr () -> Int -> IO Color
+getPixelColor srcPtr format = c'getPixelColor srcPtr (fromIntegral format) >>= pop
 
 foreign import ccall unsafe "raylib.h &GetPixelColor"
   p'getPixelColor ::
     FunPtr (Ptr () -> CInt -> IO Color)
 
-foreign import ccall unsafe "bindings.h SetPixelColor_" setPixelColor :: Ptr () -> Ptr Color -> CInt -> IO ()
+foreign import ccall unsafe "bindings.h SetPixelColor_" c'setPixelColor :: Ptr () -> Ptr Color -> CInt -> IO ()
+
+setPixelColor :: Ptr () -> Color -> Int -> IO ()
+setPixelColor dstPtr color format = with color (\c -> c'setPixelColor dstPtr c (fromIntegral format))
 
 foreign import ccall unsafe "raylib.h &SetPixelColor"
   p'setPixelColor ::
     FunPtr (Ptr () -> Color -> CInt -> IO ())
 
 foreign import ccall unsafe "raylib.h GetPixelDataSize"
-  getPixelDataSize ::
+  c'getPixelDataSize ::
     CInt -> CInt -> CInt -> IO CInt
+
+getPixelDataSize :: Int -> Int -> Int -> Int
+getPixelDataSize width height format = unsafePerformIO (fromIntegral <$> c'getPixelDataSize (fromIntegral width) (fromIntegral height) (fromIntegral format))
 
 foreign import ccall unsafe "raylib.h &GetPixelDataSize"
   p'getPixelDataSize ::
     FunPtr (CInt -> CInt -> CInt -> IO CInt)
 
-foreign import ccall unsafe "bindings.h GetFontDefault_" getFontDefault :: IO (Ptr Font)
+foreign import ccall unsafe "bindings.h GetFontDefault_" c'getFontDefault :: IO (Ptr Font)
+
+getFontDefault :: IO Font
+getFontDefault = c'getFontDefault >>= pop
 
 foreign import ccall unsafe "raylib.h &GetFontDefault"
   p'getFontDefault ::
     FunPtr (IO Font)
 
-foreign import ccall unsafe "bindings.h LoadFont_" loadFont :: CString -> IO (Ptr Font)
+foreign import ccall unsafe "bindings.h LoadFont_" c'loadFont :: CString -> IO (Ptr Font)
+
+loadFont :: String -> IO Font
+loadFont fileName = withCString fileName c'loadFont >>= pop
 
 foreign import ccall unsafe "raylib.h &LoadFont"
   p'loadFont ::
     FunPtr (CString -> IO Font)
 
-foreign import ccall unsafe "bindings.h LoadFontEx_" loadFontEx :: CString -> CInt -> Ptr CInt -> CInt -> IO (Ptr Font)
+foreign import ccall unsafe "bindings.h LoadFontEx_" c'loadFontEx :: CString -> CInt -> Ptr CInt -> CInt -> IO (Ptr Font)
+
+loadFontEx :: String -> Int -> [Int] -> Int -> IO Font
+loadFontEx fileName fontSize fontChars glyphCount = withCString fileName (\f -> withArray fontChars (\c -> c'loadFontEx f (fromIntegral fontSize) (castPtr c) (fromIntegral glyphCount))) >>= pop
 
 foreign import ccall unsafe "raylib.h &LoadFontEx"
   p'loadFontEx ::
     FunPtr (CString -> CInt -> Ptr CInt -> CInt -> IO Font)
 
-foreign import ccall unsafe "bindings.h LoadFontFromImage_" loadFontFromImage :: Ptr Image -> Ptr Color -> CInt -> IO (Ptr Font)
+foreign import ccall unsafe "bindings.h LoadFontFromImage_" c'loadFontFromImage :: Ptr Image -> Ptr Color -> CInt -> IO (Ptr Font)
+
+loadFontFromImage :: Image -> Color -> Int -> IO Font
+loadFontFromImage image key firstChar = with image (\i -> with key (\k -> c'loadFontFromImage i k (fromIntegral firstChar))) >>= pop
 
 foreign import ccall unsafe "raylib.h &LoadFontFromImage"
   p'loadFontFromImage ::
     FunPtr (Image -> Color -> CInt -> IO Font)
 
-foreign import ccall unsafe "bindings.h LoadFontFromMemory_" loadFontFromMemory :: CString -> Ptr CUChar -> CInt -> CInt -> Ptr CInt -> CInt -> IO (Ptr Font)
+foreign import ccall unsafe "bindings.h LoadFontFromMemory_" c'loadFontFromMemory :: CString -> Ptr CUChar -> CInt -> CInt -> Ptr CInt -> CInt -> IO (Ptr Font)
+
+loadFontFromMemory :: String -> [Int] -> Int -> [Int] -> Int -> IO Font
+loadFontFromMemory fileType fileData fontSize fontChars glyphCount = withCString fileType (\t -> withArrayLen fileData (\size d -> withArray fontChars (\c -> c'loadFontFromMemory t (castPtr d) (fromIntegral size) (fromIntegral fontSize) (castPtr c) (fromIntegral glyphCount)))) >>= pop
 
 foreign import ccall unsafe "raylib.h &LoadFontFromMemory"
   p'loadFontFromMemory ::
     FunPtr (CString -> Ptr CUChar -> CInt -> CInt -> Ptr CInt -> CInt -> IO Font)
 
 foreign import ccall unsafe "raylib.h LoadFontData"
-  loadFontData ::
+  c'loadFontData ::
     Ptr CUChar -> CInt -> CInt -> Ptr CInt -> CInt -> CInt -> IO (Ptr GlyphInfo)
+
+loadFontData :: [Int] -> Int -> [Int] -> Int -> Int -> IO GlyphInfo
+loadFontData fileData fontSize fontChars glyphCount fontType = withArrayLen fileData (\size d -> withArray fontChars (\c -> c'loadFontData (castPtr d) (fromIntegral size) (fromIntegral fontSize) (castPtr c) (fromIntegral glyphCount) (fromIntegral fontType))) >>= pop
 
 foreign import ccall unsafe "raylib.h &LoadFontData"
   p'loadFontData ::
     FunPtr (Ptr CUChar -> CInt -> CInt -> Ptr CInt -> CInt -> CInt -> IO (Ptr GlyphInfo))
 
-foreign import ccall unsafe "bindings.h GenImageFontAtlas_" genImageFontAtlas :: Ptr GlyphInfo -> Ptr (Ptr Rectangle) -> CInt -> CInt -> CInt -> CInt -> IO (Ptr Image)
+foreign import ccall unsafe "bindings.h GenImageFontAtlas_" c'genImageFontAtlas :: Ptr GlyphInfo -> Ptr (Ptr Rectangle) -> CInt -> CInt -> CInt -> CInt -> IO (Ptr Image)
+
+genImageFontAtlas :: [GlyphInfo] -> [[Rectangle]] -> Int -> Int -> Int -> Int -> IO Image
+genImageFontAtlas chars recs glyphCount fontSize padding packMethod = withArray chars (\c -> withArray2D recs (\r -> c'genImageFontAtlas c r (fromIntegral glyphCount) (fromIntegral fontSize) (fromIntegral padding) (fromIntegral packMethod))) >>= pop
 
 foreign import ccall unsafe "raylib.h &GenImageFontAtlas"
   p'genImageFontAtlas ::
     FunPtr (Ptr GlyphInfo -> Ptr (Ptr Rectangle) -> CInt -> CInt -> CInt -> CInt -> IO Image)
 
 foreign import ccall unsafe "raylib.h UnloadFontData"
-  unloadFontData ::
+  c'unloadFontData ::
     Ptr GlyphInfo -> CInt -> IO ()
+
+unloadFontData :: [GlyphInfo] -> IO ()
+unloadFontData glyphs = withArrayLen glyphs (\size g -> c'unloadFontData g (fromIntegral size))
 
 foreign import ccall unsafe "raylib.h &UnloadFontData"
   p'unloadFontData ::
     FunPtr (Ptr GlyphInfo -> CInt -> IO ())
 
-foreign import ccall unsafe "bindings.h UnloadFont_" unloadFont :: Ptr Font -> IO ()
+foreign import ccall unsafe "bindings.h UnloadFont_" c'unloadFont :: Ptr Font -> IO ()
+
+unloadFont :: Font -> IO ()
+unloadFont font = with font c'unloadFont
 
 foreign import ccall unsafe "raylib.h &UnloadFont"
   p'unloadFont ::
     FunPtr (Font -> IO ())
 
-foreign import ccall unsafe "bindings.h ExportFontAsCode_" exportFontAsCode :: Ptr Font -> CString -> IO CInt
+foreign import ccall unsafe "bindings.h ExportFontAsCode_" c'exportFontAsCode :: Ptr Font -> CString -> IO CInt
+
+exportFontAsCode :: Font -> String -> IO Bool
+exportFontAsCode font fileName = toBool <$> with font (withCString fileName . c'exportFontAsCode)
 
 foreign import ccall unsafe "raylib.h &ExportFontAsCode"
   p'exportFontAsCode ::
     FunPtr (Font -> CString -> IO CInt)
 
 foreign import ccall unsafe "raylib.h DrawFPS"
-  drawFPS ::
+  c'drawFPS ::
     CInt -> CInt -> IO ()
+
+drawFPS :: Int -> Int -> IO ()
+drawFPS x y = c'drawFPS (fromIntegral x) (fromIntegral y)
 
 foreign import ccall unsafe "raylib.h &DrawFPS"
   p'drawFPS ::
     FunPtr (CInt -> CInt -> IO ())
 
-foreign import ccall unsafe "bindings.h DrawText_" drawText :: CString -> CInt -> CInt -> CInt -> Ptr Color -> IO ()
+foreign import ccall unsafe "bindings.h DrawText_" c'drawText :: CString -> CInt -> CInt -> CInt -> Ptr Color -> IO ()
+
+drawText :: String -> Int -> Int -> Int -> Color -> IO ()
+drawText text x y fontSize color = withCString text (\t -> with color (c'drawText t (fromIntegral x) (fromIntegral y) (fromIntegral fontSize)))
 
 foreign import ccall unsafe "raylib.h &DrawText"
   p'drawText ::
     FunPtr (CString -> CInt -> CInt -> CInt -> Color -> IO ())
 
-foreign import ccall unsafe "bindings.h DrawTextEx_" drawTextEx :: Ptr Font -> CString -> Ptr Vector2 -> CFloat -> CFloat -> Ptr Color -> IO ()
+foreign import ccall unsafe "bindings.h DrawTextEx_" c'drawTextEx :: Ptr Font -> CString -> Ptr Vector2 -> CFloat -> CFloat -> Ptr Color -> IO ()
+
+drawTextEx :: Font -> String -> Vector2 -> Float -> Float -> Color -> IO ()
+drawTextEx font text position fontSize spacing tint = with font (\f -> withCString text (\t -> with position (\p -> with tint (c'drawTextEx f t p (realToFrac fontSize) (realToFrac spacing)))))
 
 foreign import ccall unsafe "raylib.h &DrawTextEx"
   p'drawTextEx ::
     FunPtr (Font -> CString -> Vector2 -> CFloat -> CFloat -> Color -> IO ())
 
-foreign import ccall unsafe "bindings.h DrawTextPro_" drawTextPro :: Ptr Font -> CString -> Ptr Vector2 -> Ptr Vector2 -> CFloat -> CFloat -> CFloat -> Ptr Color -> IO ()
+foreign import ccall unsafe "bindings.h DrawTextPro_" c'drawTextPro :: Ptr Font -> CString -> Ptr Vector2 -> Ptr Vector2 -> CFloat -> CFloat -> CFloat -> Ptr Color -> IO ()
+
+drawTextPro :: Font -> String -> Vector2 -> Vector2 -> Float -> Float -> Float -> Color -> IO ()
+drawTextPro font text position origin rotation fontSize spacing tint = with font (\f -> withCString text (\t -> with position (\p -> with origin (\o -> with tint (c'drawTextPro f t p o (realToFrac rotation) (realToFrac fontSize) (realToFrac spacing))))))
 
 foreign import ccall unsafe "raylib.h &DrawTextPro"
   p'drawTextPro ::
     FunPtr (Font -> CString -> Vector2 -> Vector2 -> CFloat -> CFloat -> CFloat -> Color -> IO ())
 
-foreign import ccall unsafe "bindings.h DrawTextCodepoint_" drawTextCodepoint :: Ptr Font -> CInt -> Ptr Vector2 -> CFloat -> Ptr Color -> IO ()
+foreign import ccall unsafe "bindings.h DrawTextCodepoint_" c'drawTextCodepoint :: Ptr Font -> CInt -> Ptr Vector2 -> CFloat -> Ptr Color -> IO ()
+
+drawTextCodepoint :: Font -> Int -> Vector2 -> Float -> Color -> IO ()
+drawTextCodepoint font codepoint position fontSize tint = with font (\f -> with position (\p -> with tint (c'drawTextCodepoint f (fromIntegral codepoint) p (realToFrac fontSize))))
 
 foreign import ccall unsafe "raylib.h &DrawTextCodepoint"
   p'drawTextCodepoint ::
@@ -3731,7 +3840,7 @@ foreign import ccall unsafe "raylib.h &GetCodepointCount"
   p'getCodepointCount ::
     FunPtr (CString -> IO CInt)
 
-{-|Deprecated, use `getCodepointNext` -}
+-- | Deprecated, use `getCodepointNext`
 foreign import ccall unsafe "raylib.h GetCodepoint"
   getCodepoint ::
     CString -> Ptr CInt -> IO CInt
@@ -4701,6 +4810,7 @@ foreign import ccall unsafe "bindings.h SetAudioStreamCallback_" setAudioStreamC
 foreign import ccall unsafe "raylib.h &SetAudioStreamCallback"
   p'setAudioStreamCallback ::
     FunPtr (AudioStream -> AudioCallback -> IO ())
+
 foreign import ccall unsafe "bindings.h AttachAudioStreamProcessor_" attachAudioStreamProcessor :: Ptr AudioStream -> Ptr AudioCallback -> IO ()
 
 foreign import ccall unsafe "raylib.h &AttachAudioStreamProcessor"
