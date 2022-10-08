@@ -435,7 +435,7 @@ foreign import ccall unsafe "raylib.h &GetCurrentMonitor"
 foreign import ccall unsafe "bindings.h GetMonitorPosition_" c'getMonitorPosition :: CInt -> IO (Ptr Vector2)
 
 getMonitorPosition :: Int -> IO Vector2
-getMonitorPosition monitor = c'getMonitorPosition (fromIntegral monitor) >>= peek
+getMonitorPosition monitor = c'getMonitorPosition (fromIntegral monitor) >>= pop
 
 foreign import ccall unsafe "raylib.h &GetMonitorPosition"
   p'getMonitorPosition ::
@@ -499,7 +499,7 @@ foreign import ccall unsafe "raylib.h &GetMonitorRefreshRate"
 foreign import ccall unsafe "bindings.h GetWindowPosition_" c'getWindowPosition :: IO (Ptr Vector2)
 
 getWindowPosition :: IO Vector2
-getWindowPosition = c'getWindowPosition >>= peek
+getWindowPosition = c'getWindowPosition >>= pop
 
 foreign import ccall unsafe "raylib.h &GetWindowPosition"
   p'getWindowPosition ::
@@ -508,7 +508,7 @@ foreign import ccall unsafe "raylib.h &GetWindowPosition"
 foreign import ccall unsafe "bindings.h GetWindowScaleDPI_" c'getWindowScaleDPI :: IO (Ptr Vector2)
 
 getWindowScaleDPI :: IO Vector2
-getWindowScaleDPI = c'getWindowScaleDPI >>= peek
+getWindowScaleDPI = c'getWindowScaleDPI >>= pop
 
 foreign import ccall unsafe "raylib.h &GetWindowScaleDPI"
   p'getWindowScaleDPI ::
@@ -795,7 +795,7 @@ foreign import ccall unsafe "raylib.h &EndVrStereoMode"
 foreign import ccall unsafe "bindings.h LoadVrStereoConfig_" c'loadVrStereoConfig :: Ptr VrDeviceInfo -> IO (Ptr VrStereoConfig)
 
 loadVrStereoConfig :: VrDeviceInfo -> IO VrStereoConfig
-loadVrStereoConfig deviceInfo = with deviceInfo c'loadVrStereoConfig >>= peek
+loadVrStereoConfig deviceInfo = with deviceInfo c'loadVrStereoConfig >>= pop
 
 foreign import ccall unsafe "raylib.h &LoadVrStereoConfig"
   p'loadVrStereoConfig ::
@@ -813,7 +813,7 @@ foreign import ccall unsafe "raylib.h &UnloadVrStereoConfig"
 foreign import ccall unsafe "bindings.h LoadShader_" c'loadShader :: CString -> CString -> IO (Ptr Shader)
 
 loadShader :: String -> String -> IO Shader
-loadShader vsFileName fsFileName = withCString vsFileName (withCString fsFileName . c'loadShader) >>= peek
+loadShader vsFileName fsFileName = withCString vsFileName (withCString fsFileName . c'loadShader) >>= pop
 
 foreign import ccall unsafe "raylib.h &LoadShader"
   p'loadShader ::
@@ -822,7 +822,7 @@ foreign import ccall unsafe "raylib.h &LoadShader"
 foreign import ccall unsafe "bindings.h LoadShaderFromMemory_" c'loadShaderFromMemory :: CString -> CString -> IO (Ptr Shader)
 
 loadShaderFromMemory :: String -> String -> IO Shader
-loadShaderFromMemory vsCode fsCode = withCString vsCode (withCString fsCode . c'loadShaderFromMemory) >>= peek
+loadShaderFromMemory vsCode fsCode = withCString vsCode (withCString fsCode . c'loadShaderFromMemory) >>= pop
 
 foreign import ccall unsafe "raylib.h &LoadShaderFromMemory"
   p'loadShaderFromMemory ::
@@ -894,7 +894,7 @@ foreign import ccall unsafe "raylib.h &UnloadShader"
 foreign import ccall unsafe "bindings.h GetMouseRay_" c'getMouseRay :: Ptr Vector2 -> Ptr Camera3D -> IO (Ptr Ray)
 
 getMouseRay :: Vector2 -> Camera3D -> IO Ray
-getMouseRay mousePosition camera = with mousePosition (with camera . c'getMouseRay) >>= peek
+getMouseRay mousePosition camera = with mousePosition (with camera . c'getMouseRay) >>= pop
 
 foreign import ccall unsafe "raylib.h &GetMouseRay"
   p'getMouseRay ::
@@ -903,7 +903,7 @@ foreign import ccall unsafe "raylib.h &GetMouseRay"
 foreign import ccall unsafe "bindings.h GetCameraMatrix_" c'getCameraMatrix :: Ptr Camera3D -> IO (Ptr Matrix)
 
 getCameraMatrix :: Camera3D -> IO Matrix
-getCameraMatrix camera = with camera c'getCameraMatrix >>= peek
+getCameraMatrix camera = with camera c'getCameraMatrix >>= pop
 
 foreign import ccall unsafe "raylib.h &GetCameraMatrix"
   p'getCameraMatrix ::
@@ -912,7 +912,7 @@ foreign import ccall unsafe "raylib.h &GetCameraMatrix"
 foreign import ccall unsafe "bindings.h GetCameraMatrix2D_" c'getCameraMatrix2D :: Ptr Camera2D -> IO (Ptr Matrix)
 
 getCameraMatrix2D :: Camera2D -> IO Matrix
-getCameraMatrix2D camera = with camera c'getCameraMatrix2D >>= peek
+getCameraMatrix2D camera = with camera c'getCameraMatrix2D >>= pop
 
 foreign import ccall unsafe "raylib.h &GetCameraMatrix2D"
   p'getCameraMatrix2D ::
@@ -921,7 +921,7 @@ foreign import ccall unsafe "raylib.h &GetCameraMatrix2D"
 foreign import ccall unsafe "bindings.h GetWorldToScreen_" c'getWorldToScreen :: Ptr Vector3 -> Ptr Camera3D -> IO (Ptr Vector2)
 
 getWorldToScreen :: Vector3 -> Camera3D -> IO Vector2
-getWorldToScreen position camera = with position (with camera . c'getWorldToScreen) >>= peek
+getWorldToScreen position camera = with position (with camera . c'getWorldToScreen) >>= pop
 
 foreign import ccall unsafe "raylib.h &GetWorldToScreen"
   p'getWorldToScreen ::
@@ -930,7 +930,7 @@ foreign import ccall unsafe "raylib.h &GetWorldToScreen"
 foreign import ccall unsafe "bindings.h GetScreenToWorld2D_" c'getScreenToWorld2D :: Ptr Vector2 -> Ptr Camera2D -> IO (Ptr Vector2)
 
 getScreenToWorld2D :: Vector2 -> Camera2D -> IO Vector2
-getScreenToWorld2D position camera = with position (with camera . c'getScreenToWorld2D) >>= peek
+getScreenToWorld2D position camera = with position (with camera . c'getScreenToWorld2D) >>= pop
 
 foreign import ccall unsafe "raylib.h &GetScreenToWorld2D"
   p'getScreenToWorld2D ::
@@ -939,7 +939,7 @@ foreign import ccall unsafe "raylib.h &GetScreenToWorld2D"
 foreign import ccall unsafe "bindings.h GetWorldToScreenEx_" c'getWorldToScreenEx :: Ptr Vector3 -> Ptr Camera3D -> CInt -> CInt -> IO (Ptr Vector2)
 
 getWorldToScreenEx :: Vector3 -> Camera3D -> Int -> Int -> IO Vector2
-getWorldToScreenEx position camera width height = with position (\p -> with camera (\c -> c'getWorldToScreenEx p c (fromIntegral width) (fromIntegral height))) >>= peek
+getWorldToScreenEx position camera width height = with position (\p -> with camera (\c -> c'getWorldToScreenEx p c (fromIntegral width) (fromIntegral height))) >>= pop
 
 foreign import ccall unsafe "raylib.h &GetWorldToScreenEx"
   p'getWorldToScreenEx ::
@@ -948,7 +948,7 @@ foreign import ccall unsafe "raylib.h &GetWorldToScreenEx"
 foreign import ccall unsafe "bindings.h GetWorldToScreen2D_" c'getWorldToScreen2D :: Ptr Vector2 -> Ptr Camera2D -> IO (Ptr Vector2)
 
 getWorldToScreen2D :: Vector2 -> Camera2D -> IO Vector2
-getWorldToScreen2D position camera = with position (with camera . c'getWorldToScreen2D) >>= peek
+getWorldToScreen2D position camera = with position (with camera . c'getWorldToScreen2D) >>= pop
 
 foreign import ccall unsafe "raylib.h &GetWorldToScreen2D"
   p'getWorldToScreen2D ::
@@ -1382,7 +1382,7 @@ foreign import ccall unsafe "raylib.h &IsPathFile"
 foreign import ccall unsafe "bindings.h LoadDirectoryFiles_" c'loadDirectoryFiles :: CString -> IO (Ptr FilePathList)
 
 loadDirectoryFiles :: String -> IO FilePathList
-loadDirectoryFiles dirPath = withCString dirPath c'loadDirectoryFiles >>= peek
+loadDirectoryFiles dirPath = withCString dirPath c'loadDirectoryFiles >>= pop
 
 foreign import ccall unsafe "raylib.h &LoadDirectoryFiles"
   p'loadDirectoryFiles ::
@@ -1392,7 +1392,7 @@ foreign import ccall unsafe "bindings.h LoadDirectoryFilesEx_" c'loadDirectoryFi
 
 loadDirectoryFilesEx :: String -> String -> Bool -> IO FilePathList
 loadDirectoryFilesEx basePath filter scanSubdirs =
-  withCString basePath (\b -> withCString filter (\f -> c'loadDirectoryFilesEx b f (fromBool scanSubdirs))) >>= peek
+  withCString basePath (\b -> withCString filter (\f -> c'loadDirectoryFilesEx b f (fromBool scanSubdirs))) >>= pop
 
 foreign import ccall unsafe "raylib.h &LoadDirectoryFilesEx"
   p'loadDirectoryFilesEx ::
@@ -1421,7 +1421,7 @@ foreign import ccall unsafe "raylib.h &IsFileDropped"
 foreign import ccall unsafe "bindings.h LoadDroppedFiles_" c'loadDroppedFiles :: IO (Ptr FilePathList)
 
 loadDroppedFiles :: IO FilePathList
-loadDroppedFiles = c'loadDroppedFiles >>= peek
+loadDroppedFiles = c'loadDroppedFiles >>= pop
 
 foreign import ccall unsafe "raylib.h &LoadDroppedFiles"
   p'loadDroppedFiles ::
@@ -1791,7 +1791,7 @@ foreign import ccall unsafe "raylib.h &GetMouseY"
 foreign import ccall unsafe "bindings.h GetMousePosition_" c'getMousePosition :: IO (Ptr Vector2)
 
 getMousePosition :: IO Vector2
-getMousePosition = c'getMousePosition >>= peek
+getMousePosition = c'getMousePosition >>= pop
 
 foreign import ccall unsafe "raylib.h &GetMousePosition"
   p'getMousePosition ::
@@ -1800,7 +1800,7 @@ foreign import ccall unsafe "raylib.h &GetMousePosition"
 foreign import ccall unsafe "bindings.h GetMouseDelta_" c'getMouseDelta :: IO (Ptr Vector2)
 
 getMouseDelta :: IO Vector2
-getMouseDelta = c'getMouseDelta >>= peek
+getMouseDelta = c'getMouseDelta >>= pop
 
 foreign import ccall unsafe "raylib.h &GetMouseDelta"
   p'getMouseDelta ::
@@ -1853,7 +1853,7 @@ foreign import ccall unsafe "raylib.h &GetMouseWheelMove"
 foreign import ccall unsafe "bindings.h GetMouseWheelMoveV_" c'getMouseWheelMoveV :: IO (Ptr Vector2)
 
 getMouseWheelMoveV :: IO Vector2
-getMouseWheelMoveV = c'getMouseWheelMoveV >>= peek
+getMouseWheelMoveV = c'getMouseWheelMoveV >>= pop
 
 foreign import ccall unsafe "raylib.h &GetMouseWheelMoveV"
   p'getMouseWheelMoveV ::
@@ -1895,7 +1895,7 @@ foreign import ccall unsafe "raylib.h &GetTouchY"
 foreign import ccall unsafe "bindings.h GetTouchPosition_" c'getTouchPosition :: CInt -> IO (Ptr Vector2)
 
 getTouchPosition :: Int -> IO Vector2
-getTouchPosition index = c'getTouchPosition (fromIntegral index) >>= peek
+getTouchPosition index = c'getTouchPosition (fromIntegral index) >>= pop
 
 foreign import ccall unsafe "raylib.h &GetTouchPosition"
   p'getTouchPosition ::
@@ -1970,7 +1970,7 @@ foreign import ccall unsafe "raylib.h &GetGestureHoldDuration"
 foreign import ccall unsafe "bindings.h GetGestureDragVector_" c'getGestureDragVector :: IO (Ptr Vector2)
 
 getGestureDragVector :: IO Vector2
-getGestureDragVector = c'getGestureDragVector >>= peek
+getGestureDragVector = c'getGestureDragVector >>= pop
 
 foreign import ccall unsafe "raylib.h &GetGestureDragVector"
   p'getGestureDragVector ::
@@ -1990,7 +1990,7 @@ foreign import ccall unsafe "raylib.h &GetGestureDragAngle"
 foreign import ccall unsafe "bindings.h GetGesturePinchVector_" c'getGesturePinchVector :: IO (Ptr Vector2)
 
 getGesturePinchVector :: IO Vector2
-getGesturePinchVector = c'getGesturePinchVector >>= peek
+getGesturePinchVector = c'getGesturePinchVector >>= pop
 
 foreign import ccall unsafe "raylib.h &GetGesturePinchVector"
   p'getGesturePinchVector ::
@@ -2662,7 +2662,7 @@ foreign import ccall unsafe "bindings.h GetCollisionRec_" c'getCollisionRec :: P
 
 getCollisionRec :: Rectangle -> Rectangle -> Rectangle
 getCollisionRec rec1 rec2 =
-  unsafePerformIO $ with rec1 (with rec2 . c'getCollisionRec) >>= peek
+  unsafePerformIO $ with rec1 (with rec2 . c'getCollisionRec) >>= pop
 
 foreign import ccall unsafe "raylib.h &GetCollisionRec"
   p'getCollisionRec ::
@@ -2671,7 +2671,7 @@ foreign import ccall unsafe "raylib.h &GetCollisionRec"
 foreign import ccall unsafe "bindings.h LoadImage_" c'loadImage :: CString -> IO (Ptr Image)
 
 loadImage :: String -> IO Image
-loadImage fileName = withCString fileName c'loadImage >>= peek
+loadImage fileName = withCString fileName c'loadImage >>= pop
 
 foreign import ccall unsafe "raylib.h &LoadImage"
   p'loadImage ::
@@ -2681,7 +2681,7 @@ foreign import ccall unsafe "bindings.h LoadImageRaw_" c'loadImageRaw :: CString
 
 loadImageRaw :: String -> Int -> Int -> Int -> Int -> IO Image
 loadImageRaw fileName width height format headerSize =
-  withCString fileName (\str -> c'loadImageRaw str (fromIntegral width) (fromIntegral height) (fromIntegral format) (fromIntegral headerSize)) >>= peek
+  withCString fileName (\str -> c'loadImageRaw str (fromIntegral width) (fromIntegral height) (fromIntegral format) (fromIntegral headerSize)) >>= pop
 
 foreign import ccall unsafe "raylib.h &LoadImageRaw"
   p'loadImageRaw ::
@@ -2698,7 +2698,7 @@ loadImageAnim fileName =
         withCString
           fileName
           ( \fn -> do
-              img <- c'loadImageAnim fn frames >>= peek
+              img <- c'loadImageAnim fn frames >>= pop
               frameNum <- fromIntegral <$> peek frames
               return (img, frameNum)
           )
@@ -2712,7 +2712,7 @@ foreign import ccall unsafe "bindings.h LoadImageFromMemory_" c'loadImageFromMem
 
 loadImageFromMemory :: String -> String -> Int -> IO Image
 loadImageFromMemory fileType fileData fileSize =
-  withCString fileType (\ft -> withCString fileData (\fd -> c'loadImageFromMemory ft (castPtr fd) (fromIntegral fileSize))) >>= peek
+  withCString fileType (\ft -> withCString fileData (\fd -> c'loadImageFromMemory ft (castPtr fd) (fromIntegral fileSize))) >>= pop
 
 foreign import ccall unsafe "raylib.h &LoadImageFromMemory"
   p'loadImageFromMemory ::
@@ -2721,7 +2721,7 @@ foreign import ccall unsafe "raylib.h &LoadImageFromMemory"
 foreign import ccall unsafe "bindings.h LoadImageFromTexture_" c'loadImageFromTexture :: Ptr Texture -> IO (Ptr Image)
 
 loadImageFromTexture :: Texture -> IO Image
-loadImageFromTexture tex = with tex c'loadImageFromTexture >>= peek
+loadImageFromTexture tex = with tex c'loadImageFromTexture >>= pop
 
 foreign import ccall unsafe "raylib.h &LoadImageFromTexture"
   p'loadImageFromTexture ::
@@ -2730,7 +2730,7 @@ foreign import ccall unsafe "raylib.h &LoadImageFromTexture"
 foreign import ccall unsafe "bindings.h LoadImageFromScreen_" c'loadImageFromScreen :: IO (Ptr Image)
 
 loadImageFromScreen :: IO Image
-loadImageFromScreen = c'loadImageFromScreen >>= peek
+loadImageFromScreen = c'loadImageFromScreen >>= pop
 
 foreign import ccall unsafe "raylib.h &LoadImageFromScreen"
   p'loadImageFromScreen ::
@@ -2768,7 +2768,7 @@ foreign import ccall unsafe "bindings.h GenImageColor_" c'genImageColor :: CInt 
 
 genImageColor :: Int -> Int -> Color -> IO Image
 genImageColor width height color =
-  with color (c'genImageColor (fromIntegral width) (fromIntegral height)) >>= peek
+  with color (c'genImageColor (fromIntegral width) (fromIntegral height)) >>= pop
 
 foreign import ccall unsafe "raylib.h &GenImageColor"
   p'genImageColor ::
@@ -2778,7 +2778,7 @@ foreign import ccall unsafe "bindings.h GenImageGradientV_" c'genImageGradientV 
 
 genImageGradientV :: Int -> Int -> Color -> Color -> IO Image
 genImageGradientV width height top bottom =
-  with top (with bottom . c'genImageGradientV (fromIntegral width) (fromIntegral height)) >>= peek
+  with top (with bottom . c'genImageGradientV (fromIntegral width) (fromIntegral height)) >>= pop
 
 foreign import ccall unsafe "raylib.h &GenImageGradientV"
   p'genImageGradientV ::
@@ -2788,7 +2788,7 @@ foreign import ccall unsafe "bindings.h GenImageGradientH_" c'genImageGradientH 
 
 genImageGradientH :: Int -> Int -> Color -> Color -> IO Image
 genImageGradientH width height left right =
-  with left (with right . c'genImageGradientH (fromIntegral width) (fromIntegral height)) >>= peek
+  with left (with right . c'genImageGradientH (fromIntegral width) (fromIntegral height)) >>= pop
 
 foreign import ccall unsafe "raylib.h &GenImageGradientH"
   p'genImageGradientH ::
@@ -2798,7 +2798,7 @@ foreign import ccall unsafe "bindings.h GenImageGradientRadial_" c'genImageGradi
 
 genImageGradientRadial :: Int -> Int -> Float -> Color -> Color -> IO Image
 genImageGradientRadial width height density inner outer =
-  with inner (with outer . c'genImageGradientRadial (fromIntegral width) (fromIntegral height) (realToFrac density)) >>= peek
+  with inner (with outer . c'genImageGradientRadial (fromIntegral width) (fromIntegral height) (realToFrac density)) >>= pop
 
 foreign import ccall unsafe "raylib.h &GenImageGradientRadial"
   p'genImageGradientRadial ::
@@ -2808,7 +2808,7 @@ foreign import ccall unsafe "bindings.h GenImageChecked_" c'genImageChecked :: C
 
 genImageChecked :: Int -> Int -> Int -> Int -> Color -> Color -> IO Image
 genImageChecked width height checksX checksY col1 col2 =
-  with col1 (with col2 . c'genImageChecked (fromIntegral width) (fromIntegral height) (fromIntegral checksX) (fromIntegral checksY)) >>= peek
+  with col1 (with col2 . c'genImageChecked (fromIntegral width) (fromIntegral height) (fromIntegral checksX) (fromIntegral checksY)) >>= pop
 
 foreign import ccall unsafe "raylib.h &GenImageChecked"
   p'genImageChecked ::
@@ -2818,7 +2818,7 @@ foreign import ccall unsafe "bindings.h GenImageWhiteNoise_" c'genImageWhiteNois
 
 genImageWhiteNoise :: Int -> Int -> Float -> IO Image
 genImageWhiteNoise width height factor =
-  c'genImageWhiteNoise (fromIntegral width) (fromIntegral height) (realToFrac factor) >>= peek
+  c'genImageWhiteNoise (fromIntegral width) (fromIntegral height) (realToFrac factor) >>= pop
 
 foreign import ccall unsafe "raylib.h &GenImageWhiteNoise"
   p'genImageWhiteNoise ::
@@ -2827,7 +2827,7 @@ foreign import ccall unsafe "raylib.h &GenImageWhiteNoise"
 foreign import ccall unsafe "bindings.h GenImagePerlinNoise_" c'genImagePerlinNoise :: CInt -> CInt -> CInt -> CInt -> CFloat -> IO (Ptr Image)
 
 genImagePerlinNoise :: Int -> Int -> Int -> Int -> Float -> IO Image
-genImagePerlinNoise width height offsetX offsetY scale = c'genImagePerlinNoise (fromIntegral width) (fromIntegral height) (fromIntegral offsetX) (fromIntegral offsetY) (realToFrac scale) >>= peek
+genImagePerlinNoise width height offsetX offsetY scale = c'genImagePerlinNoise (fromIntegral width) (fromIntegral height) (fromIntegral offsetX) (fromIntegral offsetY) (realToFrac scale) >>= pop
 
 foreign import ccall unsafe "raylib.h &GenImagePerlinNoise" p'genImagePerlinNoise :: FunPtr (CInt -> CInt -> CInt -> CInt -> CFloat -> IO Image)
 
@@ -2835,7 +2835,7 @@ foreign import ccall unsafe "bindings.h GenImageCellular_" c'genImageCellular ::
 
 genImageCellular :: Int -> Int -> Int -> IO Image
 genImageCellular width height tileSize =
-  c'genImageCellular (fromIntegral width) (fromIntegral height) (fromIntegral tileSize) >>= peek
+  c'genImageCellular (fromIntegral width) (fromIntegral height) (fromIntegral tileSize) >>= pop
 
 foreign import ccall unsafe "raylib.h &GenImageCellular"
   p'genImageCellular ::
@@ -2844,7 +2844,7 @@ foreign import ccall unsafe "raylib.h &GenImageCellular"
 foreign import ccall unsafe "bindings.h ImageCopy_" c'imageCopy :: Ptr Image -> IO (Ptr Image)
 
 imageCopy :: Image -> IO Image
-imageCopy image = with image c'imageCopy >>= peek
+imageCopy image = with image c'imageCopy >>= pop
 
 foreign import ccall unsafe "raylib.h &ImageCopy"
   p'imageCopy ::
@@ -2853,7 +2853,7 @@ foreign import ccall unsafe "raylib.h &ImageCopy"
 foreign import ccall unsafe "bindings.h ImageFromImage_" c'imageFromImage :: Ptr Image -> Ptr Rectangle -> IO (Ptr Image)
 
 imageFromImage :: Image -> Rectangle -> IO Image
-imageFromImage image rect = with image (with rect . c'imageFromImage) >>= peek
+imageFromImage image rect = with image (with rect . c'imageFromImage) >>= pop
 
 foreign import ccall unsafe "raylib.h &ImageFromImage"
   p'imageFromImage ::
@@ -2863,7 +2863,7 @@ foreign import ccall unsafe "bindings.h ImageText_" c'imageText :: CString -> CI
 
 imageText :: String -> Int -> Color -> IO Image
 imageText text fontSize color =
-  withCString text (\t -> with color $ c'imageText t (fromIntegral fontSize)) >>= peek
+  withCString text (\t -> with color $ c'imageText t (fromIntegral fontSize)) >>= pop
 
 foreign import ccall unsafe "raylib.h &ImageText"
   p'imageText ::
@@ -2873,7 +2873,7 @@ foreign import ccall unsafe "bindings.h ImageTextEx_" c'imageTextEx :: Ptr Font 
 
 imageTextEx :: Font -> String -> Float -> Float -> Color -> IO Image
 imageTextEx font text fontSize spacing tint =
-  with font (\f -> withCString text (\t -> with tint $ c'imageTextEx f t (realToFrac fontSize) (realToFrac spacing))) >>= peek
+  with font (\f -> withCString text (\t -> with tint $ c'imageTextEx f t (realToFrac fontSize) (realToFrac spacing))) >>= pop
 
 foreign import ccall unsafe "raylib.h &ImageTextEx"
   p'imageTextEx ::
@@ -3170,7 +3170,7 @@ foreign import ccall unsafe "raylib.h &UnloadImagePalette"
 foreign import ccall unsafe "bindings.h GetImageAlphaBorder_" c'getImageAlphaBorder :: Ptr Image -> CFloat -> IO (Ptr Rectangle)
 
 getImageAlphaBorder :: Image -> Float -> IO Rectangle
-getImageAlphaBorder image threshold = with image (\i -> c'getImageAlphaBorder i (realToFrac threshold)) >>= peek
+getImageAlphaBorder image threshold = with image (\i -> c'getImageAlphaBorder i (realToFrac threshold)) >>= pop
 
 foreign import ccall unsafe "raylib.h &GetImageAlphaBorder"
   p'getImageAlphaBorder ::
@@ -3179,7 +3179,7 @@ foreign import ccall unsafe "raylib.h &GetImageAlphaBorder"
 foreign import ccall unsafe "bindings.h GetImageColor_" c'getImageColor :: Ptr Image -> CInt -> CInt -> IO (Ptr Color)
 
 getImageColor :: Image -> Int -> Int -> IO Color
-getImageColor image x y = with image (\i -> c'getImageColor i (fromIntegral x) (fromIntegral y)) >>= peek
+getImageColor image x y = with image (\i -> c'getImageColor i (fromIntegral x) (fromIntegral y)) >>= pop
 
 foreign import ccall unsafe "raylib.h &GetImageColor"
   p'getImageColor ::
@@ -3332,7 +3332,7 @@ foreign import ccall unsafe "raylib.h &ImageDrawTextEx"
 foreign import ccall unsafe "bindings.h LoadTexture_" c'loadTexture :: CString -> IO (Ptr Texture)
 
 loadTexture :: String -> IO Texture
-loadTexture fileName = withCString fileName c'loadTexture >>= peek
+loadTexture fileName = withCString fileName c'loadTexture >>= pop
 
 foreign import ccall unsafe "raylib.h &LoadTexture"
   p'loadTexture ::
@@ -3341,7 +3341,7 @@ foreign import ccall unsafe "raylib.h &LoadTexture"
 foreign import ccall unsafe "bindings.h LoadTextureFromImage_" c'loadTextureFromImage :: Ptr Image -> IO (Ptr Texture)
 
 loadTextureFromImage :: Image -> IO Texture
-loadTextureFromImage image = with image c'loadTextureFromImage >>= peek
+loadTextureFromImage image = with image c'loadTextureFromImage >>= pop
 
 foreign import ccall unsafe "raylib.h &LoadTextureFromImage"
   p'loadTextureFromImage ::
@@ -3350,7 +3350,7 @@ foreign import ccall unsafe "raylib.h &LoadTextureFromImage"
 foreign import ccall unsafe "bindings.h LoadTextureCubemap_" c'loadTextureCubemap :: Ptr Image -> CInt -> IO (Ptr Texture)
 
 loadTextureCubemap :: Image -> Int -> IO Texture
-loadTextureCubemap image layout = with image (\i -> c'loadTextureCubemap i (fromIntegral layout)) >>= peek
+loadTextureCubemap image layout = with image (\i -> c'loadTextureCubemap i (fromIntegral layout)) >>= pop
 
 foreign import ccall unsafe "raylib.h &LoadTextureCubemap"
   p'loadTextureCubemap ::
@@ -3359,7 +3359,7 @@ foreign import ccall unsafe "raylib.h &LoadTextureCubemap"
 foreign import ccall unsafe "bindings.h LoadRenderTexture_" c'loadRenderTexture :: CInt -> CInt -> IO (Ptr RenderTexture)
 
 loadRenderTexture :: Int -> Int -> IO RenderTexture
-loadRenderTexture width height = c'loadRenderTexture (fromIntegral width) (fromIntegral height) >>= peek
+loadRenderTexture width height = c'loadRenderTexture (fromIntegral width) (fromIntegral height) >>= pop
 
 foreign import ccall unsafe "raylib.h &LoadRenderTexture"
   p'loadRenderTexture ::
@@ -3514,7 +3514,7 @@ foreign import ccall unsafe "raylib.h &DrawTexturePoly"
 foreign import ccall unsafe "bindings.h Fade_" c'fade :: Ptr Color -> CFloat -> IO (Ptr Color)
 
 fade :: Color -> Float -> Color
-fade color alpha = unsafePerformIO $ with color (\c -> c'fade c (realToFrac alpha)) >>= peek
+fade color alpha = unsafePerformIO $ with color (\c -> c'fade c (realToFrac alpha)) >>= pop
 
 foreign import ccall unsafe "raylib.h &Fade"
   p'fade ::
@@ -3532,7 +3532,7 @@ foreign import ccall unsafe "raylib.h &ColorToInt"
 foreign import ccall unsafe "bindings.h ColorNormalize_" c'colorNormalize :: Ptr Color -> IO (Ptr Vector4)
 
 colorNormalize :: Color -> Vector4
-colorNormalize color = unsafePerformIO $ with color c'colorNormalize >>= peek
+colorNormalize color = unsafePerformIO $ with color c'colorNormalize >>= pop
 
 foreign import ccall unsafe "raylib.h &ColorNormalize"
   p'colorNormalize ::
@@ -3541,7 +3541,7 @@ foreign import ccall unsafe "raylib.h &ColorNormalize"
 foreign import ccall unsafe "bindings.h ColorFromNormalized_" c'colorFromNormalized :: Ptr Vector4 -> IO (Ptr Color)
 
 colorFromNormalized :: Vector4 -> Color
-colorFromNormalized normalized = unsafePerformIO $ with normalized c'colorFromNormalized >>= peek
+colorFromNormalized normalized = unsafePerformIO $ with normalized c'colorFromNormalized >>= pop
 
 foreign import ccall unsafe "raylib.h &ColorFromNormalized"
   p'colorFromNormalized ::
@@ -3550,7 +3550,7 @@ foreign import ccall unsafe "raylib.h &ColorFromNormalized"
 foreign import ccall unsafe "bindings.h ColorToHSV_" c'colorToHSV :: Ptr Color -> IO (Ptr Vector3)
 
 colorToHSV :: Color -> Vector3
-colorToHSV color = unsafePerformIO $ with color c'colorToHSV >>= peek
+colorToHSV color = unsafePerformIO $ with color c'colorToHSV >>= pop
 
 foreign import ccall unsafe "raylib.h &ColorToHSV"
   p'colorToHSV ::
@@ -3559,7 +3559,7 @@ foreign import ccall unsafe "raylib.h &ColorToHSV"
 foreign import ccall unsafe "bindings.h ColorFromHSV_" c'colorFromHSV :: CFloat -> CFloat -> CFloat -> IO (Ptr Color)
 
 colorFromHSV :: Float -> Float -> Float -> Color
-colorFromHSV hue saturation value = unsafePerformIO $ c'colorFromHSV (realToFrac hue) (realToFrac saturation) (realToFrac value) >>= peek
+colorFromHSV hue saturation value = unsafePerformIO $ c'colorFromHSV (realToFrac hue) (realToFrac saturation) (realToFrac value) >>= pop
 
 foreign import ccall unsafe "raylib.h &ColorFromHSV"
   p'colorFromHSV ::
@@ -3568,7 +3568,7 @@ foreign import ccall unsafe "raylib.h &ColorFromHSV"
 foreign import ccall unsafe "bindings.h ColorAlpha_" c'colorAlpha :: Ptr Color -> CFloat -> IO (Ptr Color)
 
 colorAlpha :: Color -> Float -> Color
-colorAlpha color alpha = unsafePerformIO $ with color (\c -> c'colorAlpha c (realToFrac alpha)) >>= peek
+colorAlpha color alpha = unsafePerformIO $ with color (\c -> c'colorAlpha c (realToFrac alpha)) >>= pop
 
 foreign import ccall unsafe "raylib.h &ColorAlpha"
   p'colorAlpha ::
@@ -3577,7 +3577,7 @@ foreign import ccall unsafe "raylib.h &ColorAlpha"
 foreign import ccall unsafe "bindings.h ColorAlphaBlend_" c'colorAlphaBlend :: Ptr Color -> Ptr Color -> Ptr Color -> IO (Ptr Color)
 
 colorAlphaBlend :: Color -> Color -> Color -> Color
-colorAlphaBlend dst src tint = unsafePerformIO $ with dst (\d -> with src (with tint . c'colorAlphaBlend d)) >>= peek
+colorAlphaBlend dst src tint = unsafePerformIO $ with dst (\d -> with src (with tint . c'colorAlphaBlend d)) >>= pop
 
 foreign import ccall unsafe "raylib.h &ColorAlphaBlend"
   p'colorAlphaBlend ::
@@ -3586,7 +3586,7 @@ foreign import ccall unsafe "raylib.h &ColorAlphaBlend"
 foreign import ccall unsafe "bindings.h GetColor_" c'getColor :: CUInt -> IO (Ptr Color)
 
 getColor :: Integer -> Color
-getColor hexValue = unsafePerformIO $ c'getColor (fromIntegral hexValue) >>= peek
+getColor hexValue = unsafePerformIO $ c'getColor (fromIntegral hexValue) >>= pop
 
 foreign import ccall unsafe "raylib.h &GetColor"
   p'getColor ::
@@ -3595,7 +3595,7 @@ foreign import ccall unsafe "raylib.h &GetColor"
 foreign import ccall unsafe "bindings.h GetPixelColor_" c'getPixelColor :: Ptr () -> CInt -> IO (Ptr Color)
 
 getPixelColor :: Ptr () -> Int -> IO Color
-getPixelColor srcPtr format = c'getPixelColor srcPtr (fromIntegral format) >>= peek
+getPixelColor srcPtr format = c'getPixelColor srcPtr (fromIntegral format) >>= pop
 
 foreign import ccall unsafe "raylib.h &GetPixelColor"
   p'getPixelColor ::
@@ -3624,7 +3624,7 @@ foreign import ccall unsafe "raylib.h &GetPixelDataSize"
 foreign import ccall unsafe "bindings.h GetFontDefault_" c'getFontDefault :: IO (Ptr Font)
 
 getFontDefault :: IO Font
-getFontDefault = c'getFontDefault >>= peek
+getFontDefault = c'getFontDefault >>= pop
 
 foreign import ccall unsafe "raylib.h &GetFontDefault"
   p'getFontDefault ::
@@ -3633,7 +3633,7 @@ foreign import ccall unsafe "raylib.h &GetFontDefault"
 foreign import ccall unsafe "bindings.h LoadFont_" c'loadFont :: CString -> IO (Ptr Font)
 
 loadFont :: String -> IO Font
-loadFont fileName = withCString fileName c'loadFont >>= peek
+loadFont fileName = withCString fileName c'loadFont >>= pop
 
 foreign import ccall unsafe "raylib.h &LoadFont"
   p'loadFont ::
@@ -3642,7 +3642,7 @@ foreign import ccall unsafe "raylib.h &LoadFont"
 foreign import ccall unsafe "bindings.h LoadFontEx_" c'loadFontEx :: CString -> CInt -> Ptr CInt -> CInt -> IO (Ptr Font)
 
 loadFontEx :: String -> Int -> [Int] -> Int -> IO Font
-loadFontEx fileName fontSize fontChars glyphCount = withCString fileName (\f -> withArray fontChars (\c -> c'loadFontEx f (fromIntegral fontSize) (castPtr c) (fromIntegral glyphCount))) >>= peek
+loadFontEx fileName fontSize fontChars glyphCount = withCString fileName (\f -> withArray fontChars (\c -> c'loadFontEx f (fromIntegral fontSize) (castPtr c) (fromIntegral glyphCount))) >>= pop
 
 foreign import ccall unsafe "raylib.h &LoadFontEx"
   p'loadFontEx ::
@@ -3651,7 +3651,7 @@ foreign import ccall unsafe "raylib.h &LoadFontEx"
 foreign import ccall unsafe "bindings.h LoadFontFromImage_" c'loadFontFromImage :: Ptr Image -> Ptr Color -> CInt -> IO (Ptr Font)
 
 loadFontFromImage :: Image -> Color -> Int -> IO Font
-loadFontFromImage image key firstChar = with image (\i -> with key (\k -> c'loadFontFromImage i k (fromIntegral firstChar))) >>= peek
+loadFontFromImage image key firstChar = with image (\i -> with key (\k -> c'loadFontFromImage i k (fromIntegral firstChar))) >>= pop
 
 foreign import ccall unsafe "raylib.h &LoadFontFromImage"
   p'loadFontFromImage ::
@@ -3660,7 +3660,7 @@ foreign import ccall unsafe "raylib.h &LoadFontFromImage"
 foreign import ccall unsafe "bindings.h LoadFontFromMemory_" c'loadFontFromMemory :: CString -> Ptr CUChar -> CInt -> CInt -> Ptr CInt -> CInt -> IO (Ptr Font)
 
 loadFontFromMemory :: String -> [Int] -> Int -> [Int] -> Int -> IO Font
-loadFontFromMemory fileType fileData fontSize fontChars glyphCount = withCString fileType (\t -> withArrayLen fileData (\size d -> withArray fontChars (\c -> c'loadFontFromMemory t (castPtr d) (fromIntegral size) (fromIntegral fontSize) (castPtr c) (fromIntegral glyphCount)))) >>= peek
+loadFontFromMemory fileType fileData fontSize fontChars glyphCount = withCString fileType (\t -> withArrayLen fileData (\size d -> withArray fontChars (\c -> c'loadFontFromMemory t (castPtr d) (fromIntegral size) (fromIntegral fontSize) (castPtr c) (fromIntegral glyphCount)))) >>= pop
 
 foreign import ccall unsafe "raylib.h &LoadFontFromMemory"
   p'loadFontFromMemory ::
@@ -3671,7 +3671,7 @@ foreign import ccall unsafe "raylib.h LoadFontData"
     Ptr CUChar -> CInt -> CInt -> Ptr CInt -> CInt -> CInt -> IO (Ptr GlyphInfo)
 
 loadFontData :: [Int] -> Int -> [Int] -> Int -> Int -> IO GlyphInfo
-loadFontData fileData fontSize fontChars glyphCount fontType = withArrayLen fileData (\size d -> withArray fontChars (\c -> c'loadFontData (castPtr d) (fromIntegral size) (fromIntegral fontSize) (castPtr c) (fromIntegral glyphCount) (fromIntegral fontType))) >>= peek
+loadFontData fileData fontSize fontChars glyphCount fontType = withArrayLen fileData (\size d -> withArray fontChars (\c -> c'loadFontData (castPtr d) (fromIntegral size) (fromIntegral fontSize) (castPtr c) (fromIntegral glyphCount) (fromIntegral fontType))) >>= pop
 
 foreign import ccall unsafe "raylib.h &LoadFontData"
   p'loadFontData ::
@@ -3680,7 +3680,7 @@ foreign import ccall unsafe "raylib.h &LoadFontData"
 foreign import ccall unsafe "bindings.h GenImageFontAtlas_" c'genImageFontAtlas :: Ptr GlyphInfo -> Ptr (Ptr Rectangle) -> CInt -> CInt -> CInt -> CInt -> IO (Ptr Image)
 
 genImageFontAtlas :: [GlyphInfo] -> [[Rectangle]] -> Int -> Int -> Int -> Int -> IO Image
-genImageFontAtlas chars recs glyphCount fontSize padding packMethod = withArray chars (\c -> withArray2D recs (\r -> c'genImageFontAtlas c r (fromIntegral glyphCount) (fromIntegral fontSize) (fromIntegral padding) (fromIntegral packMethod))) >>= peek
+genImageFontAtlas chars recs glyphCount fontSize padding packMethod = withArray chars (\c -> withArray2D recs (\r -> c'genImageFontAtlas c r (fromIntegral glyphCount) (fromIntegral fontSize) (fromIntegral padding) (fromIntegral packMethod))) >>= pop
 
 foreign import ccall unsafe "raylib.h &GenImageFontAtlas"
   p'genImageFontAtlas ::
@@ -3785,7 +3785,7 @@ foreign import ccall unsafe "raylib.h &MeasureText"
 foreign import ccall unsafe "bindings.h MeasureTextEx_" c'measureTextEx :: Ptr Font -> CString -> CFloat -> CFloat -> IO (Ptr Vector2)
 
 measureTextEx :: Font -> String -> Float -> Float -> IO Vector2
-measureTextEx font text fontSize spacing = with font (\f -> withCString text (\t -> c'measureTextEx f t (realToFrac fontSize) (realToFrac spacing))) >>= peek
+measureTextEx font text fontSize spacing = with font (\f -> withCString text (\t -> c'measureTextEx f t (realToFrac fontSize) (realToFrac spacing))) >>= pop
 
 foreign import ccall unsafe "raylib.h &MeasureTextEx"
   p'measureTextEx ::
@@ -3803,7 +3803,7 @@ foreign import ccall unsafe "raylib.h &GetGlyphIndex"
 foreign import ccall unsafe "bindings.h GetGlyphInfo_" c'getGlyphInfo :: Ptr Font -> CInt -> IO (Ptr GlyphInfo)
 
 getGlyphInfo :: Font -> Int -> IO GlyphInfo
-getGlyphInfo font codepoint = with font (\f -> c'getGlyphInfo f (fromIntegral codepoint)) >>= peek
+getGlyphInfo font codepoint = with font (\f -> c'getGlyphInfo f (fromIntegral codepoint)) >>= pop
 
 foreign import ccall unsafe "raylib.h &GetGlyphInfo"
   p'getGlyphInfo ::
@@ -3812,7 +3812,7 @@ foreign import ccall unsafe "raylib.h &GetGlyphInfo"
 foreign import ccall unsafe "bindings.h GetGlyphAtlasRec_" c'getGlyphAtlasRec :: Ptr Font -> CInt -> IO (Ptr Rectangle)
 
 getGlyphAtlasRec :: Font -> Int -> IO Rectangle
-getGlyphAtlasRec font codepoint = with font (\f -> c'getGlyphAtlasRec f (fromIntegral codepoint)) >>= peek
+getGlyphAtlasRec font codepoint = with font (\f -> c'getGlyphAtlasRec f (fromIntegral codepoint)) >>= pop
 
 foreign import ccall unsafe "raylib.h &GetGlyphAtlasRec"
   p'getGlyphAtlasRec ::
@@ -4251,7 +4251,7 @@ foreign import ccall unsafe "raylib.h &DrawGrid"
 foreign import ccall unsafe "bindings.h LoadModel_" c'loadModel :: CString -> IO (Ptr Model)
 
 loadModel :: String -> IO Model
-loadModel fileName = withCString fileName c'loadModel >>= peek
+loadModel fileName = withCString fileName c'loadModel >>= pop
 
 foreign import ccall unsafe "raylib.h &LoadModel"
   p'loadModel ::

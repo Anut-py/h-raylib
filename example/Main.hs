@@ -14,45 +14,37 @@ import Raylib
       setWindowOpacity,
       closeWindow,
       windowShouldClose,
-      initWindow, drawFPS, codepointToUTF8, getWorkingDirectory, loadModel, c'loadModel )
-import Raylib.Colors (lightGray, rayWhite)
-import Raylib.Types (Vector2(Vector2))
+      initWindow, drawFPS, codepointToUTF8, getWorkingDirectory, loadModel, c'loadModel, setCameraMode, updateCamera, beginMode3D, endMode3D, drawModel, drawCircle3D, drawLine3D )
+import Raylib.Colors (lightGray, rayWhite, white, black)
+import Raylib.Types (Camera3D (Camera3D), Vector3 (Vector3), Model)
+import Raylib.Constants (cameraProjection'perspective, cameraMode'firstPerson)
 
 main = do
   getWorkingDirectory >>= putStrLn
-  -- Neither of these model loading functions work properly
-  -- They result in an access violation error
-
-  -- model <- loadModel "Cube.obj"
-  -- model <- withCString "Cube.obj" c'loadModel
-  -- withCString "Cube.obj" c'loadModel
-
-  -- The error is as follows:
-
-  -- Access violation in generated code when executing data at 0x0
-  -- 
-  --  Attempting to reconstruct a stack trace...
-  -- 
-  --    Frame        Code address
-  -- Null address
-
-  -- The Cube.obj file is found and loaded, as it shows the following lines before the error
-
-  -- INFO: FILEIO: [Cube.obj] Text file loaded successfully
-  -- INFO: MODEL: [Cube.obj] OBJ data loaded successfully: 1 meshes/1 materials
-  -- INFO: MODEL: model has 1 material meshes
-
   initWindow 600 450 "Hello world"
+  let camera = Camera3D (Vector3 0 0 0) (Vector3 2 0 1) (Vector3 0 1 0) 70 cameraProjection'perspective
+  setCameraMode camera cameraMode'firstPerson
   pos <- getWindowPosition
   setTargetFPS 60
-  gameLoop
+  gameLoop camera
   closeWindow
 
-gameLoop = do
+gameLoop :: Camera3D -> IO ()
+gameLoop camera = do
   beginDrawing
-  clearBackground rayWhite
-  drawText "Testing raylib" 190 200 20 lightGray
-  drawFPS 50 50
+
+  clearBackground black
+  drawFPS 10 20
+
+  beginMode3D camera
+
+  drawCircle3D (Vector3 2 0 1) 2 (Vector3 0 0 0) 0 white
+  drawLine3D (Vector3 3 (-1) 1) (Vector3 1 1 1) white
+  drawLine3D (Vector3 4 2 2) (Vector3 1 (-1) 1) white
+
+  endMode3D
+
   endDrawing
+  newCam <- updateCamera camera
   shouldClose <- windowShouldClose
-  unless shouldClose gameLoop
+  unless shouldClose $ gameLoop newCam
