@@ -1,6 +1,6 @@
 # h-raylib: Haskell bindings for Raylib
 
-This library includes low-level bindings to the [Raylib](https://www.raylib.com/) library from Haskell.
+This library includes Haskell bindings to the [Raylib](https://www.raylib.com/) library.
 
 ## Usage
 
@@ -13,18 +13,25 @@ build-depends:
   h-raylib
 ```
 
-By default, h-raylib will automatically set up all the plaform specific requirements for your platform.
+Your platform-specific dependencies will automatically be built by default. You
+may want to disable this behavior. You can disable the `detect-platform` flag to
+achieve this.
 
-You can disable this behavior by adding the `no-autosetup` flag, e.g.
+You can do this through the command line when running your project, like so
 
-```cabal
-build-depends:
-  base,
-  # ...
-  h-raylib +no-autosetup
+```sh
+cabal run --constraint="h-raylib -detect-platform"
 ```
 
-You may want to do this if you are using a platform that isn't supported by h-raylib autosetup.
+Or you can add it to your `cabal.project` file.
+
+```
+package h-raylib
+  flags: -detect-platform
+```
+
+The flags `platform-windows`, `platform-mac`, `platform-linux`, and `platform-bsd` are also
+supported if you want to build for a different platform.
 
 ## Platform specific requirements
 
@@ -32,11 +39,11 @@ This library has been tested on Windows and Ubuntu through WSL. It may not work 
 
 ### Windows
 
-h-raylib should automatically work if you do not pass the `no-autosetup` flag. In that case, you may skip this step.
+h-raylib should automatically work if you do not disable the `detect-platform` flag. In that case, you may skip this step.
 
-**If you do add the `no-autosetup` flag when building:**
+**If you do disable the `detect-platform` flag when building:**
 
-Add the following in your cabal file
+Add the following in your cabal file, or use the `platform-windows` flag when building.
 
 ```cabal
 extra-libraries: gdi32 opengl32 winmm kernel32
@@ -44,20 +51,20 @@ extra-libraries: gdi32 opengl32 winmm kernel32
 
 ### Ubuntu/Debian based systems
 
-You may need to run the following command to install [X11](https://en.wikipedia.org/wiki/X_Window_System) (a window manager for Linux).
+You may need to run the following to install [X11](https://en.wikipedia.org/wiki/X_Window_System) (a window manager for Linux).
 
 ```bash
 sudo apt-get install libxrandr-dev libxi-dev libxcursor-dev libxinerama-dev
 ```
 
-Now, h-raylib should automatically work if you do not pass the `no-autosetup` flag. In that case, you may skip the following.
+Now, h-raylib should automatically work if you do not disable the `detect-platform` flag. In that case, you may skip the following.
 
-**If you do add the `no-autosetup` flag when building:**
+**If you do disable the `detect-platform` flag when building:**
 
-Include the following in your cabal file
+Include the following in your cabal file, or use the `platform-linux` flag when building
 
 ```cabal
-extra-libraries: pthread m dl rt X11
+extra-libraries: GL pthread m dl rt X11
 ```
 
 ### Other platforms

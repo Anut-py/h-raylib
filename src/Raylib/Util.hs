@@ -1,7 +1,7 @@
+{-# OPTIONS -Wall #-}
 module Raylib.Util (c'free, pop, popCArray, withArray2D) where
-import Foreign (Ptr, Storable (peek), castPtr, mallocArray, newArray, free, peekArray)
-import Control.Monad (forM, forM_)
-import Foreign.C (CChar, peekCString)
+import Foreign (Ptr, Storable (peek), castPtr, newArray, free, peekArray)
+import Control.Monad (forM_)
 
 -- Internal utility functions
 

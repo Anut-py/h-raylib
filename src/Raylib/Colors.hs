@@ -1,3 +1,4 @@
+{-# OPTIONS -Wall #-}
 module Raylib.Colors
   ( lightGray,
     gray,
@@ -28,7 +29,6 @@ module Raylib.Colors
   )
 where
 
-import Foreign (Ptr, castPtr, castStablePtrToPtr, newStablePtr)
 import Raylib.Types (Color (Color))
 
 -- Simple color palette defined in raylib.h

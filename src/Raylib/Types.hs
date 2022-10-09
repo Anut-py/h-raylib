@@ -1,3 +1,4 @@
+{-# OPTIONS -Wall #-}
 module Raylib.Types where
 
 -- This file includes Haskell counterparts to the structs defined in raylib

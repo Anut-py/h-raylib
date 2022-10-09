@@ -1,3 +1,4 @@
+{-# OPTIONS -Wall #-}
 module Raylib.Constants where
 
 -- This file includes constants and enums defined in raylib
