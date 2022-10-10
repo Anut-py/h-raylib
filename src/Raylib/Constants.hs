@@ -1127,6 +1127,10 @@ blend'custom = 6
 
 blend'custom :: (Num a) => a
 
+blend'customSeparate = 7
+
+blend'customSeparate :: (Num a) => a
+
 type Gesture = CUInt
 
 gesture'none = 0

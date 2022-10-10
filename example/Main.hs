@@ -14,7 +14,6 @@ import Raylib
     endMode3D,
     getWorkingDirectory,
     initWindow,
-    loadModel,
     setCameraMode,
     setTargetFPS,
     updateCamera,
@@ -22,21 +21,20 @@ import Raylib
   )
 import Raylib.Colors (black, white)
 import Raylib.Constants (cameraMode'firstPerson, cameraProjection'perspective)
-import Raylib.Types (Camera3D (Camera3D), Model, Vector3 (Vector3))
+import Raylib.Types (Camera3D (Camera3D), Vector3 (Vector3))
 
 main :: IO ()
 main = do
   getWorkingDirectory >>= putStrLn
   initWindow 600 450 "Hello world"
   let camera = Camera3D (Vector3 0 0 0) (Vector3 2 0 1) (Vector3 0 1 0) 70 cameraProjection'perspective
-  model <- loadModel "Cube.obj"
   setCameraMode camera cameraMode'firstPerson
   setTargetFPS 60
-  gameLoop camera model
+  gameLoop camera
   closeWindow
 
-gameLoop :: Camera3D -> Model -> IO ()
-gameLoop camera model = do
+gameLoop :: Camera3D -> IO ()
+gameLoop camera = do
   beginDrawing
 
   clearBackground black
@@ -54,4 +52,4 @@ gameLoop camera model = do
   endDrawing
   newCam <- updateCamera camera
   shouldClose <- windowShouldClose
-  unless shouldClose $ gameLoop newCam model
+  unless shouldClose $ gameLoop newCam

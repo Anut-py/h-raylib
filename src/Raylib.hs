@@ -1,4 +1,5 @@
 {-# LANGUAGE ForeignFunctionInterface #-}
+
 {-# OPTIONS -Wall #-}
 
 module Raylib where
@@ -32,36 +33,35 @@ import Foreign.C
   )
 import GHC.IO (unsafePerformIO)
 import Raylib.Types
-  ( AudioStream,
-    BoundingBox,
-    Camera2D,
-    Camera3D,
-    Color,
-    FilePathList,
-    Font,
-    GlyphInfo,
-    Image (image'height, image'width),
-    Material,
-    Matrix,
-    Mesh,
-    Model,
-    ModelAnimation,
-    Music,
-    NPatchInfo,
-    Ray,
-    RayCollision,
-    Rectangle,
-    RenderTexture,
-    Shader,
-    Sound,
-    Texture,
-    Vector2 (Vector2),
-    Vector3,
-    Vector4,
-    VrDeviceInfo,
-    VrStereoConfig,
-    Wave,
-  )
+    ( AudioStream,
+      BoundingBox,
+      Camera2D,
+      Camera3D,
+      Color,
+      FilePathList,
+      Font,
+      GlyphInfo,
+      Image(image'width, image'height),
+      Material,
+      Matrix,
+      Mesh,
+      Model,
+      ModelAnimation,
+      Music,
+      NPatchInfo,
+      Ray,
+      RayCollision,
+      Rectangle,
+      RenderTexture,
+      Shader,
+      Sound,
+      Texture,
+      Vector2(Vector2),
+      Vector3,
+      Vector4,
+      VrDeviceInfo,
+      VrStereoConfig,
+      Wave )
 import Raylib.Util (pop, withArray2D)
 import Prelude hiding (length)
 
@@ -285,14 +285,14 @@ foreign import ccall safe "raylib.h &RestoreWindow"
   p'restoreWindow ::
     FunPtr (IO ())
 
-foreign import ccall safe "bindings.h SetWindowIcon_" c'setWindowIcon :: Ptr Image -> IO ()
+foreign import ccall safe "bindings.h SetWindowIcon_" c'setWindowIcon :: Ptr Raylib.Types.Image -> IO ()
 
-setWindowIcon :: Image -> IO ()
+setWindowIcon :: Raylib.Types.Image -> IO ()
 setWindowIcon image = with image c'setWindowIcon
 
 foreign import ccall safe "raylib.h &SetWindowIcon"
   p'setWindowIcon ::
-    FunPtr (Image -> IO ())
+    FunPtr (Raylib.Types.Image -> IO ())
 
 foreign import ccall safe "raylib.h SetWindowTitle"
   c'setWindowTitle ::
@@ -434,14 +434,14 @@ foreign import ccall safe "raylib.h &GetCurrentMonitor"
   p'getCurrentMonitor ::
     FunPtr (IO CInt)
 
-foreign import ccall safe "bindings.h GetMonitorPosition_" c'getMonitorPosition :: CInt -> IO (Ptr Vector2)
+foreign import ccall safe "bindings.h GetMonitorPosition_" c'getMonitorPosition :: CInt -> IO (Ptr Raylib.Types.Vector2)
 
-getMonitorPosition :: Int -> IO Vector2
+getMonitorPosition :: Int -> IO Raylib.Types.Vector2
 getMonitorPosition monitor = c'getMonitorPosition (fromIntegral monitor) >>= pop
 
 foreign import ccall safe "raylib.h &GetMonitorPosition"
   p'getMonitorPosition ::
-    FunPtr (CInt -> IO Vector2)
+    FunPtr (CInt -> IO Raylib.Types.Vector2)
 
 foreign import ccall safe "raylib.h GetMonitorWidth"
   c'getMonitorWidth ::
@@ -498,23 +498,23 @@ foreign import ccall safe "raylib.h &GetMonitorRefreshRate"
   p'getMonitorRefreshRate ::
     FunPtr (CInt -> IO CInt)
 
-foreign import ccall safe "bindings.h GetWindowPosition_" c'getWindowPosition :: IO (Ptr Vector2)
+foreign import ccall safe "bindings.h GetWindowPosition_" c'getWindowPosition :: IO (Ptr Raylib.Types.Vector2)
 
-getWindowPosition :: IO Vector2
+getWindowPosition :: IO Raylib.Types.Vector2
 getWindowPosition = c'getWindowPosition >>= pop
 
 foreign import ccall safe "raylib.h &GetWindowPosition"
   p'getWindowPosition ::
-    FunPtr (IO Vector2)
+    FunPtr (IO Raylib.Types.Vector2)
 
-foreign import ccall safe "bindings.h GetWindowScaleDPI_" c'getWindowScaleDPI :: IO (Ptr Vector2)
+foreign import ccall safe "bindings.h GetWindowScaleDPI_" c'getWindowScaleDPI :: IO (Ptr Raylib.Types.Vector2)
 
-getWindowScaleDPI :: IO Vector2
+getWindowScaleDPI :: IO Raylib.Types.Vector2
 getWindowScaleDPI = c'getWindowScaleDPI >>= pop
 
 foreign import ccall safe "raylib.h &GetWindowScaleDPI"
   p'getWindowScaleDPI ::
-    FunPtr (IO Vector2)
+    FunPtr (IO Raylib.Types.Vector2)
 
 foreign import ccall safe "raylib.h GetMonitorName"
   c'getMonitorName ::
@@ -646,14 +646,14 @@ foreign import ccall safe "raylib.h &IsCursorOnScreen"
   p'isCursorOnScreen ::
     FunPtr (IO CInt)
 
-foreign import ccall safe "bindings.h ClearBackground_" c'clearBackground :: Ptr Color -> IO ()
+foreign import ccall safe "bindings.h ClearBackground_" c'clearBackground :: Ptr Raylib.Types.Color -> IO ()
 
-clearBackground :: Color -> IO ()
+clearBackground :: Raylib.Types.Color -> IO ()
 clearBackground color = with color c'clearBackground
 
 foreign import ccall safe "raylib.h &ClearBackground"
   p'clearBackground ::
-    FunPtr (Color -> IO ())
+    FunPtr (Raylib.Types.Color -> IO ())
 
 foreign import ccall safe "raylib.h BeginDrawing"
   beginDrawing ::
@@ -671,14 +671,14 @@ foreign import ccall safe "raylib.h &EndDrawing"
   p'endDrawing ::
     FunPtr (IO ())
 
-foreign import ccall safe "bindings.h BeginMode2D_" c'beginMode2D :: Ptr Camera2D -> IO ()
+foreign import ccall safe "bindings.h BeginMode2D_" c'beginMode2D :: Ptr Raylib.Types.Camera2D -> IO ()
 
-beginMode2D :: Camera2D -> IO ()
+beginMode2D :: Raylib.Types.Camera2D -> IO ()
 beginMode2D camera = with camera c'beginMode2D
 
 foreign import ccall safe "raylib.h &BeginMode2D"
   p'beginMode2D ::
-    FunPtr (Camera2D -> IO ())
+    FunPtr (Raylib.Types.Camera2D -> IO ())
 
 foreign import ccall safe "raylib.h EndMode2D"
   endMode2D ::
@@ -688,14 +688,14 @@ foreign import ccall safe "raylib.h &EndMode2D"
   p'endMode2D ::
     FunPtr (IO ())
 
-foreign import ccall safe "bindings.h BeginMode3D_" c'beginMode3D :: Ptr Camera3D -> IO ()
+foreign import ccall safe "bindings.h BeginMode3D_" c'beginMode3D :: Ptr Raylib.Types.Camera3D -> IO ()
 
-beginMode3D :: Camera3D -> IO ()
+beginMode3D :: Raylib.Types.Camera3D -> IO ()
 beginMode3D camera = with camera c'beginMode3D
 
 foreign import ccall safe "raylib.h &BeginMode3D"
   p'beginMode3D ::
-    FunPtr (Camera3D -> IO ())
+    FunPtr (Raylib.Types.Camera3D -> IO ())
 
 foreign import ccall safe "raylib.h EndMode3D"
   endMode3D ::
@@ -705,14 +705,14 @@ foreign import ccall safe "raylib.h &EndMode3D"
   p'endMode3D ::
     FunPtr (IO ())
 
-foreign import ccall safe "bindings.h BeginTextureMode_" c'beginTextureMode :: Ptr RenderTexture -> IO ()
+foreign import ccall safe "bindings.h BeginTextureMode_" c'beginTextureMode :: Ptr Raylib.Types.RenderTexture -> IO ()
 
-beginTextureMode :: RenderTexture -> IO ()
+beginTextureMode :: Raylib.Types.RenderTexture -> IO ()
 beginTextureMode renderTexture = with renderTexture c'beginTextureMode
 
 foreign import ccall safe "raylib.h &BeginTextureMode"
   p'beginTextureMode ::
-    FunPtr (RenderTexture -> IO ())
+    FunPtr (Raylib.Types.RenderTexture -> IO ())
 
 foreign import ccall safe "raylib.h EndTextureMode"
   endTextureMode ::
@@ -722,14 +722,14 @@ foreign import ccall safe "raylib.h &EndTextureMode"
   p'endTextureMode ::
     FunPtr (IO ())
 
-foreign import ccall safe "bindings.h BeginShaderMode_" c'beginShaderMode :: Ptr Shader -> IO ()
+foreign import ccall safe "bindings.h BeginShaderMode_" c'beginShaderMode :: Ptr Raylib.Types.Shader -> IO ()
 
-beginShaderMode :: Shader -> IO ()
+beginShaderMode :: Raylib.Types.Shader -> IO ()
 beginShaderMode shader = with shader c'beginShaderMode
 
 foreign import ccall safe "raylib.h &BeginShaderMode"
   p'beginShaderMode ::
-    FunPtr (Shader -> IO ())
+    FunPtr (Raylib.Types.Shader -> IO ())
 
 foreign import ccall safe "raylib.h EndShaderMode"
   endShaderMode ::
@@ -777,14 +777,14 @@ foreign import ccall safe "raylib.h &EndScissorMode"
   p'endScissorMode ::
     FunPtr (IO ())
 
-foreign import ccall safe "bindings.h BeginVrStereoMode_" c'beginVrStereoMode :: Ptr VrStereoConfig -> IO ()
+foreign import ccall safe "bindings.h BeginVrStereoMode_" c'beginVrStereoMode :: Ptr Raylib.Types.VrStereoConfig -> IO ()
 
-beginVrStereoMode :: VrStereoConfig -> IO ()
+beginVrStereoMode :: Raylib.Types.VrStereoConfig -> IO ()
 beginVrStereoMode config = with config c'beginVrStereoMode
 
 foreign import ccall safe "raylib.h &BeginVrStereoMode"
   p'beginVrStereoMode ::
-    FunPtr (VrStereoConfig -> IO ())
+    FunPtr (Raylib.Types.VrStereoConfig -> IO ())
 
 foreign import ccall safe "raylib.h EndVrStereoMode"
   endVrStereoMode ::
@@ -794,167 +794,167 @@ foreign import ccall safe "raylib.h &EndVrStereoMode"
   p'endVrStereoMode ::
     FunPtr (IO ())
 
-foreign import ccall safe "bindings.h LoadVrStereoConfig_" c'loadVrStereoConfig :: Ptr VrDeviceInfo -> IO (Ptr VrStereoConfig)
+foreign import ccall safe "bindings.h LoadVrStereoConfig_" c'loadVrStereoConfig :: Ptr Raylib.Types.VrDeviceInfo -> IO (Ptr Raylib.Types.VrStereoConfig)
 
-loadVrStereoConfig :: VrDeviceInfo -> IO VrStereoConfig
+loadVrStereoConfig :: Raylib.Types.VrDeviceInfo -> IO Raylib.Types.VrStereoConfig
 loadVrStereoConfig deviceInfo = with deviceInfo c'loadVrStereoConfig >>= pop
 
 foreign import ccall safe "raylib.h &LoadVrStereoConfig"
   p'loadVrStereoConfig ::
-    FunPtr (VrDeviceInfo -> IO VrStereoConfig)
+    FunPtr (Raylib.Types.VrDeviceInfo -> IO Raylib.Types.VrStereoConfig)
 
-foreign import ccall safe "bindings.h UnloadVrStereoConfig_" c'unloadVrStereoConfig :: Ptr VrStereoConfig -> IO ()
+foreign import ccall safe "bindings.h UnloadVrStereoConfig_" c'unloadVrStereoConfig :: Ptr Raylib.Types.VrStereoConfig -> IO ()
 
-unloadVrStereoConfig :: VrStereoConfig -> IO ()
+unloadVrStereoConfig :: Raylib.Types.VrStereoConfig -> IO ()
 unloadVrStereoConfig config = with config c'unloadVrStereoConfig
 
 foreign import ccall safe "raylib.h &UnloadVrStereoConfig"
   p'unloadVrStereoConfig ::
-    FunPtr (VrStereoConfig -> IO ())
+    FunPtr (Raylib.Types.VrStereoConfig -> IO ())
 
-foreign import ccall safe "bindings.h LoadShader_" c'loadShader :: CString -> CString -> IO (Ptr Shader)
+foreign import ccall safe "bindings.h LoadShader_" c'loadShader :: CString -> CString -> IO (Ptr Raylib.Types.Shader)
 
-loadShader :: String -> String -> IO Shader
+loadShader :: String -> String -> IO Raylib.Types.Shader
 loadShader vsFileName fsFileName = withCString vsFileName (withCString fsFileName . c'loadShader) >>= pop
 
 foreign import ccall safe "raylib.h &LoadShader"
   p'loadShader ::
-    FunPtr (CString -> CString -> IO Shader)
+    FunPtr (CString -> CString -> IO Raylib.Types.Shader)
 
-foreign import ccall safe "bindings.h LoadShaderFromMemory_" c'loadShaderFromMemory :: CString -> CString -> IO (Ptr Shader)
+foreign import ccall safe "bindings.h LoadShaderFromMemory_" c'loadShaderFromMemory :: CString -> CString -> IO (Ptr Raylib.Types.Shader)
 
-loadShaderFromMemory :: String -> String -> IO Shader
+loadShaderFromMemory :: String -> String -> IO Raylib.Types.Shader
 loadShaderFromMemory vsCode fsCode = withCString vsCode (withCString fsCode . c'loadShaderFromMemory) >>= pop
 
 foreign import ccall safe "raylib.h &LoadShaderFromMemory"
   p'loadShaderFromMemory ::
-    FunPtr (CString -> CString -> IO Shader)
+    FunPtr (CString -> CString -> IO Raylib.Types.Shader)
 
-foreign import ccall safe "bindings.h GetShaderLocation_" c'getShaderLocation :: Ptr Shader -> CString -> IO CInt
+foreign import ccall safe "bindings.h GetShaderLocation_" c'getShaderLocation :: Ptr Raylib.Types.Shader -> CString -> IO CInt
 
-getShaderLocation :: Shader -> String -> IO Int
+getShaderLocation :: Raylib.Types.Shader -> String -> IO Int
 getShaderLocation shader uniformName = fromIntegral <$> with shader (withCString uniformName . c'getShaderLocation)
 
 foreign import ccall safe "raylib.h &GetShaderLocation"
   p'getShaderLocation ::
-    FunPtr (Shader -> CString -> IO CInt)
+    FunPtr (Raylib.Types.Shader -> CString -> IO CInt)
 
-foreign import ccall safe "bindings.h GetShaderLocationAttrib_" c'getShaderLocationAttrib :: Ptr Shader -> CString -> IO CInt
+foreign import ccall safe "bindings.h GetShaderLocationAttrib_" c'getShaderLocationAttrib :: Ptr Raylib.Types.Shader -> CString -> IO CInt
 
-getShaderLocationAttrib :: Shader -> String -> IO Int
+getShaderLocationAttrib :: Raylib.Types.Shader -> String -> IO Int
 getShaderLocationAttrib shader attribName = fromIntegral <$> with shader (withCString attribName . c'getShaderLocationAttrib)
 
 foreign import ccall safe "raylib.h &GetShaderLocationAttrib"
   p'getShaderLocationAttrib ::
-    FunPtr (Shader -> CString -> IO CInt)
+    FunPtr (Raylib.Types.Shader -> CString -> IO CInt)
 
-foreign import ccall safe "bindings.h SetShaderValue_" c'setShaderValue :: Ptr Shader -> CInt -> Ptr () -> CInt -> IO ()
+foreign import ccall safe "bindings.h SetShaderValue_" c'setShaderValue :: Ptr Raylib.Types.Shader -> CInt -> Ptr () -> CInt -> IO ()
 
-setShaderValue :: (Storable a) => Shader -> Int -> a -> Int -> IO ()
+setShaderValue :: (Storable a) => Raylib.Types.Shader -> Int -> a -> Int -> IO ()
 setShaderValue shader locIndex value uniformType = with value (\v -> with shader (\s -> c'setShaderValue s (fromIntegral locIndex) (castPtr v) (fromIntegral uniformType)))
 
 foreign import ccall safe "raylib.h &SetShaderValue"
   p'setShaderValue ::
-    FunPtr (Shader -> CInt -> Ptr () -> CInt -> IO ())
+    FunPtr (Raylib.Types.Shader -> CInt -> Ptr () -> CInt -> IO ())
 
-foreign import ccall safe "bindings.h SetShaderValueV_" c'setShaderValueV :: Ptr Shader -> CInt -> Ptr () -> CInt -> CInt -> IO ()
+foreign import ccall safe "bindings.h SetShaderValueV_" c'setShaderValueV :: Ptr Raylib.Types.Shader -> CInt -> Ptr () -> CInt -> CInt -> IO ()
 
-setShaderValueV :: (Storable a) => Shader -> Int -> a -> Int -> Int -> IO ()
+setShaderValueV :: (Storable a) => Raylib.Types.Shader -> Int -> a -> Int -> Int -> IO ()
 setShaderValueV shader locIndex value uniformType count = with value (\v -> with shader (\s -> c'setShaderValueV s (fromIntegral locIndex) (castPtr v) (fromIntegral uniformType) (fromIntegral count)))
 
 foreign import ccall safe "raylib.h &SetShaderValueV"
   p'setShaderValueV ::
-    FunPtr (Shader -> CInt -> Ptr () -> CInt -> CInt -> IO ())
+    FunPtr (Raylib.Types.Shader -> CInt -> Ptr () -> CInt -> CInt -> IO ())
 
-foreign import ccall safe "bindings.h SetShaderValueMatrix_" c'setShaderValueMatrix :: Ptr Shader -> CInt -> Ptr Matrix -> IO ()
+foreign import ccall safe "bindings.h SetShaderValueMatrix_" c'setShaderValueMatrix :: Ptr Raylib.Types.Shader -> CInt -> Ptr Raylib.Types.Matrix -> IO ()
 
-setShaderValueMatrix :: Shader -> Int -> Matrix -> IO ()
+setShaderValueMatrix :: Raylib.Types.Shader -> Int -> Raylib.Types.Matrix -> IO ()
 setShaderValueMatrix shader locIndex mat = with shader (\s -> with mat (c'setShaderValueMatrix s (fromIntegral locIndex)))
 
 foreign import ccall safe "raylib.h &SetShaderValueMatrix"
   p'setShaderValueMatrix ::
-    FunPtr (Shader -> CInt -> Matrix -> IO ())
+    FunPtr (Raylib.Types.Shader -> CInt -> Raylib.Types.Matrix -> IO ())
 
-foreign import ccall safe "bindings.h SetShaderValueTexture_" c'setShaderValueTexture :: Ptr Shader -> CInt -> Ptr Texture -> IO ()
+foreign import ccall safe "bindings.h SetShaderValueTexture_" c'setShaderValueTexture :: Ptr Raylib.Types.Shader -> CInt -> Ptr Raylib.Types.Texture -> IO ()
 
-setShaderValueTexture :: Shader -> Int -> Texture -> IO ()
+setShaderValueTexture :: Raylib.Types.Shader -> Int -> Raylib.Types.Texture -> IO ()
 setShaderValueTexture shader locIndex tex = with shader (\s -> with tex (c'setShaderValueTexture s (fromIntegral locIndex)))
 
 foreign import ccall safe "raylib.h &SetShaderValueTexture"
   p'setShaderValueTexture ::
-    FunPtr (Shader -> CInt -> Texture -> IO ())
+    FunPtr (Raylib.Types.Shader -> CInt -> Raylib.Types.Texture -> IO ())
 
-foreign import ccall safe "bindings.h UnloadShader_" c'unloadShader :: Ptr Shader -> IO ()
+foreign import ccall safe "bindings.h UnloadShader_" c'unloadShader :: Ptr Raylib.Types.Shader -> IO ()
 
-unloadShader :: Shader -> IO ()
+unloadShader :: Raylib.Types.Shader -> IO ()
 unloadShader shader = with shader c'unloadShader
 
 foreign import ccall safe "raylib.h &UnloadShader"
   p'unloadShader ::
-    FunPtr (Shader -> IO ())
+    FunPtr (Raylib.Types.Shader -> IO ())
 
-foreign import ccall safe "bindings.h GetMouseRay_" c'getMouseRay :: Ptr Vector2 -> Ptr Camera3D -> IO (Ptr Ray)
+foreign import ccall safe "bindings.h GetMouseRay_" c'getMouseRay :: Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Camera3D -> IO (Ptr Raylib.Types.Ray)
 
-getMouseRay :: Vector2 -> Camera3D -> IO Ray
+getMouseRay :: Raylib.Types.Vector2 -> Raylib.Types.Camera3D -> IO Raylib.Types.Ray
 getMouseRay mousePosition camera = with mousePosition (with camera . c'getMouseRay) >>= pop
 
 foreign import ccall safe "raylib.h &GetMouseRay"
   p'getMouseRay ::
-    FunPtr (Vector2 -> Camera3D -> IO Ray)
+    FunPtr (Raylib.Types.Vector2 -> Raylib.Types.Camera3D -> IO Raylib.Types.Ray)
 
-foreign import ccall safe "bindings.h GetCameraMatrix_" c'getCameraMatrix :: Ptr Camera3D -> IO (Ptr Matrix)
+foreign import ccall safe "bindings.h GetCameraMatrix_" c'getCameraMatrix :: Ptr Raylib.Types.Camera3D -> IO (Ptr Raylib.Types.Matrix)
 
-getCameraMatrix :: Camera3D -> IO Matrix
+getCameraMatrix :: Raylib.Types.Camera3D -> IO Raylib.Types.Matrix
 getCameraMatrix camera = with camera c'getCameraMatrix >>= pop
 
 foreign import ccall safe "raylib.h &GetCameraMatrix"
   p'getCameraMatrix ::
-    FunPtr (Camera3D -> IO Matrix)
+    FunPtr (Raylib.Types.Camera3D -> IO Raylib.Types.Matrix)
 
-foreign import ccall safe "bindings.h GetCameraMatrix2D_" c'getCameraMatrix2D :: Ptr Camera2D -> IO (Ptr Matrix)
+foreign import ccall safe "bindings.h GetCameraMatrix2D_" c'getCameraMatrix2D :: Ptr Raylib.Types.Camera2D -> IO (Ptr Raylib.Types.Matrix)
 
-getCameraMatrix2D :: Camera2D -> IO Matrix
+getCameraMatrix2D :: Raylib.Types.Camera2D -> IO Raylib.Types.Matrix
 getCameraMatrix2D camera = with camera c'getCameraMatrix2D >>= pop
 
 foreign import ccall safe "raylib.h &GetCameraMatrix2D"
   p'getCameraMatrix2D ::
-    FunPtr (Camera2D -> IO Matrix)
+    FunPtr (Raylib.Types.Camera2D -> IO Raylib.Types.Matrix)
 
-foreign import ccall safe "bindings.h GetWorldToScreen_" c'getWorldToScreen :: Ptr Vector3 -> Ptr Camera3D -> IO (Ptr Vector2)
+foreign import ccall safe "bindings.h GetWorldToScreen_" c'getWorldToScreen :: Ptr Raylib.Types.Vector3 -> Ptr Raylib.Types.Camera3D -> IO (Ptr Raylib.Types.Vector2)
 
-getWorldToScreen :: Vector3 -> Camera3D -> IO Vector2
+getWorldToScreen :: Raylib.Types.Vector3 -> Raylib.Types.Camera3D -> IO Raylib.Types.Vector2
 getWorldToScreen position camera = with position (with camera . c'getWorldToScreen) >>= pop
 
 foreign import ccall safe "raylib.h &GetWorldToScreen"
   p'getWorldToScreen ::
-    FunPtr (Vector3 -> Camera3D -> IO Vector2)
+    FunPtr (Raylib.Types.Vector3 -> Raylib.Types.Camera3D -> IO Raylib.Types.Vector2)
 
-foreign import ccall safe "bindings.h GetScreenToWorld2D_" c'getScreenToWorld2D :: Ptr Vector2 -> Ptr Camera2D -> IO (Ptr Vector2)
+foreign import ccall safe "bindings.h GetScreenToWorld2D_" c'getScreenToWorld2D :: Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Camera2D -> IO (Ptr Raylib.Types.Vector2)
 
-getScreenToWorld2D :: Vector2 -> Camera2D -> IO Vector2
+getScreenToWorld2D :: Raylib.Types.Vector2 -> Raylib.Types.Camera2D -> IO Raylib.Types.Vector2
 getScreenToWorld2D position camera = with position (with camera . c'getScreenToWorld2D) >>= pop
 
 foreign import ccall safe "raylib.h &GetScreenToWorld2D"
   p'getScreenToWorld2D ::
-    FunPtr (Vector2 -> Camera2D -> IO Vector2)
+    FunPtr (Raylib.Types.Vector2 -> Raylib.Types.Camera2D -> IO Raylib.Types.Vector2)
 
-foreign import ccall safe "bindings.h GetWorldToScreenEx_" c'getWorldToScreenEx :: Ptr Vector3 -> Ptr Camera3D -> CInt -> CInt -> IO (Ptr Vector2)
+foreign import ccall safe "bindings.h GetWorldToScreenEx_" c'getWorldToScreenEx :: Ptr Raylib.Types.Vector3 -> Ptr Raylib.Types.Camera3D -> CInt -> CInt -> IO (Ptr Raylib.Types.Vector2)
 
-getWorldToScreenEx :: Vector3 -> Camera3D -> Int -> Int -> IO Vector2
+getWorldToScreenEx :: Raylib.Types.Vector3 -> Raylib.Types.Camera3D -> Int -> Int -> IO Raylib.Types.Vector2
 getWorldToScreenEx position camera width height = with position (\p -> with camera (\c -> c'getWorldToScreenEx p c (fromIntegral width) (fromIntegral height))) >>= pop
 
 foreign import ccall safe "raylib.h &GetWorldToScreenEx"
   p'getWorldToScreenEx ::
-    FunPtr (Vector3 -> Camera3D -> CInt -> CInt -> IO Vector2)
+    FunPtr (Raylib.Types.Vector3 -> Raylib.Types.Camera3D -> CInt -> CInt -> IO Raylib.Types.Vector2)
 
-foreign import ccall safe "bindings.h GetWorldToScreen2D_" c'getWorldToScreen2D :: Ptr Vector2 -> Ptr Camera2D -> IO (Ptr Vector2)
+foreign import ccall safe "bindings.h GetWorldToScreen2D_" c'getWorldToScreen2D :: Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Camera2D -> IO (Ptr Raylib.Types.Vector2)
 
-getWorldToScreen2D :: Vector2 -> Camera2D -> IO Vector2
+getWorldToScreen2D :: Raylib.Types.Vector2 -> Raylib.Types.Camera2D -> IO Raylib.Types.Vector2
 getWorldToScreen2D position camera = with position (with camera . c'getWorldToScreen2D) >>= pop
 
 foreign import ccall safe "raylib.h &GetWorldToScreen2D"
   p'getWorldToScreen2D ::
-    FunPtr (Vector2 -> Camera2D -> IO Vector2)
+    FunPtr (Raylib.Types.Vector2 -> Raylib.Types.Camera2D -> IO Raylib.Types.Vector2)
 
 foreign import ccall safe "raylib.h SetTargetFPS"
   c'setTargetFPS ::
@@ -1381,33 +1381,33 @@ foreign import ccall safe "raylib.h &IsPathFile"
   p'isPathFile ::
     FunPtr (CString -> IO CInt)
 
-foreign import ccall safe "bindings.h LoadDirectoryFiles_" c'loadDirectoryFiles :: CString -> IO (Ptr FilePathList)
+foreign import ccall safe "bindings.h LoadDirectoryFiles_" c'loadDirectoryFiles :: CString -> IO (Ptr Raylib.Types.FilePathList)
 
-loadDirectoryFiles :: String -> IO FilePathList
+loadDirectoryFiles :: String -> IO Raylib.Types.FilePathList
 loadDirectoryFiles dirPath = withCString dirPath c'loadDirectoryFiles >>= pop
 
 foreign import ccall safe "raylib.h &LoadDirectoryFiles"
   p'loadDirectoryFiles ::
-    FunPtr (CString -> IO FilePathList)
+    FunPtr (CString -> IO Raylib.Types.FilePathList)
 
-foreign import ccall safe "bindings.h LoadDirectoryFilesEx_" c'loadDirectoryFilesEx :: CString -> CString -> CInt -> IO (Ptr FilePathList)
+foreign import ccall safe "bindings.h LoadDirectoryFilesEx_" c'loadDirectoryFilesEx :: CString -> CString -> CInt -> IO (Ptr Raylib.Types.FilePathList)
 
-loadDirectoryFilesEx :: String -> String -> Bool -> IO FilePathList
+loadDirectoryFilesEx :: String -> String -> Bool -> IO Raylib.Types.FilePathList
 loadDirectoryFilesEx basePath filterStr scanSubdirs =
   withCString basePath (\b -> withCString filterStr (\f -> c'loadDirectoryFilesEx b f (fromBool scanSubdirs))) >>= pop
 
 foreign import ccall safe "raylib.h &LoadDirectoryFilesEx"
   p'loadDirectoryFilesEx ::
-    FunPtr (CString -> CString -> CInt -> IO FilePathList)
+    FunPtr (CString -> CString -> CInt -> IO Raylib.Types.FilePathList)
 
-foreign import ccall safe "bindings.h UnloadDirectoryFiles_" c'unloadDirectoryFiles :: Ptr FilePathList -> IO ()
+foreign import ccall safe "bindings.h UnloadDirectoryFiles_" c'unloadDirectoryFiles :: Ptr Raylib.Types.FilePathList -> IO ()
 
-unloadDirectoryFiles :: FilePathList -> IO ()
+unloadDirectoryFiles :: Raylib.Types.FilePathList -> IO ()
 unloadDirectoryFiles files = with files c'unloadDirectoryFiles
 
 foreign import ccall safe "raylib.h &UnloadDirectoryFiles"
   p'unloadDirectoryFiles ::
-    FunPtr (FilePathList -> IO ())
+    FunPtr (Raylib.Types.FilePathList -> IO ())
 
 foreign import ccall safe "raylib.h IsFileDropped"
   c'isFileDropped ::
@@ -1420,23 +1420,23 @@ foreign import ccall safe "raylib.h &IsFileDropped"
   p'isFileDropped ::
     FunPtr (IO CInt)
 
-foreign import ccall safe "bindings.h LoadDroppedFiles_" c'loadDroppedFiles :: IO (Ptr FilePathList)
+foreign import ccall safe "bindings.h LoadDroppedFiles_" c'loadDroppedFiles :: IO (Ptr Raylib.Types.FilePathList)
 
-loadDroppedFiles :: IO FilePathList
+loadDroppedFiles :: IO Raylib.Types.FilePathList
 loadDroppedFiles = c'loadDroppedFiles >>= pop
 
 foreign import ccall safe "raylib.h &LoadDroppedFiles"
   p'loadDroppedFiles ::
-    FunPtr (IO FilePathList)
+    FunPtr (IO Raylib.Types.FilePathList)
 
-foreign import ccall safe "bindings.h UnloadDroppedFiles_" c'unloadDroppedFiles :: Ptr FilePathList -> IO ()
+foreign import ccall safe "bindings.h UnloadDroppedFiles_" c'unloadDroppedFiles :: Ptr Raylib.Types.FilePathList -> IO ()
 
-unloadDroppedFiles :: FilePathList -> IO ()
+unloadDroppedFiles :: Raylib.Types.FilePathList -> IO ()
 unloadDroppedFiles files = with files c'unloadDroppedFiles
 
 foreign import ccall safe "raylib.h &UnloadDroppedFiles"
   p'unloadDroppedFiles ::
-    FunPtr (FilePathList -> IO ())
+    FunPtr (Raylib.Types.FilePathList -> IO ())
 
 foreign import ccall safe "raylib.h GetFileModTime"
   c'getFileModTime ::
@@ -1790,23 +1790,23 @@ foreign import ccall safe "raylib.h &GetMouseY"
   p'getMouseY ::
     FunPtr (IO CInt)
 
-foreign import ccall safe "bindings.h GetMousePosition_" c'getMousePosition :: IO (Ptr Vector2)
+foreign import ccall safe "bindings.h GetMousePosition_" c'getMousePosition :: IO (Ptr Raylib.Types.Vector2)
 
-getMousePosition :: IO Vector2
+getMousePosition :: IO Raylib.Types.Vector2
 getMousePosition = c'getMousePosition >>= pop
 
 foreign import ccall safe "raylib.h &GetMousePosition"
   p'getMousePosition ::
-    FunPtr (IO Vector2)
+    FunPtr (IO Raylib.Types.Vector2)
 
-foreign import ccall safe "bindings.h GetMouseDelta_" c'getMouseDelta :: IO (Ptr Vector2)
+foreign import ccall safe "bindings.h GetMouseDelta_" c'getMouseDelta :: IO (Ptr Raylib.Types.Vector2)
 
-getMouseDelta :: IO Vector2
+getMouseDelta :: IO Raylib.Types.Vector2
 getMouseDelta = c'getMouseDelta >>= pop
 
 foreign import ccall safe "raylib.h &GetMouseDelta"
   p'getMouseDelta ::
-    FunPtr (IO Vector2)
+    FunPtr (IO Raylib.Types.Vector2)
 
 foreign import ccall safe "raylib.h SetMousePosition"
   c'setMousePosition ::
@@ -1852,14 +1852,14 @@ foreign import ccall safe "raylib.h &GetMouseWheelMove"
   p'getMouseWheelMove ::
     FunPtr (IO CFloat)
 
-foreign import ccall safe "bindings.h GetMouseWheelMoveV_" c'getMouseWheelMoveV :: IO (Ptr Vector2)
+foreign import ccall safe "bindings.h GetMouseWheelMoveV_" c'getMouseWheelMoveV :: IO (Ptr Raylib.Types.Vector2)
 
-getMouseWheelMoveV :: IO Vector2
+getMouseWheelMoveV :: IO Raylib.Types.Vector2
 getMouseWheelMoveV = c'getMouseWheelMoveV >>= pop
 
 foreign import ccall safe "raylib.h &GetMouseWheelMoveV"
   p'getMouseWheelMoveV ::
-    FunPtr (IO Vector2)
+    FunPtr (IO Raylib.Types.Vector2)
 
 foreign import ccall safe "raylib.h SetMouseCursor"
   c'setMouseCursor ::
@@ -1894,14 +1894,14 @@ foreign import ccall safe "raylib.h &GetTouchY"
   p'getTouchY ::
     FunPtr (IO CInt)
 
-foreign import ccall safe "bindings.h GetTouchPosition_" c'getTouchPosition :: CInt -> IO (Ptr Vector2)
+foreign import ccall safe "bindings.h GetTouchPosition_" c'getTouchPosition :: CInt -> IO (Ptr Raylib.Types.Vector2)
 
-getTouchPosition :: Int -> IO Vector2
+getTouchPosition :: Int -> IO Raylib.Types.Vector2
 getTouchPosition index = c'getTouchPosition (fromIntegral index) >>= pop
 
 foreign import ccall safe "raylib.h &GetTouchPosition"
   p'getTouchPosition ::
-    FunPtr (CInt -> IO Vector2)
+    FunPtr (CInt -> IO Raylib.Types.Vector2)
 
 foreign import ccall safe "raylib.h GetTouchPointId"
   c'getTouchPointId ::
@@ -1969,14 +1969,14 @@ foreign import ccall safe "raylib.h &GetGestureHoldDuration"
   p'getGestureHoldDuration ::
     FunPtr (IO CFloat)
 
-foreign import ccall safe "bindings.h GetGestureDragVector_" c'getGestureDragVector :: IO (Ptr Vector2)
+foreign import ccall safe "bindings.h GetGestureDragVector_" c'getGestureDragVector :: IO (Ptr Raylib.Types.Vector2)
 
-getGestureDragVector :: IO Vector2
+getGestureDragVector :: IO Raylib.Types.Vector2
 getGestureDragVector = c'getGestureDragVector >>= pop
 
 foreign import ccall safe "raylib.h &GetGestureDragVector"
   p'getGestureDragVector ::
-    FunPtr (IO Vector2)
+    FunPtr (IO Raylib.Types.Vector2)
 
 foreign import ccall safe "raylib.h GetGestureDragAngle"
   c'getGestureDragAngle ::
@@ -1989,14 +1989,14 @@ foreign import ccall safe "raylib.h &GetGestureDragAngle"
   p'getGestureDragAngle ::
     FunPtr (IO CFloat)
 
-foreign import ccall safe "bindings.h GetGesturePinchVector_" c'getGesturePinchVector :: IO (Ptr Vector2)
+foreign import ccall safe "bindings.h GetGesturePinchVector_" c'getGesturePinchVector :: IO (Ptr Raylib.Types.Vector2)
 
-getGesturePinchVector :: IO Vector2
+getGesturePinchVector :: IO Raylib.Types.Vector2
 getGesturePinchVector = c'getGesturePinchVector >>= pop
 
 foreign import ccall safe "raylib.h &GetGesturePinchVector"
   p'getGesturePinchVector ::
-    FunPtr (IO Vector2)
+    FunPtr (IO Raylib.Types.Vector2)
 
 foreign import ccall safe "raylib.h GetGesturePinchAngle"
   c'getGesturePinchAngle ::
@@ -2009,20 +2009,20 @@ foreign import ccall safe "raylib.h &GetGesturePinchAngle"
   p'getGesturePinchAngle ::
     FunPtr (IO CFloat)
 
-foreign import ccall safe "bindings.h SetCameraMode_" c'setCameraMode :: Ptr Camera3D -> CInt -> IO ()
+foreign import ccall safe "bindings.h SetCameraMode_" c'setCameraMode :: Ptr Raylib.Types.Camera3D -> CInt -> IO ()
 
-setCameraMode :: Camera3D -> Int -> IO ()
+setCameraMode :: Raylib.Types.Camera3D -> Int -> IO ()
 setCameraMode camera mode = with camera (\c -> c'setCameraMode c (fromIntegral mode))
 
 foreign import ccall safe "raylib.h &SetCameraMode"
   p'setCameraMode ::
-    FunPtr (Camera3D -> CInt -> IO ())
+    FunPtr (Raylib.Types.Camera3D -> CInt -> IO ())
 
 foreign import ccall safe "raylib.h UpdateCamera"
   c'updateCamera ::
-    Ptr Camera3D -> IO ()
+    Ptr Raylib.Types.Camera3D -> IO ()
 
-updateCamera :: Camera3D -> IO Camera3D
+updateCamera :: Raylib.Types.Camera3D -> IO Raylib.Types.Camera3D
 updateCamera camera =
   with
     camera
@@ -2033,7 +2033,7 @@ updateCamera camera =
 
 foreign import ccall safe "raylib.h &UpdateCamera"
   p'updateCamera ::
-    FunPtr (Ptr Camera3D -> IO ())
+    FunPtr (Ptr Raylib.Types.Camera3D -> IO ())
 
 foreign import ccall safe "raylib.h SetCameraPanControl"
   c'setCameraPanControl ::
@@ -2086,85 +2086,85 @@ foreign import ccall safe "raylib.h &SetCameraMoveControls"
   p'setCameraMoveControls ::
     FunPtr (CInt -> CInt -> CInt -> CInt -> CInt -> CInt -> IO ())
 
-foreign import ccall safe "bindings.h SetShapesTexture_" c'setShapesTexture :: Ptr Texture -> Ptr Rectangle -> IO ()
+foreign import ccall safe "bindings.h SetShapesTexture_" c'setShapesTexture :: Ptr Raylib.Types.Texture -> Ptr Raylib.Types.Rectangle -> IO ()
 
-setShapesTexture :: Texture -> Rectangle -> IO ()
+setShapesTexture :: Raylib.Types.Texture -> Raylib.Types.Rectangle -> IO ()
 setShapesTexture tex source = with tex (with source . c'setShapesTexture)
 
 foreign import ccall safe "raylib.h &SetShapesTexture"
   p'setShapesTexture ::
-    FunPtr (Texture -> Rectangle -> IO ())
+    FunPtr (Raylib.Types.Texture -> Raylib.Types.Rectangle -> IO ())
 
-foreign import ccall safe "bindings.h DrawPixel_" c'drawPixel :: CInt -> CInt -> Ptr Color -> IO ()
+foreign import ccall safe "bindings.h DrawPixel_" c'drawPixel :: CInt -> CInt -> Ptr Raylib.Types.Color -> IO ()
 
-drawPixel :: Int -> Int -> Color -> IO ()
+drawPixel :: Int -> Int -> Raylib.Types.Color -> IO ()
 drawPixel x y color = with color $ c'drawPixel (fromIntegral x) (fromIntegral y)
 
 foreign import ccall safe "raylib.h &DrawPixel"
   p'drawPixel ::
-    FunPtr (CInt -> CInt -> Color -> IO ())
+    FunPtr (CInt -> CInt -> Raylib.Types.Color -> IO ())
 
-foreign import ccall safe "bindings.h DrawPixelV_" c'drawPixelV :: Ptr Vector2 -> Ptr Color -> IO ()
+foreign import ccall safe "bindings.h DrawPixelV_" c'drawPixelV :: Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Color -> IO ()
 
-drawPixelV :: Vector2 -> Color -> IO ()
+drawPixelV :: Raylib.Types.Vector2 -> Raylib.Types.Color -> IO ()
 drawPixelV position color = with position (with color . c'drawPixelV)
 
 foreign import ccall safe "raylib.h &DrawPixelV"
   p'drawPixelV ::
-    FunPtr (Vector2 -> Color -> IO ())
+    FunPtr (Raylib.Types.Vector2 -> Raylib.Types.Color -> IO ())
 
-foreign import ccall safe "bindings.h DrawLine_" c'drawLine :: CInt -> CInt -> CInt -> CInt -> Ptr Color -> IO ()
+foreign import ccall safe "bindings.h DrawLine_" c'drawLine :: CInt -> CInt -> CInt -> CInt -> Ptr Raylib.Types.Color -> IO ()
 
-drawLine :: Int -> Int -> Int -> Int -> Color -> IO ()
+drawLine :: Int -> Int -> Int -> Int -> Raylib.Types.Color -> IO ()
 drawLine startX startY endX endY color =
   with color $ c'drawLine (fromIntegral startX) (fromIntegral startY) (fromIntegral endX) (fromIntegral endY)
 
 foreign import ccall safe "raylib.h &DrawLine"
   p'drawLine ::
-    FunPtr (CInt -> CInt -> CInt -> CInt -> Color -> IO ())
+    FunPtr (CInt -> CInt -> CInt -> CInt -> Raylib.Types.Color -> IO ())
 
-foreign import ccall safe "bindings.h DrawLineV_" c'drawLineV :: Ptr Vector2 -> Ptr Vector2 -> Ptr Color -> IO ()
+foreign import ccall safe "bindings.h DrawLineV_" c'drawLineV :: Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Color -> IO ()
 
-drawLineV :: Vector2 -> Vector2 -> Color -> IO ()
+drawLineV :: Raylib.Types.Vector2 -> Raylib.Types.Vector2 -> Raylib.Types.Color -> IO ()
 drawLineV start end color = with start (\s -> with end (with color . c'drawLineV s))
 
 foreign import ccall safe "raylib.h &DrawLineV"
   p'drawLineV ::
-    FunPtr (Vector2 -> Vector2 -> Color -> IO ())
+    FunPtr (Raylib.Types.Vector2 -> Raylib.Types.Vector2 -> Raylib.Types.Color -> IO ())
 
-foreign import ccall safe "bindings.h DrawLineEx_" c'drawLineEx :: Ptr Vector2 -> Ptr Vector2 -> CFloat -> Ptr Color -> IO ()
+foreign import ccall safe "bindings.h DrawLineEx_" c'drawLineEx :: Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Vector2 -> CFloat -> Ptr Raylib.Types.Color -> IO ()
 
-drawLineEx :: Vector2 -> Vector2 -> Float -> Color -> IO ()
+drawLineEx :: Raylib.Types.Vector2 -> Raylib.Types.Vector2 -> Float -> Raylib.Types.Color -> IO ()
 drawLineEx start end thickness color =
   with start (\s -> with end (\e -> with color (c'drawLineEx s e (realToFrac thickness))))
 
 foreign import ccall safe "raylib.h &DrawLineEx"
   p'drawLineEx ::
-    FunPtr (Vector2 -> Vector2 -> CFloat -> Color -> IO ())
+    FunPtr (Raylib.Types.Vector2 -> Raylib.Types.Vector2 -> CFloat -> Raylib.Types.Color -> IO ())
 
-foreign import ccall safe "bindings.h DrawLineBezier_" c'drawLineBezier :: Ptr Vector2 -> Ptr Vector2 -> CFloat -> Ptr Color -> IO ()
+foreign import ccall safe "bindings.h DrawLineBezier_" c'drawLineBezier :: Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Vector2 -> CFloat -> Ptr Raylib.Types.Color -> IO ()
 
-drawLineBezier :: Vector2 -> Vector2 -> Float -> Color -> IO ()
+drawLineBezier :: Raylib.Types.Vector2 -> Raylib.Types.Vector2 -> Float -> Raylib.Types.Color -> IO ()
 drawLineBezier start end thickness color =
   with start (\s -> with end (\e -> with color (c'drawLineBezier s e (realToFrac thickness))))
 
 foreign import ccall safe "raylib.h &DrawLineBezier"
   p'drawLineBezier ::
-    FunPtr (Vector2 -> Vector2 -> CFloat -> Color -> IO ())
+    FunPtr (Raylib.Types.Vector2 -> Raylib.Types.Vector2 -> CFloat -> Raylib.Types.Color -> IO ())
 
-foreign import ccall safe "bindings.h DrawLineBezierQuad_" c'drawLineBezierQuad :: Ptr Vector2 -> Ptr Vector2 -> Ptr Vector2 -> CFloat -> Ptr Color -> IO ()
+foreign import ccall safe "bindings.h DrawLineBezierQuad_" c'drawLineBezierQuad :: Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Vector2 -> CFloat -> Ptr Raylib.Types.Color -> IO ()
 
-drawLineBezierQuad :: Vector2 -> Vector2 -> Vector2 -> Float -> Color -> IO ()
+drawLineBezierQuad :: Raylib.Types.Vector2 -> Raylib.Types.Vector2 -> Raylib.Types.Vector2 -> Float -> Raylib.Types.Color -> IO ()
 drawLineBezierQuad start end control thickness color =
   with start (\s -> with end (\e -> with control (\c -> with color (c'drawLineBezierQuad s e c (realToFrac thickness)))))
 
 foreign import ccall safe "raylib.h &DrawLineBezierQuad"
   p'drawLineBezierQuad ::
-    FunPtr (Vector2 -> Vector2 -> Vector2 -> CFloat -> Color -> IO ())
+    FunPtr (Raylib.Types.Vector2 -> Raylib.Types.Vector2 -> Raylib.Types.Vector2 -> CFloat -> Raylib.Types.Color -> IO ())
 
-foreign import ccall safe "bindings.h DrawLineBezierCubic_" c'drawLineBezierCubic :: Ptr Vector2 -> Ptr Vector2 -> Ptr Vector2 -> Ptr Vector2 -> CFloat -> Ptr Color -> IO ()
+foreign import ccall safe "bindings.h DrawLineBezierCubic_" c'drawLineBezierCubic :: Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Vector2 -> CFloat -> Ptr Raylib.Types.Color -> IO ()
 
-drawLineBezierCubic :: Vector2 -> Vector2 -> Vector2 -> Vector2 -> Float -> Color -> IO ()
+drawLineBezierCubic :: Raylib.Types.Vector2 -> Raylib.Types.Vector2 -> Raylib.Types.Vector2 -> Raylib.Types.Vector2 -> Float -> Raylib.Types.Color -> IO ()
 drawLineBezierCubic start end startControl endControl thickness color =
   with
     start
@@ -2189,29 +2189,29 @@ drawLineBezierCubic start end startControl endControl thickness color =
 
 foreign import ccall safe "raylib.h &DrawLineBezierCubic"
   p'drawLineBezierCubic ::
-    FunPtr (Vector2 -> Vector2 -> Vector2 -> Vector2 -> CFloat -> Color -> IO ())
+    FunPtr (Raylib.Types.Vector2 -> Raylib.Types.Vector2 -> Raylib.Types.Vector2 -> Raylib.Types.Vector2 -> CFloat -> Raylib.Types.Color -> IO ())
 
-foreign import ccall safe "bindings.h DrawLineStrip_" c'drawLineStrip :: Ptr Vector2 -> CInt -> Ptr Color -> IO ()
+foreign import ccall safe "bindings.h DrawLineStrip_" c'drawLineStrip :: Ptr Raylib.Types.Vector2 -> CInt -> Ptr Raylib.Types.Color -> IO ()
 
-drawLineStrip :: [Vector2] -> Color -> IO ()
+drawLineStrip :: [Raylib.Types.Vector2] -> Raylib.Types.Color -> IO ()
 drawLineStrip points color = withArray points (\p -> with color $ c'drawLineStrip p (genericLength points))
 
 foreign import ccall safe "raylib.h &DrawLineStrip"
   p'drawLineStrip ::
-    FunPtr (Ptr Vector2 -> CInt -> Color -> IO ())
+    FunPtr (Ptr Raylib.Types.Vector2 -> CInt -> Raylib.Types.Color -> IO ())
 
-foreign import ccall safe "bindings.h DrawCircle_" c'drawCircle :: CInt -> CInt -> CFloat -> Ptr Color -> IO ()
+foreign import ccall safe "bindings.h DrawCircle_" c'drawCircle :: CInt -> CInt -> CFloat -> Ptr Raylib.Types.Color -> IO ()
 
-drawCircle :: Int -> Int -> Float -> Color -> IO ()
+drawCircle :: Int -> Int -> Float -> Raylib.Types.Color -> IO ()
 drawCircle centerX centerY radius color = with color (c'drawCircle (fromIntegral centerX) (fromIntegral centerY) (realToFrac radius))
 
 foreign import ccall safe "raylib.h &DrawCircle"
   p'drawCircle ::
-    FunPtr (CInt -> CInt -> CFloat -> Color -> IO ())
+    FunPtr (CInt -> CInt -> CFloat -> Raylib.Types.Color -> IO ())
 
-foreign import ccall safe "bindings.h DrawCircleSector_" c'drawCircleSector :: Ptr Vector2 -> CFloat -> CFloat -> CFloat -> CInt -> Ptr Color -> IO ()
+foreign import ccall safe "bindings.h DrawCircleSector_" c'drawCircleSector :: Ptr Raylib.Types.Vector2 -> CFloat -> CFloat -> CFloat -> CInt -> Ptr Raylib.Types.Color -> IO ()
 
-drawCircleSector :: Vector2 -> Float -> Float -> Float -> Int -> Color -> IO ()
+drawCircleSector :: Raylib.Types.Vector2 -> Float -> Float -> Float -> Int -> Raylib.Types.Color -> IO ()
 drawCircleSector center radius startAngle endAngle segments color =
   with
     center
@@ -2224,11 +2224,11 @@ drawCircleSector center radius startAngle endAngle segments color =
 
 foreign import ccall safe "raylib.h &DrawCircleSector"
   p'drawCircleSector ::
-    FunPtr (Vector2 -> CFloat -> CFloat -> CFloat -> CInt -> Color -> IO ())
+    FunPtr (Raylib.Types.Vector2 -> CFloat -> CFloat -> CFloat -> CInt -> Raylib.Types.Color -> IO ())
 
-foreign import ccall safe "bindings.h DrawCircleSectorLines_" c'drawCircleSectorLines :: Ptr Vector2 -> CFloat -> CFloat -> CFloat -> CInt -> Ptr Color -> IO ()
+foreign import ccall safe "bindings.h DrawCircleSectorLines_" c'drawCircleSectorLines :: Ptr Raylib.Types.Vector2 -> CFloat -> CFloat -> CFloat -> CInt -> Ptr Raylib.Types.Color -> IO ()
 
-drawCircleSectorLines :: Vector2 -> Float -> Float -> Float -> Int -> Color -> IO ()
+drawCircleSectorLines :: Raylib.Types.Vector2 -> Float -> Float -> Float -> Int -> Raylib.Types.Color -> IO ()
 drawCircleSectorLines center radius startAngle endAngle segments color =
   with
     center
@@ -2241,61 +2241,61 @@ drawCircleSectorLines center radius startAngle endAngle segments color =
 
 foreign import ccall safe "raylib.h &DrawCircleSectorLines"
   p'drawCircleSectorLines ::
-    FunPtr (Vector2 -> CFloat -> CFloat -> CFloat -> CInt -> Color -> IO ())
+    FunPtr (Raylib.Types.Vector2 -> CFloat -> CFloat -> CFloat -> CInt -> Raylib.Types.Color -> IO ())
 
-foreign import ccall safe "bindings.h DrawCircleGradient_" c'drawCircleGradient :: CInt -> CInt -> CFloat -> Ptr Color -> Ptr Color -> IO ()
+foreign import ccall safe "bindings.h DrawCircleGradient_" c'drawCircleGradient :: CInt -> CInt -> CFloat -> Ptr Raylib.Types.Color -> Ptr Raylib.Types.Color -> IO ()
 
-drawCircleGradient :: Int -> Int -> Float -> Color -> Color -> IO ()
+drawCircleGradient :: Int -> Int -> Float -> Raylib.Types.Color -> Raylib.Types.Color -> IO ()
 drawCircleGradient centerX centerY radius color1 color2 =
   with color1 (with color2 . c'drawCircleGradient (fromIntegral centerX) (fromIntegral centerY) (realToFrac radius))
 
 foreign import ccall safe "raylib.h &DrawCircleGradient"
   p'drawCircleGradient ::
-    FunPtr (CInt -> CInt -> CFloat -> Color -> Color -> IO ())
+    FunPtr (CInt -> CInt -> CFloat -> Raylib.Types.Color -> Raylib.Types.Color -> IO ())
 
-foreign import ccall safe "bindings.h DrawCircleV_" c'drawCircleV :: Ptr Vector2 -> CFloat -> Ptr Color -> IO ()
+foreign import ccall safe "bindings.h DrawCircleV_" c'drawCircleV :: Ptr Raylib.Types.Vector2 -> CFloat -> Ptr Raylib.Types.Color -> IO ()
 
-drawCircleV :: Vector2 -> Float -> Color -> IO ()
+drawCircleV :: Raylib.Types.Vector2 -> Float -> Raylib.Types.Color -> IO ()
 drawCircleV center radius color =
   with center (\c -> with color (c'drawCircleV c (realToFrac radius)))
 
 foreign import ccall safe "raylib.h &DrawCircleV"
   p'drawCircleV ::
-    FunPtr (Vector2 -> CFloat -> Color -> IO ())
+    FunPtr (Raylib.Types.Vector2 -> CFloat -> Raylib.Types.Color -> IO ())
 
-foreign import ccall safe "bindings.h DrawCircleLines_" c'drawCircleLines :: CInt -> CInt -> CFloat -> Ptr Color -> IO ()
+foreign import ccall safe "bindings.h DrawCircleLines_" c'drawCircleLines :: CInt -> CInt -> CFloat -> Ptr Raylib.Types.Color -> IO ()
 
-drawCircleLines :: Int -> Int -> Float -> Color -> IO ()
+drawCircleLines :: Int -> Int -> Float -> Raylib.Types.Color -> IO ()
 drawCircleLines centerX centerY radius color =
   with color (c'drawCircleLines (fromIntegral centerX) (fromIntegral centerY) (realToFrac radius))
 
 foreign import ccall safe "raylib.h &DrawCircleLines"
   p'drawCircleLines ::
-    FunPtr (CInt -> CInt -> CFloat -> Color -> IO ())
+    FunPtr (CInt -> CInt -> CFloat -> Raylib.Types.Color -> IO ())
 
-foreign import ccall safe "bindings.h DrawEllipse_" c'drawEllipse :: CInt -> CInt -> CFloat -> CFloat -> Ptr Color -> IO ()
+foreign import ccall safe "bindings.h DrawEllipse_" c'drawEllipse :: CInt -> CInt -> CFloat -> CFloat -> Ptr Raylib.Types.Color -> IO ()
 
-drawEllipse :: Int -> Int -> Float -> Float -> Color -> IO ()
+drawEllipse :: Int -> Int -> Float -> Float -> Raylib.Types.Color -> IO ()
 drawEllipse centerX centerY radiusH radiusV color =
   with color (c'drawEllipse (fromIntegral centerX) (fromIntegral centerY) (realToFrac radiusH) (realToFrac radiusV))
 
 foreign import ccall safe "raylib.h &DrawEllipse"
   p'drawEllipse ::
-    FunPtr (CInt -> CInt -> CFloat -> CFloat -> Color -> IO ())
+    FunPtr (CInt -> CInt -> CFloat -> CFloat -> Raylib.Types.Color -> IO ())
 
-foreign import ccall safe "bindings.h DrawEllipseLines_" c'drawEllipseLines :: CInt -> CInt -> CFloat -> CFloat -> Ptr Color -> IO ()
+foreign import ccall safe "bindings.h DrawEllipseLines_" c'drawEllipseLines :: CInt -> CInt -> CFloat -> CFloat -> Ptr Raylib.Types.Color -> IO ()
 
-drawEllipseLines :: Int -> Int -> Float -> Float -> Color -> IO ()
+drawEllipseLines :: Int -> Int -> Float -> Float -> Raylib.Types.Color -> IO ()
 drawEllipseLines centerX centerY radiusH radiusV color =
   with color (c'drawEllipseLines (fromIntegral centerX) (fromIntegral centerY) (realToFrac radiusH) (realToFrac radiusV))
 
 foreign import ccall safe "raylib.h &DrawEllipseLines"
   p'drawEllipseLines ::
-    FunPtr (CInt -> CInt -> CFloat -> CFloat -> Color -> IO ())
+    FunPtr (CInt -> CInt -> CFloat -> CFloat -> Raylib.Types.Color -> IO ())
 
-foreign import ccall safe "bindings.h DrawRing_" c'drawRing :: Ptr Vector2 -> CFloat -> CFloat -> CFloat -> CFloat -> CInt -> Ptr Color -> IO ()
+foreign import ccall safe "bindings.h DrawRing_" c'drawRing :: Ptr Raylib.Types.Vector2 -> CFloat -> CFloat -> CFloat -> CFloat -> CInt -> Ptr Raylib.Types.Color -> IO ()
 
-drawRing :: Vector2 -> Float -> Float -> Float -> Float -> Int -> Color -> IO ()
+drawRing :: Raylib.Types.Vector2 -> Float -> Float -> Float -> Float -> Int -> Raylib.Types.Color -> IO ()
 drawRing center innerRadius outerRadius startAngle endAngle segments color =
   with
     center
@@ -2314,11 +2314,11 @@ drawRing center innerRadius outerRadius startAngle endAngle segments color =
 
 foreign import ccall safe "raylib.h &DrawRing"
   p'drawRing ::
-    FunPtr (Vector2 -> CFloat -> CFloat -> CFloat -> CFloat -> CInt -> Color -> IO ())
+    FunPtr (Raylib.Types.Vector2 -> CFloat -> CFloat -> CFloat -> CFloat -> CInt -> Raylib.Types.Color -> IO ())
 
-foreign import ccall safe "bindings.h DrawRingLines_" c'drawRingLines :: Ptr Vector2 -> CFloat -> CFloat -> CFloat -> CFloat -> CInt -> Ptr Color -> IO ()
+foreign import ccall safe "bindings.h DrawRingLines_" c'drawRingLines :: Ptr Raylib.Types.Vector2 -> CFloat -> CFloat -> CFloat -> CFloat -> CInt -> Ptr Raylib.Types.Color -> IO ()
 
-drawRingLines :: Vector2 -> Float -> Float -> Float -> Float -> Int -> Color -> IO ()
+drawRingLines :: Raylib.Types.Vector2 -> Float -> Float -> Float -> Float -> Int -> Raylib.Types.Color -> IO ()
 drawRingLines center innerRadius outerRadius startAngle endAngle segments color =
   with
     center
@@ -2337,49 +2337,49 @@ drawRingLines center innerRadius outerRadius startAngle endAngle segments color 
 
 foreign import ccall safe "raylib.h &DrawRingLines"
   p'drawRingLines ::
-    FunPtr (Vector2 -> CFloat -> CFloat -> CFloat -> CFloat -> CInt -> Color -> IO ())
+    FunPtr (Raylib.Types.Vector2 -> CFloat -> CFloat -> CFloat -> CFloat -> CInt -> Raylib.Types.Color -> IO ())
 
-foreign import ccall safe "bindings.h DrawRectangle_" c'drawRectangle :: CInt -> CInt -> CInt -> CInt -> Ptr Color -> IO ()
+foreign import ccall safe "bindings.h DrawRectangle_" c'drawRectangle :: CInt -> CInt -> CInt -> CInt -> Ptr Raylib.Types.Color -> IO ()
 
-drawRectangle :: Int -> Int -> Int -> Int -> Color -> IO ()
+drawRectangle :: Int -> Int -> Int -> Int -> Raylib.Types.Color -> IO ()
 drawRectangle posX posY width height color =
   with color (c'drawRectangle (fromIntegral posX) (fromIntegral posY) (fromIntegral width) (fromIntegral height))
 
 foreign import ccall safe "raylib.h &DrawRectangle"
   p'drawRectangle ::
-    FunPtr (CInt -> CInt -> CInt -> CInt -> Color -> IO ())
+    FunPtr (CInt -> CInt -> CInt -> CInt -> Raylib.Types.Color -> IO ())
 
-foreign import ccall safe "bindings.h DrawRectangleV_" c'drawRectangleV :: Ptr Vector2 -> Ptr Vector2 -> Ptr Color -> IO ()
+foreign import ccall safe "bindings.h DrawRectangleV_" c'drawRectangleV :: Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Color -> IO ()
 
-drawRectangleV :: Vector2 -> Vector2 -> Color -> IO ()
+drawRectangleV :: Raylib.Types.Vector2 -> Raylib.Types.Vector2 -> Raylib.Types.Color -> IO ()
 drawRectangleV position size color = with position (\p -> with size (with color . c'drawRectangleV p))
 
 foreign import ccall safe "raylib.h &DrawRectangleV"
   p'drawRectangleV ::
-    FunPtr (Vector2 -> Vector2 -> Color -> IO ())
+    FunPtr (Raylib.Types.Vector2 -> Raylib.Types.Vector2 -> Raylib.Types.Color -> IO ())
 
-foreign import ccall safe "bindings.h DrawRectangleRec_" c'drawRectangleRec :: Ptr Rectangle -> Ptr Color -> IO ()
+foreign import ccall safe "bindings.h DrawRectangleRec_" c'drawRectangleRec :: Ptr Raylib.Types.Rectangle -> Ptr Raylib.Types.Color -> IO ()
 
-drawRectangleRec :: Rectangle -> Color -> IO ()
+drawRectangleRec :: Raylib.Types.Rectangle -> Raylib.Types.Color -> IO ()
 drawRectangleRec rect color = with rect (with color . c'drawRectangleRec)
 
 foreign import ccall safe "raylib.h &DrawRectangleRec"
   p'drawRectangleRec ::
-    FunPtr (Rectangle -> Color -> IO ())
+    FunPtr (Raylib.Types.Rectangle -> Raylib.Types.Color -> IO ())
 
-foreign import ccall safe "bindings.h DrawRectanglePro_" c'drawRectanglePro :: Ptr Rectangle -> Ptr Vector2 -> CFloat -> Ptr Color -> IO ()
+foreign import ccall safe "bindings.h DrawRectanglePro_" c'drawRectanglePro :: Ptr Raylib.Types.Rectangle -> Ptr Raylib.Types.Vector2 -> CFloat -> Ptr Raylib.Types.Color -> IO ()
 
-drawRectanglePro :: Rectangle -> Vector2 -> Float -> Color -> IO ()
+drawRectanglePro :: Raylib.Types.Rectangle -> Raylib.Types.Vector2 -> Float -> Raylib.Types.Color -> IO ()
 drawRectanglePro rect origin rotation color =
   with color (\c -> with rect (\r -> with origin (\o -> c'drawRectanglePro r o (realToFrac rotation) c)))
 
 foreign import ccall safe "raylib.h &DrawRectanglePro"
   p'drawRectanglePro ::
-    FunPtr (Rectangle -> Vector2 -> CFloat -> Color -> IO ())
+    FunPtr (Raylib.Types.Rectangle -> Raylib.Types.Vector2 -> CFloat -> Raylib.Types.Color -> IO ())
 
-foreign import ccall safe "bindings.h DrawRectangleGradientV_" c'drawRectangleGradientV :: CInt -> CInt -> CInt -> CInt -> Ptr Color -> Ptr Color -> IO ()
+foreign import ccall safe "bindings.h DrawRectangleGradientV_" c'drawRectangleGradientV :: CInt -> CInt -> CInt -> CInt -> Ptr Raylib.Types.Color -> Ptr Raylib.Types.Color -> IO ()
 
-drawRectangleGradientV :: Int -> Int -> Int -> Int -> Color -> Color -> IO ()
+drawRectangleGradientV :: Int -> Int -> Int -> Int -> Raylib.Types.Color -> Raylib.Types.Color -> IO ()
 drawRectangleGradientV posX posY width height color1 color2 =
   with
     color1
@@ -2393,11 +2393,11 @@ drawRectangleGradientV posX posY width height color1 color2 =
 
 foreign import ccall safe "raylib.h &DrawRectangleGradientV"
   p'drawRectangleGradientV ::
-    FunPtr (CInt -> CInt -> CInt -> CInt -> Color -> Color -> IO ())
+    FunPtr (CInt -> CInt -> CInt -> CInt -> Raylib.Types.Color -> Raylib.Types.Color -> IO ())
 
-foreign import ccall safe "bindings.h DrawRectangleGradientH_" c'drawRectangleGradientH :: CInt -> CInt -> CInt -> CInt -> Ptr Color -> Ptr Color -> IO ()
+foreign import ccall safe "bindings.h DrawRectangleGradientH_" c'drawRectangleGradientH :: CInt -> CInt -> CInt -> CInt -> Ptr Raylib.Types.Color -> Ptr Raylib.Types.Color -> IO ()
 
-drawRectangleGradientH :: Int -> Int -> Int -> Int -> Color -> Color -> IO ()
+drawRectangleGradientH :: Int -> Int -> Int -> Int -> Raylib.Types.Color -> Raylib.Types.Color -> IO ()
 drawRectangleGradientH posX posY width height color1 color2 =
   with
     color1
@@ -2411,11 +2411,11 @@ drawRectangleGradientH posX posY width height color1 color2 =
 
 foreign import ccall safe "raylib.h &DrawRectangleGradientH"
   p'drawRectangleGradientH ::
-    FunPtr (CInt -> CInt -> CInt -> CInt -> Color -> Color -> IO ())
+    FunPtr (CInt -> CInt -> CInt -> CInt -> Raylib.Types.Color -> Raylib.Types.Color -> IO ())
 
-foreign import ccall safe "bindings.h DrawRectangleGradientEx_" c'drawRectangleGradientEx :: Ptr Rectangle -> Ptr Color -> Ptr Color -> Ptr Color -> Ptr Color -> IO ()
+foreign import ccall safe "bindings.h DrawRectangleGradientEx_" c'drawRectangleGradientEx :: Ptr Raylib.Types.Rectangle -> Ptr Raylib.Types.Color -> Ptr Raylib.Types.Color -> Ptr Raylib.Types.Color -> Ptr Raylib.Types.Color -> IO ()
 
-drawRectangleGradientEx :: Rectangle -> Color -> Color -> Color -> Color -> IO ()
+drawRectangleGradientEx :: Raylib.Types.Rectangle -> Raylib.Types.Color -> Raylib.Types.Color -> Raylib.Types.Color -> Raylib.Types.Color -> IO ()
 drawRectangleGradientEx rect col1 col2 col3 col4 =
   with
     rect
@@ -2433,51 +2433,51 @@ drawRectangleGradientEx rect col1 col2 col3 col4 =
 
 foreign import ccall safe "raylib.h &DrawRectangleGradientEx"
   p'drawRectangleGradientEx ::
-    FunPtr (Rectangle -> Color -> Color -> Color -> Color -> IO ())
+    FunPtr (Raylib.Types.Rectangle -> Raylib.Types.Color -> Raylib.Types.Color -> Raylib.Types.Color -> Raylib.Types.Color -> IO ())
 
-foreign import ccall safe "bindings.h DrawRectangleLines_" c'drawRectangleLines :: CInt -> CInt -> CInt -> CInt -> Ptr Color -> IO ()
+foreign import ccall safe "bindings.h DrawRectangleLines_" c'drawRectangleLines :: CInt -> CInt -> CInt -> CInt -> Ptr Raylib.Types.Color -> IO ()
 
-drawRectangleLines :: Int -> Int -> Int -> Int -> Color -> IO ()
+drawRectangleLines :: Int -> Int -> Int -> Int -> Raylib.Types.Color -> IO ()
 drawRectangleLines posX posY width height color =
   with color (c'drawRectangleLines (fromIntegral posX) (fromIntegral posY) (fromIntegral width) (fromIntegral height))
 
 foreign import ccall safe "raylib.h &DrawRectangleLines"
   p'drawRectangleLines ::
-    FunPtr (CInt -> CInt -> CInt -> CInt -> Color -> IO ())
+    FunPtr (CInt -> CInt -> CInt -> CInt -> Raylib.Types.Color -> IO ())
 
-foreign import ccall safe "bindings.h DrawRectangleLinesEx_" c'drawRectangleLinesEx :: Ptr Rectangle -> CFloat -> Ptr Color -> IO ()
+foreign import ccall safe "bindings.h DrawRectangleLinesEx_" c'drawRectangleLinesEx :: Ptr Raylib.Types.Rectangle -> CFloat -> Ptr Raylib.Types.Color -> IO ()
 
-drawRectangleLinesEx :: Rectangle -> Float -> Color -> IO ()
+drawRectangleLinesEx :: Raylib.Types.Rectangle -> Float -> Raylib.Types.Color -> IO ()
 drawRectangleLinesEx rect thickness color =
   with color (\c -> with rect (\r -> c'drawRectangleLinesEx r (realToFrac thickness) c))
 
 foreign import ccall safe "raylib.h &DrawRectangleLinesEx"
   p'drawRectangleLinesEx ::
-    FunPtr (Rectangle -> CFloat -> Color -> IO ())
+    FunPtr (Raylib.Types.Rectangle -> CFloat -> Raylib.Types.Color -> IO ())
 
-foreign import ccall safe "bindings.h DrawRectangleRounded_" c'drawRectangleRounded :: Ptr Rectangle -> CFloat -> CInt -> Ptr Color -> IO ()
+foreign import ccall safe "bindings.h DrawRectangleRounded_" c'drawRectangleRounded :: Ptr Raylib.Types.Rectangle -> CFloat -> CInt -> Ptr Raylib.Types.Color -> IO ()
 
-drawRectangleRounded :: Rectangle -> Float -> Int -> Color -> IO ()
+drawRectangleRounded :: Raylib.Types.Rectangle -> Float -> Int -> Raylib.Types.Color -> IO ()
 drawRectangleRounded rect roundness segments color =
   with rect (\r -> with color $ c'drawRectangleRounded r (realToFrac roundness) (fromIntegral segments))
 
 foreign import ccall safe "raylib.h &DrawRectangleRounded"
   p'drawRectangleRounded ::
-    FunPtr (Rectangle -> CFloat -> CInt -> Color -> IO ())
+    FunPtr (Raylib.Types.Rectangle -> CFloat -> CInt -> Raylib.Types.Color -> IO ())
 
-foreign import ccall safe "bindings.h DrawRectangleRoundedLines_" c'drawRectangleRoundedLines :: Ptr Rectangle -> CFloat -> CInt -> CFloat -> Ptr Color -> IO ()
+foreign import ccall safe "bindings.h DrawRectangleRoundedLines_" c'drawRectangleRoundedLines :: Ptr Raylib.Types.Rectangle -> CFloat -> CInt -> CFloat -> Ptr Raylib.Types.Color -> IO ()
 
-drawRectangleRoundedLines :: Rectangle -> Float -> Int -> Float -> Color -> IO ()
+drawRectangleRoundedLines :: Raylib.Types.Rectangle -> Float -> Int -> Float -> Raylib.Types.Color -> IO ()
 drawRectangleRoundedLines rect roundness segments thickness color =
   with rect (\r -> with color $ c'drawRectangleRoundedLines r (realToFrac roundness) (fromIntegral segments) (realToFrac thickness))
 
 foreign import ccall safe "raylib.h &DrawRectangleRoundedLines"
   p'drawRectangleRoundedLines ::
-    FunPtr (Rectangle -> CFloat -> CInt -> CFloat -> Color -> IO ())
+    FunPtr (Raylib.Types.Rectangle -> CFloat -> CInt -> CFloat -> Raylib.Types.Color -> IO ())
 
-foreign import ccall safe "bindings.h DrawTriangle_" c'drawTriangle :: Ptr Vector2 -> Ptr Vector2 -> Ptr Vector2 -> Ptr Color -> IO ()
+foreign import ccall safe "bindings.h DrawTriangle_" c'drawTriangle :: Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Color -> IO ()
 
-drawTriangle :: Vector2 -> Vector2 -> Vector2 -> Color -> IO ()
+drawTriangle :: Raylib.Types.Vector2 -> Raylib.Types.Vector2 -> Raylib.Types.Vector2 -> Raylib.Types.Color -> IO ()
 drawTriangle v1 v2 v3 color =
   with
     v1
@@ -2490,11 +2490,11 @@ drawTriangle v1 v2 v3 color =
 
 foreign import ccall safe "raylib.h &DrawTriangle"
   p'drawTriangle ::
-    FunPtr (Vector2 -> Vector2 -> Vector2 -> Color -> IO ())
+    FunPtr (Raylib.Types.Vector2 -> Raylib.Types.Vector2 -> Raylib.Types.Vector2 -> Raylib.Types.Color -> IO ())
 
-foreign import ccall safe "bindings.h DrawTriangleLines_" c'drawTriangleLines :: Ptr Vector2 -> Ptr Vector2 -> Ptr Vector2 -> Ptr Color -> IO ()
+foreign import ccall safe "bindings.h DrawTriangleLines_" c'drawTriangleLines :: Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Color -> IO ()
 
-drawTriangleLines :: Vector2 -> Vector2 -> Vector2 -> Color -> IO ()
+drawTriangleLines :: Raylib.Types.Vector2 -> Raylib.Types.Vector2 -> Raylib.Types.Vector2 -> Raylib.Types.Color -> IO ()
 drawTriangleLines v1 v2 v3 color =
   with
     v1
@@ -2507,50 +2507,50 @@ drawTriangleLines v1 v2 v3 color =
 
 foreign import ccall safe "raylib.h &DrawTriangleLines"
   p'drawTriangleLines ::
-    FunPtr (Vector2 -> Vector2 -> Vector2 -> Color -> IO ())
+    FunPtr (Raylib.Types.Vector2 -> Raylib.Types.Vector2 -> Raylib.Types.Vector2 -> Raylib.Types.Color -> IO ())
 
-foreign import ccall safe "bindings.h DrawTriangleFan_" c'drawTriangleFan :: Ptr Vector2 -> CInt -> Ptr Color -> IO ()
+foreign import ccall safe "bindings.h DrawTriangleFan_" c'drawTriangleFan :: Ptr Raylib.Types.Vector2 -> CInt -> Ptr Raylib.Types.Color -> IO ()
 
-drawTriangleFan :: [Vector2] -> Color -> IO ()
+drawTriangleFan :: [Raylib.Types.Vector2] -> Raylib.Types.Color -> IO ()
 drawTriangleFan points color = withArray points (\p -> with color $ c'drawTriangleFan p (genericLength points))
 
 foreign import ccall safe "raylib.h &DrawTriangleFan"
   p'drawTriangleFan ::
-    FunPtr (Ptr Vector2 -> CInt -> Color -> IO ())
+    FunPtr (Ptr Raylib.Types.Vector2 -> CInt -> Raylib.Types.Color -> IO ())
 
-foreign import ccall safe "bindings.h DrawTriangleStrip_" c'drawTriangleStrip :: Ptr Vector2 -> CInt -> Ptr Color -> IO ()
+foreign import ccall safe "bindings.h DrawTriangleStrip_" c'drawTriangleStrip :: Ptr Raylib.Types.Vector2 -> CInt -> Ptr Raylib.Types.Color -> IO ()
 
-drawTriangleStrip :: [Vector2] -> Color -> IO ()
+drawTriangleStrip :: [Raylib.Types.Vector2] -> Raylib.Types.Color -> IO ()
 drawTriangleStrip points color =
   withArray points (\p -> with color $ c'drawTriangleStrip p (genericLength points))
 
 foreign import ccall safe "raylib.h &DrawTriangleStrip"
   p'drawTriangleStrip ::
-    FunPtr (Ptr Vector2 -> CInt -> Color -> IO ())
+    FunPtr (Ptr Raylib.Types.Vector2 -> CInt -> Raylib.Types.Color -> IO ())
 
-foreign import ccall safe "bindings.h DrawPoly_" c'drawPoly :: Ptr Vector2 -> CInt -> CFloat -> CFloat -> Ptr Color -> IO ()
+foreign import ccall safe "bindings.h DrawPoly_" c'drawPoly :: Ptr Raylib.Types.Vector2 -> CInt -> CFloat -> CFloat -> Ptr Raylib.Types.Color -> IO ()
 
-drawPoly :: Vector2 -> Int -> Float -> Float -> Color -> IO ()
+drawPoly :: Raylib.Types.Vector2 -> Int -> Float -> Float -> Raylib.Types.Color -> IO ()
 drawPoly center sides radius rotation color =
   with center (\c -> with color $ c'drawPoly c (fromIntegral sides) (realToFrac radius) (realToFrac rotation))
 
 foreign import ccall safe "raylib.h &DrawPoly"
   p'drawPoly ::
-    FunPtr (Vector2 -> CInt -> CFloat -> CFloat -> Color -> IO ())
+    FunPtr (Raylib.Types.Vector2 -> CInt -> CFloat -> CFloat -> Raylib.Types.Color -> IO ())
 
-foreign import ccall safe "bindings.h DrawPolyLines_" c'drawPolyLines :: Ptr Vector2 -> CInt -> CFloat -> CFloat -> Ptr Color -> IO ()
+foreign import ccall safe "bindings.h DrawPolyLines_" c'drawPolyLines :: Ptr Raylib.Types.Vector2 -> CInt -> CFloat -> CFloat -> Ptr Raylib.Types.Color -> IO ()
 
-drawPolyLines :: Vector2 -> Int -> Float -> Float -> Color -> IO ()
+drawPolyLines :: Raylib.Types.Vector2 -> Int -> Float -> Float -> Raylib.Types.Color -> IO ()
 drawPolyLines center sides radius rotation color =
   with center (\c -> with color $ c'drawPolyLines c (fromIntegral sides) (realToFrac radius) (realToFrac rotation))
 
 foreign import ccall safe "raylib.h &DrawPolyLines"
   p'drawPolyLines ::
-    FunPtr (Vector2 -> CInt -> CFloat -> CFloat -> Color -> IO ())
+    FunPtr (Raylib.Types.Vector2 -> CInt -> CFloat -> CFloat -> Raylib.Types.Color -> IO ())
 
-foreign import ccall safe "bindings.h DrawPolyLinesEx_" c'drawPolyLinesEx :: Ptr Vector2 -> CInt -> CFloat -> CFloat -> CFloat -> Ptr Color -> IO ()
+foreign import ccall safe "bindings.h DrawPolyLinesEx_" c'drawPolyLinesEx :: Ptr Raylib.Types.Vector2 -> CInt -> CFloat -> CFloat -> CFloat -> Ptr Raylib.Types.Color -> IO ()
 
-drawPolyLinesEx :: Vector2 -> Int -> Float -> Float -> Float -> Color -> IO ()
+drawPolyLinesEx :: Raylib.Types.Vector2 -> Int -> Float -> Float -> Float -> Raylib.Types.Color -> IO ()
 drawPolyLinesEx center sides radius rotation thickness color =
   with
     center
@@ -2566,7 +2566,7 @@ drawPolyLinesEx center sides radius rotation thickness color =
 
 foreign import ccall safe "raylib.h &DrawPolyLinesEx"
   p'drawPolyLinesEx ::
-    FunPtr (Vector2 -> CInt -> CFloat -> CFloat -> CFloat -> Color -> IO ())
+    FunPtr (Raylib.Types.Vector2 -> CInt -> CFloat -> CFloat -> CFloat -> Raylib.Types.Color -> IO ())
 
 -- unsafePerformIO has been used with these collision functions
 -- It is OK to use to here because even though we are passing
@@ -2574,73 +2574,73 @@ foreign import ccall safe "raylib.h &DrawPolyLinesEx"
 -- function, which ensures that all pointers are destroyed.
 -- See https://stackoverflow.com/a/10530919/17907758
 
-foreign import ccall safe "bindings.h CheckCollisionRecs_" c'checkCollisionRecs :: Ptr Rectangle -> Ptr Rectangle -> IO CInt
+foreign import ccall safe "bindings.h CheckCollisionRecs_" c'checkCollisionRecs :: Ptr Raylib.Types.Rectangle -> Ptr Raylib.Types.Rectangle -> IO CInt
 
-checkCollisionRecs :: Rectangle -> Rectangle -> Bool
+checkCollisionRecs :: Raylib.Types.Rectangle -> Raylib.Types.Rectangle -> Bool
 checkCollisionRecs rec1 rec2 = unsafePerformIO $ toBool <$> with rec1 (with rec2 . c'checkCollisionRecs)
 
 foreign import ccall safe "raylib.h &CheckCollisionRecs"
   p'checkCollisionRecs ::
-    FunPtr (Rectangle -> Rectangle -> IO CInt)
+    FunPtr (Raylib.Types.Rectangle -> Raylib.Types.Rectangle -> IO CInt)
 
-foreign import ccall safe "bindings.h CheckCollisionCircles_" c'checkCollisionCircles :: Ptr Vector2 -> CFloat -> Ptr Vector2 -> CFloat -> IO CInt
+foreign import ccall safe "bindings.h CheckCollisionCircles_" c'checkCollisionCircles :: Ptr Raylib.Types.Vector2 -> CFloat -> Ptr Raylib.Types.Vector2 -> CFloat -> IO CInt
 
-checkCollisionCircles :: Vector2 -> Float -> Vector2 -> Float -> Bool
+checkCollisionCircles :: Raylib.Types.Vector2 -> Float -> Raylib.Types.Vector2 -> Float -> Bool
 checkCollisionCircles center1 radius1 center2 radius2 =
   unsafePerformIO $ toBool <$> with center1 (\c1 -> with center2 (\c2 -> c'checkCollisionCircles c1 (realToFrac radius1) c2 (realToFrac radius2)))
 
 foreign import ccall safe "raylib.h &CheckCollisionCircles"
   p'checkCollisionCircles ::
-    FunPtr (Vector2 -> CFloat -> Vector2 -> CFloat -> IO CInt)
+    FunPtr (Raylib.Types.Vector2 -> CFloat -> Raylib.Types.Vector2 -> CFloat -> IO CInt)
 
-foreign import ccall safe "bindings.h CheckCollisionCircleRec_" c'checkCollisionCircleRec :: Ptr Vector2 -> CFloat -> Ptr Rectangle -> IO CInt
+foreign import ccall safe "bindings.h CheckCollisionCircleRec_" c'checkCollisionCircleRec :: Ptr Raylib.Types.Vector2 -> CFloat -> Ptr Raylib.Types.Rectangle -> IO CInt
 
-checkCollisionCircleRec :: Vector2 -> Float -> Rectangle -> Bool
+checkCollisionCircleRec :: Raylib.Types.Vector2 -> Float -> Raylib.Types.Rectangle -> Bool
 checkCollisionCircleRec center radius rect =
   unsafePerformIO $ toBool <$> with center (\c -> with rect $ c'checkCollisionCircleRec c (realToFrac radius))
 
 foreign import ccall safe "raylib.h &CheckCollisionCircleRec"
   p'checkCollisionCircleRec ::
-    FunPtr (Vector2 -> CFloat -> Rectangle -> IO CInt)
+    FunPtr (Raylib.Types.Vector2 -> CFloat -> Raylib.Types.Rectangle -> IO CInt)
 
-foreign import ccall safe "bindings.h CheckCollisionPointRec_" c'checkCollisionPointRec :: Ptr Vector2 -> Ptr Rectangle -> IO CInt
+foreign import ccall safe "bindings.h CheckCollisionPointRec_" c'checkCollisionPointRec :: Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Rectangle -> IO CInt
 
-checkCollisionPointRec :: Vector2 -> Rectangle -> Bool
+checkCollisionPointRec :: Raylib.Types.Vector2 -> Raylib.Types.Rectangle -> Bool
 checkCollisionPointRec point rect =
   unsafePerformIO $ toBool <$> with point (with rect . c'checkCollisionPointRec)
 
 foreign import ccall safe "raylib.h &CheckCollisionPointRec"
   p'checkCollisionPointRec ::
-    FunPtr (Vector2 -> Rectangle -> IO CInt)
+    FunPtr (Raylib.Types.Vector2 -> Raylib.Types.Rectangle -> IO CInt)
 
-foreign import ccall safe "bindings.h CheckCollisionPointCircle_" c'checkCollisionPointCircle :: Ptr Vector2 -> Ptr Vector2 -> CFloat -> IO CInt
+foreign import ccall safe "bindings.h CheckCollisionPointCircle_" c'checkCollisionPointCircle :: Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Vector2 -> CFloat -> IO CInt
 
-checkCollisionPointCircle :: Vector2 -> Vector2 -> Float -> Bool
+checkCollisionPointCircle :: Raylib.Types.Vector2 -> Raylib.Types.Vector2 -> Float -> Bool
 checkCollisionPointCircle point center radius =
   unsafePerformIO $ toBool <$> with point (\p -> with center (\c -> c'checkCollisionPointCircle p c (realToFrac radius)))
 
 foreign import ccall safe "raylib.h &CheckCollisionPointCircle"
   p'checkCollisionPointCircle ::
-    FunPtr (Vector2 -> Vector2 -> CFloat -> IO CInt)
+    FunPtr (Raylib.Types.Vector2 -> Raylib.Types.Vector2 -> CFloat -> IO CInt)
 
-foreign import ccall safe "bindings.h CheckCollisionPointTriangle_" c'checkCollisionPointTriangle :: Ptr Vector2 -> Ptr Vector2 -> Ptr Vector2 -> Ptr Vector2 -> IO CInt
+foreign import ccall safe "bindings.h CheckCollisionPointTriangle_" c'checkCollisionPointTriangle :: Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Vector2 -> IO CInt
 
-checkCollisionPointTriangle :: Vector2 -> Vector2 -> Vector2 -> Vector2 -> Bool
+checkCollisionPointTriangle :: Raylib.Types.Vector2 -> Raylib.Types.Vector2 -> Raylib.Types.Vector2 -> Raylib.Types.Vector2 -> Bool
 checkCollisionPointTriangle point p1 p2 p3 =
   unsafePerformIO $ toBool <$> with point (\p -> with p1 (\ptr1 -> with p2 (with p3 . c'checkCollisionPointTriangle p ptr1)))
 
 foreign import ccall safe "raylib.h &CheckCollisionPointTriangle"
   p'checkCollisionPointTriangle ::
-    FunPtr (Vector2 -> Vector2 -> Vector2 -> Vector2 -> IO CInt)
+    FunPtr (Raylib.Types.Vector2 -> Raylib.Types.Vector2 -> Raylib.Types.Vector2 -> Raylib.Types.Vector2 -> IO CInt)
 
-foreign import ccall safe "bindings.h CheckCollisionLines_" c'checkCollisionLines :: Ptr Vector2 -> Ptr Vector2 -> Ptr Vector2 -> Ptr Vector2 -> Ptr Vector2 -> IO CInt
+foreign import ccall safe "bindings.h CheckCollisionLines_" c'checkCollisionLines :: Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Vector2 -> IO CInt
 
 -- | If a collision is found, returns @Just collisionPoint@, otherwise returns @Nothing@
-checkCollisionLines :: Vector2 -> Vector2 -> Vector2 -> Vector2 -> Maybe Vector2
+checkCollisionLines :: Raylib.Types.Vector2 -> Raylib.Types.Vector2 -> Raylib.Types.Vector2 -> Raylib.Types.Vector2 -> Maybe Raylib.Types.Vector2
 checkCollisionLines start1 end1 start2 end2 =
   unsafePerformIO $
     with
-      (Vector2 0 0)
+      (Raylib.Types.Vector2 0 0)
       ( \res -> do
           foundCollision <- toBool <$> with start1 (\s1 -> with end1 (\e1 -> with start2 (\s2 -> with end2 (\e2 -> c'checkCollisionLines s1 e1 s2 e2 res))))
           if foundCollision then Just <$> peek res else return Nothing
@@ -2648,51 +2648,51 @@ checkCollisionLines start1 end1 start2 end2 =
 
 foreign import ccall safe "raylib.h &CheckCollisionLines"
   p'checkCollisionLines ::
-    FunPtr (Vector2 -> Vector2 -> Vector2 -> Vector2 -> Ptr Vector2 -> IO CInt)
+    FunPtr (Raylib.Types.Vector2 -> Raylib.Types.Vector2 -> Raylib.Types.Vector2 -> Raylib.Types.Vector2 -> Ptr Raylib.Types.Vector2 -> IO CInt)
 
-foreign import ccall safe "bindings.h CheckCollisionPointLine_" c'checkCollisionPointLine :: Ptr Vector2 -> Ptr Vector2 -> Ptr Vector2 -> CInt -> IO CInt
+foreign import ccall safe "bindings.h CheckCollisionPointLine_" c'checkCollisionPointLine :: Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Vector2 -> CInt -> IO CInt
 
-checkCollisionPointLine :: Vector2 -> Vector2 -> Vector2 -> Int -> Bool
+checkCollisionPointLine :: Raylib.Types.Vector2 -> Raylib.Types.Vector2 -> Raylib.Types.Vector2 -> Int -> Bool
 checkCollisionPointLine point p1 p2 threshold =
   unsafePerformIO $ toBool <$> with point (\p -> with p1 (\ptr1 -> with p2 (\ptr2 -> c'checkCollisionPointLine p ptr1 ptr2 (fromIntegral threshold))))
 
 foreign import ccall safe "raylib.h &CheckCollisionPointLine"
   p'checkCollisionPointLine ::
-    FunPtr (Vector2 -> Vector2 -> Vector2 -> CInt -> IO CInt)
+    FunPtr (Raylib.Types.Vector2 -> Raylib.Types.Vector2 -> Raylib.Types.Vector2 -> CInt -> IO CInt)
 
-foreign import ccall safe "bindings.h GetCollisionRec_" c'getCollisionRec :: Ptr Rectangle -> Ptr Rectangle -> IO (Ptr Rectangle)
+foreign import ccall safe "bindings.h GetCollisionRec_" c'getCollisionRec :: Ptr Raylib.Types.Rectangle -> Ptr Raylib.Types.Rectangle -> IO (Ptr Raylib.Types.Rectangle)
 
-getCollisionRec :: Rectangle -> Rectangle -> Rectangle
+getCollisionRec :: Raylib.Types.Rectangle -> Raylib.Types.Rectangle -> Raylib.Types.Rectangle
 getCollisionRec rec1 rec2 =
   unsafePerformIO $ with rec1 (with rec2 . c'getCollisionRec) >>= pop
 
 foreign import ccall safe "raylib.h &GetCollisionRec"
   p'getCollisionRec ::
-    FunPtr (Rectangle -> Rectangle -> IO Rectangle)
+    FunPtr (Raylib.Types.Rectangle -> Raylib.Types.Rectangle -> IO Raylib.Types.Rectangle)
 
-foreign import ccall safe "bindings.h LoadImage_" c'loadImage :: CString -> IO (Ptr Image)
+foreign import ccall safe "bindings.h LoadImage_" c'loadImage :: CString -> IO (Ptr Raylib.Types.Image)
 
-loadImage :: String -> IO Image
+loadImage :: String -> IO Raylib.Types.Image
 loadImage fileName = withCString fileName c'loadImage >>= pop
 
 foreign import ccall safe "raylib.h &LoadImage"
   p'loadImage ::
-    FunPtr (CString -> IO Image)
+    FunPtr (CString -> IO Raylib.Types.Image)
 
-foreign import ccall safe "bindings.h LoadImageRaw_" c'loadImageRaw :: CString -> CInt -> CInt -> CInt -> CInt -> IO (Ptr Image)
+foreign import ccall safe "bindings.h LoadImageRaw_" c'loadImageRaw :: CString -> CInt -> CInt -> CInt -> CInt -> IO (Ptr Raylib.Types.Image)
 
-loadImageRaw :: String -> Int -> Int -> Int -> Int -> IO Image
+loadImageRaw :: String -> Int -> Int -> Int -> Int -> IO Raylib.Types.Image
 loadImageRaw fileName width height format headerSize =
   withCString fileName (\str -> c'loadImageRaw str (fromIntegral width) (fromIntegral height) (fromIntegral format) (fromIntegral headerSize)) >>= pop
 
 foreign import ccall safe "raylib.h &LoadImageRaw"
   p'loadImageRaw ::
-    FunPtr (CString -> CInt -> CInt -> CInt -> CInt -> IO Image)
+    FunPtr (CString -> CInt -> CInt -> CInt -> CInt -> IO Raylib.Types.Image)
 
-foreign import ccall safe "bindings.h LoadImageAnim_" c'loadImageAnim :: CString -> Ptr CInt -> IO (Ptr Image)
+foreign import ccall safe "bindings.h LoadImageAnim_" c'loadImageAnim :: CString -> Ptr CInt -> IO (Ptr Raylib.Types.Image)
 
 -- | Returns the final image and the framees in a tuple, e.g. @(img, 18)@
-loadImageAnim :: String -> IO (Image, Int)
+loadImageAnim :: String -> IO (Raylib.Types.Image, Int)
 loadImageAnim fileName =
   with
     0
@@ -2708,428 +2708,428 @@ loadImageAnim fileName =
 
 foreign import ccall safe "raylib.h &LoadImageAnim"
   p'loadImageAnim ::
-    FunPtr (CString -> Ptr CInt -> IO Image)
+    FunPtr (CString -> Ptr CInt -> IO Raylib.Types.Image)
 
-foreign import ccall safe "bindings.h LoadImageFromMemory_" c'loadImageFromMemory :: CString -> Ptr CUChar -> CInt -> IO (Ptr Image)
+foreign import ccall safe "bindings.h LoadImageFromMemory_" c'loadImageFromMemory :: CString -> Ptr CUChar -> CInt -> IO (Ptr Raylib.Types.Image)
 
-loadImageFromMemory :: String -> String -> Int -> IO Image
+loadImageFromMemory :: String -> String -> Int -> IO Raylib.Types.Image
 loadImageFromMemory fileType fileData fileSize =
   withCString fileType (\ft -> withCString fileData (\fd -> c'loadImageFromMemory ft (castPtr fd) (fromIntegral fileSize))) >>= pop
 
 foreign import ccall safe "raylib.h &LoadImageFromMemory"
   p'loadImageFromMemory ::
-    FunPtr (CString -> Ptr CUChar -> CInt -> IO Image)
+    FunPtr (CString -> Ptr CUChar -> CInt -> IO Raylib.Types.Image)
 
-foreign import ccall safe "bindings.h LoadImageFromTexture_" c'loadImageFromTexture :: Ptr Texture -> IO (Ptr Image)
+foreign import ccall safe "bindings.h LoadImageFromTexture_" c'loadImageFromTexture :: Ptr Raylib.Types.Texture -> IO (Ptr Raylib.Types.Image)
 
-loadImageFromTexture :: Texture -> IO Image
+loadImageFromTexture :: Raylib.Types.Texture -> IO Raylib.Types.Image
 loadImageFromTexture tex = with tex c'loadImageFromTexture >>= pop
 
 foreign import ccall safe "raylib.h &LoadImageFromTexture"
   p'loadImageFromTexture ::
-    FunPtr (Texture -> IO Image)
+    FunPtr (Raylib.Types.Texture -> IO Raylib.Types.Image)
 
-foreign import ccall safe "bindings.h LoadImageFromScreen_" c'loadImageFromScreen :: IO (Ptr Image)
+foreign import ccall safe "bindings.h LoadImageFromScreen_" c'loadImageFromScreen :: IO (Ptr Raylib.Types.Image)
 
-loadImageFromScreen :: IO Image
+loadImageFromScreen :: IO Raylib.Types.Image
 loadImageFromScreen = c'loadImageFromScreen >>= pop
 
 foreign import ccall safe "raylib.h &LoadImageFromScreen"
   p'loadImageFromScreen ::
-    FunPtr (IO Image)
+    FunPtr (IO Raylib.Types.Image)
 
-foreign import ccall safe "bindings.h UnloadImage_" c'unloadImage :: Ptr Image -> IO ()
+foreign import ccall safe "bindings.h UnloadImage_" c'unloadImage :: Ptr Raylib.Types.Image -> IO ()
 
-unloadImage :: Image -> IO ()
+unloadImage :: Raylib.Types.Image -> IO ()
 unloadImage image = with image c'unloadImage
 
 foreign import ccall safe "raylib.h &UnloadImage"
   p'unloadImage ::
-    FunPtr (Image -> IO ())
+    FunPtr (Raylib.Types.Image -> IO ())
 
-foreign import ccall safe "bindings.h ExportImage_" c'exportImage :: Ptr Image -> CString -> IO CInt
+foreign import ccall safe "bindings.h ExportImage_" c'exportImage :: Ptr Raylib.Types.Image -> CString -> IO CInt
 
-exportImage :: Image -> String -> IO Bool
+exportImage :: Raylib.Types.Image -> String -> IO Bool
 exportImage image fileName = toBool <$> with image (withCString fileName . c'exportImage)
 
 foreign import ccall safe "raylib.h &ExportImage"
   p'exportImage ::
-    FunPtr (Image -> CString -> IO CInt)
+    FunPtr (Raylib.Types.Image -> CString -> IO CInt)
 
-foreign import ccall safe "bindings.h ExportImageAsCode_" c'exportImageAsCode :: Ptr Image -> CString -> IO CInt
+foreign import ccall safe "bindings.h ExportImageAsCode_" c'exportImageAsCode :: Ptr Raylib.Types.Image -> CString -> IO CInt
 
-exportImageAsCode :: Image -> String -> IO Bool
+exportImageAsCode :: Raylib.Types.Image -> String -> IO Bool
 exportImageAsCode image fileName =
   toBool <$> with image (withCString fileName . c'exportImageAsCode)
 
 foreign import ccall safe "raylib.h &ExportImageAsCode"
   p'exportImageAsCode ::
-    FunPtr (Image -> CString -> IO CInt)
+    FunPtr (Raylib.Types.Image -> CString -> IO CInt)
 
-foreign import ccall safe "bindings.h GenImageColor_" c'genImageColor :: CInt -> CInt -> Ptr Color -> IO (Ptr Image)
+foreign import ccall safe "bindings.h GenImageColor_" c'genImageColor :: CInt -> CInt -> Ptr Raylib.Types.Color -> IO (Ptr Raylib.Types.Image)
 
-genImageColor :: Int -> Int -> Color -> IO Image
+genImageColor :: Int -> Int -> Raylib.Types.Color -> IO Raylib.Types.Image
 genImageColor width height color =
   with color (c'genImageColor (fromIntegral width) (fromIntegral height)) >>= pop
 
 foreign import ccall safe "raylib.h &GenImageColor"
   p'genImageColor ::
-    FunPtr (CInt -> CInt -> Color -> IO Image)
+    FunPtr (CInt -> CInt -> Raylib.Types.Color -> IO Raylib.Types.Image)
 
-foreign import ccall safe "bindings.h GenImageGradientV_" c'genImageGradientV :: CInt -> CInt -> Ptr Color -> Ptr Color -> IO (Ptr Image)
+foreign import ccall safe "bindings.h GenImageGradientV_" c'genImageGradientV :: CInt -> CInt -> Ptr Raylib.Types.Color -> Ptr Raylib.Types.Color -> IO (Ptr Raylib.Types.Image)
 
-genImageGradientV :: Int -> Int -> Color -> Color -> IO Image
+genImageGradientV :: Int -> Int -> Raylib.Types.Color -> Raylib.Types.Color -> IO Raylib.Types.Image
 genImageGradientV width height top bottom =
   with top (with bottom . c'genImageGradientV (fromIntegral width) (fromIntegral height)) >>= pop
 
 foreign import ccall safe "raylib.h &GenImageGradientV"
   p'genImageGradientV ::
-    FunPtr (CInt -> CInt -> Color -> Color -> IO Image)
+    FunPtr (CInt -> CInt -> Raylib.Types.Color -> Raylib.Types.Color -> IO Raylib.Types.Image)
 
-foreign import ccall safe "bindings.h GenImageGradientH_" c'genImageGradientH :: CInt -> CInt -> Ptr Color -> Ptr Color -> IO (Ptr Image)
+foreign import ccall safe "bindings.h GenImageGradientH_" c'genImageGradientH :: CInt -> CInt -> Ptr Raylib.Types.Color -> Ptr Raylib.Types.Color -> IO (Ptr Raylib.Types.Image)
 
-genImageGradientH :: Int -> Int -> Color -> Color -> IO Image
+genImageGradientH :: Int -> Int -> Raylib.Types.Color -> Raylib.Types.Color -> IO Raylib.Types.Image
 genImageGradientH width height left right =
   with left (with right . c'genImageGradientH (fromIntegral width) (fromIntegral height)) >>= pop
 
 foreign import ccall safe "raylib.h &GenImageGradientH"
   p'genImageGradientH ::
-    FunPtr (CInt -> CInt -> Color -> Color -> IO Image)
+    FunPtr (CInt -> CInt -> Raylib.Types.Color -> Raylib.Types.Color -> IO Raylib.Types.Image)
 
-foreign import ccall safe "bindings.h GenImageGradientRadial_" c'genImageGradientRadial :: CInt -> CInt -> CFloat -> Ptr Color -> Ptr Color -> IO (Ptr Image)
+foreign import ccall safe "bindings.h GenImageGradientRadial_" c'genImageGradientRadial :: CInt -> CInt -> CFloat -> Ptr Raylib.Types.Color -> Ptr Raylib.Types.Color -> IO (Ptr Raylib.Types.Image)
 
-genImageGradientRadial :: Int -> Int -> Float -> Color -> Color -> IO Image
+genImageGradientRadial :: Int -> Int -> Float -> Raylib.Types.Color -> Raylib.Types.Color -> IO Raylib.Types.Image
 genImageGradientRadial width height density inner outer =
   with inner (with outer . c'genImageGradientRadial (fromIntegral width) (fromIntegral height) (realToFrac density)) >>= pop
 
 foreign import ccall safe "raylib.h &GenImageGradientRadial"
   p'genImageGradientRadial ::
-    FunPtr (CInt -> CInt -> CFloat -> Color -> Color -> IO Image)
+    FunPtr (CInt -> CInt -> CFloat -> Raylib.Types.Color -> Raylib.Types.Color -> IO Raylib.Types.Image)
 
-foreign import ccall safe "bindings.h GenImageChecked_" c'genImageChecked :: CInt -> CInt -> CInt -> CInt -> Ptr Color -> Ptr Color -> IO (Ptr Image)
+foreign import ccall safe "bindings.h GenImageChecked_" c'genImageChecked :: CInt -> CInt -> CInt -> CInt -> Ptr Raylib.Types.Color -> Ptr Raylib.Types.Color -> IO (Ptr Raylib.Types.Image)
 
-genImageChecked :: Int -> Int -> Int -> Int -> Color -> Color -> IO Image
+genImageChecked :: Int -> Int -> Int -> Int -> Raylib.Types.Color -> Raylib.Types.Color -> IO Raylib.Types.Image
 genImageChecked width height checksX checksY col1 col2 =
   with col1 (with col2 . c'genImageChecked (fromIntegral width) (fromIntegral height) (fromIntegral checksX) (fromIntegral checksY)) >>= pop
 
 foreign import ccall safe "raylib.h &GenImageChecked"
   p'genImageChecked ::
-    FunPtr (CInt -> CInt -> CInt -> CInt -> Color -> Color -> IO Image)
+    FunPtr (CInt -> CInt -> CInt -> CInt -> Raylib.Types.Color -> Raylib.Types.Color -> IO Raylib.Types.Image)
 
-foreign import ccall safe "bindings.h GenImageWhiteNoise_" c'genImageWhiteNoise :: CInt -> CInt -> CFloat -> IO (Ptr Image)
+foreign import ccall safe "bindings.h GenImageWhiteNoise_" c'genImageWhiteNoise :: CInt -> CInt -> CFloat -> IO (Ptr Raylib.Types.Image)
 
-genImageWhiteNoise :: Int -> Int -> Float -> IO Image
+genImageWhiteNoise :: Int -> Int -> Float -> IO Raylib.Types.Image
 genImageWhiteNoise width height factor =
   c'genImageWhiteNoise (fromIntegral width) (fromIntegral height) (realToFrac factor) >>= pop
 
 foreign import ccall safe "raylib.h &GenImageWhiteNoise"
   p'genImageWhiteNoise ::
-    FunPtr (CInt -> CInt -> CFloat -> IO Image)
+    FunPtr (CInt -> CInt -> CFloat -> IO Raylib.Types.Image)
 
-foreign import ccall safe "bindings.h GenImagePerlinNoise_" c'genImagePerlinNoise :: CInt -> CInt -> CInt -> CInt -> CFloat -> IO (Ptr Image)
+foreign import ccall safe "bindings.h GenImagePerlinNoise_" c'genImagePerlinNoise :: CInt -> CInt -> CInt -> CInt -> CFloat -> IO (Ptr Raylib.Types.Image)
 
-genImagePerlinNoise :: Int -> Int -> Int -> Int -> Float -> IO Image
+genImagePerlinNoise :: Int -> Int -> Int -> Int -> Float -> IO Raylib.Types.Image
 genImagePerlinNoise width height offsetX offsetY scale = c'genImagePerlinNoise (fromIntegral width) (fromIntegral height) (fromIntegral offsetX) (fromIntegral offsetY) (realToFrac scale) >>= pop
 
-foreign import ccall safe "raylib.h &GenImagePerlinNoise" p'genImagePerlinNoise :: FunPtr (CInt -> CInt -> CInt -> CInt -> CFloat -> IO Image)
+foreign import ccall safe "raylib.h &GenImagePerlinNoise" p'genImagePerlinNoise :: FunPtr (CInt -> CInt -> CInt -> CInt -> CFloat -> IO Raylib.Types.Image)
 
-foreign import ccall safe "bindings.h GenImageCellular_" c'genImageCellular :: CInt -> CInt -> CInt -> IO (Ptr Image)
+foreign import ccall safe "bindings.h GenImageCellular_" c'genImageCellular :: CInt -> CInt -> CInt -> IO (Ptr Raylib.Types.Image)
 
-genImageCellular :: Int -> Int -> Int -> IO Image
+genImageCellular :: Int -> Int -> Int -> IO Raylib.Types.Image
 genImageCellular width height tileSize =
   c'genImageCellular (fromIntegral width) (fromIntegral height) (fromIntegral tileSize) >>= pop
 
 foreign import ccall safe "raylib.h &GenImageCellular"
   p'genImageCellular ::
-    FunPtr (CInt -> CInt -> CInt -> IO Image)
+    FunPtr (CInt -> CInt -> CInt -> IO Raylib.Types.Image)
 
-foreign import ccall safe "bindings.h ImageCopy_" c'imageCopy :: Ptr Image -> IO (Ptr Image)
+foreign import ccall safe "bindings.h ImageCopy_" c'imageCopy :: Ptr Raylib.Types.Image -> IO (Ptr Raylib.Types.Image)
 
-imageCopy :: Image -> IO Image
+imageCopy :: Raylib.Types.Image -> IO Raylib.Types.Image
 imageCopy image = with image c'imageCopy >>= pop
 
 foreign import ccall safe "raylib.h &ImageCopy"
   p'imageCopy ::
-    FunPtr (Image -> IO Image)
+    FunPtr (Raylib.Types.Image -> IO Raylib.Types.Image)
 
-foreign import ccall safe "bindings.h ImageFromImage_" c'imageFromImage :: Ptr Image -> Ptr Rectangle -> IO (Ptr Image)
+foreign import ccall safe "bindings.h ImageFromImage_" c'imageFromImage :: Ptr Raylib.Types.Image -> Ptr Raylib.Types.Rectangle -> IO (Ptr Raylib.Types.Image)
 
-imageFromImage :: Image -> Rectangle -> IO Image
+imageFromImage :: Raylib.Types.Image -> Raylib.Types.Rectangle -> IO Raylib.Types.Image
 imageFromImage image rect = with image (with rect . c'imageFromImage) >>= pop
 
 foreign import ccall safe "raylib.h &ImageFromImage"
   p'imageFromImage ::
-    FunPtr (Image -> Rectangle -> IO Image)
+    FunPtr (Raylib.Types.Image -> Raylib.Types.Rectangle -> IO Raylib.Types.Image)
 
-foreign import ccall safe "bindings.h ImageText_" c'imageText :: CString -> CInt -> Ptr Color -> IO (Ptr Image)
+foreign import ccall safe "bindings.h ImageText_" c'imageText :: CString -> CInt -> Ptr Raylib.Types.Color -> IO (Ptr Raylib.Types.Image)
 
-imageText :: String -> Int -> Color -> IO Image
+imageText :: String -> Int -> Raylib.Types.Color -> IO Raylib.Types.Image
 imageText text fontSize color =
   withCString text (\t -> with color $ c'imageText t (fromIntegral fontSize)) >>= pop
 
 foreign import ccall safe "raylib.h &ImageText"
   p'imageText ::
-    FunPtr (CString -> CInt -> Color -> IO Image)
+    FunPtr (CString -> CInt -> Raylib.Types.Color -> IO Raylib.Types.Image)
 
-foreign import ccall safe "bindings.h ImageTextEx_" c'imageTextEx :: Ptr Font -> CString -> CFloat -> CFloat -> Ptr Color -> IO (Ptr Image)
+foreign import ccall safe "bindings.h ImageTextEx_" c'imageTextEx :: Ptr Raylib.Types.Font -> CString -> CFloat -> CFloat -> Ptr Raylib.Types.Color -> IO (Ptr Raylib.Types.Image)
 
-imageTextEx :: Font -> String -> Float -> Float -> Color -> IO Image
+imageTextEx :: Raylib.Types.Font -> String -> Float -> Float -> Raylib.Types.Color -> IO Raylib.Types.Image
 imageTextEx font text fontSize spacing tint =
   with font (\f -> withCString text (\t -> with tint $ c'imageTextEx f t (realToFrac fontSize) (realToFrac spacing))) >>= pop
 
 foreign import ccall safe "raylib.h &ImageTextEx"
   p'imageTextEx ::
-    FunPtr (Font -> CString -> CFloat -> CFloat -> Color -> IO Image)
+    FunPtr (Raylib.Types.Font -> CString -> CFloat -> CFloat -> Raylib.Types.Color -> IO Raylib.Types.Image)
 
 foreign import ccall safe "raylib.h ImageFormat"
   c'imageFormat ::
-    Ptr Image -> CInt -> IO ()
+    Ptr Raylib.Types.Image -> CInt -> IO ()
 
-imageFormat :: Image -> Int -> IO Image
+imageFormat :: Raylib.Types.Image -> Int -> IO Raylib.Types.Image
 imageFormat image newFormat =
   with image (\i -> c'imageFormat i (fromIntegral newFormat) >> peek i)
 
 foreign import ccall safe "raylib.h &ImageFormat"
   p'imageFormat ::
-    FunPtr (Ptr Image -> CInt -> IO ())
+    FunPtr (Ptr Raylib.Types.Image -> CInt -> IO ())
 
-foreign import ccall safe "bindings.h ImageToPOT_" c'imageToPOT :: Ptr Image -> Ptr Color -> IO ()
+foreign import ccall safe "bindings.h ImageToPOT_" c'imageToPOT :: Ptr Raylib.Types.Image -> Ptr Raylib.Types.Color -> IO ()
 
-imageToPOT :: Image -> Color -> IO Image
+imageToPOT :: Raylib.Types.Image -> Raylib.Types.Color -> IO Raylib.Types.Image
 imageToPOT image color = with image (\i -> with color (c'imageToPOT i) >> peek i)
 
 foreign import ccall safe "raylib.h &ImageToPOT"
   p'imageToPOT ::
-    FunPtr (Ptr Image -> Color -> IO ())
+    FunPtr (Ptr Raylib.Types.Image -> Raylib.Types.Color -> IO ())
 
-foreign import ccall safe "bindings.h ImageCrop_" c'imageCrop :: Ptr Image -> Ptr Rectangle -> IO ()
+foreign import ccall safe "bindings.h ImageCrop_" c'imageCrop :: Ptr Raylib.Types.Image -> Ptr Raylib.Types.Rectangle -> IO ()
 
-imageCrop :: Image -> Rectangle -> IO Image
+imageCrop :: Raylib.Types.Image -> Raylib.Types.Rectangle -> IO Raylib.Types.Image
 imageCrop image crop = with image (\i -> with crop (c'imageCrop i) >> peek i)
 
 foreign import ccall safe "raylib.h &ImageCrop"
   p'imageCrop ::
-    FunPtr (Ptr Image -> Rectangle -> IO ())
+    FunPtr (Ptr Raylib.Types.Image -> Raylib.Types.Rectangle -> IO ())
 
 foreign import ccall safe "raylib.h ImageAlphaCrop"
   c'imageAlphaCrop ::
-    Ptr Image -> CFloat -> IO ()
+    Ptr Raylib.Types.Image -> CFloat -> IO ()
 
-imageAlphaCrop :: Image -> Float -> IO Image
+imageAlphaCrop :: Raylib.Types.Image -> Float -> IO Raylib.Types.Image
 imageAlphaCrop image threshold = with image (\i -> c'imageAlphaCrop i (realToFrac threshold) >> peek i)
 
 foreign import ccall safe "raylib.h &ImageAlphaCrop"
   p'imageAlphaCrop ::
-    FunPtr (Ptr Image -> CFloat -> IO ())
+    FunPtr (Ptr Raylib.Types.Image -> CFloat -> IO ())
 
-foreign import ccall safe "bindings.h ImageAlphaClear_" c'imageAlphaClear :: Ptr Image -> Ptr Color -> CFloat -> IO ()
+foreign import ccall safe "bindings.h ImageAlphaClear_" c'imageAlphaClear :: Ptr Raylib.Types.Image -> Ptr Raylib.Types.Color -> CFloat -> IO ()
 
-imageAlphaClear :: Image -> Color -> Float -> IO Image
+imageAlphaClear :: Raylib.Types.Image -> Raylib.Types.Color -> Float -> IO Raylib.Types.Image
 imageAlphaClear image color threshold = with image (\i -> with color (\c -> c'imageAlphaClear i c (realToFrac threshold) >> peek i))
 
 foreign import ccall safe "raylib.h &ImageAlphaClear"
   p'imageAlphaClear ::
-    FunPtr (Ptr Image -> Color -> CFloat -> IO ())
+    FunPtr (Ptr Raylib.Types.Image -> Raylib.Types.Color -> CFloat -> IO ())
 
-foreign import ccall safe "bindings.h ImageAlphaMask_" c'imageAlphaMask :: Ptr Image -> Ptr Image -> IO ()
+foreign import ccall safe "bindings.h ImageAlphaMask_" c'imageAlphaMask :: Ptr Raylib.Types.Image -> Ptr Raylib.Types.Image -> IO ()
 
-imageAlphaMask :: Image -> Image -> IO Image
+imageAlphaMask :: Raylib.Types.Image -> Raylib.Types.Image -> IO Raylib.Types.Image
 imageAlphaMask image alphaMask = with image (\i -> with alphaMask (c'imageAlphaMask i) >> peek i)
 
 foreign import ccall safe "raylib.h &ImageAlphaMask"
   p'imageAlphaMask ::
-    FunPtr (Ptr Image -> Image -> IO ())
+    FunPtr (Ptr Raylib.Types.Image -> Raylib.Types.Image -> IO ())
 
 foreign import ccall safe "raylib.h ImageAlphaPremultiply"
   c'imageAlphaPremultiply ::
-    Ptr Image -> IO ()
+    Ptr Raylib.Types.Image -> IO ()
 
-imageAlphaPremultiply :: Image -> IO Image
+imageAlphaPremultiply :: Raylib.Types.Image -> IO Raylib.Types.Image
 imageAlphaPremultiply image = with image (\i -> c'imageAlphaPremultiply i >> peek i)
 
 foreign import ccall safe "raylib.h &ImageAlphaPremultiply"
   p'imageAlphaPremultiply ::
-    FunPtr (Ptr Image -> IO ())
+    FunPtr (Ptr Raylib.Types.Image -> IO ())
 
 foreign import ccall safe "raylib.h ImageResize"
   c'imageResize ::
-    Ptr Image -> CInt -> CInt -> IO ()
+    Ptr Raylib.Types.Image -> CInt -> CInt -> IO ()
 
-imageResize :: Image -> Int -> Int -> IO Image
+imageResize :: Raylib.Types.Image -> Int -> Int -> IO Raylib.Types.Image
 imageResize image newWidth newHeight = with image (\i -> c'imageResize i (fromIntegral newWidth) (fromIntegral newHeight) >> peek i)
 
 foreign import ccall safe "raylib.h &ImageResize"
   p'imageResize ::
-    FunPtr (Ptr Image -> CInt -> CInt -> IO ())
+    FunPtr (Ptr Raylib.Types.Image -> CInt -> CInt -> IO ())
 
 foreign import ccall safe "raylib.h ImageResizeNN"
   c'imageResizeNN ::
-    Ptr Image -> CInt -> CInt -> IO ()
+    Ptr Raylib.Types.Image -> CInt -> CInt -> IO ()
 
-imageResizeNN :: Image -> Int -> Int -> IO Image
+imageResizeNN :: Raylib.Types.Image -> Int -> Int -> IO Raylib.Types.Image
 imageResizeNN image newWidth newHeight = with image (\i -> c'imageResizeNN i (fromIntegral newWidth) (fromIntegral newHeight) >> peek i)
 
 foreign import ccall safe "raylib.h &ImageResizeNN"
   p'imageResizeNN ::
-    FunPtr (Ptr Image -> CInt -> CInt -> IO ())
+    FunPtr (Ptr Raylib.Types.Image -> CInt -> CInt -> IO ())
 
-foreign import ccall safe "bindings.h ImageResizeCanvas_" c'imageResizeCanvas :: Ptr Image -> CInt -> CInt -> CInt -> CInt -> Ptr Color -> IO ()
+foreign import ccall safe "bindings.h ImageResizeCanvas_" c'imageResizeCanvas :: Ptr Raylib.Types.Image -> CInt -> CInt -> CInt -> CInt -> Ptr Raylib.Types.Color -> IO ()
 
-imageResizeCanvas :: Image -> Int -> Int -> Int -> Int -> Color -> IO Image
+imageResizeCanvas :: Raylib.Types.Image -> Int -> Int -> Int -> Int -> Raylib.Types.Color -> IO Raylib.Types.Image
 imageResizeCanvas image newWidth newHeight offsetX offsetY fill = with image (\i -> with fill (c'imageResizeCanvas i (fromIntegral newWidth) (fromIntegral newHeight) (fromIntegral offsetX) (fromIntegral offsetY)) >> peek i)
 
 foreign import ccall safe "raylib.h &ImageResizeCanvas"
   p'imageResizeCanvas ::
-    FunPtr (Ptr Image -> CInt -> CInt -> CInt -> CInt -> Color -> IO ())
+    FunPtr (Ptr Raylib.Types.Image -> CInt -> CInt -> CInt -> CInt -> Raylib.Types.Color -> IO ())
 
 foreign import ccall safe "raylib.h ImageMipmaps"
   c'imageMipmaps ::
-    Ptr Image -> IO ()
+    Ptr Raylib.Types.Image -> IO ()
 
-imageMipmaps :: Image -> IO Image
+imageMipmaps :: Raylib.Types.Image -> IO Raylib.Types.Image
 imageMipmaps image = with image (\i -> c'imageMipmaps i >> peek i)
 
 foreign import ccall safe "raylib.h &ImageMipmaps"
   p'imageMipmaps ::
-    FunPtr (Ptr Image -> IO ())
+    FunPtr (Ptr Raylib.Types.Image -> IO ())
 
 foreign import ccall safe "raylib.h ImageDither"
   c'imageDither ::
-    Ptr Image -> CInt -> CInt -> CInt -> CInt -> IO ()
+    Ptr Raylib.Types.Image -> CInt -> CInt -> CInt -> CInt -> IO ()
 
-imageDither :: Image -> Int -> Int -> Int -> Int -> IO Image
+imageDither :: Raylib.Types.Image -> Int -> Int -> Int -> Int -> IO Raylib.Types.Image
 imageDither image rBpp gBpp bBpp aBpp = with image (\i -> c'imageDither i (fromIntegral rBpp) (fromIntegral gBpp) (fromIntegral bBpp) (fromIntegral aBpp) >> peek i)
 
 foreign import ccall safe "raylib.h &ImageDither"
   p'imageDither ::
-    FunPtr (Ptr Image -> CInt -> CInt -> CInt -> CInt -> IO ())
+    FunPtr (Ptr Raylib.Types.Image -> CInt -> CInt -> CInt -> CInt -> IO ())
 
 foreign import ccall safe "raylib.h ImageFlipVertical"
   c'imageFlipVertical ::
-    Ptr Image -> IO ()
+    Ptr Raylib.Types.Image -> IO ()
 
-imageFlipVertical :: Image -> IO Image
+imageFlipVertical :: Raylib.Types.Image -> IO Raylib.Types.Image
 imageFlipVertical image = with image (\i -> c'imageFlipVertical i >> peek i)
 
 foreign import ccall safe "raylib.h &ImageFlipVertical"
   p'imageFlipVertical ::
-    FunPtr (Ptr Image -> IO ())
+    FunPtr (Ptr Raylib.Types.Image -> IO ())
 
 foreign import ccall safe "raylib.h ImageFlipHorizontal"
   c'imageFlipHorizontal ::
-    Ptr Image -> IO ()
+    Ptr Raylib.Types.Image -> IO ()
 
-imageFlipHorizontal :: Image -> IO Image
+imageFlipHorizontal :: Raylib.Types.Image -> IO Raylib.Types.Image
 imageFlipHorizontal image = with image (\i -> c'imageFlipHorizontal i >> peek i)
 
 foreign import ccall safe "raylib.h &ImageFlipHorizontal"
   p'imageFlipHorizontal ::
-    FunPtr (Ptr Image -> IO ())
+    FunPtr (Ptr Raylib.Types.Image -> IO ())
 
 foreign import ccall safe "raylib.h ImageRotateCW"
   c'imageRotateCW ::
-    Ptr Image -> IO ()
+    Ptr Raylib.Types.Image -> IO ()
 
-imageRotateCW :: Image -> IO Image
+imageRotateCW :: Raylib.Types.Image -> IO Raylib.Types.Image
 imageRotateCW image = with image (\i -> c'imageRotateCW i >> peek i)
 
 foreign import ccall safe "raylib.h &ImageRotateCW"
   p'imageRotateCW ::
-    FunPtr (Ptr Image -> IO ())
+    FunPtr (Ptr Raylib.Types.Image -> IO ())
 
 foreign import ccall safe "raylib.h ImageRotateCCW"
   c'imageRotateCCW ::
-    Ptr Image -> IO ()
+    Ptr Raylib.Types.Image -> IO ()
 
-imageRotateCCW :: Image -> IO Image
+imageRotateCCW :: Raylib.Types.Image -> IO Raylib.Types.Image
 imageRotateCCW image = with image (\i -> c'imageRotateCCW i >> peek i)
 
 foreign import ccall safe "raylib.h &ImageRotateCCW"
   p'imageRotateCCW ::
-    FunPtr (Ptr Image -> IO ())
+    FunPtr (Ptr Raylib.Types.Image -> IO ())
 
-foreign import ccall safe "bindings.h ImageColorTint_" c'imageColorTint :: Ptr Image -> Ptr Color -> IO ()
+foreign import ccall safe "bindings.h ImageColorTint_" c'imageColorTint :: Ptr Raylib.Types.Image -> Ptr Raylib.Types.Color -> IO ()
 
-imageColorTint :: Image -> Color -> IO Image
+imageColorTint :: Raylib.Types.Image -> Raylib.Types.Color -> IO Raylib.Types.Image
 imageColorTint image color = with image (\i -> with color (c'imageColorTint i) >> peek i)
 
 foreign import ccall safe "raylib.h &ImageColorTint"
   p'imageColorTint ::
-    FunPtr (Ptr Image -> Color -> IO ())
+    FunPtr (Ptr Raylib.Types.Image -> Raylib.Types.Color -> IO ())
 
 foreign import ccall safe "raylib.h ImageColorInvert"
   c'imageColorInvert ::
-    Ptr Image -> IO ()
+    Ptr Raylib.Types.Image -> IO ()
 
-imageColorInvert :: Image -> IO Image
+imageColorInvert :: Raylib.Types.Image -> IO Raylib.Types.Image
 imageColorInvert image = with image (\i -> c'imageColorInvert i >> peek i)
 
 foreign import ccall safe "raylib.h &ImageColorInvert"
   p'imageColorInvert ::
-    FunPtr (Ptr Image -> IO ())
+    FunPtr (Ptr Raylib.Types.Image -> IO ())
 
 foreign import ccall safe "raylib.h ImageColorGrayscale"
   c'imageColorGrayscale ::
-    Ptr Image -> IO ()
+    Ptr Raylib.Types.Image -> IO ()
 
-imageColorGrayscale :: Image -> IO Image
+imageColorGrayscale :: Raylib.Types.Image -> IO Raylib.Types.Image
 imageColorGrayscale image = with image (\i -> c'imageColorGrayscale i >> peek i)
 
 foreign import ccall safe "raylib.h &ImageColorGrayscale"
   p'imageColorGrayscale ::
-    FunPtr (Ptr Image -> IO ())
+    FunPtr (Ptr Raylib.Types.Image -> IO ())
 
 foreign import ccall safe "raylib.h ImageColorContrast"
   c'imageColorContrast ::
-    Ptr Image -> CFloat -> IO ()
+    Ptr Raylib.Types.Image -> CFloat -> IO ()
 
-imageColorContrast :: Image -> Float -> IO Image
+imageColorContrast :: Raylib.Types.Image -> Float -> IO Raylib.Types.Image
 imageColorContrast image contrast = with image (\i -> c'imageColorContrast i (realToFrac contrast) >> peek i)
 
 foreign import ccall safe "raylib.h &ImageColorContrast"
   p'imageColorContrast ::
-    FunPtr (Ptr Image -> CFloat -> IO ())
+    FunPtr (Ptr Raylib.Types.Image -> CFloat -> IO ())
 
 foreign import ccall safe "raylib.h ImageColorBrightness"
   c'imageColorBrightness ::
-    Ptr Image -> CInt -> IO ()
+    Ptr Raylib.Types.Image -> CInt -> IO ()
 
-imageColorBrightness :: Image -> Int -> IO Image
+imageColorBrightness :: Raylib.Types.Image -> Int -> IO Raylib.Types.Image
 imageColorBrightness image brightness = with image (\i -> c'imageColorBrightness i (fromIntegral brightness) >> peek i)
 
 foreign import ccall safe "raylib.h &ImageColorBrightness"
   p'imageColorBrightness ::
-    FunPtr (Ptr Image -> CInt -> IO ())
+    FunPtr (Ptr Raylib.Types.Image -> CInt -> IO ())
 
-foreign import ccall safe "bindings.h ImageColorReplace_" c'imageColorReplace :: Ptr Image -> Ptr Color -> Ptr Color -> IO ()
+foreign import ccall safe "bindings.h ImageColorReplace_" c'imageColorReplace :: Ptr Raylib.Types.Image -> Ptr Raylib.Types.Color -> Ptr Raylib.Types.Color -> IO ()
 
-imageColorReplace :: Image -> Color -> Color -> IO Image
+imageColorReplace :: Raylib.Types.Image -> Raylib.Types.Color -> Raylib.Types.Color -> IO Raylib.Types.Image
 imageColorReplace image color replace = with image (\i -> with color (with replace . c'imageColorReplace i) >> peek i)
 
 foreign import ccall safe "raylib.h &ImageColorReplace"
   p'imageColorReplace ::
-    FunPtr (Ptr Image -> Color -> Color -> IO ())
+    FunPtr (Ptr Raylib.Types.Image -> Raylib.Types.Color -> Raylib.Types.Color -> IO ())
 
-foreign import ccall safe "bindings.h LoadImageColors_" c'loadImageColors :: Ptr Image -> IO (Ptr Color)
+foreign import ccall safe "bindings.h LoadImageColors_" c'loadImageColors :: Ptr Raylib.Types.Image -> IO (Ptr Raylib.Types.Color)
 
-loadImageColors :: Image -> IO [Color]
+loadImageColors :: Raylib.Types.Image -> IO [Raylib.Types.Color]
 loadImageColors image =
   with
     image
     ( \i -> do
         colors <- c'loadImageColors i
-        colArray <- peekArray (fromIntegral $ image'width image * image'height image) colors
+        colArray <- peekArray (fromIntegral $ Raylib.Types.image'width image * Raylib.Types.image'height image) colors
         unloadImageColors colors
         return colArray
     )
 
 foreign import ccall safe "raylib.h &LoadImageColors"
   p'loadImageColors ::
-    FunPtr (Image -> IO (Ptr Color))
+    FunPtr (Raylib.Types.Image -> IO (Ptr Raylib.Types.Color))
 
-foreign import ccall safe "bindings.h LoadImagePalette_" c'loadImagePalette :: Ptr Image -> CInt -> Ptr CInt -> IO (Ptr Color)
+foreign import ccall safe "bindings.h LoadImagePalette_" c'loadImagePalette :: Ptr Raylib.Types.Image -> CInt -> Ptr CInt -> IO (Ptr Raylib.Types.Color)
 
-loadImagePalette :: Image -> Int -> IO [Color]
+loadImagePalette :: Raylib.Types.Image -> Int -> IO [Raylib.Types.Color]
 loadImagePalette image maxPaletteSize =
   with
     image
@@ -3149,468 +3149,468 @@ loadImagePalette image maxPaletteSize =
 
 foreign import ccall safe "raylib.h &LoadImagePalette"
   p'loadImagePalette ::
-    FunPtr (Image -> CInt -> Ptr CInt -> IO (Ptr Color))
+    FunPtr (Raylib.Types.Image -> CInt -> Ptr CInt -> IO (Ptr Raylib.Types.Color))
 
 -- | NOTE: You usually won't need to use this. `loadImageColors` unloads the colors automatically. Only use this when you are using `c'loadImageColors` to load the colors.
 foreign import ccall safe "raylib.h UnloadImageColors"
   unloadImageColors ::
-    Ptr Color -> IO ()
+    Ptr Raylib.Types.Color -> IO ()
 
 foreign import ccall safe "raylib.h &UnloadImageColors"
   p'unloadImageColors ::
-    FunPtr (Ptr Color -> IO ())
+    FunPtr (Ptr Raylib.Types.Color -> IO ())
 
 -- | NOTE: You usually won't need to use this. `loadImagePalette` unloads the colors automatically. Only use this when you are using `c'loadImagePalette` to load the colors.
 foreign import ccall safe "raylib.h UnloadImagePalette"
   unloadImagePalette ::
-    Ptr Color -> IO ()
+    Ptr Raylib.Types.Color -> IO ()
 
 foreign import ccall safe "raylib.h &UnloadImagePalette"
   p'unloadImagePalette ::
-    FunPtr (Ptr Color -> IO ())
+    FunPtr (Ptr Raylib.Types.Color -> IO ())
 
-foreign import ccall safe "bindings.h GetImageAlphaBorder_" c'getImageAlphaBorder :: Ptr Image -> CFloat -> IO (Ptr Rectangle)
+foreign import ccall safe "bindings.h GetImageAlphaBorder_" c'getImageAlphaBorder :: Ptr Raylib.Types.Image -> CFloat -> IO (Ptr Raylib.Types.Rectangle)
 
-getImageAlphaBorder :: Image -> Float -> IO Rectangle
+getImageAlphaBorder :: Raylib.Types.Image -> Float -> IO Raylib.Types.Rectangle
 getImageAlphaBorder image threshold = with image (\i -> c'getImageAlphaBorder i (realToFrac threshold)) >>= pop
 
 foreign import ccall safe "raylib.h &GetImageAlphaBorder"
   p'getImageAlphaBorder ::
-    FunPtr (Image -> CFloat -> IO Rectangle)
+    FunPtr (Raylib.Types.Image -> CFloat -> IO Raylib.Types.Rectangle)
 
-foreign import ccall safe "bindings.h GetImageColor_" c'getImageColor :: Ptr Image -> CInt -> CInt -> IO (Ptr Color)
+foreign import ccall safe "bindings.h GetImageColor_" c'getImageColor :: Ptr Raylib.Types.Image -> CInt -> CInt -> IO (Ptr Raylib.Types.Color)
 
-getImageColor :: Image -> Int -> Int -> IO Color
+getImageColor :: Raylib.Types.Image -> Int -> Int -> IO Raylib.Types.Color
 getImageColor image x y = with image (\i -> c'getImageColor i (fromIntegral x) (fromIntegral y)) >>= pop
 
 foreign import ccall safe "raylib.h &GetImageColor"
   p'getImageColor ::
-    FunPtr (Image -> CInt -> CInt -> IO Color)
+    FunPtr (Raylib.Types.Image -> CInt -> CInt -> IO Raylib.Types.Color)
 
-foreign import ccall safe "bindings.h ImageClearBackground_" c'imageClearBackground :: Ptr Image -> Ptr Color -> IO ()
+foreign import ccall safe "bindings.h ImageClearBackground_" c'imageClearBackground :: Ptr Raylib.Types.Image -> Ptr Raylib.Types.Color -> IO ()
 
-imageClearBackground :: Image -> Color -> IO Image
+imageClearBackground :: Raylib.Types.Image -> Raylib.Types.Color -> IO Raylib.Types.Image
 imageClearBackground image color = with image (\i -> with color (c'imageClearBackground i) >> peek i)
 
 foreign import ccall safe "raylib.h &ImageClearBackground"
   p'imageClearBackground ::
-    FunPtr (Ptr Image -> Color -> IO ())
+    FunPtr (Ptr Raylib.Types.Image -> Raylib.Types.Color -> IO ())
 
-foreign import ccall safe "bindings.h ImageDrawPixel_" c'imageDrawPixel :: Ptr Image -> CInt -> CInt -> Ptr Color -> IO ()
+foreign import ccall safe "bindings.h ImageDrawPixel_" c'imageDrawPixel :: Ptr Raylib.Types.Image -> CInt -> CInt -> Ptr Raylib.Types.Color -> IO ()
 
-imageDrawPixel :: Image -> Int -> Int -> Color -> IO Image
+imageDrawPixel :: Raylib.Types.Image -> Int -> Int -> Raylib.Types.Color -> IO Raylib.Types.Image
 imageDrawPixel image x y color = with image (\i -> with color (c'imageDrawPixel i (fromIntegral x) (fromIntegral y)) >> peek i)
 
 foreign import ccall safe "raylib.h &ImageDrawPixel"
   p'imageDrawPixel ::
-    FunPtr (Ptr Image -> CInt -> CInt -> Color -> IO ())
+    FunPtr (Ptr Raylib.Types.Image -> CInt -> CInt -> Raylib.Types.Color -> IO ())
 
-foreign import ccall safe "bindings.h ImageDrawPixelV_" c'imageDrawPixelV :: Ptr Image -> Ptr Vector2 -> Ptr Color -> IO ()
+foreign import ccall safe "bindings.h ImageDrawPixelV_" c'imageDrawPixelV :: Ptr Raylib.Types.Image -> Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Color -> IO ()
 
-imageDrawPixelV :: Image -> Vector2 -> Color -> IO Image
+imageDrawPixelV :: Raylib.Types.Image -> Raylib.Types.Vector2 -> Raylib.Types.Color -> IO Raylib.Types.Image
 imageDrawPixelV image position color = with image (\i -> with position (with color . c'imageDrawPixelV i) >> peek i)
 
 foreign import ccall safe "raylib.h &ImageDrawPixelV"
   p'imageDrawPixelV ::
-    FunPtr (Ptr Image -> Vector2 -> Color -> IO ())
+    FunPtr (Ptr Raylib.Types.Image -> Raylib.Types.Vector2 -> Raylib.Types.Color -> IO ())
 
-foreign import ccall safe "bindings.h ImageDrawLine_" c'imageDrawLine :: Ptr Image -> CInt -> CInt -> CInt -> CInt -> Ptr Color -> IO ()
+foreign import ccall safe "bindings.h ImageDrawLine_" c'imageDrawLine :: Ptr Raylib.Types.Image -> CInt -> CInt -> CInt -> CInt -> Ptr Raylib.Types.Color -> IO ()
 
-imageDrawLine :: Image -> Int -> Int -> Int -> Int -> Color -> IO Image
+imageDrawLine :: Raylib.Types.Image -> Int -> Int -> Int -> Int -> Raylib.Types.Color -> IO Raylib.Types.Image
 imageDrawLine image startPosX startPosY endPosX endPosY color = with image (\i -> with color (c'imageDrawLine i (fromIntegral startPosX) (fromIntegral startPosY) (fromIntegral endPosX) (fromIntegral endPosY)) >> peek i)
 
 foreign import ccall safe "raylib.h &ImageDrawLine"
   p'imageDrawLine ::
-    FunPtr (Ptr Image -> CInt -> CInt -> CInt -> CInt -> Color -> IO ())
+    FunPtr (Ptr Raylib.Types.Image -> CInt -> CInt -> CInt -> CInt -> Raylib.Types.Color -> IO ())
 
-foreign import ccall safe "bindings.h ImageDrawLineV_" c'imageDrawLineV :: Ptr Image -> Ptr Vector2 -> Ptr Vector2 -> Ptr Color -> IO ()
+foreign import ccall safe "bindings.h ImageDrawLineV_" c'imageDrawLineV :: Ptr Raylib.Types.Image -> Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Color -> IO ()
 
-imageDrawLineV :: Image -> Vector2 -> Vector2 -> Color -> IO Image
+imageDrawLineV :: Raylib.Types.Image -> Raylib.Types.Vector2 -> Raylib.Types.Vector2 -> Raylib.Types.Color -> IO Raylib.Types.Image
 imageDrawLineV image start end color = with image (\i -> with start (\s -> with end (with color . c'imageDrawLineV i s)) >> peek i)
 
 foreign import ccall safe "raylib.h &ImageDrawLineV"
   p'imageDrawLineV ::
-    FunPtr (Ptr Image -> Vector2 -> Vector2 -> Color -> IO ())
+    FunPtr (Ptr Raylib.Types.Image -> Raylib.Types.Vector2 -> Raylib.Types.Vector2 -> Raylib.Types.Color -> IO ())
 
-foreign import ccall safe "bindings.h ImageDrawCircle_" c'imageDrawCircle :: Ptr Image -> CInt -> CInt -> CInt -> Ptr Color -> IO ()
+foreign import ccall safe "bindings.h ImageDrawCircle_" c'imageDrawCircle :: Ptr Raylib.Types.Image -> CInt -> CInt -> CInt -> Ptr Raylib.Types.Color -> IO ()
 
-imageDrawCircle :: Image -> Int -> Int -> Int -> Color -> IO Image
+imageDrawCircle :: Raylib.Types.Image -> Int -> Int -> Int -> Raylib.Types.Color -> IO Raylib.Types.Image
 imageDrawCircle image centerX centerY radius color = with image (\i -> with color (c'imageDrawCircle i (fromIntegral centerX) (fromIntegral centerY) (fromIntegral radius)) >> peek i)
 
 foreign import ccall safe "raylib.h &ImageDrawCircle"
   p'imageDrawCircle ::
-    FunPtr (Ptr Image -> CInt -> CInt -> CInt -> Color -> IO ())
+    FunPtr (Ptr Raylib.Types.Image -> CInt -> CInt -> CInt -> Raylib.Types.Color -> IO ())
 
-foreign import ccall safe "bindings.h ImageDrawCircleV_" c'imageDrawCircleV :: Ptr Image -> Ptr Vector2 -> CInt -> Ptr Color -> IO ()
+foreign import ccall safe "bindings.h ImageDrawCircleV_" c'imageDrawCircleV :: Ptr Raylib.Types.Image -> Ptr Raylib.Types.Vector2 -> CInt -> Ptr Raylib.Types.Color -> IO ()
 
-imageDrawCircleV :: Image -> Vector2 -> Int -> Color -> IO Image
+imageDrawCircleV :: Raylib.Types.Image -> Raylib.Types.Vector2 -> Int -> Raylib.Types.Color -> IO Raylib.Types.Image
 imageDrawCircleV image center radius color = with image (\i -> with center (\c -> with color (c'imageDrawCircleV i c (fromIntegral radius))) >> peek i)
 
 foreign import ccall safe "raylib.h &ImageDrawCircleV"
   p'imageDrawCircleV ::
-    FunPtr (Ptr Image -> Vector2 -> CInt -> Color -> IO ())
+    FunPtr (Ptr Raylib.Types.Image -> Raylib.Types.Vector2 -> CInt -> Raylib.Types.Color -> IO ())
 
-foreign import ccall safe "bindings.h ImageDrawCircleLines_" c'imageDrawCircleLines :: Ptr Image -> CInt -> CInt -> CInt -> Ptr Color -> IO ()
+foreign import ccall safe "bindings.h ImageDrawCircleLines_" c'imageDrawCircleLines :: Ptr Raylib.Types.Image -> CInt -> CInt -> CInt -> Ptr Raylib.Types.Color -> IO ()
 
-imageDrawCircleLines :: Image -> Int -> Int -> Int -> Color -> IO Image
+imageDrawCircleLines :: Raylib.Types.Image -> Int -> Int -> Int -> Raylib.Types.Color -> IO Raylib.Types.Image
 imageDrawCircleLines image centerX centerY radius color = with image (\i -> with color (c'imageDrawCircleLines i (fromIntegral centerX) (fromIntegral centerY) (fromIntegral radius)) >> peek i)
 
 foreign import ccall safe "raylib.h &ImageDrawCircleLines"
   p'imageDrawCircleLines ::
-    FunPtr (Ptr Image -> Vector2 -> CInt -> Color -> IO ())
+    FunPtr (Ptr Raylib.Types.Image -> Raylib.Types.Vector2 -> CInt -> Raylib.Types.Color -> IO ())
 
-foreign import ccall safe "bindings.h ImageDrawCircleLinesV_" c'imageDrawCircleLinesV :: Ptr Image -> Ptr Vector2 -> CInt -> Ptr Color -> IO ()
+foreign import ccall safe "bindings.h ImageDrawCircleLinesV_" c'imageDrawCircleLinesV :: Ptr Raylib.Types.Image -> Ptr Raylib.Types.Vector2 -> CInt -> Ptr Raylib.Types.Color -> IO ()
 
-imageDrawCircleLinesV :: Image -> Vector2 -> Int -> Color -> IO Image
+imageDrawCircleLinesV :: Raylib.Types.Image -> Raylib.Types.Vector2 -> Int -> Raylib.Types.Color -> IO Raylib.Types.Image
 imageDrawCircleLinesV image center radius color = with image (\i -> with center (\c -> with color (c'imageDrawCircleLinesV i c (fromIntegral radius))) >> peek i)
 
 foreign import ccall safe "raylib.h &ImageDrawCircleLinesV"
   p'imageDrawCircleLinesV ::
-    FunPtr (Ptr Image -> Vector2 -> CInt -> Color -> IO ())
+    FunPtr (Ptr Raylib.Types.Image -> Raylib.Types.Vector2 -> CInt -> Raylib.Types.Color -> IO ())
 
-foreign import ccall safe "bindings.h ImageDrawRectangle_" c'imageDrawRectangle :: Ptr Image -> CInt -> CInt -> CInt -> CInt -> Ptr Color -> IO ()
+foreign import ccall safe "bindings.h ImageDrawRectangle_" c'imageDrawRectangle :: Ptr Raylib.Types.Image -> CInt -> CInt -> CInt -> CInt -> Ptr Raylib.Types.Color -> IO ()
 
-imageDrawRectangle :: Image -> Int -> Int -> Int -> Int -> Color -> IO Image
+imageDrawRectangle :: Raylib.Types.Image -> Int -> Int -> Int -> Int -> Raylib.Types.Color -> IO Raylib.Types.Image
 imageDrawRectangle image posX posY width height color = with image (\i -> with color (c'imageDrawRectangle i (fromIntegral posX) (fromIntegral posY) (fromIntegral width) (fromIntegral height)) >> peek i)
 
 foreign import ccall safe "raylib.h &ImageDrawRectangle"
   p'imageDrawRectangle ::
-    FunPtr (Ptr Image -> CInt -> CInt -> CInt -> CInt -> Color -> IO ())
+    FunPtr (Ptr Raylib.Types.Image -> CInt -> CInt -> CInt -> CInt -> Raylib.Types.Color -> IO ())
 
-foreign import ccall safe "bindings.h ImageDrawRectangleV_" c'imageDrawRectangleV :: Ptr Image -> Ptr Vector2 -> Ptr Vector2 -> Ptr Color -> IO ()
+foreign import ccall safe "bindings.h ImageDrawRectangleV_" c'imageDrawRectangleV :: Ptr Raylib.Types.Image -> Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Color -> IO ()
 
-imageDrawRectangleV :: Image -> Vector2 -> Vector2 -> Color -> IO Image
+imageDrawRectangleV :: Raylib.Types.Image -> Raylib.Types.Vector2 -> Raylib.Types.Vector2 -> Raylib.Types.Color -> IO Raylib.Types.Image
 imageDrawRectangleV image position size color = with image (\i -> with position (\p -> with size (with color . c'imageDrawRectangleV i p)) >> peek i)
 
 foreign import ccall safe "raylib.h &ImageDrawRectangleV"
   p'imageDrawRectangleV ::
-    FunPtr (Ptr Image -> Vector2 -> Vector2 -> Color -> IO ())
+    FunPtr (Ptr Raylib.Types.Image -> Raylib.Types.Vector2 -> Raylib.Types.Vector2 -> Raylib.Types.Color -> IO ())
 
-foreign import ccall safe "bindings.h ImageDrawRectangleRec_" c'imageDrawRectangleRec :: Ptr Image -> Ptr Rectangle -> Ptr Color -> IO ()
+foreign import ccall safe "bindings.h ImageDrawRectangleRec_" c'imageDrawRectangleRec :: Ptr Raylib.Types.Image -> Ptr Raylib.Types.Rectangle -> Ptr Raylib.Types.Color -> IO ()
 
-imageDrawRectangleRec :: Image -> Rectangle -> Color -> IO Image
+imageDrawRectangleRec :: Raylib.Types.Image -> Raylib.Types.Rectangle -> Raylib.Types.Color -> IO Raylib.Types.Image
 imageDrawRectangleRec image rectangle color = with image (\i -> with rectangle (with color . c'imageDrawRectangleRec i) >> peek i)
 
 foreign import ccall safe "raylib.h &ImageDrawRectangleRec"
   p'imageDrawRectangleRec ::
-    FunPtr (Ptr Image -> Rectangle -> Color -> IO ())
+    FunPtr (Ptr Raylib.Types.Image -> Raylib.Types.Rectangle -> Raylib.Types.Color -> IO ())
 
-foreign import ccall safe "bindings.h ImageDrawRectangleLines_" c'imageDrawRectangleLines :: Ptr Image -> Ptr Rectangle -> CInt -> Ptr Color -> IO ()
+foreign import ccall safe "bindings.h ImageDrawRectangleLines_" c'imageDrawRectangleLines :: Ptr Raylib.Types.Image -> Ptr Raylib.Types.Rectangle -> CInt -> Ptr Raylib.Types.Color -> IO ()
 
-imageDrawRectangleLines :: Image -> Rectangle -> Int -> Color -> IO Image
+imageDrawRectangleLines :: Raylib.Types.Image -> Raylib.Types.Rectangle -> Int -> Raylib.Types.Color -> IO Raylib.Types.Image
 imageDrawRectangleLines image rectangle thickness color = with image (\i -> with rectangle (\r -> with color (c'imageDrawRectangleLines i r (fromIntegral thickness))) >> peek i)
 
 foreign import ccall safe "raylib.h &ImageDrawRectangleLines"
   p'imageDrawRectangleLines ::
-    FunPtr (Ptr Image -> Rectangle -> CInt -> Color -> IO ())
+    FunPtr (Ptr Raylib.Types.Image -> Raylib.Types.Rectangle -> CInt -> Raylib.Types.Color -> IO ())
 
-foreign import ccall safe "bindings.h ImageDraw_" c'imageDraw :: Ptr Image -> Ptr Image -> Ptr Rectangle -> Ptr Rectangle -> Ptr Color -> IO ()
+foreign import ccall safe "bindings.h ImageDraw_" c'imageDraw :: Ptr Raylib.Types.Image -> Ptr Raylib.Types.Image -> Ptr Raylib.Types.Rectangle -> Ptr Raylib.Types.Rectangle -> Ptr Raylib.Types.Color -> IO ()
 
-imageDraw :: Image -> Image -> Rectangle -> Rectangle -> Color -> IO Image
+imageDraw :: Raylib.Types.Image -> Raylib.Types.Image -> Raylib.Types.Rectangle -> Raylib.Types.Rectangle -> Raylib.Types.Color -> IO Raylib.Types.Image
 imageDraw image source srcRec dstRec tint = with image (\i -> with source (\s -> with srcRec (\sr -> with dstRec (with tint . c'imageDraw i s sr))) >> peek i)
 
 foreign import ccall safe "raylib.h &ImageDraw"
   p'imageDraw ::
-    FunPtr (Ptr Image -> Image -> Rectangle -> Rectangle -> Color -> IO ())
+    FunPtr (Ptr Raylib.Types.Image -> Raylib.Types.Image -> Raylib.Types.Rectangle -> Raylib.Types.Rectangle -> Raylib.Types.Color -> IO ())
 
-foreign import ccall safe "bindings.h ImageDrawText_" c'imageDrawText :: Ptr Image -> CString -> CInt -> CInt -> CInt -> Ptr Color -> IO ()
+foreign import ccall safe "bindings.h ImageDrawText_" c'imageDrawText :: Ptr Raylib.Types.Image -> CString -> CInt -> CInt -> CInt -> Ptr Raylib.Types.Color -> IO ()
 
-imageDrawText :: Image -> String -> Int -> Int -> Int -> Color -> IO Image
+imageDrawText :: Raylib.Types.Image -> String -> Int -> Int -> Int -> Raylib.Types.Color -> IO Raylib.Types.Image
 imageDrawText image text x y fontSize color = with image (\i -> withCString text (\t -> with color (c'imageDrawText i t (fromIntegral x) (fromIntegral y) (fromIntegral fontSize))) >> peek i)
 
 foreign import ccall safe "raylib.h &ImageDrawText"
   p'imageDrawText ::
-    FunPtr (Ptr Image -> CString -> CInt -> CInt -> CInt -> Color -> IO ())
+    FunPtr (Ptr Raylib.Types.Image -> CString -> CInt -> CInt -> CInt -> Raylib.Types.Color -> IO ())
 
-foreign import ccall safe "bindings.h ImageDrawTextEx_" c'imageDrawTextEx :: Ptr Image -> Ptr Font -> CString -> Ptr Vector2 -> CFloat -> CFloat -> Ptr Color -> IO ()
+foreign import ccall safe "bindings.h ImageDrawTextEx_" c'imageDrawTextEx :: Ptr Raylib.Types.Image -> Ptr Raylib.Types.Font -> CString -> Ptr Raylib.Types.Vector2 -> CFloat -> CFloat -> Ptr Raylib.Types.Color -> IO ()
 
-imageDrawTextEx :: Image -> Font -> String -> Vector2 -> Float -> Float -> Color -> IO Image
+imageDrawTextEx :: Raylib.Types.Image -> Raylib.Types.Font -> String -> Raylib.Types.Vector2 -> Float -> Float -> Raylib.Types.Color -> IO Raylib.Types.Image
 imageDrawTextEx image font text position fontSize spacing tint = with image (\i -> with font (\f -> withCString text (\t -> with position (\p -> with tint (c'imageDrawTextEx i f t p (realToFrac fontSize) (realToFrac spacing))))) >> peek i)
 
 foreign import ccall safe "raylib.h &ImageDrawTextEx"
   p'imageDrawTextEx ::
-    FunPtr (Ptr Image -> Font -> CString -> Vector2 -> CFloat -> CFloat -> Color -> IO ())
+    FunPtr (Ptr Raylib.Types.Image -> Raylib.Types.Font -> CString -> Raylib.Types.Vector2 -> CFloat -> CFloat -> Raylib.Types.Color -> IO ())
 
-foreign import ccall safe "bindings.h LoadTexture_" c'loadTexture :: CString -> IO (Ptr Texture)
+foreign import ccall safe "bindings.h LoadTexture_" c'loadTexture :: CString -> IO (Ptr Raylib.Types.Texture)
 
-loadTexture :: String -> IO Texture
+loadTexture :: String -> IO Raylib.Types.Texture
 loadTexture fileName = withCString fileName c'loadTexture >>= pop
 
 foreign import ccall safe "raylib.h &LoadTexture"
   p'loadTexture ::
-    FunPtr (CString -> IO Texture)
+    FunPtr (CString -> IO Raylib.Types.Texture)
 
-foreign import ccall safe "bindings.h LoadTextureFromImage_" c'loadTextureFromImage :: Ptr Image -> IO (Ptr Texture)
+foreign import ccall safe "bindings.h LoadTextureFromImage_" c'loadTextureFromImage :: Ptr Raylib.Types.Image -> IO (Ptr Raylib.Types.Texture)
 
-loadTextureFromImage :: Image -> IO Texture
+loadTextureFromImage :: Raylib.Types.Image -> IO Raylib.Types.Texture
 loadTextureFromImage image = with image c'loadTextureFromImage >>= pop
 
 foreign import ccall safe "raylib.h &LoadTextureFromImage"
   p'loadTextureFromImage ::
-    FunPtr (Image -> IO Texture)
+    FunPtr (Raylib.Types.Image -> IO Raylib.Types.Texture)
 
-foreign import ccall safe "bindings.h LoadTextureCubemap_" c'loadTextureCubemap :: Ptr Image -> CInt -> IO (Ptr Texture)
+foreign import ccall safe "bindings.h LoadTextureCubemap_" c'loadTextureCubemap :: Ptr Raylib.Types.Image -> CInt -> IO (Ptr Raylib.Types.Texture)
 
-loadTextureCubemap :: Image -> Int -> IO Texture
+loadTextureCubemap :: Raylib.Types.Image -> Int -> IO Raylib.Types.Texture
 loadTextureCubemap image layout = with image (\i -> c'loadTextureCubemap i (fromIntegral layout)) >>= pop
 
 foreign import ccall safe "raylib.h &LoadTextureCubemap"
   p'loadTextureCubemap ::
-    FunPtr (Image -> CInt -> IO Texture)
+    FunPtr (Raylib.Types.Image -> CInt -> IO Raylib.Types.Texture)
 
-foreign import ccall safe "bindings.h LoadRenderTexture_" c'loadRenderTexture :: CInt -> CInt -> IO (Ptr RenderTexture)
+foreign import ccall safe "bindings.h LoadRenderTexture_" c'loadRenderTexture :: CInt -> CInt -> IO (Ptr Raylib.Types.RenderTexture)
 
-loadRenderTexture :: Int -> Int -> IO RenderTexture
+loadRenderTexture :: Int -> Int -> IO Raylib.Types.RenderTexture
 loadRenderTexture width height = c'loadRenderTexture (fromIntegral width) (fromIntegral height) >>= pop
 
 foreign import ccall safe "raylib.h &LoadRenderTexture"
   p'loadRenderTexture ::
-    FunPtr (CInt -> CInt -> IO RenderTexture)
+    FunPtr (CInt -> CInt -> IO Raylib.Types.RenderTexture)
 
-foreign import ccall safe "bindings.h UnloadTexture_" c'unloadTexture :: Ptr Texture -> IO ()
+foreign import ccall safe "bindings.h UnloadTexture_" c'unloadTexture :: Ptr Raylib.Types.Texture -> IO ()
 
-unloadTexture :: Texture -> IO ()
+unloadTexture :: Raylib.Types.Texture -> IO ()
 unloadTexture texture = with texture c'unloadTexture
 
 foreign import ccall safe "raylib.h &UnloadTexture"
   p'unloadTexture ::
-    FunPtr (Texture -> IO ())
+    FunPtr (Raylib.Types.Texture -> IO ())
 
-foreign import ccall safe "bindings.h UnloadRenderTexture_" c'unloadRenderTexture :: Ptr RenderTexture -> IO ()
+foreign import ccall safe "bindings.h UnloadRenderTexture_" c'unloadRenderTexture :: Ptr Raylib.Types.RenderTexture -> IO ()
 
-unloadRenderTexture :: RenderTexture -> IO ()
+unloadRenderTexture :: Raylib.Types.RenderTexture -> IO ()
 unloadRenderTexture target = with target c'unloadRenderTexture
 
 foreign import ccall safe "raylib.h &UnloadRenderTexture"
   p'unloadRenderTexture ::
-    FunPtr (RenderTexture -> IO ())
+    FunPtr (Raylib.Types.RenderTexture -> IO ())
 
-foreign import ccall safe "bindings.h UpdateTexture_" c'updateTexture :: Ptr Texture -> Ptr () -> IO ()
+foreign import ccall safe "bindings.h UpdateTexture_" c'updateTexture :: Ptr Raylib.Types.Texture -> Ptr () -> IO ()
 
-updateTexture :: Texture -> Ptr () -> IO Texture
+updateTexture :: Raylib.Types.Texture -> Ptr () -> IO Raylib.Types.Texture
 updateTexture texture pixels = with texture (\t -> c'updateTexture t pixels >> peek t)
 
 foreign import ccall safe "raylib.h &UpdateTexture"
   p'updateTexture ::
-    FunPtr (Texture -> Ptr () -> IO ())
+    FunPtr (Raylib.Types.Texture -> Ptr () -> IO ())
 
-foreign import ccall safe "bindings.h UpdateTextureRec_" c'updateTextureRec :: Ptr Texture -> Ptr Rectangle -> Ptr () -> IO ()
+foreign import ccall safe "bindings.h UpdateTextureRec_" c'updateTextureRec :: Ptr Raylib.Types.Texture -> Ptr Raylib.Types.Rectangle -> Ptr () -> IO ()
 
-updateTextureRec :: Texture -> Rectangle -> Ptr () -> IO Texture
+updateTextureRec :: Raylib.Types.Texture -> Raylib.Types.Rectangle -> Ptr () -> IO Raylib.Types.Texture
 updateTextureRec texture rect pixels = with texture (\t -> with rect (\r -> c'updateTextureRec t r pixels) >> peek t)
 
 foreign import ccall safe "raylib.h &UpdateTextureRec"
   p'updateTextureRec ::
-    FunPtr (Texture -> Rectangle -> Ptr () -> IO ())
+    FunPtr (Raylib.Types.Texture -> Raylib.Types.Rectangle -> Ptr () -> IO ())
 
 foreign import ccall safe "raylib.h GenTextureMipmaps"
   c'genTextureMipmaps ::
-    Ptr Texture -> IO ()
+    Ptr Raylib.Types.Texture -> IO ()
 
-genTextureMipmaps :: Texture -> IO Texture
+genTextureMipmaps :: Raylib.Types.Texture -> IO Raylib.Types.Texture
 genTextureMipmaps texture = with texture (\t -> c'genTextureMipmaps t >> peek t)
 
 foreign import ccall safe "raylib.h &GenTextureMipmaps"
   p'genTextureMipmaps ::
-    FunPtr (Ptr Texture -> IO ())
+    FunPtr (Ptr Raylib.Types.Texture -> IO ())
 
-foreign import ccall safe "bindings.h SetTextureFilter_" c'setTextureFilter :: Ptr Texture -> CInt -> IO ()
+foreign import ccall safe "bindings.h SetTextureFilter_" c'setTextureFilter :: Ptr Raylib.Types.Texture -> CInt -> IO ()
 
-setTextureFilter :: Texture -> Int -> IO Texture
+setTextureFilter :: Raylib.Types.Texture -> Int -> IO Raylib.Types.Texture
 setTextureFilter texture filterType = with texture (\t -> c'setTextureFilter t (fromIntegral filterType) >> peek t)
 
 foreign import ccall safe "raylib.h &SetTextureFilter"
   p'setTextureFilter ::
-    FunPtr (Texture -> CInt -> IO ())
+    FunPtr (Raylib.Types.Texture -> CInt -> IO ())
 
-foreign import ccall safe "bindings.h SetTextureWrap_" c'setTextureWrap :: Ptr Texture -> CInt -> IO ()
+foreign import ccall safe "bindings.h SetTextureWrap_" c'setTextureWrap :: Ptr Raylib.Types.Texture -> CInt -> IO ()
 
-setTextureWrap :: Texture -> Int -> IO Texture
+setTextureWrap :: Raylib.Types.Texture -> Int -> IO Raylib.Types.Texture
 setTextureWrap texture wrap = with texture (\t -> c'setTextureWrap t (fromIntegral wrap) >> peek t)
 
 foreign import ccall safe "raylib.h &SetTextureWrap"
   p'setTextureWrap ::
-    FunPtr (Texture -> CInt -> IO ())
+    FunPtr (Raylib.Types.Texture -> CInt -> IO ())
 
-foreign import ccall safe "bindings.h DrawTexture_" c'drawTexture :: Ptr Texture -> CInt -> CInt -> Ptr Color -> IO ()
+foreign import ccall safe "bindings.h DrawTexture_" c'drawTexture :: Ptr Raylib.Types.Texture -> CInt -> CInt -> Ptr Raylib.Types.Color -> IO ()
 
-drawTexture :: Texture -> CInt -> CInt -> Color -> IO ()
+drawTexture :: Raylib.Types.Texture -> CInt -> CInt -> Raylib.Types.Color -> IO ()
 drawTexture texture x y tint = with texture (\t -> with tint (c'drawTexture t (fromIntegral x) (fromIntegral y)))
 
 foreign import ccall safe "raylib.h &DrawTexture"
   p'drawTexture ::
-    FunPtr (Texture -> CInt -> CInt -> Color -> IO ())
+    FunPtr (Raylib.Types.Texture -> CInt -> CInt -> Raylib.Types.Color -> IO ())
 
-foreign import ccall safe "bindings.h DrawTextureV_" c'drawTextureV :: Ptr Texture -> Ptr Vector2 -> Ptr Color -> IO ()
+foreign import ccall safe "bindings.h DrawTextureV_" c'drawTextureV :: Ptr Raylib.Types.Texture -> Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Color -> IO ()
 
-drawTextureV :: Texture -> Vector2 -> Color -> IO ()
+drawTextureV :: Raylib.Types.Texture -> Raylib.Types.Vector2 -> Raylib.Types.Color -> IO ()
 drawTextureV texture position color = with texture (\t -> with position (with color . c'drawTextureV t))
 
 foreign import ccall safe "raylib.h &DrawTextureV"
   p'drawTextureV ::
-    FunPtr (Texture -> Vector2 -> Color -> IO ())
+    FunPtr (Raylib.Types.Texture -> Raylib.Types.Vector2 -> Raylib.Types.Color -> IO ())
 
-foreign import ccall safe "bindings.h DrawTextureEx_" c'drawTextureEx :: Ptr Texture -> Ptr Vector2 -> CFloat -> CFloat -> Ptr Color -> IO ()
+foreign import ccall safe "bindings.h DrawTextureEx_" c'drawTextureEx :: Ptr Raylib.Types.Texture -> Ptr Raylib.Types.Vector2 -> CFloat -> CFloat -> Ptr Raylib.Types.Color -> IO ()
 
-drawTextureEx :: Texture -> Vector2 -> Float -> Float -> Color -> IO ()
+drawTextureEx :: Raylib.Types.Texture -> Raylib.Types.Vector2 -> Float -> Float -> Raylib.Types.Color -> IO ()
 drawTextureEx texture position rotation scale tint = with texture (\t -> with position (\p -> with tint (c'drawTextureEx t p (realToFrac rotation) (realToFrac scale))))
 
 foreign import ccall safe "raylib.h &DrawTextureEx"
   p'drawTextureEx ::
-    FunPtr (Texture -> Vector2 -> CFloat -> CFloat -> Color -> IO ())
+    FunPtr (Raylib.Types.Texture -> Raylib.Types.Vector2 -> CFloat -> CFloat -> Raylib.Types.Color -> IO ())
 
-foreign import ccall safe "bindings.h DrawTextureRec_" c'drawTextureRec :: Ptr Texture -> Ptr Rectangle -> Ptr Vector2 -> Ptr Color -> IO ()
+foreign import ccall safe "bindings.h DrawTextureRec_" c'drawTextureRec :: Ptr Raylib.Types.Texture -> Ptr Raylib.Types.Rectangle -> Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Color -> IO ()
 
-drawTextureRec :: Texture -> Rectangle -> Vector2 -> Color -> IO ()
+drawTextureRec :: Raylib.Types.Texture -> Raylib.Types.Rectangle -> Raylib.Types.Vector2 -> Raylib.Types.Color -> IO ()
 drawTextureRec texture source position tint = with texture (\t -> with source (\s -> with position (with tint . c'drawTextureRec t s)))
 
 foreign import ccall safe "raylib.h &DrawTextureRec"
   p'drawTextureRec ::
-    FunPtr (Texture -> Rectangle -> Vector2 -> Color -> IO ())
+    FunPtr (Raylib.Types.Texture -> Raylib.Types.Rectangle -> Raylib.Types.Vector2 -> Raylib.Types.Color -> IO ())
 
-foreign import ccall safe "bindings.h DrawTextureQuad_" c'drawTextureQuad :: Ptr Texture -> Ptr Vector2 -> Ptr Vector2 -> Ptr Rectangle -> Ptr Color -> IO ()
+foreign import ccall safe "bindings.h DrawTextureQuad_" c'drawTextureQuad :: Ptr Raylib.Types.Texture -> Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Rectangle -> Ptr Raylib.Types.Color -> IO ()
 
-drawTextureQuad :: Texture -> Vector2 -> Vector2 -> Rectangle -> Color -> IO ()
+drawTextureQuad :: Raylib.Types.Texture -> Raylib.Types.Vector2 -> Raylib.Types.Vector2 -> Raylib.Types.Rectangle -> Raylib.Types.Color -> IO ()
 drawTextureQuad texture tiling offset quad tint = with texture (\t -> with tiling (\ti -> with offset (\o -> with quad (with tint . c'drawTextureQuad t ti o))))
 
 foreign import ccall safe "raylib.h &DrawTextureQuad"
   p'drawTextureQuad ::
-    FunPtr (Texture -> Vector2 -> Vector2 -> Rectangle -> Color -> IO ())
+    FunPtr (Raylib.Types.Texture -> Raylib.Types.Vector2 -> Raylib.Types.Vector2 -> Raylib.Types.Rectangle -> Raylib.Types.Color -> IO ())
 
-foreign import ccall safe "bindings.h DrawTextureTiled_" c'drawTextureTiled :: Ptr Texture -> Ptr Rectangle -> Ptr Rectangle -> Ptr Vector2 -> CFloat -> CFloat -> Ptr Color -> IO ()
+foreign import ccall safe "bindings.h DrawTextureTiled_" c'drawTextureTiled :: Ptr Raylib.Types.Texture -> Ptr Raylib.Types.Rectangle -> Ptr Raylib.Types.Rectangle -> Ptr Raylib.Types.Vector2 -> CFloat -> CFloat -> Ptr Raylib.Types.Color -> IO ()
 
-drawTextureTiled :: Texture -> Rectangle -> Rectangle -> Vector2 -> Float -> Float -> Color -> IO ()
+drawTextureTiled :: Raylib.Types.Texture -> Raylib.Types.Rectangle -> Raylib.Types.Rectangle -> Raylib.Types.Vector2 -> Float -> Float -> Raylib.Types.Color -> IO ()
 drawTextureTiled texture source dest origin rotation scale tint = with texture (\t -> with source (\s -> with dest (\d -> with origin (\o -> with tint (c'drawTextureTiled t s d o (realToFrac rotation) (realToFrac scale))))))
 
 foreign import ccall safe "raylib.h &DrawTextureTiled"
   p'drawTextureTiled ::
-    FunPtr (Texture -> Rectangle -> Rectangle -> Vector2 -> CFloat -> CFloat -> Color -> IO ())
+    FunPtr (Raylib.Types.Texture -> Raylib.Types.Rectangle -> Raylib.Types.Rectangle -> Raylib.Types.Vector2 -> CFloat -> CFloat -> Raylib.Types.Color -> IO ())
 
-foreign import ccall safe "bindings.h DrawTexturePro_" c'drawTexturePro :: Ptr Texture -> Ptr Rectangle -> Ptr Rectangle -> Ptr Vector2 -> CFloat -> Ptr Color -> IO ()
+foreign import ccall safe "bindings.h DrawTexturePro_" c'drawTexturePro :: Ptr Raylib.Types.Texture -> Ptr Raylib.Types.Rectangle -> Ptr Raylib.Types.Rectangle -> Ptr Raylib.Types.Vector2 -> CFloat -> Ptr Raylib.Types.Color -> IO ()
 
-drawTexturePro :: Texture -> Rectangle -> Rectangle -> Vector2 -> Float -> Color -> IO ()
+drawTexturePro :: Raylib.Types.Texture -> Raylib.Types.Rectangle -> Raylib.Types.Rectangle -> Raylib.Types.Vector2 -> Float -> Raylib.Types.Color -> IO ()
 drawTexturePro texture source dest origin rotation tint = with texture (\t -> with source (\s -> with dest (\d -> with origin (\o -> with tint (c'drawTexturePro t s d o (realToFrac rotation))))))
 
 foreign import ccall safe "raylib.h &DrawTexturePro"
   p'drawTexturePro ::
-    FunPtr (Texture -> Rectangle -> Rectangle -> Vector2 -> CFloat -> Color -> IO ())
+    FunPtr (Raylib.Types.Texture -> Raylib.Types.Rectangle -> Raylib.Types.Rectangle -> Raylib.Types.Vector2 -> CFloat -> Raylib.Types.Color -> IO ())
 
-foreign import ccall safe "bindings.h DrawTextureNPatch_" c'drawTextureNPatch :: Ptr Texture -> Ptr NPatchInfo -> Ptr Rectangle -> Ptr Vector2 -> CFloat -> Ptr Color -> IO ()
+foreign import ccall safe "bindings.h DrawTextureNPatch_" c'drawTextureNPatch :: Ptr Raylib.Types.Texture -> Ptr Raylib.Types.NPatchInfo -> Ptr Raylib.Types.Rectangle -> Ptr Raylib.Types.Vector2 -> CFloat -> Ptr Raylib.Types.Color -> IO ()
 
-drawTextureNPatch :: Texture -> NPatchInfo -> Rectangle -> Vector2 -> Float -> Color -> IO ()
+drawTextureNPatch :: Raylib.Types.Texture -> Raylib.Types.NPatchInfo -> Raylib.Types.Rectangle -> Raylib.Types.Vector2 -> Float -> Raylib.Types.Color -> IO ()
 drawTextureNPatch texture nPatchInfo dest origin rotation tint = with texture (\t -> with nPatchInfo (\n -> with dest (\d -> with origin (\o -> with tint (c'drawTextureNPatch t n d o (realToFrac rotation))))))
 
 foreign import ccall safe "raylib.h &DrawTextureNPatch"
   p'drawTextureNPatch ::
-    FunPtr (Texture -> NPatchInfo -> Rectangle -> Vector2 -> CFloat -> Color -> IO ())
+    FunPtr (Raylib.Types.Texture -> Raylib.Types.NPatchInfo -> Raylib.Types.Rectangle -> Raylib.Types.Vector2 -> CFloat -> Raylib.Types.Color -> IO ())
 
-foreign import ccall safe "bindings.h DrawTexturePoly_" c'drawTexturePoly :: Ptr Texture -> Ptr Vector2 -> Ptr Vector2 -> Ptr Vector2 -> CInt -> Ptr Color -> IO ()
+foreign import ccall safe "bindings.h DrawTexturePoly_" c'drawTexturePoly :: Ptr Raylib.Types.Texture -> Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Vector2 -> CInt -> Ptr Raylib.Types.Color -> IO ()
 
-drawTexturePoly :: Texture -> Vector2 -> [Vector2] -> [Vector2] -> Color -> IO ()
+drawTexturePoly :: Raylib.Types.Texture -> Raylib.Types.Vector2 -> [Raylib.Types.Vector2] -> [Raylib.Types.Vector2] -> Raylib.Types.Color -> IO ()
 drawTexturePoly texture center points texcoords tint = with texture (\t -> with center (\c -> withArrayLen points (\numPoints pArr -> withArray texcoords (\tc -> with tint (c'drawTexturePoly t c pArr tc (fromIntegral numPoints))))))
 
 foreign import ccall safe "raylib.h &DrawTexturePoly"
   p'drawTexturePoly ::
-    FunPtr (Texture -> Vector2 -> Ptr Vector2 -> Ptr Vector2 -> CInt -> Color -> IO ())
+    FunPtr (Raylib.Types.Texture -> Raylib.Types.Vector2 -> Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Vector2 -> CInt -> Raylib.Types.Color -> IO ())
 
-foreign import ccall safe "bindings.h Fade_" c'fade :: Ptr Color -> CFloat -> IO (Ptr Color)
+foreign import ccall safe "bindings.h Fade_" c'fade :: Ptr Raylib.Types.Color -> CFloat -> IO (Ptr Raylib.Types.Color)
 
-fade :: Color -> Float -> Color
+fade :: Raylib.Types.Color -> Float -> Raylib.Types.Color
 fade color alpha = unsafePerformIO $ with color (\c -> c'fade c (realToFrac alpha)) >>= pop
 
 foreign import ccall safe "raylib.h &Fade"
   p'fade ::
-    FunPtr (Color -> CFloat -> IO Color)
+    FunPtr (Raylib.Types.Color -> CFloat -> IO Raylib.Types.Color)
 
-foreign import ccall safe "bindings.h ColorToInt_" c'colorToInt :: Ptr Color -> IO CInt
+foreign import ccall safe "bindings.h ColorToInt_" c'colorToInt :: Ptr Raylib.Types.Color -> IO CInt
 
-colorToInt :: Color -> Int
+colorToInt :: Raylib.Types.Color -> Int
 colorToInt color = unsafePerformIO $ fromIntegral <$> with color c'colorToInt
 
 foreign import ccall safe "raylib.h &ColorToInt"
   p'colorToInt ::
-    FunPtr (Color -> IO CInt)
+    FunPtr (Raylib.Types.Color -> IO CInt)
 
-foreign import ccall safe "bindings.h ColorNormalize_" c'colorNormalize :: Ptr Color -> IO (Ptr Vector4)
+foreign import ccall safe "bindings.h ColorNormalize_" c'colorNormalize :: Ptr Raylib.Types.Color -> IO (Ptr Raylib.Types.Vector4)
 
-colorNormalize :: Color -> Vector4
+colorNormalize :: Raylib.Types.Color -> Raylib.Types.Vector4
 colorNormalize color = unsafePerformIO $ with color c'colorNormalize >>= pop
 
 foreign import ccall safe "raylib.h &ColorNormalize"
   p'colorNormalize ::
-    FunPtr (Color -> IO Vector4)
+    FunPtr (Raylib.Types.Color -> IO Raylib.Types.Vector4)
 
-foreign import ccall safe "bindings.h ColorFromNormalized_" c'colorFromNormalized :: Ptr Vector4 -> IO (Ptr Color)
+foreign import ccall safe "bindings.h ColorFromNormalized_" c'colorFromNormalized :: Ptr Raylib.Types.Vector4 -> IO (Ptr Raylib.Types.Color)
 
-colorFromNormalized :: Vector4 -> Color
+colorFromNormalized :: Raylib.Types.Vector4 -> Raylib.Types.Color
 colorFromNormalized normalized = unsafePerformIO $ with normalized c'colorFromNormalized >>= pop
 
 foreign import ccall safe "raylib.h &ColorFromNormalized"
   p'colorFromNormalized ::
-    FunPtr (Vector4 -> IO Color)
+    FunPtr (Raylib.Types.Vector4 -> IO Raylib.Types.Color)
 
-foreign import ccall safe "bindings.h ColorToHSV_" c'colorToHSV :: Ptr Color -> IO (Ptr Vector3)
+foreign import ccall safe "bindings.h ColorToHSV_" c'colorToHSV :: Ptr Raylib.Types.Color -> IO (Ptr Raylib.Types.Vector3)
 
-colorToHSV :: Color -> Vector3
+colorToHSV :: Raylib.Types.Color -> Raylib.Types.Vector3
 colorToHSV color = unsafePerformIO $ with color c'colorToHSV >>= pop
 
 foreign import ccall safe "raylib.h &ColorToHSV"
   p'colorToHSV ::
-    FunPtr (Color -> IO Vector3)
+    FunPtr (Raylib.Types.Color -> IO Raylib.Types.Vector3)
 
-foreign import ccall safe "bindings.h ColorFromHSV_" c'colorFromHSV :: CFloat -> CFloat -> CFloat -> IO (Ptr Color)
+foreign import ccall safe "bindings.h ColorFromHSV_" c'colorFromHSV :: CFloat -> CFloat -> CFloat -> IO (Ptr Raylib.Types.Color)
 
-colorFromHSV :: Float -> Float -> Float -> Color
+colorFromHSV :: Float -> Float -> Float -> Raylib.Types.Color
 colorFromHSV hue saturation value = unsafePerformIO $ c'colorFromHSV (realToFrac hue) (realToFrac saturation) (realToFrac value) >>= pop
 
 foreign import ccall safe "raylib.h &ColorFromHSV"
   p'colorFromHSV ::
-    FunPtr (CFloat -> CFloat -> CFloat -> IO Color)
+    FunPtr (CFloat -> CFloat -> CFloat -> IO Raylib.Types.Color)
 
-foreign import ccall safe "bindings.h ColorAlpha_" c'colorAlpha :: Ptr Color -> CFloat -> IO (Ptr Color)
+foreign import ccall safe "bindings.h ColorAlpha_" c'colorAlpha :: Ptr Raylib.Types.Color -> CFloat -> IO (Ptr Raylib.Types.Color)
 
-colorAlpha :: Color -> Float -> Color
+colorAlpha :: Raylib.Types.Color -> Float -> Raylib.Types.Color
 colorAlpha color alpha = unsafePerformIO $ with color (\c -> c'colorAlpha c (realToFrac alpha)) >>= pop
 
 foreign import ccall safe "raylib.h &ColorAlpha"
   p'colorAlpha ::
-    FunPtr (Color -> CFloat -> IO Color)
+    FunPtr (Raylib.Types.Color -> CFloat -> IO Raylib.Types.Color)
 
-foreign import ccall safe "bindings.h ColorAlphaBlend_" c'colorAlphaBlend :: Ptr Color -> Ptr Color -> Ptr Color -> IO (Ptr Color)
+foreign import ccall safe "bindings.h ColorAlphaBlend_" c'colorAlphaBlend :: Ptr Raylib.Types.Color -> Ptr Raylib.Types.Color -> Ptr Raylib.Types.Color -> IO (Ptr Raylib.Types.Color)
 
-colorAlphaBlend :: Color -> Color -> Color -> Color
+colorAlphaBlend :: Raylib.Types.Color -> Raylib.Types.Color -> Raylib.Types.Color -> Raylib.Types.Color
 colorAlphaBlend dst src tint = unsafePerformIO $ with dst (\d -> with src (with tint . c'colorAlphaBlend d)) >>= pop
 
 foreign import ccall safe "raylib.h &ColorAlphaBlend"
   p'colorAlphaBlend ::
-    FunPtr (Color -> Color -> Color -> IO Color)
+    FunPtr (Raylib.Types.Color -> Raylib.Types.Color -> Raylib.Types.Color -> IO Raylib.Types.Color)
 
-foreign import ccall safe "bindings.h GetColor_" c'getColor :: CUInt -> IO (Ptr Color)
+foreign import ccall safe "bindings.h GetColor_" c'getColor :: CUInt -> IO (Ptr Raylib.Types.Color)
 
-getColor :: Integer -> Color
+getColor :: Integer -> Raylib.Types.Color
 getColor hexValue = unsafePerformIO $ c'getColor (fromIntegral hexValue) >>= pop
 
 foreign import ccall safe "raylib.h &GetColor"
   p'getColor ::
-    FunPtr (CUInt -> IO Color)
+    FunPtr (CUInt -> IO Raylib.Types.Color)
 
-foreign import ccall safe "bindings.h GetPixelColor_" c'getPixelColor :: Ptr () -> CInt -> IO (Ptr Color)
+foreign import ccall safe "bindings.h GetPixelColor_" c'getPixelColor :: Ptr () -> CInt -> IO (Ptr Raylib.Types.Color)
 
-getPixelColor :: Ptr () -> Int -> IO Color
+getPixelColor :: Ptr () -> Int -> IO Raylib.Types.Color
 getPixelColor srcPtr format = c'getPixelColor srcPtr (fromIntegral format) >>= pop
 
 foreign import ccall safe "raylib.h &GetPixelColor"
   p'getPixelColor ::
-    FunPtr (Ptr () -> CInt -> IO Color)
+    FunPtr (Ptr () -> CInt -> IO Raylib.Types.Color)
 
-foreign import ccall safe "bindings.h SetPixelColor_" c'setPixelColor :: Ptr () -> Ptr Color -> CInt -> IO ()
+foreign import ccall safe "bindings.h SetPixelColor_" c'setPixelColor :: Ptr () -> Ptr Raylib.Types.Color -> CInt -> IO ()
 
-setPixelColor :: Ptr () -> Color -> Int -> IO ()
+setPixelColor :: Ptr () -> Raylib.Types.Color -> Int -> IO ()
 setPixelColor dstPtr color format = with color (\c -> c'setPixelColor dstPtr c (fromIntegral format))
 
 foreign import ccall safe "raylib.h &SetPixelColor"
   p'setPixelColor ::
-    FunPtr (Ptr () -> Color -> CInt -> IO ())
+    FunPtr (Ptr () -> Raylib.Types.Color -> CInt -> IO ())
 
 foreign import ccall safe "raylib.h GetPixelDataSize"
   c'getPixelDataSize ::
@@ -3623,99 +3623,99 @@ foreign import ccall safe "raylib.h &GetPixelDataSize"
   p'getPixelDataSize ::
     FunPtr (CInt -> CInt -> CInt -> IO CInt)
 
-foreign import ccall safe "bindings.h GetFontDefault_" c'getFontDefault :: IO (Ptr Font)
+foreign import ccall safe "bindings.h GetFontDefault_" c'getFontDefault :: IO (Ptr Raylib.Types.Font)
 
-getFontDefault :: IO Font
+getFontDefault :: IO Raylib.Types.Font
 getFontDefault = c'getFontDefault >>= pop
 
 foreign import ccall safe "raylib.h &GetFontDefault"
   p'getFontDefault ::
-    FunPtr (IO Font)
+    FunPtr (IO Raylib.Types.Font)
 
-foreign import ccall safe "bindings.h LoadFont_" c'loadFont :: CString -> IO (Ptr Font)
+foreign import ccall safe "bindings.h LoadFont_" c'loadFont :: CString -> IO (Ptr Raylib.Types.Font)
 
-loadFont :: String -> IO Font
+loadFont :: String -> IO Raylib.Types.Font
 loadFont fileName = withCString fileName c'loadFont >>= pop
 
 foreign import ccall safe "raylib.h &LoadFont"
   p'loadFont ::
-    FunPtr (CString -> IO Font)
+    FunPtr (CString -> IO Raylib.Types.Font)
 
-foreign import ccall safe "bindings.h LoadFontEx_" c'loadFontEx :: CString -> CInt -> Ptr CInt -> CInt -> IO (Ptr Font)
+foreign import ccall safe "bindings.h LoadFontEx_" c'loadFontEx :: CString -> CInt -> Ptr CInt -> CInt -> IO (Ptr Raylib.Types.Font)
 
-loadFontEx :: String -> Int -> [Int] -> Int -> IO Font
+loadFontEx :: String -> Int -> [Int] -> Int -> IO Raylib.Types.Font
 loadFontEx fileName fontSize fontChars glyphCount = withCString fileName (\f -> withArray fontChars (\c -> c'loadFontEx f (fromIntegral fontSize) (castPtr c) (fromIntegral glyphCount))) >>= pop
 
 foreign import ccall safe "raylib.h &LoadFontEx"
   p'loadFontEx ::
-    FunPtr (CString -> CInt -> Ptr CInt -> CInt -> IO Font)
+    FunPtr (CString -> CInt -> Ptr CInt -> CInt -> IO Raylib.Types.Font)
 
-foreign import ccall safe "bindings.h LoadFontFromImage_" c'loadFontFromImage :: Ptr Image -> Ptr Color -> CInt -> IO (Ptr Font)
+foreign import ccall safe "bindings.h LoadFontFromImage_" c'loadFontFromImage :: Ptr Raylib.Types.Image -> Ptr Raylib.Types.Color -> CInt -> IO (Ptr Raylib.Types.Font)
 
-loadFontFromImage :: Image -> Color -> Int -> IO Font
+loadFontFromImage :: Raylib.Types.Image -> Raylib.Types.Color -> Int -> IO Raylib.Types.Font
 loadFontFromImage image key firstChar = with image (\i -> with key (\k -> c'loadFontFromImage i k (fromIntegral firstChar))) >>= pop
 
 foreign import ccall safe "raylib.h &LoadFontFromImage"
   p'loadFontFromImage ::
-    FunPtr (Image -> Color -> CInt -> IO Font)
+    FunPtr (Raylib.Types.Image -> Raylib.Types.Color -> CInt -> IO Raylib.Types.Font)
 
-foreign import ccall safe "bindings.h LoadFontFromMemory_" c'loadFontFromMemory :: CString -> Ptr CUChar -> CInt -> CInt -> Ptr CInt -> CInt -> IO (Ptr Font)
+foreign import ccall safe "bindings.h LoadFontFromMemory_" c'loadFontFromMemory :: CString -> Ptr CUChar -> CInt -> CInt -> Ptr CInt -> CInt -> IO (Ptr Raylib.Types.Font)
 
-loadFontFromMemory :: String -> [Int] -> Int -> [Int] -> Int -> IO Font
+loadFontFromMemory :: String -> [Int] -> Int -> [Int] -> Int -> IO Raylib.Types.Font
 loadFontFromMemory fileType fileData fontSize fontChars glyphCount = withCString fileType (\t -> withArrayLen fileData (\size d -> withArray fontChars (\c -> c'loadFontFromMemory t (castPtr d) (fromIntegral size) (fromIntegral fontSize) (castPtr c) (fromIntegral glyphCount)))) >>= pop
 
 foreign import ccall safe "raylib.h &LoadFontFromMemory"
   p'loadFontFromMemory ::
-    FunPtr (CString -> Ptr CUChar -> CInt -> CInt -> Ptr CInt -> CInt -> IO Font)
+    FunPtr (CString -> Ptr CUChar -> CInt -> CInt -> Ptr CInt -> CInt -> IO Raylib.Types.Font)
 
 foreign import ccall safe "raylib.h LoadFontData"
   c'loadFontData ::
-    Ptr CUChar -> CInt -> CInt -> Ptr CInt -> CInt -> CInt -> IO (Ptr GlyphInfo)
+    Ptr CUChar -> CInt -> CInt -> Ptr CInt -> CInt -> CInt -> IO (Ptr Raylib.Types.GlyphInfo)
 
-loadFontData :: [Int] -> Int -> [Int] -> Int -> Int -> IO GlyphInfo
+loadFontData :: [Int] -> Int -> [Int] -> Int -> Int -> IO Raylib.Types.GlyphInfo
 loadFontData fileData fontSize fontChars glyphCount fontType = withArrayLen fileData (\size d -> withArray fontChars (\c -> c'loadFontData (castPtr d) (fromIntegral size) (fromIntegral fontSize) (castPtr c) (fromIntegral glyphCount) (fromIntegral fontType))) >>= pop
 
 foreign import ccall safe "raylib.h &LoadFontData"
   p'loadFontData ::
-    FunPtr (Ptr CUChar -> CInt -> CInt -> Ptr CInt -> CInt -> CInt -> IO (Ptr GlyphInfo))
+    FunPtr (Ptr CUChar -> CInt -> CInt -> Ptr CInt -> CInt -> CInt -> IO (Ptr Raylib.Types.GlyphInfo))
 
-foreign import ccall safe "bindings.h GenImageFontAtlas_" c'genImageFontAtlas :: Ptr GlyphInfo -> Ptr (Ptr Rectangle) -> CInt -> CInt -> CInt -> CInt -> IO (Ptr Image)
+foreign import ccall safe "bindings.h GenImageFontAtlas_" c'genImageFontAtlas :: Ptr Raylib.Types.GlyphInfo -> Ptr (Ptr Raylib.Types.Rectangle) -> CInt -> CInt -> CInt -> CInt -> IO (Ptr Raylib.Types.Image)
 
-genImageFontAtlas :: [GlyphInfo] -> [[Rectangle]] -> Int -> Int -> Int -> Int -> IO Image
+genImageFontAtlas :: [Raylib.Types.GlyphInfo] -> [[Raylib.Types.Rectangle]] -> Int -> Int -> Int -> Int -> IO Raylib.Types.Image
 genImageFontAtlas chars recs glyphCount fontSize padding packMethod = withArray chars (\c -> withArray2D recs (\r -> c'genImageFontAtlas c r (fromIntegral glyphCount) (fromIntegral fontSize) (fromIntegral padding) (fromIntegral packMethod))) >>= pop
 
 foreign import ccall safe "raylib.h &GenImageFontAtlas"
   p'genImageFontAtlas ::
-    FunPtr (Ptr GlyphInfo -> Ptr (Ptr Rectangle) -> CInt -> CInt -> CInt -> CInt -> IO Image)
+    FunPtr (Ptr Raylib.Types.GlyphInfo -> Ptr (Ptr Raylib.Types.Rectangle) -> CInt -> CInt -> CInt -> CInt -> IO Raylib.Types.Image)
 
 foreign import ccall safe "raylib.h UnloadFontData"
   c'unloadFontData ::
-    Ptr GlyphInfo -> CInt -> IO ()
+    Ptr Raylib.Types.GlyphInfo -> CInt -> IO ()
 
-unloadFontData :: [GlyphInfo] -> IO ()
+unloadFontData :: [Raylib.Types.GlyphInfo] -> IO ()
 unloadFontData glyphs = withArrayLen glyphs (\size g -> c'unloadFontData g (fromIntegral size))
 
 foreign import ccall safe "raylib.h &UnloadFontData"
   p'unloadFontData ::
-    FunPtr (Ptr GlyphInfo -> CInt -> IO ())
+    FunPtr (Ptr Raylib.Types.GlyphInfo -> CInt -> IO ())
 
-foreign import ccall safe "bindings.h UnloadFont_" c'unloadFont :: Ptr Font -> IO ()
+foreign import ccall safe "bindings.h UnloadFont_" c'unloadFont :: Ptr Raylib.Types.Font -> IO ()
 
-unloadFont :: Font -> IO ()
+unloadFont :: Raylib.Types.Font -> IO ()
 unloadFont font = with font c'unloadFont
 
 foreign import ccall safe "raylib.h &UnloadFont"
   p'unloadFont ::
-    FunPtr (Font -> IO ())
+    FunPtr (Raylib.Types.Font -> IO ())
 
-foreign import ccall safe "bindings.h ExportFontAsCode_" c'exportFontAsCode :: Ptr Font -> CString -> IO CInt
+foreign import ccall safe "bindings.h ExportFontAsCode_" c'exportFontAsCode :: Ptr Raylib.Types.Font -> CString -> IO CInt
 
-exportFontAsCode :: Font -> String -> IO Bool
+exportFontAsCode :: Raylib.Types.Font -> String -> IO Bool
 exportFontAsCode font fileName = toBool <$> with font (withCString fileName . c'exportFontAsCode)
 
 foreign import ccall safe "raylib.h &ExportFontAsCode"
   p'exportFontAsCode ::
-    FunPtr (Font -> CString -> IO CInt)
+    FunPtr (Raylib.Types.Font -> CString -> IO CInt)
 
 foreign import ccall safe "raylib.h DrawFPS"
   c'drawFPS ::
@@ -3728,50 +3728,50 @@ foreign import ccall safe "raylib.h &DrawFPS"
   p'drawFPS ::
     FunPtr (CInt -> CInt -> IO ())
 
-foreign import ccall safe "bindings.h DrawText_" c'drawText :: CString -> CInt -> CInt -> CInt -> Ptr Color -> IO ()
+foreign import ccall safe "bindings.h DrawText_" c'drawText :: CString -> CInt -> CInt -> CInt -> Ptr Raylib.Types.Color -> IO ()
 
-drawText :: String -> Int -> Int -> Int -> Color -> IO ()
+drawText :: String -> Int -> Int -> Int -> Raylib.Types.Color -> IO ()
 drawText text x y fontSize color = withCString text (\t -> with color (c'drawText t (fromIntegral x) (fromIntegral y) (fromIntegral fontSize)))
 
 foreign import ccall safe "raylib.h &DrawText"
   p'drawText ::
-    FunPtr (CString -> CInt -> CInt -> CInt -> Color -> IO ())
+    FunPtr (CString -> CInt -> CInt -> CInt -> Raylib.Types.Color -> IO ())
 
-foreign import ccall safe "bindings.h DrawTextEx_" c'drawTextEx :: Ptr Font -> CString -> Ptr Vector2 -> CFloat -> CFloat -> Ptr Color -> IO ()
+foreign import ccall safe "bindings.h DrawTextEx_" c'drawTextEx :: Ptr Raylib.Types.Font -> CString -> Ptr Raylib.Types.Vector2 -> CFloat -> CFloat -> Ptr Raylib.Types.Color -> IO ()
 
-drawTextEx :: Font -> String -> Vector2 -> Float -> Float -> Color -> IO ()
+drawTextEx :: Raylib.Types.Font -> String -> Raylib.Types.Vector2 -> Float -> Float -> Raylib.Types.Color -> IO ()
 drawTextEx font text position fontSize spacing tint = with font (\f -> withCString text (\t -> with position (\p -> with tint (c'drawTextEx f t p (realToFrac fontSize) (realToFrac spacing)))))
 
 foreign import ccall safe "raylib.h &DrawTextEx"
   p'drawTextEx ::
-    FunPtr (Font -> CString -> Vector2 -> CFloat -> CFloat -> Color -> IO ())
+    FunPtr (Raylib.Types.Font -> CString -> Raylib.Types.Vector2 -> CFloat -> CFloat -> Raylib.Types.Color -> IO ())
 
-foreign import ccall safe "bindings.h DrawTextPro_" c'drawTextPro :: Ptr Font -> CString -> Ptr Vector2 -> Ptr Vector2 -> CFloat -> CFloat -> CFloat -> Ptr Color -> IO ()
+foreign import ccall safe "bindings.h DrawTextPro_" c'drawTextPro :: Ptr Raylib.Types.Font -> CString -> Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Vector2 -> CFloat -> CFloat -> CFloat -> Ptr Raylib.Types.Color -> IO ()
 
-drawTextPro :: Font -> String -> Vector2 -> Vector2 -> Float -> Float -> Float -> Color -> IO ()
+drawTextPro :: Raylib.Types.Font -> String -> Raylib.Types.Vector2 -> Raylib.Types.Vector2 -> Float -> Float -> Float -> Raylib.Types.Color -> IO ()
 drawTextPro font text position origin rotation fontSize spacing tint = with font (\f -> withCString text (\t -> with position (\p -> with origin (\o -> with tint (c'drawTextPro f t p o (realToFrac rotation) (realToFrac fontSize) (realToFrac spacing))))))
 
 foreign import ccall safe "raylib.h &DrawTextPro"
   p'drawTextPro ::
-    FunPtr (Font -> CString -> Vector2 -> Vector2 -> CFloat -> CFloat -> CFloat -> Color -> IO ())
+    FunPtr (Raylib.Types.Font -> CString -> Raylib.Types.Vector2 -> Raylib.Types.Vector2 -> CFloat -> CFloat -> CFloat -> Raylib.Types.Color -> IO ())
 
-foreign import ccall safe "bindings.h DrawTextCodepoint_" c'drawTextCodepoint :: Ptr Font -> CInt -> Ptr Vector2 -> CFloat -> Ptr Color -> IO ()
+foreign import ccall safe "bindings.h DrawTextCodepoint_" c'drawTextCodepoint :: Ptr Raylib.Types.Font -> CInt -> Ptr Raylib.Types.Vector2 -> CFloat -> Ptr Raylib.Types.Color -> IO ()
 
-drawTextCodepoint :: Font -> Int -> Vector2 -> Float -> Color -> IO ()
+drawTextCodepoint :: Raylib.Types.Font -> Int -> Raylib.Types.Vector2 -> Float -> Raylib.Types.Color -> IO ()
 drawTextCodepoint font codepoint position fontSize tint = with font (\f -> with position (\p -> with tint (c'drawTextCodepoint f (fromIntegral codepoint) p (realToFrac fontSize))))
 
 foreign import ccall safe "raylib.h &DrawTextCodepoint"
   p'drawTextCodepoint ::
-    FunPtr (Font -> CInt -> Vector2 -> CFloat -> Color -> IO ())
+    FunPtr (Raylib.Types.Font -> CInt -> Raylib.Types.Vector2 -> CFloat -> Raylib.Types.Color -> IO ())
 
-foreign import ccall safe "bindings.h DrawTextCodepoints_" c'drawTextCodepoints :: Ptr Font -> Ptr CInt -> CInt -> Ptr Vector2 -> CFloat -> CFloat -> Ptr Color -> IO ()
+foreign import ccall safe "bindings.h DrawTextCodepoints_" c'drawTextCodepoints :: Ptr Raylib.Types.Font -> Ptr CInt -> CInt -> Ptr Raylib.Types.Vector2 -> CFloat -> CFloat -> Ptr Raylib.Types.Color -> IO ()
 
-drawTextCodepoints :: Font -> [Int] -> Vector2 -> Float -> Float -> Color -> IO ()
+drawTextCodepoints :: Raylib.Types.Font -> [Int] -> Raylib.Types.Vector2 -> Float -> Float -> Raylib.Types.Color -> IO ()
 drawTextCodepoints font codepoints position fontSize spacing tint = with font (\f -> withArrayLen codepoints (\count cp -> with position (\p -> with tint (c'drawTextCodepoints f (castPtr cp) (fromIntegral count) p (realToFrac fontSize) (realToFrac spacing)))))
 
 foreign import ccall safe "raylib.h &DrawTextCodepoints"
   p'drawTextCodepoints ::
-    FunPtr (Font -> Ptr CInt -> CInt -> Vector2 -> CFloat -> CFloat -> Color -> IO ())
+    FunPtr (Raylib.Types.Font -> Ptr CInt -> CInt -> Raylib.Types.Vector2 -> CFloat -> CFloat -> Raylib.Types.Color -> IO ())
 
 foreign import ccall safe "raylib.h MeasureText"
   c'measureText ::
@@ -3784,48 +3784,58 @@ foreign import ccall safe "raylib.h &MeasureText"
   p'measureText ::
     FunPtr (CString -> CInt -> IO CInt)
 
-foreign import ccall safe "bindings.h MeasureTextEx_" c'measureTextEx :: Ptr Font -> CString -> CFloat -> CFloat -> IO (Ptr Vector2)
+foreign import ccall safe "bindings.h MeasureTextEx_" c'measureTextEx :: Ptr Raylib.Types.Font -> CString -> CFloat -> CFloat -> IO (Ptr Raylib.Types.Vector2)
 
-measureTextEx :: Font -> String -> Float -> Float -> IO Vector2
+measureTextEx :: Raylib.Types.Font -> String -> Float -> Float -> IO Raylib.Types.Vector2
 measureTextEx font text fontSize spacing = with font (\f -> withCString text (\t -> c'measureTextEx f t (realToFrac fontSize) (realToFrac spacing))) >>= pop
 
 foreign import ccall safe "raylib.h &MeasureTextEx"
   p'measureTextEx ::
-    FunPtr (Font -> CString -> CFloat -> CFloat -> IO Vector2)
+    FunPtr (Raylib.Types.Font -> CString -> CFloat -> CFloat -> IO Raylib.Types.Vector2)
 
-foreign import ccall safe "bindings.h GetGlyphIndex_" c'getGlyphIndex :: Ptr Font -> CInt -> IO CInt
+foreign import ccall safe "bindings.h GetGlyphIndex_" c'getGlyphIndex :: Ptr Raylib.Types.Font -> CInt -> IO CInt
 
-getGlyphIndex :: Font -> Int -> IO Int
+getGlyphIndex :: Raylib.Types.Font -> Int -> IO Int
 getGlyphIndex font codepoint = fromIntegral <$> with font (\f -> c'getGlyphIndex f (fromIntegral codepoint))
 
 foreign import ccall safe "raylib.h &GetGlyphIndex"
   p'getGlyphIndex ::
-    FunPtr (Font -> CInt -> IO CInt)
+    FunPtr (Raylib.Types.Font -> CInt -> IO CInt)
 
-foreign import ccall safe "bindings.h GetGlyphInfo_" c'getGlyphInfo :: Ptr Font -> CInt -> IO (Ptr GlyphInfo)
+foreign import ccall safe "bindings.h GetGlyphInfo_" c'getGlyphInfo :: Ptr Raylib.Types.Font -> CInt -> IO (Ptr Raylib.Types.GlyphInfo)
 
-getGlyphInfo :: Font -> Int -> IO GlyphInfo
+getGlyphInfo :: Raylib.Types.Font -> Int -> IO Raylib.Types.GlyphInfo
 getGlyphInfo font codepoint = with font (\f -> c'getGlyphInfo f (fromIntegral codepoint)) >>= pop
 
 foreign import ccall safe "raylib.h &GetGlyphInfo"
   p'getGlyphInfo ::
-    FunPtr (Font -> CInt -> IO GlyphInfo)
+    FunPtr (Raylib.Types.Font -> CInt -> IO Raylib.Types.GlyphInfo)
 
-foreign import ccall safe "bindings.h GetGlyphAtlasRec_" c'getGlyphAtlasRec :: Ptr Font -> CInt -> IO (Ptr Rectangle)
+foreign import ccall safe "bindings.h GetGlyphAtlasRec_" c'getGlyphAtlasRec :: Ptr Raylib.Types.Font -> CInt -> IO (Ptr Raylib.Types.Rectangle)
 
-getGlyphAtlasRec :: Font -> Int -> IO Rectangle
+getGlyphAtlasRec :: Raylib.Types.Font -> Int -> IO Raylib.Types.Rectangle
 getGlyphAtlasRec font codepoint = with font (\f -> c'getGlyphAtlasRec f (fromIntegral codepoint)) >>= pop
 
 foreign import ccall safe "raylib.h &GetGlyphAtlasRec"
   p'getGlyphAtlasRec ::
-    FunPtr (Font -> CInt -> IO Rectangle)
+    FunPtr (Raylib.Types.Font -> CInt -> IO Raylib.Types.Rectangle)
 
 foreign import ccall safe "raylib.h LoadUTF8"
   c'loadUTF8 ::
     Ptr CInt -> CInt -> IO CString
 
 loadUTF8 :: [Int] -> IO String
-loadUTF8 codepoints = withArrayLen codepoints (\size c -> c'loadUTF8 (castPtr c) (fromIntegral size)) >>= (\s -> do val <- peekCString s; unloadUTF8 s; return val)
+loadUTF8 codepoints =
+  withArrayLen
+    codepoints
+    ( \size c ->
+        c'loadUTF8 (castPtr c) (fromIntegral size)
+    )
+    >>= ( \s -> do
+            val <- peekCString s
+            unloadUTF8 s
+            return val
+        )
 
 foreign import ccall safe "raylib.h &LoadUTF8"
   p'loadUTF8 ::
@@ -3896,7 +3906,19 @@ foreign import ccall safe "raylib.h GetCodepointNext"
     CString -> Ptr CInt -> IO CInt
 
 getCodepointNext :: String -> IO (Int, Int)
-getCodepointNext text = withCString text (\t -> with 0 (\n -> do res <- c'getCodepointNext t n; num <- peek n; return (fromIntegral res, fromIntegral num)))
+getCodepointNext text =
+  withCString
+    text
+    ( \t ->
+        with
+          0
+          ( \n ->
+              do
+                res <- c'getCodepointNext t n
+                num <- peek n
+                return (fromIntegral res, fromIntegral num)
+          )
+    )
 
 foreign import ccall safe "raylib.h &GetCodepointNext"
   p'getCodepointNext ::
@@ -3907,7 +3929,19 @@ foreign import ccall safe "raylib.h GetCodepointPrevious"
     CString -> Ptr CInt -> IO CInt
 
 getCodepointPrevious :: String -> IO (Int, Int)
-getCodepointPrevious text = withCString text(\t -> with 0 (\n -> do res <- c'getCodepointPrevious t n; num <- peek n; return (fromIntegral res, fromIntegral num)))
+getCodepointPrevious text =
+  withCString
+    text
+    ( \t ->
+        with
+          0
+          ( \n ->
+              do
+                res <- c'getCodepointPrevious t n
+                num <- peek n
+                return (fromIntegral res, fromIntegral num)
+          )
+    )
 
 foreign import ccall safe "raylib.h &GetCodepointPrevious"
   p'getCodepointPrevious ::
@@ -3924,7 +3958,7 @@ foreign import ccall safe "raylib.h &CodepointToUTF8"
   p'codepointToUTF8 ::
     FunPtr (CInt -> Ptr CInt -> IO CString)
 
-{-| Not required in Haskell -}
+-- | Not required in Haskell
 foreign import ccall safe "raylib.h TextCopy"
   textCopy ::
     CString -> CString -> IO CInt
@@ -3933,7 +3967,7 @@ foreign import ccall safe "raylib.h &TextCopy"
   p'textCopy ::
     FunPtr (CString -> CString -> IO CInt)
 
-{-| Not required in Haskell -}
+-- | Not required in Haskell
 foreign import ccall safe "raylib.h TextIsEqual"
   textIsEqual ::
     CString -> CString -> IO CInt
@@ -3942,7 +3976,7 @@ foreign import ccall safe "raylib.h &TextIsEqual"
   p'textIsEqual ::
     FunPtr (CString -> CString -> IO CInt)
 
-{-| Not required in Haskell -}
+-- | Not required in Haskell
 foreign import ccall safe "raylib.h TextLength"
   textLength ::
     CString -> IO CUInt
@@ -3951,7 +3985,7 @@ foreign import ccall safe "raylib.h &TextLength"
   p'textLength ::
     FunPtr (CString -> IO CUInt)
 
-{-| Not required in Haskell -}
+-- | Not required in Haskell
 foreign import ccall safe "raylib.h TextFormat"
   textFormat ::
     CString -> IO CString
@@ -3960,7 +3994,7 @@ foreign import ccall safe "raylib.h &TextFormat"
   p'textFormat ::
     FunPtr (CString -> IO CString)
 
-{-| Not required in Haskell -}
+-- | Not required in Haskell
 foreign import ccall safe "raylib.h TextSubtext"
   textSubtext ::
     CString -> CInt -> CInt -> IO CString
@@ -3969,7 +4003,7 @@ foreign import ccall safe "raylib.h &TextSubtext"
   p'textSubtext ::
     FunPtr (CString -> CInt -> CInt -> IO CString)
 
-{-| Not required in Haskell -}
+-- | Not required in Haskell
 foreign import ccall safe "raylib.h TextReplace"
   textReplace ::
     CString -> CString -> CString -> IO CString
@@ -3978,7 +4012,7 @@ foreign import ccall safe "raylib.h &TextReplace"
   p'textReplace ::
     FunPtr (CString -> CString -> CString -> IO CString)
 
-{-| Not required in Haskell -}
+-- | Not required in Haskell
 foreign import ccall safe "raylib.h TextInsert"
   textInsert ::
     CString -> CString -> CInt -> IO CString
@@ -3987,7 +4021,7 @@ foreign import ccall safe "raylib.h &TextInsert"
   p'textInsert ::
     FunPtr (CString -> CString -> CInt -> IO CString)
 
-{-| Not required in Haskell -}
+-- | Not required in Haskell
 foreign import ccall safe "raylib.h TextJoin"
   textJoin ::
     Ptr CString -> CInt -> CString -> IO CString
@@ -3996,7 +4030,7 @@ foreign import ccall safe "raylib.h &TextJoin"
   p'textJoin ::
     FunPtr (Ptr CString -> CInt -> CString -> IO CString)
 
-{-| Not required in Haskell -}
+-- | Not required in Haskell
 foreign import ccall safe "raylib.h TextSplit"
   textSplit ::
     CString -> CChar -> Ptr CInt -> IO (Ptr CString)
@@ -4005,7 +4039,7 @@ foreign import ccall safe "raylib.h &TextSplit"
   p'textSplit ::
     FunPtr (CString -> CChar -> Ptr CInt -> IO (Ptr CString))
 
-{-| Not required in Haskell -}
+-- | Not required in Haskell
 foreign import ccall safe "raylib.h TextAppend"
   textAppend ::
     CString -> CString -> Ptr CInt -> IO ()
@@ -4014,7 +4048,7 @@ foreign import ccall safe "raylib.h &TextAppend"
   p'textAppend ::
     FunPtr (CString -> CString -> Ptr CInt -> IO ())
 
-{-| Not required in Haskell -}
+-- | Not required in Haskell
 foreign import ccall safe "raylib.h TextFindIndex"
   textFindIndex ::
     CString -> CString -> IO CInt
@@ -4023,7 +4057,7 @@ foreign import ccall safe "raylib.h &TextFindIndex"
   p'textFindIndex ::
     FunPtr (CString -> CString -> IO CInt)
 
-{-| Not required in Haskell -}
+-- | Not required in Haskell
 foreign import ccall safe "raylib.h TextToUpper"
   textToUpper ::
     CString -> IO CString
@@ -4032,7 +4066,7 @@ foreign import ccall safe "raylib.h &TextToUpper"
   p'textToUpper ::
     FunPtr (CString -> IO CString)
 
-{-| Not required in Haskell -}
+-- | Not required in Haskell
 foreign import ccall safe "raylib.h TextToLower"
   textToLower ::
     CString -> IO CString
@@ -4041,7 +4075,7 @@ foreign import ccall safe "raylib.h &TextToLower"
   p'textToLower ::
     FunPtr (CString -> IO CString)
 
-{-| Not required in Haskell -}
+-- | Not required in Haskell
 foreign import ccall safe "raylib.h TextToPascal"
   textToPascal ::
     CString -> IO CString
@@ -4050,7 +4084,7 @@ foreign import ccall safe "raylib.h &TextToPascal"
   p'textToPascal ::
     FunPtr (CString -> IO CString)
 
-{-| Not required in Haskell -}
+-- | Not required in Haskell
 foreign import ccall safe "raylib.h TextToInteger"
   textToInteger ::
     CString -> IO CInt
@@ -4059,185 +4093,185 @@ foreign import ccall safe "raylib.h &TextToInteger"
   p'textToInteger ::
     FunPtr (CString -> IO CInt)
 
-foreign import ccall safe "bindings.h DrawLine3D_" c'drawLine3D :: Ptr Vector3 -> Ptr Vector3 -> Ptr Color -> IO ()
+foreign import ccall safe "bindings.h DrawLine3D_" c'drawLine3D :: Ptr Raylib.Types.Vector3 -> Ptr Raylib.Types.Vector3 -> Ptr Raylib.Types.Color -> IO ()
 
-drawLine3D :: Vector3 -> Vector3 -> Color -> IO ()
+drawLine3D :: Raylib.Types.Vector3 -> Raylib.Types.Vector3 -> Raylib.Types.Color -> IO ()
 drawLine3D start end color = with start (\s -> with end (with color . c'drawLine3D s))
 
 foreign import ccall safe "raylib.h &DrawLine3D"
   p'drawLine3D ::
-    FunPtr (Vector3 -> Vector3 -> Color -> IO ())
+    FunPtr (Raylib.Types.Vector3 -> Raylib.Types.Vector3 -> Raylib.Types.Color -> IO ())
 
-foreign import ccall safe "bindings.h DrawPoint3D_" c'drawPoint3D :: Ptr Vector3 -> Ptr Color -> IO ()
+foreign import ccall safe "bindings.h DrawPoint3D_" c'drawPoint3D :: Ptr Raylib.Types.Vector3 -> Ptr Raylib.Types.Color -> IO ()
 
-drawPoint3D :: Vector3 -> Color -> IO ()
+drawPoint3D :: Raylib.Types.Vector3 -> Raylib.Types.Color -> IO ()
 drawPoint3D point color = with point (with color . c'drawPoint3D)
 
 foreign import ccall safe "raylib.h &DrawPoint3D"
   p'drawPoint3D ::
-    FunPtr (Vector3 -> Color -> IO ())
+    FunPtr (Raylib.Types.Vector3 -> Raylib.Types.Color -> IO ())
 
-foreign import ccall safe "bindings.h DrawCircle3D_" c'drawCircle3D :: Ptr Vector3 -> CFloat -> Ptr Vector3 -> CFloat -> Ptr Color -> IO ()
+foreign import ccall safe "bindings.h DrawCircle3D_" c'drawCircle3D :: Ptr Raylib.Types.Vector3 -> CFloat -> Ptr Raylib.Types.Vector3 -> CFloat -> Ptr Raylib.Types.Color -> IO ()
 
-drawCircle3D :: Vector3 -> Float -> Vector3 -> Float -> Color -> IO ()
+drawCircle3D :: Raylib.Types.Vector3 -> Float -> Raylib.Types.Vector3 -> Float -> Raylib.Types.Color -> IO ()
 drawCircle3D center radius rotationAxis rotationAngle color = with center (\c -> with rotationAxis (\r -> with color (c'drawCircle3D c (realToFrac radius) r (realToFrac rotationAngle))))
 
 foreign import ccall safe "raylib.h &DrawCircle3D"
   p'drawCircle3D ::
-    FunPtr (Vector3 -> CFloat -> Vector3 -> CFloat -> Color -> IO ())
+    FunPtr (Raylib.Types.Vector3 -> CFloat -> Raylib.Types.Vector3 -> CFloat -> Raylib.Types.Color -> IO ())
 
-foreign import ccall safe "bindings.h DrawTriangle3D_" c'drawTriangle3D :: Ptr Vector3 -> Ptr Vector3 -> Ptr Vector3 -> Ptr Color -> IO ()
+foreign import ccall safe "bindings.h DrawTriangle3D_" c'drawTriangle3D :: Ptr Raylib.Types.Vector3 -> Ptr Raylib.Types.Vector3 -> Ptr Raylib.Types.Vector3 -> Ptr Raylib.Types.Color -> IO ()
 
-drawTriangle3D :: Vector3 -> Vector3 -> Vector3 -> Color -> IO ()
+drawTriangle3D :: Raylib.Types.Vector3 -> Raylib.Types.Vector3 -> Raylib.Types.Vector3 -> Raylib.Types.Color -> IO ()
 drawTriangle3D v1 v2 v3 color = with v1 (\p1 -> with v2 (\p2 -> with v3 (with color . c'drawTriangle3D p1 p2)))
 
 foreign import ccall safe "raylib.h &DrawTriangle3D"
   p'drawTriangle3D ::
-    FunPtr (Vector3 -> Vector3 -> Vector3 -> Color -> IO ())
+    FunPtr (Raylib.Types.Vector3 -> Raylib.Types.Vector3 -> Raylib.Types.Vector3 -> Raylib.Types.Color -> IO ())
 
-foreign import ccall safe "bindings.h DrawTriangleStrip3D_" c'drawTriangleStrip3D :: Ptr Vector3 -> CInt -> Ptr Color -> IO ()
+foreign import ccall safe "bindings.h DrawTriangleStrip3D_" c'drawTriangleStrip3D :: Ptr Raylib.Types.Vector3 -> CInt -> Ptr Raylib.Types.Color -> IO ()
 
-drawTriangleStrip3D :: [Vector3] -> Int -> Color -> IO ()
+drawTriangleStrip3D :: [Raylib.Types.Vector3] -> Int -> Raylib.Types.Color -> IO ()
 drawTriangleStrip3D points pointCount color = withArray points (\p -> with color (c'drawTriangleStrip3D p (fromIntegral pointCount)))
 
 foreign import ccall safe "raylib.h &DrawTriangleStrip3D"
   p'drawTriangleStrip3D ::
-    FunPtr (Ptr Vector3 -> CInt -> Color -> IO ())
+    FunPtr (Ptr Raylib.Types.Vector3 -> CInt -> Raylib.Types.Color -> IO ())
 
-foreign import ccall safe "bindings.h DrawCube_" c'drawCube :: Ptr Vector3 -> CFloat -> CFloat -> CFloat -> Ptr Color -> IO ()
+foreign import ccall safe "bindings.h DrawCube_" c'drawCube :: Ptr Raylib.Types.Vector3 -> CFloat -> CFloat -> CFloat -> Ptr Raylib.Types.Color -> IO ()
 
-drawCube :: Vector3 -> Float -> Float -> Float -> Color -> IO ()
+drawCube :: Raylib.Types.Vector3 -> Float -> Float -> Float -> Raylib.Types.Color -> IO ()
 drawCube position width height length color = with position (\p -> with color (c'drawCube p (realToFrac width) (realToFrac height) (realToFrac length)))
 
 foreign import ccall safe "raylib.h &DrawCube"
   p'drawCube ::
-    FunPtr (Vector3 -> CFloat -> CFloat -> CFloat -> Color -> IO ())
+    FunPtr (Raylib.Types.Vector3 -> CFloat -> CFloat -> CFloat -> Raylib.Types.Color -> IO ())
 
-foreign import ccall safe "bindings.h DrawCubeV_" c'drawCubeV :: Ptr Vector3 -> Ptr Vector3 -> Ptr Color -> IO ()
+foreign import ccall safe "bindings.h DrawCubeV_" c'drawCubeV :: Ptr Raylib.Types.Vector3 -> Ptr Raylib.Types.Vector3 -> Ptr Raylib.Types.Color -> IO ()
 
-drawCubeV :: Vector3 -> Vector3 -> Color -> IO ()
+drawCubeV :: Raylib.Types.Vector3 -> Raylib.Types.Vector3 -> Raylib.Types.Color -> IO ()
 drawCubeV position size color = with position (\p -> with size (with color . c'drawCubeV p))
 
 foreign import ccall safe "raylib.h &DrawCubeV"
   p'drawCubeV ::
-    FunPtr (Vector3 -> Vector3 -> Color -> IO ())
+    FunPtr (Raylib.Types.Vector3 -> Raylib.Types.Vector3 -> Raylib.Types.Color -> IO ())
 
-foreign import ccall safe "bindings.h DrawCubeWires_" c'drawCubeWires :: Ptr Vector3 -> CFloat -> CFloat -> CFloat -> Ptr Color -> IO ()
+foreign import ccall safe "bindings.h DrawCubeWires_" c'drawCubeWires :: Ptr Raylib.Types.Vector3 -> CFloat -> CFloat -> CFloat -> Ptr Raylib.Types.Color -> IO ()
 
-drawCubeWires :: Vector3 -> Float -> Float -> Float -> Color -> IO ()
+drawCubeWires :: Raylib.Types.Vector3 -> Float -> Float -> Float -> Raylib.Types.Color -> IO ()
 drawCubeWires position width height length color = with position (\p -> with color (c'drawCubeWires p (realToFrac width) (realToFrac height) (realToFrac length)))
 
 foreign import ccall safe "raylib.h &DrawCubeWires"
   p'drawCubeWires ::
-    FunPtr (Vector3 -> CFloat -> CFloat -> CFloat -> Color -> IO ())
+    FunPtr (Raylib.Types.Vector3 -> CFloat -> CFloat -> CFloat -> Raylib.Types.Color -> IO ())
 
-foreign import ccall safe "bindings.h DrawCubeWiresV_" c'drawCubeWiresV :: Ptr Vector3 -> Ptr Vector3 -> Ptr Color -> IO ()
+foreign import ccall safe "bindings.h DrawCubeWiresV_" c'drawCubeWiresV :: Ptr Raylib.Types.Vector3 -> Ptr Raylib.Types.Vector3 -> Ptr Raylib.Types.Color -> IO ()
 
-drawCubeWiresV :: Vector3 -> Vector3 -> Color -> IO ()
+drawCubeWiresV :: Raylib.Types.Vector3 -> Raylib.Types.Vector3 -> Raylib.Types.Color -> IO ()
 drawCubeWiresV position size color = with position (\p -> with size (with color . c'drawCubeWiresV p))
 
 foreign import ccall safe "raylib.h &DrawCubeWiresV"
   p'drawCubeWiresV ::
-    FunPtr (Vector3 -> Vector3 -> Color -> IO ())
+    FunPtr (Raylib.Types.Vector3 -> Raylib.Types.Vector3 -> Raylib.Types.Color -> IO ())
 
-foreign import ccall safe "bindings.h DrawCubeTexture_" c'drawCubeTexture :: Ptr Texture -> Ptr Vector3 -> CFloat -> CFloat -> CFloat -> Ptr Color -> IO ()
+foreign import ccall safe "bindings.h DrawCubeTexture_" c'drawCubeTexture :: Ptr Raylib.Types.Texture -> Ptr Raylib.Types.Vector3 -> CFloat -> CFloat -> CFloat -> Ptr Raylib.Types.Color -> IO ()
 
-drawCubeTexture :: Texture -> Vector3 -> Float -> Float -> Float -> Color -> IO ()
+drawCubeTexture :: Raylib.Types.Texture -> Raylib.Types.Vector3 -> Float -> Float -> Float -> Raylib.Types.Color -> IO ()
 drawCubeTexture texture position width height length color = with texture (\t -> with position (\p -> with color (c'drawCubeTexture t p (realToFrac width) (realToFrac height) (realToFrac length))))
 
 foreign import ccall safe "raylib.h &DrawCubeTexture"
   p'drawCubeTexture ::
-    FunPtr (Texture -> Vector3 -> CFloat -> CFloat -> CFloat -> Color -> IO ())
+    FunPtr (Raylib.Types.Texture -> Raylib.Types.Vector3 -> CFloat -> CFloat -> CFloat -> Raylib.Types.Color -> IO ())
 
-foreign import ccall safe "bindings.h DrawCubeTextureRec_" c'drawCubeTextureRec :: Ptr Texture -> Ptr Rectangle -> Ptr Vector3 -> CFloat -> CFloat -> CFloat -> Ptr Color -> IO ()
+foreign import ccall safe "bindings.h DrawCubeTextureRec_" c'drawCubeTextureRec :: Ptr Raylib.Types.Texture -> Ptr Raylib.Types.Rectangle -> Ptr Raylib.Types.Vector3 -> CFloat -> CFloat -> CFloat -> Ptr Raylib.Types.Color -> IO ()
 
-drawCubeTextureRec :: Texture -> Rectangle -> Vector3 -> Float -> Float -> Float -> Color -> IO ()
+drawCubeTextureRec :: Raylib.Types.Texture -> Raylib.Types.Rectangle -> Raylib.Types.Vector3 -> Float -> Float -> Float -> Raylib.Types.Color -> IO ()
 drawCubeTextureRec texture source position width height length color = with texture (\t -> with source (\s -> with position (\p -> with color (c'drawCubeTextureRec t s p (realToFrac width) (realToFrac height) (realToFrac length)))))
 
 foreign import ccall safe "raylib.h &DrawCubeTextureRec"
   p'drawCubeTextureRec ::
-    FunPtr (Texture -> Rectangle -> Vector3 -> CFloat -> CFloat -> CFloat -> Color -> IO ())
+    FunPtr (Raylib.Types.Texture -> Raylib.Types.Rectangle -> Raylib.Types.Vector3 -> CFloat -> CFloat -> CFloat -> Raylib.Types.Color -> IO ())
 
-foreign import ccall safe "bindings.h DrawSphere_" c'drawSphere :: Ptr Vector3 -> CFloat -> Ptr Color -> IO ()
+foreign import ccall safe "bindings.h DrawSphere_" c'drawSphere :: Ptr Raylib.Types.Vector3 -> CFloat -> Ptr Raylib.Types.Color -> IO ()
 
-drawSphere :: Vector3 -> Float -> Color -> IO ()
+drawSphere :: Raylib.Types.Vector3 -> Float -> Raylib.Types.Color -> IO ()
 drawSphere position radius color = with position (\p -> with color (c'drawSphere p (realToFrac radius)))
 
 foreign import ccall safe "raylib.h &DrawSphere"
   p'drawSphere ::
-    FunPtr (Vector3 -> CFloat -> Color -> IO ())
+    FunPtr (Raylib.Types.Vector3 -> CFloat -> Raylib.Types.Color -> IO ())
 
-foreign import ccall safe "bindings.h DrawSphereEx_" c'drawSphereEx :: Ptr Vector3 -> CFloat -> CInt -> CInt -> Ptr Color -> IO ()
+foreign import ccall safe "bindings.h DrawSphereEx_" c'drawSphereEx :: Ptr Raylib.Types.Vector3 -> CFloat -> CInt -> CInt -> Ptr Raylib.Types.Color -> IO ()
 
-drawSphereEx :: Vector3 -> Float -> Int -> Int -> Color -> IO ()
+drawSphereEx :: Raylib.Types.Vector3 -> Float -> Int -> Int -> Raylib.Types.Color -> IO ()
 drawSphereEx position radius rings slices color = with position (\p -> with color (c'drawSphereEx p (realToFrac radius) (fromIntegral rings) (fromIntegral slices)))
 
 foreign import ccall safe "raylib.h &DrawSphereEx"
   p'drawSphereEx ::
-    FunPtr (Vector3 -> CFloat -> CInt -> CInt -> Color -> IO ())
+    FunPtr (Raylib.Types.Vector3 -> CFloat -> CInt -> CInt -> Raylib.Types.Color -> IO ())
 
-foreign import ccall safe "bindings.h DrawSphereWires_" c'drawSphereWires :: Ptr Vector3 -> CFloat -> CInt -> CInt -> Ptr Color -> IO ()
+foreign import ccall safe "bindings.h DrawSphereWires_" c'drawSphereWires :: Ptr Raylib.Types.Vector3 -> CFloat -> CInt -> CInt -> Ptr Raylib.Types.Color -> IO ()
 
-drawSphereWires :: Vector3 -> Float -> Int -> Int -> Color -> IO ()
+drawSphereWires :: Raylib.Types.Vector3 -> Float -> Int -> Int -> Raylib.Types.Color -> IO ()
 drawSphereWires position radius rings slices color = with position (\p -> with color (c'drawSphereWires p (realToFrac radius) (fromIntegral rings) (fromIntegral slices)))
 
 foreign import ccall safe "raylib.h &DrawSphereWires"
   p'drawSphereWires ::
-    FunPtr (Vector3 -> CFloat -> CInt -> CInt -> Color -> IO ())
+    FunPtr (Raylib.Types.Vector3 -> CFloat -> CInt -> CInt -> Raylib.Types.Color -> IO ())
 
-foreign import ccall safe "bindings.h DrawCylinder_" c'drawCylinder :: Ptr Vector3 -> CFloat -> CFloat -> CFloat -> CInt -> Ptr Color -> IO ()
+foreign import ccall safe "bindings.h DrawCylinder_" c'drawCylinder :: Ptr Raylib.Types.Vector3 -> CFloat -> CFloat -> CFloat -> CInt -> Ptr Raylib.Types.Color -> IO ()
 
-drawCylinder :: Vector3 -> Float -> Float -> Float -> Int -> Color -> IO ()
+drawCylinder :: Raylib.Types.Vector3 -> Float -> Float -> Float -> Int -> Raylib.Types.Color -> IO ()
 drawCylinder position radiusTop radiusBottom height slices color = with position (\p -> with color (c'drawCylinder p (realToFrac radiusTop) (realToFrac radiusBottom) (realToFrac height) (fromIntegral slices)))
 
 foreign import ccall safe "raylib.h &DrawCylinder"
   p'drawCylinder ::
-    FunPtr (Vector3 -> CFloat -> CFloat -> CFloat -> CInt -> Color -> IO ())
+    FunPtr (Raylib.Types.Vector3 -> CFloat -> CFloat -> CFloat -> CInt -> Raylib.Types.Color -> IO ())
 
-foreign import ccall safe "bindings.h DrawCylinderEx_" c'drawCylinderEx :: Ptr Vector3 -> Ptr Vector3 -> CFloat -> CFloat -> CInt -> Ptr Color -> IO ()
+foreign import ccall safe "bindings.h DrawCylinderEx_" c'drawCylinderEx :: Ptr Raylib.Types.Vector3 -> Ptr Raylib.Types.Vector3 -> CFloat -> CFloat -> CInt -> Ptr Raylib.Types.Color -> IO ()
 
-drawCylinderEx :: Vector3 -> Vector3 -> Float -> Float -> Int -> Color -> IO ()
+drawCylinderEx :: Raylib.Types.Vector3 -> Raylib.Types.Vector3 -> Float -> Float -> Int -> Raylib.Types.Color -> IO ()
 drawCylinderEx start end startRadius endRadius sides color = with start (\s -> with end (\e -> with color (c'drawCylinderEx s e (realToFrac startRadius) (realToFrac endRadius) (fromIntegral sides))))
 
 foreign import ccall safe "raylib.h &DrawCylinderEx"
   p'drawCylinderEx ::
-    FunPtr (Vector3 -> Vector3 -> CFloat -> CFloat -> CInt -> Color -> IO ())
+    FunPtr (Raylib.Types.Vector3 -> Raylib.Types.Vector3 -> CFloat -> CFloat -> CInt -> Raylib.Types.Color -> IO ())
 
-foreign import ccall safe "bindings.h DrawCylinderWires_" c'drawCylinderWires :: Ptr Vector3 -> CFloat -> CFloat -> CFloat -> CInt -> Ptr Color -> IO ()
+foreign import ccall safe "bindings.h DrawCylinderWires_" c'drawCylinderWires :: Ptr Raylib.Types.Vector3 -> CFloat -> CFloat -> CFloat -> CInt -> Ptr Raylib.Types.Color -> IO ()
 
-drawCylinderWires :: Vector3 -> Float -> Float -> Float -> Int -> Color -> IO ()
+drawCylinderWires :: Raylib.Types.Vector3 -> Float -> Float -> Float -> Int -> Raylib.Types.Color -> IO ()
 drawCylinderWires position radiusTop radiusBottom height slices color = with position (\p -> with color (c'drawCylinderWires p (realToFrac radiusTop) (realToFrac radiusBottom) (realToFrac height) (fromIntegral slices)))
 
 foreign import ccall safe "raylib.h &DrawCylinderWires"
   p'drawCylinderWires ::
-    FunPtr (Vector3 -> CFloat -> CFloat -> CFloat -> CInt -> Color -> IO ())
+    FunPtr (Raylib.Types.Vector3 -> CFloat -> CFloat -> CFloat -> CInt -> Raylib.Types.Color -> IO ())
 
-foreign import ccall safe "bindings.h DrawCylinderWiresEx_" c'drawCylinderWiresEx :: Ptr Vector3 -> Ptr Vector3 -> CFloat -> CFloat -> CInt -> Ptr Color -> IO ()
+foreign import ccall safe "bindings.h DrawCylinderWiresEx_" c'drawCylinderWiresEx :: Ptr Raylib.Types.Vector3 -> Ptr Raylib.Types.Vector3 -> CFloat -> CFloat -> CInt -> Ptr Raylib.Types.Color -> IO ()
 
-drawCylinderWiresEx :: Vector3 -> Vector3 -> Float -> Float -> Int -> Color -> IO ()
+drawCylinderWiresEx :: Raylib.Types.Vector3 -> Raylib.Types.Vector3 -> Float -> Float -> Int -> Raylib.Types.Color -> IO ()
 drawCylinderWiresEx start end startRadius endRadius sides color = with start (\s -> with end (\e -> with color (c'drawCylinderWiresEx s e (realToFrac startRadius) (realToFrac endRadius) (fromIntegral sides))))
 
 foreign import ccall safe "raylib.h &DrawCylinderWiresEx"
   p'drawCylinderWiresEx ::
-    FunPtr (Vector3 -> Vector3 -> CFloat -> CFloat -> CInt -> Color -> IO ())
+    FunPtr (Raylib.Types.Vector3 -> Raylib.Types.Vector3 -> CFloat -> CFloat -> CInt -> Raylib.Types.Color -> IO ())
 
-foreign import ccall safe "bindings.h DrawPlane_" c'drawPlane :: Ptr Vector3 -> Ptr Vector2 -> Ptr Color -> IO ()
+foreign import ccall safe "bindings.h DrawPlane_" c'drawPlane :: Ptr Raylib.Types.Vector3 -> Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Color -> IO ()
 
-drawPlane :: Vector3 -> Vector2 -> Color -> IO ()
+drawPlane :: Raylib.Types.Vector3 -> Raylib.Types.Vector2 -> Raylib.Types.Color -> IO ()
 drawPlane center size color = with center (\c -> with size (with color . c'drawPlane c))
 
 foreign import ccall safe "raylib.h &DrawPlane"
   p'drawPlane ::
-    FunPtr (Vector3 -> Vector2 -> Color -> IO ())
+    FunPtr (Raylib.Types.Vector3 -> Raylib.Types.Vector2 -> Raylib.Types.Color -> IO ())
 
-foreign import ccall safe "bindings.h DrawRay_" c'drawRay :: Ptr Ray -> Ptr Color -> IO ()
+foreign import ccall safe "bindings.h DrawRay_" c'drawRay :: Ptr Raylib.Types.Ray -> Ptr Raylib.Types.Color -> IO ()
 
-drawRay :: Ray -> Color -> IO ()
+drawRay :: Raylib.Types.Ray -> Raylib.Types.Color -> IO ()
 drawRay ray color = with ray (with color . c'drawRay)
 
 foreign import ccall safe "raylib.h &DrawRay"
   p'drawRay ::
-    FunPtr (Ray -> Color -> IO ())
+    FunPtr (Raylib.Types.Ray -> Raylib.Types.Color -> IO ())
 
 foreign import ccall safe "raylib.h DrawGrid"
   c'drawGrid ::
@@ -4250,368 +4284,462 @@ foreign import ccall safe "raylib.h &DrawGrid"
   p'drawGrid ::
     FunPtr (CInt -> CFloat -> IO ())
 
-foreign import ccall safe "bindings.h LoadModel_" c'loadModel :: CString -> IO (Ptr Model)
+foreign import ccall safe "bindings.h LoadModel_" c'loadModel :: CString -> IO (Ptr Raylib.Types.Model)
 
-loadModel :: String -> IO Model
+loadModel :: String -> IO Raylib.Types.Model
 loadModel fileName = withCString fileName c'loadModel >>= pop
 
 foreign import ccall safe "raylib.h &LoadModel"
   p'loadModel ::
-    FunPtr (CString -> IO Model)
+    FunPtr (CString -> IO Raylib.Types.Model)
 
-foreign import ccall safe "bindings.h LoadModelFromMesh_" c'loadModelFromMesh :: Ptr Mesh -> IO (Ptr Model)
+foreign import ccall safe "bindings.h LoadModelFromMesh_" c'loadModelFromMesh :: Ptr Raylib.Types.Mesh -> IO (Ptr Raylib.Types.Model)
 
-loadModelFromMesh :: Mesh -> IO Model
+loadModelFromMesh :: Raylib.Types.Mesh -> IO Raylib.Types.Model
 loadModelFromMesh mesh = with mesh c'loadModelFromMesh >>= pop
 
 foreign import ccall safe "raylib.h &LoadModelFromMesh"
   p'loadModelFromMesh ::
-    FunPtr (Mesh -> IO Model)
+    FunPtr (Raylib.Types.Mesh -> IO Raylib.Types.Model)
 
-foreign import ccall safe "bindings.h UnloadModel_" c'unloadModel :: Ptr Model -> IO ()
+foreign import ccall safe "bindings.h UnloadModel_" c'unloadModel :: Ptr Raylib.Types.Model -> IO ()
 
-unloadModel :: Model -> IO ()
+unloadModel :: Raylib.Types.Model -> IO ()
 unloadModel model = with model c'unloadModel
 
 foreign import ccall safe "raylib.h &UnloadModel"
   p'unloadModel ::
-    FunPtr (Model -> IO ())
+    FunPtr (Raylib.Types.Model -> IO ())
 
-foreign import ccall safe "bindings.h UnloadModelKeepMeshes_" c'unloadModelKeepMeshes :: Ptr Model -> IO ()
+foreign import ccall safe "bindings.h UnloadModelKeepMeshes_" c'unloadModelKeepMeshes :: Ptr Raylib.Types.Model -> IO ()
 
-unloadModelKeepMeshes :: Model -> IO ()
+unloadModelKeepMeshes :: Raylib.Types.Model -> IO ()
 unloadModelKeepMeshes model = with model c'unloadModelKeepMeshes
 
 foreign import ccall safe "raylib.h &UnloadModelKeepMeshes"
   p'unloadModelKeepMeshes ::
-    FunPtr (Model -> IO ())
+    FunPtr (Raylib.Types.Model -> IO ())
 
-foreign import ccall safe "bindings.h GetModelBoundingBox_" c'getModelBoundingBox :: Ptr Model -> IO (Ptr BoundingBox)
+foreign import ccall safe "bindings.h GetModelBoundingBox_" c'getModelBoundingBox :: Ptr Raylib.Types.Model -> IO (Ptr Raylib.Types.BoundingBox)
 
-getModelBoundingBox :: Model -> IO BoundingBox
+getModelBoundingBox :: Raylib.Types.Model -> IO Raylib.Types.BoundingBox
 getModelBoundingBox model = with model c'getModelBoundingBox >>= pop
 
 foreign import ccall safe "raylib.h &GetModelBoundingBox"
   p'getModelBoundingBox ::
-    FunPtr (Model -> IO BoundingBox)
+    FunPtr (Raylib.Types.Model -> IO Raylib.Types.BoundingBox)
 
-foreign import ccall safe "bindings.h DrawModel_" c'drawModel :: Ptr Model -> Ptr Vector3 -> CFloat -> Ptr Color -> IO ()
+foreign import ccall safe "bindings.h DrawModel_" c'drawModel :: Ptr Raylib.Types.Model -> Ptr Raylib.Types.Vector3 -> CFloat -> Ptr Raylib.Types.Color -> IO ()
 
-drawModel :: Model -> Vector3 -> Float -> Color -> IO ()
+drawModel :: Raylib.Types.Model -> Raylib.Types.Vector3 -> Float -> Raylib.Types.Color -> IO ()
 drawModel model position scale tint = with model (\m -> with position (\p -> with tint (c'drawModel m p (realToFrac scale))))
 
 foreign import ccall safe "raylib.h &DrawModel"
   p'drawModel ::
-    FunPtr (Model -> Vector3 -> CFloat -> Color -> IO ())
+    FunPtr (Raylib.Types.Model -> Raylib.Types.Vector3 -> CFloat -> Raylib.Types.Color -> IO ())
 
-foreign import ccall safe "bindings.h DrawModelEx_" c'drawModelEx :: Ptr Model -> Ptr Vector3 -> Ptr Vector3 -> CFloat -> Ptr Vector3 -> Ptr Color -> IO ()
+foreign import ccall safe "bindings.h DrawModelEx_" c'drawModelEx :: Ptr Raylib.Types.Model -> Ptr Raylib.Types.Vector3 -> Ptr Raylib.Types.Vector3 -> CFloat -> Ptr Raylib.Types.Vector3 -> Ptr Raylib.Types.Color -> IO ()
 
-drawModelEx :: Model -> Vector3 -> Vector3 -> Float -> Vector3 -> Color -> IO ()
+drawModelEx :: Raylib.Types.Model -> Raylib.Types.Vector3 -> Raylib.Types.Vector3 -> Float -> Raylib.Types.Vector3 -> Raylib.Types.Color -> IO ()
 drawModelEx model position rotationAxis rotationAngle scale tint = with model (\m -> with position (\p -> with rotationAxis (\r -> with scale (with tint . c'drawModelEx m p r (realToFrac rotationAngle)))))
 
 foreign import ccall safe "raylib.h &DrawModelEx"
   p'drawModelEx ::
-    FunPtr (Model -> Vector3 -> Vector3 -> CFloat -> Vector3 -> Color -> IO ())
+    FunPtr (Raylib.Types.Model -> Raylib.Types.Vector3 -> Raylib.Types.Vector3 -> CFloat -> Raylib.Types.Vector3 -> Raylib.Types.Color -> IO ())
 
-foreign import ccall safe "bindings.h DrawModelWires_" c'drawModelWires :: Ptr Model -> Ptr Vector3 -> CFloat -> Ptr Color -> IO ()
+foreign import ccall safe "bindings.h DrawModelWires_" c'drawModelWires :: Ptr Raylib.Types.Model -> Ptr Raylib.Types.Vector3 -> CFloat -> Ptr Raylib.Types.Color -> IO ()
 
-drawModelWires :: Model -> Vector3 -> Float -> Color -> IO ()
+drawModelWires :: Raylib.Types.Model -> Raylib.Types.Vector3 -> Float -> Raylib.Types.Color -> IO ()
 drawModelWires model position scale tint = with model (\m -> with position (\p -> with tint (c'drawModelWires m p (realToFrac scale))))
 
 foreign import ccall safe "raylib.h &DrawModelWires"
   p'drawModelWires ::
-    FunPtr (Model -> Vector3 -> CFloat -> Color -> IO ())
+    FunPtr (Raylib.Types.Model -> Raylib.Types.Vector3 -> CFloat -> Raylib.Types.Color -> IO ())
 
-foreign import ccall safe "bindings.h DrawModelWiresEx_" c'drawModelWiresEx :: Ptr Model -> Ptr Vector3 -> Ptr Vector3 -> CFloat -> Ptr Vector3 -> Ptr Color -> IO ()
+foreign import ccall safe "bindings.h DrawModelWiresEx_" c'drawModelWiresEx :: Ptr Raylib.Types.Model -> Ptr Raylib.Types.Vector3 -> Ptr Raylib.Types.Vector3 -> CFloat -> Ptr Raylib.Types.Vector3 -> Ptr Raylib.Types.Color -> IO ()
 
-drawModelWiresEx :: Model -> Vector3 -> Vector3 -> Float -> Vector3 -> Color -> IO ()
+drawModelWiresEx :: Raylib.Types.Model -> Raylib.Types.Vector3 -> Raylib.Types.Vector3 -> Float -> Raylib.Types.Vector3 -> Raylib.Types.Color -> IO ()
 drawModelWiresEx model position rotationAxis rotationAngle scale tint = with model (\m -> with position (\p -> with rotationAxis (\r -> with scale (with tint . c'drawModelWiresEx m p r (realToFrac rotationAngle)))))
 
 foreign import ccall safe "raylib.h &DrawModelWiresEx"
   p'drawModelWiresEx ::
-    FunPtr (Model -> Vector3 -> Vector3 -> CFloat -> Vector3 -> Color -> IO ())
+    FunPtr (Raylib.Types.Model -> Raylib.Types.Vector3 -> Raylib.Types.Vector3 -> CFloat -> Raylib.Types.Vector3 -> Raylib.Types.Color -> IO ())
 
-foreign import ccall safe "bindings.h DrawBoundingBox_" c'drawBoundingBox :: Ptr BoundingBox -> Ptr Color -> IO ()
+foreign import ccall safe "bindings.h DrawBoundingBox_" c'drawBoundingBox :: Ptr Raylib.Types.BoundingBox -> Ptr Raylib.Types.Color -> IO ()
 
-drawBoundingBox :: BoundingBox -> Color -> IO ()
+drawBoundingBox :: Raylib.Types.BoundingBox -> Raylib.Types.Color -> IO ()
 drawBoundingBox box color = with box (with color . c'drawBoundingBox)
 
 foreign import ccall safe "raylib.h &DrawBoundingBox"
   p'drawBoundingBox ::
-    FunPtr (BoundingBox -> Color -> IO ())
+    FunPtr (Raylib.Types.BoundingBox -> Raylib.Types.Color -> IO ())
 
-foreign import ccall safe "bindings.h DrawBillboard_" c'drawBillboard :: Ptr Camera3D -> Ptr Texture -> Ptr Vector3 -> CFloat -> Ptr Color -> IO ()
+foreign import ccall safe "bindings.h DrawBillboard_" c'drawBillboard :: Ptr Raylib.Types.Camera3D -> Ptr Raylib.Types.Texture -> Ptr Raylib.Types.Vector3 -> CFloat -> Ptr Raylib.Types.Color -> IO ()
 
-drawBillboard :: Camera3D -> Texture -> Vector3 -> Float -> Color -> IO ()
+drawBillboard :: Raylib.Types.Camera3D -> Raylib.Types.Texture -> Raylib.Types.Vector3 -> Float -> Raylib.Types.Color -> IO ()
 drawBillboard camera texture position size tint = with camera (\c -> with texture (\t -> with position (\p -> with tint (c'drawBillboard c t p (realToFrac size)))))
 
 foreign import ccall safe "raylib.h &DrawBillboard"
   p'drawBillboard ::
-    FunPtr (Camera3D -> Texture -> Vector3 -> CFloat -> Color -> IO ())
+    FunPtr (Raylib.Types.Camera3D -> Raylib.Types.Texture -> Raylib.Types.Vector3 -> CFloat -> Raylib.Types.Color -> IO ())
 
-foreign import ccall safe "bindings.h DrawBillboardRec_" c'drawBillboardRec :: Ptr Camera3D -> Ptr Texture -> Ptr Rectangle -> Ptr Vector3 -> Ptr Vector2 -> Ptr Color -> IO ()
+foreign import ccall safe "bindings.h DrawBillboardRec_" c'drawBillboardRec :: Ptr Raylib.Types.Camera3D -> Ptr Raylib.Types.Texture -> Ptr Raylib.Types.Rectangle -> Ptr Raylib.Types.Vector3 -> Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Color -> IO ()
 
-drawBillboardRec :: Camera3D -> Texture -> Rectangle -> Vector3 -> Vector2 -> Color -> IO ()
+drawBillboardRec :: Raylib.Types.Camera3D -> Raylib.Types.Texture -> Raylib.Types.Rectangle -> Raylib.Types.Vector3 -> Raylib.Types.Vector2 -> Raylib.Types.Color -> IO ()
 drawBillboardRec camera texture source position size tint = with camera (\c -> with texture (\t -> with source (\s -> with position (\p -> with size (with tint . c'drawBillboardRec c t s p)))))
 
 foreign import ccall safe "raylib.h &DrawBillboardRec"
   p'drawBillboardRec ::
-    FunPtr (Camera3D -> Texture -> Rectangle -> Vector3 -> Vector2 -> Color -> IO ())
+    FunPtr (Raylib.Types.Camera3D -> Raylib.Types.Texture -> Raylib.Types.Rectangle -> Raylib.Types.Vector3 -> Raylib.Types.Vector2 -> Raylib.Types.Color -> IO ())
 
-foreign import ccall safe "bindings.h DrawBillboardPro_" c'drawBillboardPro :: Ptr Camera3D -> Ptr Texture -> Ptr Rectangle -> Ptr Vector3 -> Ptr Vector3 -> Ptr Vector2 -> Ptr Vector2 -> CFloat -> Ptr Color -> IO ()
+foreign import ccall safe "bindings.h DrawBillboardPro_" c'drawBillboardPro :: Ptr Raylib.Types.Camera3D -> Ptr Raylib.Types.Texture -> Ptr Raylib.Types.Rectangle -> Ptr Raylib.Types.Vector3 -> Ptr Raylib.Types.Vector3 -> Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Vector2 -> CFloat -> Ptr Raylib.Types.Color -> IO ()
 
-drawBillboardPro :: Camera3D -> Texture -> Rectangle -> Vector3 -> Vector3 -> Vector2 -> Vector2 -> Float -> Color -> IO ()
+drawBillboardPro :: Raylib.Types.Camera3D -> Raylib.Types.Texture -> Raylib.Types.Rectangle -> Raylib.Types.Vector3 -> Raylib.Types.Vector3 -> Raylib.Types.Vector2 -> Raylib.Types.Vector2 -> Float -> Raylib.Types.Color -> IO ()
 drawBillboardPro camera texture source position up size origin rotation tint = with camera (\c -> with texture (\t -> with source (\s -> with position (\p -> with up (\u -> with size (\sz -> with origin (\o -> with tint (c'drawBillboardPro c t s p u sz o (realToFrac rotation)))))))))
 
 foreign import ccall safe "raylib.h &DrawBillboardPro"
   p'drawBillboardPro ::
-    FunPtr (Camera3D -> Texture -> Rectangle -> Vector3 -> Vector3 -> Vector2 -> Vector2 -> CFloat -> Color -> IO ())
+    FunPtr (Raylib.Types.Camera3D -> Raylib.Types.Texture -> Raylib.Types.Rectangle -> Raylib.Types.Vector3 -> Raylib.Types.Vector3 -> Raylib.Types.Vector2 -> Raylib.Types.Vector2 -> CFloat -> Raylib.Types.Color -> IO ())
 
 foreign import ccall safe "raylib.h UploadMesh"
   c'uploadMesh ::
-    Ptr Mesh -> CInt -> IO ()
+    Ptr Raylib.Types.Mesh -> CInt -> IO ()
 
-uploadMesh :: Mesh -> Bool -> IO Mesh
+uploadMesh :: Raylib.Types.Mesh -> Bool -> IO Raylib.Types.Mesh
 uploadMesh mesh dynamic = with mesh (\m -> c'uploadMesh m (fromBool dynamic) >> peek m)
 
 foreign import ccall safe "raylib.h &UploadMesh"
   p'uploadMesh ::
-    FunPtr (Ptr Mesh -> CInt -> IO ())
+    FunPtr (Ptr Raylib.Types.Mesh -> CInt -> IO ())
 
-foreign import ccall safe "bindings.h UpdateMeshBuffer_" c'updateMeshBuffer :: Ptr Mesh -> CInt -> Ptr () -> CInt -> CInt -> IO ()
+foreign import ccall safe "bindings.h UpdateMeshBuffer_" c'updateMeshBuffer :: Ptr Raylib.Types.Mesh -> CInt -> Ptr () -> CInt -> CInt -> IO ()
 
-updateMeshBuffer :: Mesh -> Int -> Ptr () -> Int -> Int -> IO ()
+updateMeshBuffer :: Raylib.Types.Mesh -> Int -> Ptr () -> Int -> Int -> IO ()
 updateMeshBuffer mesh index dataValue dataSize offset = with mesh (\m -> c'updateMeshBuffer m (fromIntegral index) dataValue (fromIntegral dataSize) (fromIntegral offset))
 
 foreign import ccall safe "raylib.h &UpdateMeshBuffer"
   p'updateMeshBuffer ::
-    FunPtr (Mesh -> CInt -> Ptr () -> CInt -> CInt -> IO ())
+    FunPtr (Raylib.Types.Mesh -> CInt -> Ptr () -> CInt -> CInt -> IO ())
 
-foreign import ccall safe "bindings.h UnloadMesh_" c'unloadMesh :: Ptr Mesh -> IO ()
+foreign import ccall safe "bindings.h UnloadMesh_" c'unloadMesh :: Ptr Raylib.Types.Mesh -> IO ()
 
-unloadMesh :: Mesh -> IO ()
+unloadMesh :: Raylib.Types.Mesh -> IO ()
 unloadMesh mesh = with mesh c'unloadMesh
 
 foreign import ccall safe "raylib.h &UnloadMesh"
   p'unloadMesh ::
-    FunPtr (Mesh -> IO ())
+    FunPtr (Raylib.Types.Mesh -> IO ())
 
-foreign import ccall safe "bindings.h DrawMesh_" c'drawMesh :: Ptr Mesh -> Ptr Material -> Ptr Matrix -> IO ()
+foreign import ccall safe "bindings.h DrawMesh_" c'drawMesh :: Ptr Raylib.Types.Mesh -> Ptr Raylib.Types.Material -> Ptr Raylib.Types.Matrix -> IO ()
 
-drawMesh :: Mesh -> Material -> Matrix -> IO ()
+drawMesh :: Raylib.Types.Mesh -> Raylib.Types.Material -> Raylib.Types.Matrix -> IO ()
 drawMesh mesh material transform = with mesh (\m -> with material (with transform . c'drawMesh m))
 
 foreign import ccall safe "raylib.h &DrawMesh"
   p'drawMesh ::
-    FunPtr (Mesh -> Material -> Matrix -> IO ())
+    FunPtr (Raylib.Types.Mesh -> Raylib.Types.Material -> Raylib.Types.Matrix -> IO ())
 
-foreign import ccall safe "bindings.h DrawMeshInstanced_" drawMeshInstanced :: Ptr Mesh -> Ptr Material -> Ptr Matrix -> CInt -> IO ()
+foreign import ccall safe "bindings.h DrawMeshInstanced_" c'drawMeshInstanced :: Ptr Raylib.Types.Mesh -> Ptr Raylib.Types.Material -> Ptr Raylib.Types.Matrix -> CInt -> IO ()
+
+drawMeshInstanced :: Raylib.Types.Mesh -> Raylib.Types.Material -> [Raylib.Types.Matrix] -> IO ()
+drawMeshInstanced mesh material transforms = with mesh (\m -> with material (\mat -> withArrayLen transforms (\size t -> c'drawMeshInstanced m mat t (fromIntegral size))))
 
 foreign import ccall safe "raylib.h &DrawMeshInstanced"
   p'drawMeshInstanced ::
-    FunPtr (Mesh -> Material -> Ptr Matrix -> CInt -> IO ())
+    FunPtr (Raylib.Types.Mesh -> Raylib.Types.Material -> Ptr Raylib.Types.Matrix -> CInt -> IO ())
 
-foreign import ccall safe "bindings.h ExportMesh_" exportMesh :: Ptr Mesh -> CString -> IO CInt
+foreign import ccall safe "bindings.h ExportMesh_" c'exportMesh :: Ptr Raylib.Types.Mesh -> CString -> IO CInt
+
+exportMesh :: Raylib.Types.Mesh -> String -> IO Bool
+exportMesh mesh fileName = toBool <$> with mesh (withCString fileName . c'exportMesh)
 
 foreign import ccall safe "raylib.h &ExportMesh"
   p'exportMesh ::
-    FunPtr (Mesh -> CString -> IO CInt)
+    FunPtr (Raylib.Types.Mesh -> CString -> IO CInt)
 
-foreign import ccall safe "bindings.h GetMeshBoundingBox_" getMeshBoundingBox :: Ptr Mesh -> IO (Ptr BoundingBox)
+foreign import ccall safe "bindings.h GetMeshBoundingBox_" c'getMeshBoundingBox :: Ptr Raylib.Types.Mesh -> IO (Ptr Raylib.Types.BoundingBox)
+
+getMeshBoundingBox :: Raylib.Types.Mesh -> IO Raylib.Types.BoundingBox
+getMeshBoundingBox mesh = with mesh c'getMeshBoundingBox >>= pop
 
 foreign import ccall safe "raylib.h &GetMeshBoundingBox"
   p'getMeshBoundingBox ::
-    FunPtr (Mesh -> IO BoundingBox)
+    FunPtr (Raylib.Types.Mesh -> IO Raylib.Types.BoundingBox)
 
 foreign import ccall safe "raylib.h GenMeshTangents"
-  genMeshTangents ::
-    Ptr Mesh -> IO ()
+  c'genMeshTangents ::
+    Ptr Raylib.Types.Mesh -> IO ()
+
+genMeshTangents :: Raylib.Types.Mesh -> IO Raylib.Types.Mesh
+genMeshTangents mesh = with mesh (\m -> c'genMeshTangents m >> peek m)
 
 foreign import ccall safe "raylib.h &GenMeshTangents"
   p'genMeshTangents ::
-    FunPtr (Ptr Mesh -> IO ())
+    FunPtr (Ptr Raylib.Types.Mesh -> IO ())
 
-foreign import ccall safe "bindings.h GenMeshPoly_" genMeshPoly :: CInt -> CFloat -> IO (Ptr Mesh)
+foreign import ccall safe "bindings.h GenMeshPoly_" c'genMeshPoly :: CInt -> CFloat -> IO (Ptr Raylib.Types.Mesh)
+
+genMeshPoly :: Int -> Float -> IO Raylib.Types.Mesh
+genMeshPoly sides radius = c'genMeshPoly (fromIntegral sides) (realToFrac radius) >>= pop
 
 foreign import ccall safe "raylib.h &GenMeshPoly"
   p'genMeshPoly ::
-    FunPtr (CInt -> CFloat -> IO Mesh)
+    FunPtr (CInt -> CFloat -> IO Raylib.Types.Mesh)
 
-foreign import ccall safe "bindings.h GenMeshPlane_" genMeshPlane :: CFloat -> CFloat -> CInt -> CInt -> IO (Ptr Mesh)
+foreign import ccall safe "bindings.h GenMeshPlane_" c'genMeshPlane :: CFloat -> CFloat -> CInt -> CInt -> IO (Ptr Raylib.Types.Mesh)
+
+genMeshPlane :: Float -> Float -> Int -> Int -> IO Raylib.Types.Mesh
+genMeshPlane width length resX resZ = c'genMeshPlane (realToFrac width) (realToFrac length) (fromIntegral resX) (fromIntegral resZ) >>= pop
 
 foreign import ccall safe "raylib.h &GenMeshPlane"
   p'genMeshPlane ::
-    FunPtr (CFloat -> CFloat -> CInt -> CInt -> IO Mesh)
+    FunPtr (CFloat -> CFloat -> CInt -> CInt -> IO Raylib.Types.Mesh)
 
-foreign import ccall safe "bindings.h GenMeshCube_" genMeshCube :: CFloat -> CFloat -> CFloat -> IO (Ptr Mesh)
+foreign import ccall safe "bindings.h GenMeshCube_" c'genMeshCube :: CFloat -> CFloat -> CFloat -> IO (Ptr Raylib.Types.Mesh)
+
+genMeshCube :: Float -> Float -> Float -> IO Raylib.Types.Mesh
+genMeshCube width height length = c'genMeshCube (realToFrac width) (realToFrac height) (realToFrac length) >>= pop
 
 foreign import ccall safe "raylib.h &GenMeshCube"
   p'genMeshCube ::
-    FunPtr (CFloat -> CFloat -> CFloat -> IO Mesh)
+    FunPtr (CFloat -> CFloat -> CFloat -> IO Raylib.Types.Mesh)
 
-foreign import ccall safe "bindings.h GenMeshSphere_" genMeshSphere :: CFloat -> CInt -> CInt -> IO (Ptr Mesh)
+foreign import ccall safe "bindings.h GenMeshSphere_" c'genMeshSphere :: CFloat -> CInt -> CInt -> IO (Ptr Raylib.Types.Mesh)
+
+genMeshSphere :: Float -> Int -> Int -> IO Raylib.Types.Mesh
+genMeshSphere radius rings slices = c'genMeshSphere (realToFrac radius) (fromIntegral rings) (fromIntegral slices) >>= pop
 
 foreign import ccall safe "raylib.h &GenMeshSphere"
   p'genMeshSphere ::
-    FunPtr (CFloat -> CInt -> CInt -> IO Mesh)
+    FunPtr (CFloat -> CInt -> CInt -> IO Raylib.Types.Mesh)
 
-foreign import ccall safe "bindings.h GenMeshHemiSphere_" genMeshHemiSphere :: CFloat -> CInt -> CInt -> IO (Ptr Mesh)
+foreign import ccall safe "bindings.h GenMeshHemiSphere_" c'genMeshHemiSphere :: CFloat -> CInt -> CInt -> IO (Ptr Raylib.Types.Mesh)
+
+genMeshHemiSphere :: Float -> Int -> Int -> IO Raylib.Types.Mesh
+genMeshHemiSphere radius rings slices = c'genMeshHemiSphere (realToFrac radius) (fromIntegral rings) (fromIntegral slices) >>= pop
 
 foreign import ccall safe "raylib.h &GenMeshHemiSphere"
   p'genMeshHemiSphere ::
-    FunPtr (CFloat -> CInt -> CInt -> IO Mesh)
+    FunPtr (CFloat -> CInt -> CInt -> IO Raylib.Types.Mesh)
 
-foreign import ccall safe "bindings.h GenMeshCylinder_" genMeshCylinder :: CFloat -> CFloat -> CInt -> IO (Ptr Mesh)
+foreign import ccall safe "bindings.h GenMeshCylinder_" c'genMeshCylinder :: CFloat -> CFloat -> CInt -> IO (Ptr Raylib.Types.Mesh)
+
+genMeshCylinder :: Float -> Float -> Int -> IO Raylib.Types.Mesh
+genMeshCylinder radius height slices = c'genMeshCylinder (realToFrac radius) (realToFrac height) (fromIntegral slices) >>= pop
 
 foreign import ccall safe "raylib.h &GenMeshCylinder"
   p'genMeshCylinder ::
-    FunPtr (CFloat -> CFloat -> CInt -> IO Mesh)
+    FunPtr (CFloat -> CFloat -> CInt -> IO Raylib.Types.Mesh)
 
-foreign import ccall safe "bindings.h GenMeshCone_" genMeshCone :: CFloat -> CFloat -> CInt -> IO (Ptr Mesh)
+foreign import ccall safe "bindings.h GenMeshCone_" c'genMeshCone :: CFloat -> CFloat -> CInt -> IO (Ptr Raylib.Types.Mesh)
+
+genMeshCone :: Float -> Float -> Int -> IO Raylib.Types.Mesh
+genMeshCone radius height slices = c'genMeshCone (realToFrac radius) (realToFrac height) (fromIntegral slices) >>= pop
 
 foreign import ccall safe "raylib.h &GenMeshCone"
   p'genMeshCone ::
-    FunPtr (CFloat -> CFloat -> CInt -> IO Mesh)
+    FunPtr (CFloat -> CFloat -> CInt -> IO Raylib.Types.Mesh)
 
-foreign import ccall safe "bindings.h GenMeshTorus_" genMeshTorus :: CFloat -> CFloat -> CInt -> CInt -> IO (Ptr Mesh)
+foreign import ccall safe "bindings.h GenMeshTorus_" c'genMeshTorus :: CFloat -> CFloat -> CInt -> CInt -> IO (Ptr Raylib.Types.Mesh)
+
+genMeshTorus :: Float -> Float -> Int -> Int -> IO Raylib.Types.Mesh
+genMeshTorus radius size radSeg sides = c'genMeshTorus (realToFrac radius) (realToFrac size) (fromIntegral radSeg) (fromIntegral sides) >>= pop
 
 foreign import ccall safe "raylib.h &GenMeshTorus"
   p'genMeshTorus ::
-    FunPtr (CFloat -> CFloat -> CInt -> CInt -> IO Mesh)
+    FunPtr (CFloat -> CFloat -> CInt -> CInt -> IO Raylib.Types.Mesh)
 
-foreign import ccall safe "bindings.h GenMeshKnot_" genMeshKnot :: CFloat -> CFloat -> CInt -> CInt -> IO (Ptr Mesh)
+foreign import ccall safe "bindings.h GenMeshKnot_" c'genMeshKnot :: CFloat -> CFloat -> CInt -> CInt -> IO (Ptr Raylib.Types.Mesh)
+
+genMeshKnot :: Float -> Float -> Int -> Int -> IO Raylib.Types.Mesh
+genMeshKnot radius size radSeg sides = c'genMeshKnot (realToFrac radius) (realToFrac size) (fromIntegral radSeg) (fromIntegral sides) >>= pop
 
 foreign import ccall safe "raylib.h &GenMeshKnot"
   p'genMeshKnot ::
-    FunPtr (CFloat -> CFloat -> CInt -> CInt -> IO Mesh)
+    FunPtr (CFloat -> CFloat -> CInt -> CInt -> IO Raylib.Types.Mesh)
 
-foreign import ccall safe "bindings.h GenMeshHeightmap_" genMeshHeightmap :: Ptr Image -> Ptr Vector3 -> IO (Ptr Mesh)
+foreign import ccall safe "bindings.h GenMeshHeightmap_" c'genMeshHeightmap :: Ptr Raylib.Types.Image -> Ptr Raylib.Types.Vector3 -> IO (Ptr Raylib.Types.Mesh)
+
+genMeshHeightmap :: Raylib.Types.Image -> Raylib.Types.Vector3 -> IO Raylib.Types.Mesh
+genMeshHeightmap heightmap size = with heightmap (with size . c'genMeshHeightmap) >>= pop
 
 foreign import ccall safe "raylib.h &GenMeshHeightmap"
   p'genMeshHeightmap ::
-    FunPtr (Image -> Vector3 -> IO Mesh)
+    FunPtr (Raylib.Types.Image -> Raylib.Types.Vector3 -> IO Raylib.Types.Mesh)
 
-foreign import ccall safe "bindings.h GenMeshCubicmap_" genMeshCubicmap :: Ptr Image -> Ptr Vector3 -> IO (Ptr Mesh)
+foreign import ccall safe "bindings.h GenMeshCubicmap_" c'genMeshCubicmap :: Ptr Raylib.Types.Image -> Ptr Raylib.Types.Vector3 -> IO (Ptr Raylib.Types.Mesh)
+
+genMeshCubicmap :: Raylib.Types.Image -> Raylib.Types.Vector3 -> IO Raylib.Types.Mesh
+genMeshCubicmap cubicmap cubeSize = with cubicmap (with cubeSize . c'genMeshCubicmap) >>= pop
 
 foreign import ccall safe "raylib.h &GenMeshCubicmap"
   p'genMeshCubicmap ::
-    FunPtr (Image -> Vector3 -> IO Mesh)
+    FunPtr (Raylib.Types.Image -> Raylib.Types.Vector3 -> IO Raylib.Types.Mesh)
 
 foreign import ccall safe "raylib.h LoadMaterials"
-  loadMaterials ::
-    CString -> Ptr CInt -> IO (Ptr Material)
+  c'loadMaterials ::
+    CString -> Ptr CInt -> IO (Ptr Raylib.Types.Material)
+
+loadMaterials :: String -> IO [Raylib.Types.Material]
+loadMaterials fileName =
+  withCString
+    fileName
+    ( \f ->
+        with
+          0
+          ( \n -> do
+              ptr <- c'loadMaterials f n
+              num <- peek n
+              peekArray (fromIntegral num) ptr
+          )
+    )
 
 foreign import ccall safe "raylib.h &LoadMaterials"
   p'loadMaterials ::
-    FunPtr (CString -> Ptr CInt -> IO (Ptr Material))
+    FunPtr (CString -> Ptr CInt -> IO (Ptr Raylib.Types.Material))
 
-foreign import ccall safe "bindings.h LoadMaterialDefault_" loadMaterialDefault :: IO (Ptr Material)
+foreign import ccall safe "bindings.h LoadMaterialDefault_" c'loadMaterialDefault :: IO (Ptr Raylib.Types.Material)
+
+loadMaterialDefault :: IO Raylib.Types.Material
+loadMaterialDefault = c'loadMaterialDefault >>= pop
 
 foreign import ccall safe "raylib.h &LoadMaterialDefault"
   p'loadMaterialDefault ::
-    FunPtr (IO Material)
+    FunPtr (IO Raylib.Types.Material)
 
-foreign import ccall safe "bindings.h UnloadMaterial_" unloadMaterial :: Ptr Material -> IO ()
+foreign import ccall safe "bindings.h UnloadMaterial_" c'unloadMaterial :: Ptr Raylib.Types.Material -> IO ()
+
+unloadMaterial :: Raylib.Types.Material -> IO ()
+unloadMaterial material = with material c'unloadMaterial
 
 foreign import ccall safe "raylib.h &UnloadMaterial"
   p'unloadMaterial ::
-    FunPtr (Material -> IO ())
+    FunPtr (Raylib.Types.Material -> IO ())
 
-foreign import ccall safe "bindings.h SetMaterialTexture_" setMaterialTexture :: Ptr Material -> CInt -> Ptr Texture -> IO ()
+foreign import ccall safe "bindings.h SetMaterialTexture_" c'setMaterialTexture :: Ptr Raylib.Types.Material -> CInt -> Ptr Raylib.Types.Texture -> IO ()
+
+setMaterialTexture :: Raylib.Types.Material -> Int -> Raylib.Types.Texture -> IO Raylib.Types.Material
+setMaterialTexture material mapType texture = with material (\m -> with texture (c'setMaterialTexture m (fromIntegral mapType)) >> peek m)
 
 foreign import ccall safe "raylib.h &SetMaterialTexture"
   p'setMaterialTexture ::
-    FunPtr (Ptr Material -> CInt -> Texture -> IO ())
+    FunPtr (Ptr Raylib.Types.Material -> CInt -> Raylib.Types.Texture -> IO ())
 
 foreign import ccall safe "raylib.h SetModelMeshMaterial"
-  setModelMeshMaterial ::
-    Ptr Model -> CInt -> CInt -> IO ()
+  c'setModelMeshMaterial ::
+    Ptr Raylib.Types.Model -> CInt -> CInt -> IO ()
+
+setModelMeshMaterial :: Raylib.Types.Model -> Int -> Int -> IO Raylib.Types.Model
+setModelMeshMaterial model meshId materialId = with model (\m -> c'setModelMeshMaterial m (fromIntegral meshId) (fromIntegral materialId) >> peek m)
 
 foreign import ccall safe "raylib.h &SetModelMeshMaterial"
   p'setModelMeshMaterial ::
-    FunPtr (Ptr Model -> CInt -> CInt -> IO ())
+    FunPtr (Ptr Raylib.Types.Model -> CInt -> CInt -> IO ())
 
 foreign import ccall safe "raylib.h LoadModelAnimations"
-  loadModelAnimations ::
-    CString -> Ptr CUInt -> IO (Ptr ModelAnimation)
+  c'loadModelAnimations ::
+    CString -> Ptr CUInt -> IO (Ptr Raylib.Types.ModelAnimation)
+
+loadModelAnimations :: String -> IO [Raylib.Types.ModelAnimation]
+loadModelAnimations fileName =
+  withCString
+    fileName
+    ( \f ->
+        with
+          0
+          ( \n -> do
+              ptr <- c'loadModelAnimations f n
+              num <- peek n
+              peekArray (fromIntegral num) ptr
+          )
+    )
 
 foreign import ccall safe "raylib.h &LoadModelAnimations"
   p'loadModelAnimations ::
-    FunPtr (CString -> Ptr CUInt -> IO (Ptr ModelAnimation))
+    FunPtr (CString -> Ptr CUInt -> IO (Ptr Raylib.Types.ModelAnimation))
 
-foreign import ccall safe "bindings.h UpdateModelAnimation_" updateModelAnimation :: Ptr Model -> Ptr ModelAnimation -> CInt -> IO ()
+foreign import ccall safe "bindings.h UpdateModelAnimation_" c'updateModelAnimation :: Ptr Raylib.Types.Model -> Ptr Raylib.Types.ModelAnimation -> CInt -> IO ()
+
+updateModelAnimation :: Raylib.Types.Model -> Raylib.Types.ModelAnimation -> Int -> IO ()
+updateModelAnimation model animation frame = with model (\m -> with animation (\a -> c'updateModelAnimation m a (fromIntegral frame)))
 
 foreign import ccall safe "raylib.h &UpdateModelAnimation"
   p'updateModelAnimation ::
-    FunPtr (Model -> ModelAnimation -> CInt -> IO ())
+    FunPtr (Raylib.Types.Model -> Raylib.Types.ModelAnimation -> CInt -> IO ())
 
-foreign import ccall safe "bindings.h UnloadModelAnimation_" unloadModelAnimation :: Ptr ModelAnimation -> IO ()
+foreign import ccall safe "bindings.h UnloadModelAnimation_" c'unloadModelAnimation :: Ptr Raylib.Types.ModelAnimation -> IO ()
+
+unloadModelAnimation :: ModelAnimation -> IO ()
+unloadModelAnimation animation = with animation c'unloadModelAnimation
 
 foreign import ccall safe "raylib.h &UnloadModelAnimation"
   p'unloadModelAnimation ::
-    FunPtr (ModelAnimation -> IO ())
+    FunPtr (Raylib.Types.ModelAnimation -> IO ())
 
 foreign import ccall safe "raylib.h UnloadModelAnimations"
-  unloadModelAnimations ::
-    Ptr ModelAnimation -> CUInt -> IO ()
+  c'unloadModelAnimations ::
+    Ptr Raylib.Types.ModelAnimation -> CUInt -> IO ()
+
+unloadModelAnimations :: [ModelAnimation] -> IO ()
+unloadModelAnimations animations = withArrayLen animations (\num a -> c'unloadModelAnimations a (fromIntegral num))
 
 foreign import ccall safe "raylib.h &UnloadModelAnimations"
   p'unloadModelAnimations ::
-    FunPtr (Ptr ModelAnimation -> CUInt -> IO ())
+    FunPtr (Ptr Raylib.Types.ModelAnimation -> CUInt -> IO ())
 
-foreign import ccall safe "bindings.h IsModelAnimationValid_" isModelAnimationValid :: Ptr Model -> Ptr ModelAnimation -> IO CInt
+foreign import ccall safe "bindings.h IsModelAnimationValid_" isModelAnimationValid :: Ptr Raylib.Types.Model -> Ptr Raylib.Types.ModelAnimation -> IO CInt
 
 foreign import ccall safe "raylib.h &IsModelAnimationValid"
   p'isModelAnimationValid ::
-    FunPtr (Model -> ModelAnimation -> IO CInt)
+    FunPtr (Raylib.Types.Model -> Raylib.Types.ModelAnimation -> IO CInt)
 
-foreign import ccall safe "bindings.h CheckCollisionSpheres_" checkCollisionSpheres :: Ptr Vector3 -> CFloat -> Ptr Vector3 -> CFloat -> IO CInt
+foreign import ccall safe "bindings.h CheckCollisionSpheres_" checkCollisionSpheres :: Ptr Raylib.Types.Vector3 -> CFloat -> Ptr Raylib.Types.Vector3 -> CFloat -> IO CInt
 
 foreign import ccall safe "raylib.h &CheckCollisionSpheres"
   p'checkCollisionSpheres ::
-    FunPtr (Vector3 -> CFloat -> Vector3 -> CFloat -> IO CInt)
+    FunPtr (Raylib.Types.Vector3 -> CFloat -> Raylib.Types.Vector3 -> CFloat -> IO CInt)
 
-foreign import ccall safe "bindings.h CheckCollisionBoxes_" checkCollisionBoxes :: Ptr BoundingBox -> Ptr BoundingBox -> IO CInt
+foreign import ccall safe "bindings.h CheckCollisionBoxes_" checkCollisionBoxes :: Ptr Raylib.Types.BoundingBox -> Ptr Raylib.Types.BoundingBox -> IO CInt
 
 foreign import ccall safe "raylib.h &CheckCollisionBoxes"
   p'checkCollisionBoxes ::
-    FunPtr (BoundingBox -> BoundingBox -> IO CInt)
+    FunPtr (Raylib.Types.BoundingBox -> Raylib.Types.BoundingBox -> IO CInt)
 
-foreign import ccall safe "bindings.h CheckCollisionBoxSphere_" checkCollisionBoxSphere :: Ptr BoundingBox -> Ptr Vector3 -> CFloat -> IO CInt
+foreign import ccall safe "bindings.h CheckCollisionBoxSphere_" checkCollisionBoxSphere :: Ptr Raylib.Types.BoundingBox -> Ptr Raylib.Types.Vector3 -> CFloat -> IO CInt
 
 foreign import ccall safe "raylib.h &CheckCollisionBoxSphere"
   p'checkCollisionBoxSphere ::
-    FunPtr (BoundingBox -> Vector3 -> CFloat -> IO CInt)
+    FunPtr (Raylib.Types.BoundingBox -> Raylib.Types.Vector3 -> CFloat -> IO CInt)
 
-foreign import ccall safe "bindings.h GetRayCollisionSphere_" getRayCollisionSphere :: Ptr Ray -> Ptr Vector3 -> CFloat -> IO (Ptr RayCollision)
+foreign import ccall safe "bindings.h GetRayCollisionSphere_" getRayCollisionSphere :: Ptr Raylib.Types.Ray -> Ptr Raylib.Types.Vector3 -> CFloat -> IO (Ptr Raylib.Types.RayCollision)
 
 foreign import ccall safe "raylib.h &GetRayCollisionSphere"
   p'getRayCollisionSphere ::
-    FunPtr (Ray -> Vector3 -> CFloat -> IO RayCollision)
+    FunPtr (Raylib.Types.Ray -> Raylib.Types.Vector3 -> CFloat -> IO Raylib.Types.RayCollision)
 
-foreign import ccall safe "bindings.h GetRayCollisionBox_" getRayCollisionBox :: Ptr Ray -> Ptr BoundingBox -> IO (Ptr RayCollision)
+foreign import ccall safe "bindings.h GetRayCollisionBox_" getRayCollisionBox :: Ptr Raylib.Types.Ray -> Ptr Raylib.Types.BoundingBox -> IO (Ptr Raylib.Types.RayCollision)
 
 foreign import ccall safe "raylib.h &GetRayCollisionBox"
   p'getRayCollisionBox ::
-    FunPtr (Ray -> BoundingBox -> IO RayCollision)
+    FunPtr (Raylib.Types.Ray -> Raylib.Types.BoundingBox -> IO Raylib.Types.RayCollision)
 
-foreign import ccall safe "bindings.h GetRayCollisionMesh_" getRayCollisionMesh :: Ptr Ray -> Ptr Mesh -> Ptr Matrix -> IO (Ptr RayCollision)
+foreign import ccall safe "bindings.h GetRayCollisionMesh_" getRayCollisionMesh :: Ptr Raylib.Types.Ray -> Ptr Raylib.Types.Mesh -> Ptr Raylib.Types.Matrix -> IO (Ptr Raylib.Types.RayCollision)
 
 foreign import ccall safe "raylib.h &GetRayCollisionMesh"
   p'getRayCollisionMesh ::
-    FunPtr (Ray -> Mesh -> Matrix -> IO RayCollision)
+    FunPtr (Raylib.Types.Ray -> Raylib.Types.Mesh -> Raylib.Types.Matrix -> IO Raylib.Types.RayCollision)
 
-foreign import ccall safe "bindings.h GetRayCollisionTriangle_" getRayCollisionTriangle :: Ptr Ray -> Ptr Vector3 -> Ptr Vector3 -> Ptr Vector3 -> IO (Ptr RayCollision)
+foreign import ccall safe "bindings.h GetRayCollisionTriangle_" getRayCollisionTriangle :: Ptr Raylib.Types.Ray -> Ptr Raylib.Types.Vector3 -> Ptr Raylib.Types.Vector3 -> Ptr Raylib.Types.Vector3 -> IO (Ptr Raylib.Types.RayCollision)
 
 foreign import ccall safe "raylib.h &GetRayCollisionTriangle"
   p'getRayCollisionTriangle ::
-    FunPtr (Ray -> Vector3 -> Vector3 -> Vector3 -> IO RayCollision)
+    FunPtr (Raylib.Types.Ray -> Raylib.Types.Vector3 -> Raylib.Types.Vector3 -> Raylib.Types.Vector3 -> IO Raylib.Types.RayCollision)
 
-foreign import ccall safe "bindings.h GetRayCollisionQuad_" getRayCollisionQuad :: Ptr Ray -> Ptr Vector3 -> Ptr Vector3 -> Ptr Vector3 -> Ptr Vector3 -> IO (Ptr RayCollision)
+foreign import ccall safe "bindings.h GetRayCollisionQuad_" getRayCollisionQuad :: Ptr Raylib.Types.Ray -> Ptr Raylib.Types.Vector3 -> Ptr Raylib.Types.Vector3 -> Ptr Raylib.Types.Vector3 -> Ptr Raylib.Types.Vector3 -> IO (Ptr Raylib.Types.RayCollision)
 
 foreign import ccall safe "raylib.h &GetRayCollisionQuad"
   p'getRayCollisionQuad ::
-    FunPtr (Ray -> Vector3 -> Vector3 -> Vector3 -> Vector3 -> IO RayCollision)
+    FunPtr (Raylib.Types.Ray -> Raylib.Types.Vector3 -> Raylib.Types.Vector3 -> Raylib.Types.Vector3 -> Raylib.Types.Vector3 -> IO Raylib.Types.RayCollision)
 
 type AudioCallback = FunPtr (Ptr () -> CUInt -> IO ())
 
@@ -4655,89 +4783,89 @@ foreign import ccall safe "raylib.h &SetMasterVolume"
   p'setMasterVolume ::
     FunPtr (CFloat -> IO ())
 
-foreign import ccall safe "bindings.h LoadWave_" loadWave :: CString -> IO (Ptr Wave)
+foreign import ccall safe "bindings.h LoadWave_" loadWave :: CString -> IO (Ptr Raylib.Types.Wave)
 
 foreign import ccall safe "raylib.h &LoadWave"
   p'loadWave ::
-    FunPtr (CString -> IO Wave)
+    FunPtr (CString -> IO Raylib.Types.Wave)
 
-foreign import ccall safe "bindings.h LoadWaveFromMemory_" loadWaveFromMemory :: CString -> Ptr CUChar -> CInt -> IO (Ptr Wave)
+foreign import ccall safe "bindings.h LoadWaveFromMemory_" loadWaveFromMemory :: CString -> Ptr CUChar -> CInt -> IO (Ptr Raylib.Types.Wave)
 
 foreign import ccall safe "raylib.h &LoadWaveFromMemory"
   p'loadWaveFromMemory ::
-    FunPtr (CString -> Ptr CUChar -> CInt -> IO Wave)
+    FunPtr (CString -> Ptr CUChar -> CInt -> IO Raylib.Types.Wave)
 
-foreign import ccall safe "bindings.h LoadSound_" loadSound :: CString -> IO (Ptr Sound)
+foreign import ccall safe "bindings.h LoadSound_" loadSound :: CString -> IO (Ptr Raylib.Types.Sound)
 
 foreign import ccall safe "raylib.h &LoadSound"
   p'loadSound ::
-    FunPtr (CString -> IO Sound)
+    FunPtr (CString -> IO Raylib.Types.Sound)
 
-foreign import ccall safe "bindings.h LoadSoundFromWave_" loadSoundFromWave :: Ptr Wave -> IO (Ptr Sound)
+foreign import ccall safe "bindings.h LoadSoundFromWave_" loadSoundFromWave :: Ptr Raylib.Types.Wave -> IO (Ptr Raylib.Types.Sound)
 
 foreign import ccall safe "raylib.h &LoadSoundFromWave"
   p'loadSoundFromWave ::
-    FunPtr (Wave -> IO Sound)
+    FunPtr (Raylib.Types.Wave -> IO Raylib.Types.Sound)
 
-foreign import ccall safe "bindings.h UpdateSound_" updateSound :: Ptr Sound -> Ptr () -> CInt -> IO ()
+foreign import ccall safe "bindings.h UpdateSound_" updateSound :: Ptr Raylib.Types.Sound -> Ptr () -> CInt -> IO ()
 
 foreign import ccall safe "raylib.h &UpdateSound"
   p'updateSound ::
-    FunPtr (Sound -> Ptr () -> CInt -> IO ())
+    FunPtr (Raylib.Types.Sound -> Ptr () -> CInt -> IO ())
 
-foreign import ccall safe "bindings.h UnloadWave_" unloadWave :: Ptr Wave -> IO ()
+foreign import ccall safe "bindings.h UnloadWave_" unloadWave :: Ptr Raylib.Types.Wave -> IO ()
 
 foreign import ccall safe "raylib.h &UnloadWave"
   p'unloadWave ::
-    FunPtr (Wave -> IO ())
+    FunPtr (Raylib.Types.Wave -> IO ())
 
-foreign import ccall safe "bindings.h UnloadSound_" unloadSound :: Ptr Sound -> IO ()
+foreign import ccall safe "bindings.h UnloadSound_" unloadSound :: Ptr Raylib.Types.Sound -> IO ()
 
 foreign import ccall safe "raylib.h &UnloadSound"
   p'unloadSound ::
-    FunPtr (Sound -> IO ())
+    FunPtr (Raylib.Types.Sound -> IO ())
 
-foreign import ccall safe "bindings.h ExportWave_" exportWave :: Ptr Wave -> CString -> IO CInt
+foreign import ccall safe "bindings.h ExportWave_" exportWave :: Ptr Raylib.Types.Wave -> CString -> IO CInt
 
 foreign import ccall safe "raylib.h &ExportWave"
   p'exportWave ::
-    FunPtr (Wave -> CString -> IO CInt)
+    FunPtr (Raylib.Types.Wave -> CString -> IO CInt)
 
-foreign import ccall safe "bindings.h ExportWaveAsCode_" exportWaveAsCode :: Ptr Wave -> CString -> IO CInt
+foreign import ccall safe "bindings.h ExportWaveAsCode_" exportWaveAsCode :: Ptr Raylib.Types.Wave -> CString -> IO CInt
 
 foreign import ccall safe "raylib.h &ExportWaveAsCode"
   p'exportWaveAsCode ::
-    FunPtr (Wave -> CString -> IO CInt)
+    FunPtr (Raylib.Types.Wave -> CString -> IO CInt)
 
-foreign import ccall safe "bindings.h PlaySound_" playSound :: Ptr Sound -> IO ()
+foreign import ccall safe "bindings.h PlaySound_" playSound :: Ptr Raylib.Types.Sound -> IO ()
 
 foreign import ccall safe "raylib.h &PlaySound"
   p'playSound ::
-    FunPtr (Sound -> IO ())
+    FunPtr (Raylib.Types.Sound -> IO ())
 
-foreign import ccall safe "bindings.h StopSound_" stopSound :: Ptr Sound -> IO ()
+foreign import ccall safe "bindings.h StopSound_" stopSound :: Ptr Raylib.Types.Sound -> IO ()
 
 foreign import ccall safe "raylib.h &StopSound"
   p'stopSound ::
-    FunPtr (Sound -> IO ())
+    FunPtr (Raylib.Types.Sound -> IO ())
 
-foreign import ccall safe "bindings.h PauseSound_" pauseSound :: Ptr Sound -> IO ()
+foreign import ccall safe "bindings.h PauseSound_" pauseSound :: Ptr Raylib.Types.Sound -> IO ()
 
 foreign import ccall safe "raylib.h &PauseSound"
   p'pauseSound ::
-    FunPtr (Sound -> IO ())
+    FunPtr (Raylib.Types.Sound -> IO ())
 
-foreign import ccall safe "bindings.h ResumeSound_" resumeSound :: Ptr Sound -> IO ()
+foreign import ccall safe "bindings.h ResumeSound_" resumeSound :: Ptr Raylib.Types.Sound -> IO ()
 
 foreign import ccall safe "raylib.h &ResumeSound"
   p'resumeSound ::
-    FunPtr (Sound -> IO ())
+    FunPtr (Raylib.Types.Sound -> IO ())
 
-foreign import ccall safe "bindings.h PlaySoundMulti_" playSoundMulti :: Ptr Sound -> IO ()
+foreign import ccall safe "bindings.h PlaySoundMulti_" playSoundMulti :: Ptr Raylib.Types.Sound -> IO ()
 
 foreign import ccall safe "raylib.h &PlaySoundMulti"
   p'playSoundMulti ::
-    FunPtr (Sound -> IO ())
+    FunPtr (Raylib.Types.Sound -> IO ())
 
 foreign import ccall safe "raylib.h StopSoundMulti"
   stopSoundMulti ::
@@ -4755,57 +4883,57 @@ foreign import ccall safe "raylib.h &GetSoundsPlaying"
   p'getSoundsPlaying ::
     FunPtr (IO CInt)
 
-foreign import ccall safe "bindings.h IsSoundPlaying_" isSoundPlaying :: Ptr Sound -> IO CInt
+foreign import ccall safe "bindings.h IsSoundPlaying_" isSoundPlaying :: Ptr Raylib.Types.Sound -> IO CInt
 
 foreign import ccall safe "raylib.h &IsSoundPlaying"
   p'isSoundPlaying ::
-    FunPtr (Sound -> IO CInt)
+    FunPtr (Raylib.Types.Sound -> IO CInt)
 
-foreign import ccall safe "bindings.h SetSoundVolume_" setSoundVolume :: Ptr Sound -> CFloat -> IO ()
+foreign import ccall safe "bindings.h SetSoundVolume_" setSoundVolume :: Ptr Raylib.Types.Sound -> CFloat -> IO ()
 
 foreign import ccall safe "raylib.h &SetSoundVolume"
   p'setSoundVolume ::
-    FunPtr (Sound -> CFloat -> IO ())
+    FunPtr (Raylib.Types.Sound -> CFloat -> IO ())
 
-foreign import ccall safe "bindings.h SetSoundPitch_" setSoundPitch :: Ptr Sound -> CFloat -> IO ()
+foreign import ccall safe "bindings.h SetSoundPitch_" setSoundPitch :: Ptr Raylib.Types.Sound -> CFloat -> IO ()
 
 foreign import ccall safe "raylib.h &SetSoundPitch"
   p'setSoundPitch ::
-    FunPtr (Sound -> CFloat -> IO ())
+    FunPtr (Raylib.Types.Sound -> CFloat -> IO ())
 
-foreign import ccall safe "bindings.h SetSoundPan_" setSoundPan :: Ptr Sound -> CFloat -> IO ()
+foreign import ccall safe "bindings.h SetSoundPan_" setSoundPan :: Ptr Raylib.Types.Sound -> CFloat -> IO ()
 
 foreign import ccall safe "raylib.h &SetSoundPan"
   p'setSoundPan ::
-    FunPtr (Sound -> CFloat -> IO ())
+    FunPtr (Raylib.Types.Sound -> CFloat -> IO ())
 
-foreign import ccall safe "bindings.h WaveCopy_" waveCopy :: Ptr Wave -> IO (Ptr Wave)
+foreign import ccall safe "bindings.h WaveCopy_" waveCopy :: Ptr Raylib.Types.Wave -> IO (Ptr Raylib.Types.Wave)
 
 foreign import ccall safe "raylib.h &WaveCopy"
   p'waveCopy ::
-    FunPtr (Wave -> IO Wave)
+    FunPtr (Raylib.Types.Wave -> IO Raylib.Types.Wave)
 
 foreign import ccall safe "raylib.h WaveCrop"
   waveCrop ::
-    Ptr Wave -> CInt -> CInt -> IO ()
+    Ptr Raylib.Types.Wave -> CInt -> CInt -> IO ()
 
 foreign import ccall safe "raylib.h &WaveCrop"
   p'waveCrop ::
-    FunPtr (Ptr Wave -> CInt -> CInt -> IO ())
+    FunPtr (Ptr Raylib.Types.Wave -> CInt -> CInt -> IO ())
 
 foreign import ccall safe "raylib.h WaveFormat"
   waveFormat ::
-    Ptr Wave -> CInt -> CInt -> CInt -> IO ()
+    Ptr Raylib.Types.Wave -> CInt -> CInt -> CInt -> IO ()
 
 foreign import ccall safe "raylib.h &WaveFormat"
   p'waveFormat ::
-    FunPtr (Ptr Wave -> CInt -> CInt -> CInt -> IO ())
+    FunPtr (Ptr Raylib.Types.Wave -> CInt -> CInt -> CInt -> IO ())
 
-foreign import ccall safe "bindings.h LoadWaveSamples_" loadWaveSamples :: Ptr Wave -> IO (Ptr CFloat)
+foreign import ccall safe "bindings.h LoadWaveSamples_" loadWaveSamples :: Ptr Raylib.Types.Wave -> IO (Ptr CFloat)
 
 foreign import ccall safe "raylib.h &LoadWaveSamples"
   p'loadWaveSamples ::
-    FunPtr (Wave -> IO (Ptr CFloat))
+    FunPtr (Raylib.Types.Wave -> IO (Ptr CFloat))
 
 foreign import ccall safe "raylib.h UnloadWaveSamples"
   unloadWaveSamples ::
@@ -4815,167 +4943,167 @@ foreign import ccall safe "raylib.h &UnloadWaveSamples"
   p'unloadWaveSamples ::
     FunPtr (Ptr CFloat -> IO ())
 
-foreign import ccall safe "bindings.h LoadMusicStream_" loadMusicStream :: CString -> IO (Ptr Music)
+foreign import ccall safe "bindings.h LoadMusicStream_" loadMusicStream :: CString -> IO (Ptr Raylib.Types.Music)
 
 foreign import ccall safe "raylib.h &LoadMusicStream"
   p'loadMusicStream ::
-    FunPtr (CString -> IO Music)
+    FunPtr (CString -> IO Raylib.Types.Music)
 
-foreign import ccall safe "bindings.h LoadMusicStreamFromMemory_" loadMusicStreamFromMemory :: CString -> Ptr CUChar -> CInt -> IO (Ptr Music)
+foreign import ccall safe "bindings.h LoadMusicStreamFromMemory_" loadMusicStreamFromMemory :: CString -> Ptr CUChar -> CInt -> IO (Ptr Raylib.Types.Music)
 
 foreign import ccall safe "raylib.h &LoadMusicStreamFromMemory"
   p'loadMusicStreamFromMemory ::
-    FunPtr (CString -> Ptr CUChar -> CInt -> IO Music)
+    FunPtr (CString -> Ptr CUChar -> CInt -> IO Raylib.Types.Music)
 
-foreign import ccall safe "bindings.h UnloadMusicStream_" unloadMusicStream :: Ptr Music -> IO ()
+foreign import ccall safe "bindings.h UnloadMusicStream_" unloadMusicStream :: Ptr Raylib.Types.Music -> IO ()
 
 foreign import ccall safe "raylib.h &UnloadMusicStream"
   p'unloadMusicStream ::
-    FunPtr (Music -> IO ())
+    FunPtr (Raylib.Types.Music -> IO ())
 
-foreign import ccall safe "bindings.h PlayMusicStream_" playMusicStream :: Ptr Music -> IO ()
+foreign import ccall safe "bindings.h PlayMusicStream_" playMusicStream :: Ptr Raylib.Types.Music -> IO ()
 
 foreign import ccall safe "raylib.h &PlayMusicStream"
   p'playMusicStream ::
-    FunPtr (Music -> IO ())
+    FunPtr (Raylib.Types.Music -> IO ())
 
-foreign import ccall safe "bindings.h IsMusicStreamPlaying_" isMusicStreamPlaying :: Ptr Music -> IO CInt
+foreign import ccall safe "bindings.h IsMusicStreamPlaying_" isMusicStreamPlaying :: Ptr Raylib.Types.Music -> IO CInt
 
 foreign import ccall safe "raylib.h &IsMusicStreamPlaying"
   p'isMusicStreamPlaying ::
-    FunPtr (Music -> IO CInt)
+    FunPtr (Raylib.Types.Music -> IO CInt)
 
-foreign import ccall safe "bindings.h UpdateMusicStream_" updateMusicStream :: Ptr Music -> IO ()
+foreign import ccall safe "bindings.h UpdateMusicStream_" updateMusicStream :: Ptr Raylib.Types.Music -> IO ()
 
 foreign import ccall safe "raylib.h &UpdateMusicStream"
   p'updateMusicStream ::
-    FunPtr (Music -> IO ())
+    FunPtr (Raylib.Types.Music -> IO ())
 
-foreign import ccall safe "bindings.h StopMusicStream_" stopMusicStream :: Ptr Music -> IO ()
+foreign import ccall safe "bindings.h StopMusicStream_" stopMusicStream :: Ptr Raylib.Types.Music -> IO ()
 
 foreign import ccall safe "raylib.h &StopMusicStream"
   p'stopMusicStream ::
-    FunPtr (Music -> IO ())
+    FunPtr (Raylib.Types.Music -> IO ())
 
-foreign import ccall safe "bindings.h PauseMusicStream_" pauseMusicStream :: Ptr Music -> IO ()
+foreign import ccall safe "bindings.h PauseMusicStream_" pauseMusicStream :: Ptr Raylib.Types.Music -> IO ()
 
 foreign import ccall safe "raylib.h &PauseMusicStream"
   p'pauseMusicStream ::
-    FunPtr (Music -> IO ())
+    FunPtr (Raylib.Types.Music -> IO ())
 
-foreign import ccall safe "bindings.h ResumeMusicStream_" resumeMusicStream :: Ptr Music -> IO ()
+foreign import ccall safe "bindings.h ResumeMusicStream_" resumeMusicStream :: Ptr Raylib.Types.Music -> IO ()
 
 foreign import ccall safe "raylib.h &ResumeMusicStream"
   p'resumeMusicStream ::
-    FunPtr (Music -> IO ())
+    FunPtr (Raylib.Types.Music -> IO ())
 
-foreign import ccall safe "bindings.h SeekMusicStream_" seekMusicStream :: Ptr Music -> CFloat -> IO ()
+foreign import ccall safe "bindings.h SeekMusicStream_" seekMusicStream :: Ptr Raylib.Types.Music -> CFloat -> IO ()
 
 foreign import ccall safe "raylib.h &SeekMusicStream"
   p'seekMusicStream ::
-    FunPtr (Music -> CFloat -> IO ())
+    FunPtr (Raylib.Types.Music -> CFloat -> IO ())
 
-foreign import ccall safe "bindings.h SetMusicVolume_" setMusicVolume :: Ptr Music -> CFloat -> IO ()
+foreign import ccall safe "bindings.h SetMusicVolume_" setMusicVolume :: Ptr Raylib.Types.Music -> CFloat -> IO ()
 
 foreign import ccall safe "raylib.h &SetMusicVolume"
   p'setMusicVolume ::
-    FunPtr (Music -> CFloat -> IO ())
+    FunPtr (Raylib.Types.Music -> CFloat -> IO ())
 
-foreign import ccall safe "bindings.h SetMusicPitch_" setMusicPitch :: Ptr Music -> CFloat -> IO ()
+foreign import ccall safe "bindings.h SetMusicPitch_" setMusicPitch :: Ptr Raylib.Types.Music -> CFloat -> IO ()
 
 foreign import ccall safe "raylib.h &SetMusicPitch"
   p'setMusicPitch ::
-    FunPtr (Music -> CFloat -> IO ())
+    FunPtr (Raylib.Types.Music -> CFloat -> IO ())
 
-foreign import ccall safe "bindings.h SetMusicPan_" setMusicPan :: Ptr Music -> CFloat -> IO ()
+foreign import ccall safe "bindings.h SetMusicPan_" setMusicPan :: Ptr Raylib.Types.Music -> CFloat -> IO ()
 
 foreign import ccall safe "raylib.h &SetMusicPan"
   p'setMusicPan ::
-    FunPtr (Music -> CFloat -> IO ())
+    FunPtr (Raylib.Types.Music -> CFloat -> IO ())
 
-foreign import ccall safe "bindings.h GetMusicTimeLength_" getMusicTimeLength :: Ptr Music -> IO CFloat
+foreign import ccall safe "bindings.h GetMusicTimeLength_" getMusicTimeLength :: Ptr Raylib.Types.Music -> IO CFloat
 
 foreign import ccall safe "raylib.h &GetMusicTimeLength"
   p'getMusicTimeLength ::
-    FunPtr (Music -> IO CFloat)
+    FunPtr (Raylib.Types.Music -> IO CFloat)
 
-foreign import ccall safe "bindings.h GetMusicTimePlayed_" getMusicTimePlayed :: Ptr Music -> IO CFloat
+foreign import ccall safe "bindings.h GetMusicTimePlayed_" getMusicTimePlayed :: Ptr Raylib.Types.Music -> IO CFloat
 
 foreign import ccall safe "raylib.h &GetMusicTimePlayed"
   p'getMusicTimePlayed ::
-    FunPtr (Music -> IO CFloat)
+    FunPtr (Raylib.Types.Music -> IO CFloat)
 
-foreign import ccall safe "bindings.h LoadAudioStream_" loadAudioStream :: CUInt -> CUInt -> CUInt -> IO (Ptr AudioStream)
+foreign import ccall safe "bindings.h LoadAudioStream_" loadAudioStream :: CUInt -> CUInt -> CUInt -> IO (Ptr Raylib.Types.AudioStream)
 
 foreign import ccall safe "raylib.h &LoadAudioStream"
   p'loadAudioStream ::
-    FunPtr (CUInt -> CUInt -> CUInt -> IO AudioStream)
+    FunPtr (CUInt -> CUInt -> CUInt -> IO Raylib.Types.AudioStream)
 
-foreign import ccall safe "bindings.h UnloadAudioStream_" unloadAudioStream :: Ptr AudioStream -> IO ()
+foreign import ccall safe "bindings.h UnloadAudioStream_" unloadAudioStream :: Ptr Raylib.Types.AudioStream -> IO ()
 
 foreign import ccall safe "raylib.h &UnloadAudioStream"
   p'unloadAudioStream ::
-    FunPtr (AudioStream -> IO ())
+    FunPtr (Raylib.Types.AudioStream -> IO ())
 
-foreign import ccall safe "bindings.h UpdateAudioStream_" updateAudioStream :: Ptr AudioStream -> Ptr () -> CInt -> IO ()
+foreign import ccall safe "bindings.h UpdateAudioStream_" updateAudioStream :: Ptr Raylib.Types.AudioStream -> Ptr () -> CInt -> IO ()
 
 foreign import ccall safe "raylib.h &UpdateAudioStream"
   p'updateAudioStream ::
-    FunPtr (AudioStream -> Ptr () -> CInt -> IO ())
+    FunPtr (Raylib.Types.AudioStream -> Ptr () -> CInt -> IO ())
 
-foreign import ccall safe "bindings.h IsAudioStreamProcessed_" isAudioStreamProcessed :: Ptr AudioStream -> IO CInt
+foreign import ccall safe "bindings.h IsAudioStreamProcessed_" isAudioStreamProcessed :: Ptr Raylib.Types.AudioStream -> IO CInt
 
 foreign import ccall safe "raylib.h &IsAudioStreamProcessed"
   p'isAudioStreamProcessed ::
-    FunPtr (AudioStream -> IO CInt)
+    FunPtr (Raylib.Types.AudioStream -> IO CInt)
 
-foreign import ccall safe "bindings.h PlayAudioStream_" playAudioStream :: Ptr AudioStream -> IO ()
+foreign import ccall safe "bindings.h PlayAudioStream_" playAudioStream :: Ptr Raylib.Types.AudioStream -> IO ()
 
 foreign import ccall safe "raylib.h &PlayAudioStream"
   p'playAudioStream ::
-    FunPtr (AudioStream -> IO ())
+    FunPtr (Raylib.Types.AudioStream -> IO ())
 
-foreign import ccall safe "bindings.h PauseAudioStream_" pauseAudioStream :: Ptr AudioStream -> IO ()
+foreign import ccall safe "bindings.h PauseAudioStream_" pauseAudioStream :: Ptr Raylib.Types.AudioStream -> IO ()
 
 foreign import ccall safe "raylib.h &PauseAudioStream"
   p'pauseAudioStream ::
-    FunPtr (AudioStream -> IO ())
+    FunPtr (Raylib.Types.AudioStream -> IO ())
 
-foreign import ccall safe "bindings.h ResumeAudioStream_" resumeAudioStream :: Ptr AudioStream -> IO ()
+foreign import ccall safe "bindings.h ResumeAudioStream_" resumeAudioStream :: Ptr Raylib.Types.AudioStream -> IO ()
 
 foreign import ccall safe "raylib.h &ResumeAudioStream"
   p'resumeAudioStream ::
-    FunPtr (AudioStream -> IO ())
+    FunPtr (Raylib.Types.AudioStream -> IO ())
 
-foreign import ccall safe "bindings.h IsAudioStreamPlaying_" isAudioStreamPlaying :: Ptr AudioStream -> IO CInt
+foreign import ccall safe "bindings.h IsAudioStreamPlaying_" isAudioStreamPlaying :: Ptr Raylib.Types.AudioStream -> IO CInt
 
 foreign import ccall safe "raylib.h &IsAudioStreamPlaying"
   p'isAudioStreamPlaying ::
-    FunPtr (AudioStream -> IO CInt)
+    FunPtr (Raylib.Types.AudioStream -> IO CInt)
 
-foreign import ccall safe "bindings.h StopAudioStream_" stopAudioStream :: Ptr AudioStream -> IO ()
+foreign import ccall safe "bindings.h StopAudioStream_" stopAudioStream :: Ptr Raylib.Types.AudioStream -> IO ()
 
 foreign import ccall safe "raylib.h &StopAudioStream"
   p'stopAudioStream ::
-    FunPtr (AudioStream -> IO ())
+    FunPtr (Raylib.Types.AudioStream -> IO ())
 
-foreign import ccall safe "bindings.h SetAudioStreamVolume_" setAudioStreamVolume :: Ptr AudioStream -> CFloat -> IO ()
+foreign import ccall safe "bindings.h SetAudioStreamVolume_" setAudioStreamVolume :: Ptr Raylib.Types.AudioStream -> CFloat -> IO ()
 
 foreign import ccall safe "raylib.h &SetAudioStreamVolume"
   p'setAudioStreamVolume ::
-    FunPtr (AudioStream -> CFloat -> IO ())
+    FunPtr (Raylib.Types.AudioStream -> CFloat -> IO ())
 
-foreign import ccall safe "bindings.h SetAudioStreamPitch_" setAudioStreamPitch :: Ptr AudioStream -> CFloat -> IO ()
+foreign import ccall safe "bindings.h SetAudioStreamPitch_" setAudioStreamPitch :: Ptr Raylib.Types.AudioStream -> CFloat -> IO ()
 
 foreign import ccall safe "raylib.h &SetAudioStreamPitch"
   p'setAudioStreamPitch ::
-    FunPtr (AudioStream -> CFloat -> IO ())
+    FunPtr (Raylib.Types.AudioStream -> CFloat -> IO ())
 
-foreign import ccall safe "bindings.h SetAudioStreamPan_" setAudioStreamPan :: Ptr AudioStream -> CFloat -> IO ()
+foreign import ccall safe "bindings.h SetAudioStreamPan_" setAudioStreamPan :: Ptr Raylib.Types.AudioStream -> CFloat -> IO ()
 
 foreign import ccall safe "raylib.h &SetAudioStreamPan"
   p'setAudioStreamPan ::
-    FunPtr (AudioStream -> CFloat -> IO ())
+    FunPtr (Raylib.Types.AudioStream -> CFloat -> IO ())
 
 foreign import ccall safe "raylib.h SetAudioStreamBufferSizeDefault"
   setAudioStreamBufferSizeDefault ::
@@ -4985,20 +5113,20 @@ foreign import ccall safe "raylib.h &SetAudioStreamBufferSizeDefault"
   p'setAudioStreamBufferSizeDefault ::
     FunPtr (CInt -> IO ())
 
-foreign import ccall safe "bindings.h SetAudioStreamCallback_" setAudioStreamCallback :: Ptr AudioStream -> Ptr AudioCallback -> IO ()
+foreign import ccall safe "bindings.h SetAudioStreamCallback_" setAudioStreamCallback :: Ptr Raylib.Types.AudioStream -> Ptr AudioCallback -> IO ()
 
 foreign import ccall safe "raylib.h &SetAudioStreamCallback"
   p'setAudioStreamCallback ::
-    FunPtr (AudioStream -> AudioCallback -> IO ())
+    FunPtr (Raylib.Types.AudioStream -> AudioCallback -> IO ())
 
-foreign import ccall safe "bindings.h AttachAudioStreamProcessor_" attachAudioStreamProcessor :: Ptr AudioStream -> Ptr AudioCallback -> IO ()
+foreign import ccall safe "bindings.h AttachAudioStreamProcessor_" attachAudioStreamProcessor :: Ptr Raylib.Types.AudioStream -> Ptr AudioCallback -> IO ()
 
 foreign import ccall safe "raylib.h &AttachAudioStreamProcessor"
   p'attachAudioStreamProcessor ::
-    FunPtr (AudioStream -> AudioCallback -> IO ())
+    FunPtr (Raylib.Types.AudioStream -> AudioCallback -> IO ())
 
-foreign import ccall safe "bindings.h DetachAudioStreamProcessor_" detachAudioStreamProcessor :: Ptr AudioStream -> Ptr AudioCallback -> IO ()
+foreign import ccall safe "bindings.h DetachAudioStreamProcessor_" detachAudioStreamProcessor :: Ptr Raylib.Types.AudioStream -> Ptr AudioCallback -> IO ()
 
 foreign import ccall safe "raylib.h &DetachAudioStreamProcessor"
   p'detachAudioStreamProcessor ::
-    FunPtr (AudioStream -> AudioCallback -> IO ())
+    FunPtr (Raylib.Types.AudioStream -> AudioCallback -> IO ())
