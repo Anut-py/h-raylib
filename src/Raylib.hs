@@ -10,7 +10,7 @@ import Data.List (genericLength)
 import Foreign
   ( FunPtr,
     Ptr,
-    Storable (peek),
+    Storable (peek, sizeOf),
     castPtr,
     fromBool,
     peekArray,
@@ -33,35 +33,36 @@ import Foreign.C
   )
 import GHC.IO (unsafePerformIO)
 import Raylib.Types
-    ( AudioStream,
-      BoundingBox,
-      Camera2D,
-      Camera3D,
-      Color,
-      FilePathList,
-      Font,
-      GlyphInfo,
-      Image(image'width, image'height),
-      Material,
-      Matrix,
-      Mesh,
-      Model,
-      ModelAnimation,
-      Music,
-      NPatchInfo,
-      Ray,
-      RayCollision,
-      Rectangle,
-      RenderTexture,
-      Shader,
-      Sound,
-      Texture,
-      Vector2(Vector2),
-      Vector3,
-      Vector4,
-      VrDeviceInfo,
-      VrStereoConfig,
-      Wave )
+  ( AudioStream,
+    BoundingBox,
+    Camera2D,
+    Camera3D,
+    Color,
+    FilePathList,
+    Font,
+    GlyphInfo,
+    Image (image'height, image'width),
+    Material,
+    Matrix,
+    Mesh,
+    Model,
+    ModelAnimation,
+    Music,
+    NPatchInfo,
+    Ray,
+    RayCollision,
+    Rectangle,
+    RenderTexture,
+    Shader,
+    Sound,
+    Texture,
+    Vector2 (Vector2),
+    Vector3,
+    Vector4,
+    VrDeviceInfo,
+    VrStereoConfig,
+    Wave (wave'channels, wave'frameCount),
+  )
 import Raylib.Util (pop, withArray2D)
 import Prelude hiding (length)
 
@@ -850,8 +851,8 @@ foreign import ccall safe "raylib.h &GetShaderLocationAttrib"
 
 foreign import ccall safe "bindings.h SetShaderValue_" c'setShaderValue :: Ptr Raylib.Types.Shader -> CInt -> Ptr () -> CInt -> IO ()
 
-setShaderValue :: (Storable a) => Raylib.Types.Shader -> Int -> a -> Int -> IO ()
-setShaderValue shader locIndex value uniformType = with value (\v -> with shader (\s -> c'setShaderValue s (fromIntegral locIndex) (castPtr v) (fromIntegral uniformType)))
+setShaderValue :: Raylib.Types.Shader -> Int -> Ptr () -> Int -> IO ()
+setShaderValue shader locIndex value uniformType = with shader (\s -> c'setShaderValue s (fromIntegral locIndex) value (fromIntegral uniformType))
 
 foreign import ccall safe "raylib.h &SetShaderValue"
   p'setShaderValue ::
@@ -859,8 +860,8 @@ foreign import ccall safe "raylib.h &SetShaderValue"
 
 foreign import ccall safe "bindings.h SetShaderValueV_" c'setShaderValueV :: Ptr Raylib.Types.Shader -> CInt -> Ptr () -> CInt -> CInt -> IO ()
 
-setShaderValueV :: (Storable a) => Raylib.Types.Shader -> Int -> a -> Int -> Int -> IO ()
-setShaderValueV shader locIndex value uniformType count = with value (\v -> with shader (\s -> c'setShaderValueV s (fromIntegral locIndex) (castPtr v) (fromIntegral uniformType) (fromIntegral count)))
+setShaderValueV :: Raylib.Types.Shader -> Int -> Ptr () -> Int -> Int -> IO ()
+setShaderValueV shader locIndex value uniformType count = with shader (\s -> c'setShaderValueV s (fromIntegral locIndex) value (fromIntegral uniformType) (fromIntegral count))
 
 foreign import ccall safe "raylib.h &SetShaderValueV"
   p'setShaderValueV ::
@@ -1154,8 +1155,7 @@ foreign import ccall safe "raylib.h LoadFileData"
   c'loadFileData ::
     CString -> Ptr CUInt -> IO (Ptr CUChar)
 
--- | Returns the file data and size in bytes in a tuple, e.g. @(\"Contents\", 8)@
-loadFileData :: String -> IO (String, Integer)
+loadFileData :: String -> IO [Integer]
 loadFileData fileName =
   with
     0
@@ -1163,9 +1163,11 @@ loadFileData fileName =
         withCString
           fileName
           ( \path -> do
-              contents <- c'loadFileData path size >>= peekCString . castPtr
-              bytesRead <- fromIntegral <$> peek size
-              return (contents, bytesRead)
+              ptr <- c'loadFileData path size
+              arrSize <- fromIntegral <$> peek size
+              arr <- peekArray arrSize ptr
+              c'unloadFileData ptr
+              return $ map fromIntegral arr
           )
     )
 
@@ -1174,7 +1176,7 @@ foreign import ccall safe "raylib.h &LoadFileData"
     FunPtr (CString -> Ptr CUInt -> IO (Ptr CUChar))
 
 foreign import ccall safe "raylib.h UnloadFileData"
-  unloadFileData ::
+  c'unloadFileData ::
     Ptr CUChar -> IO ()
 
 foreign import ccall safe "raylib.h &UnloadFileData"
@@ -1453,17 +1455,18 @@ foreign import ccall safe "raylib.h CompressData"
   c'compressData ::
     Ptr CUChar -> CInt -> Ptr CInt -> IO (Ptr CUChar)
 
-compressData :: String -> Int -> IO (String, Integer)
-compressData contents size = do
-  withCString
-    contents
-    ( \c -> do
+compressData :: [Integer] -> IO [Integer]
+compressData contents = do
+  withArrayLen
+    (map fromIntegral contents)
+    ( \size c -> do
         with
           0
           ( \ptr -> do
-              compressed <- c'compressData (castPtr c) (fromIntegral size) ptr >>= peekCString . castPtr
+              compressed <- c'compressData c (fromIntegral $ size * sizeOf (0 :: CUChar)) ptr
               compressedSize <- fromIntegral <$> peek ptr
-              return (compressed, compressedSize)
+              arr <- peekArray compressedSize compressed
+              return $ map fromIntegral arr
           )
     )
 
@@ -1475,17 +1478,18 @@ foreign import ccall safe "raylib.h DecompressData"
   c'decompressData ::
     Ptr CUChar -> CInt -> Ptr CInt -> IO (Ptr CUChar)
 
-decompressData :: String -> Int -> IO (String, Integer)
-decompressData compressedData size = do
-  withCString
-    compressedData
-    ( \c -> do
+decompressData :: [Integer] -> IO [Integer]
+decompressData compressedData = do
+  withArrayLen
+    (map fromIntegral compressedData)
+    ( \size c -> do
         with
           0
           ( \ptr -> do
-              decompressed <- c'decompressData (castPtr c) (fromIntegral size) ptr >>= peekCString . castPtr
+              decompressed <- c'decompressData c (fromIntegral $ size * sizeOf (0 :: CUChar)) ptr
               decompressedSize <- fromIntegral <$> peek ptr
-              return (decompressed, decompressedSize)
+              arr <- peekArray decompressedSize decompressed
+              return $ map fromIntegral arr
           )
     )
 
@@ -1497,17 +1501,18 @@ foreign import ccall safe "raylib.h EncodeDataBase64"
   c'encodeDataBase64 ::
     Ptr CUChar -> CInt -> Ptr CInt -> IO CString
 
-encodeDataBase64 :: String -> Int -> IO (String, Integer)
-encodeDataBase64 contents size = do
-  withCString
-    contents
-    ( \c -> do
+encodeDataBase64 :: [Integer] -> IO [Integer]
+encodeDataBase64 contents = do
+  withArrayLen
+    (map fromIntegral contents)
+    ( \size c -> do
         with
           0
           ( \ptr -> do
-              encoded <- c'encodeDataBase64 (castPtr c) (fromIntegral size) ptr >>= peekCString . castPtr
+              encoded <- c'encodeDataBase64 c (fromIntegral $ size * sizeOf (0 :: CUChar)) ptr
               encodedSize <- fromIntegral <$> peek ptr
-              return (encoded, encodedSize)
+              arr <- peekArray encodedSize encoded
+              return $ map fromIntegral arr
           )
     )
 
@@ -1519,17 +1524,18 @@ foreign import ccall safe "raylib.h DecodeDataBase64"
   c'decodeDataBase64 ::
     Ptr CUChar -> Ptr CInt -> IO (Ptr CUChar)
 
-decodeDataBase64 :: String -> IO (String, Integer)
+decodeDataBase64 :: [Integer] -> IO [Integer]
 decodeDataBase64 encodedData = do
-  withCString
-    encodedData
+  withArray
+    (map fromIntegral encodedData)
     ( \c -> do
         with
           0
           ( \ptr -> do
-              decoded <- c'decodeDataBase64 (castPtr c) ptr >>= peekCString . castPtr
+              decoded <- c'decodeDataBase64 c ptr
               decodedSize <- fromIntegral <$> peek ptr
-              return (decoded, decodedSize)
+              arr <- peekArray decodedSize decoded
+              return $ map fromIntegral arr
           )
     )
 
@@ -2712,9 +2718,9 @@ foreign import ccall safe "raylib.h &LoadImageAnim"
 
 foreign import ccall safe "bindings.h LoadImageFromMemory_" c'loadImageFromMemory :: CString -> Ptr CUChar -> CInt -> IO (Ptr Raylib.Types.Image)
 
-loadImageFromMemory :: String -> String -> Int -> IO Raylib.Types.Image
-loadImageFromMemory fileType fileData fileSize =
-  withCString fileType (\ft -> withCString fileData (\fd -> c'loadImageFromMemory ft (castPtr fd) (fromIntegral fileSize))) >>= pop
+loadImageFromMemory :: String -> [Integer] -> IO Raylib.Types.Image
+loadImageFromMemory fileType fileData =
+  withCString fileType (\ft -> withArrayLen (map fromIntegral fileData) (\size fd -> c'loadImageFromMemory ft fd (fromIntegral $ size * sizeOf (0 :: CUChar)))) >>= pop
 
 foreign import ccall safe "raylib.h &LoadImageFromMemory"
   p'loadImageFromMemory ::
@@ -3644,7 +3650,7 @@ foreign import ccall safe "raylib.h &LoadFont"
 foreign import ccall safe "bindings.h LoadFontEx_" c'loadFontEx :: CString -> CInt -> Ptr CInt -> CInt -> IO (Ptr Raylib.Types.Font)
 
 loadFontEx :: String -> Int -> [Int] -> Int -> IO Raylib.Types.Font
-loadFontEx fileName fontSize fontChars glyphCount = withCString fileName (\f -> withArray fontChars (\c -> c'loadFontEx f (fromIntegral fontSize) (castPtr c) (fromIntegral glyphCount))) >>= pop
+loadFontEx fileName fontSize fontChars glyphCount = withCString fileName (\f -> withArray (map fromIntegral fontChars) (\c -> c'loadFontEx f (fromIntegral fontSize) c (fromIntegral glyphCount))) >>= pop
 
 foreign import ccall safe "raylib.h &LoadFontEx"
   p'loadFontEx ::
@@ -3661,8 +3667,8 @@ foreign import ccall safe "raylib.h &LoadFontFromImage"
 
 foreign import ccall safe "bindings.h LoadFontFromMemory_" c'loadFontFromMemory :: CString -> Ptr CUChar -> CInt -> CInt -> Ptr CInt -> CInt -> IO (Ptr Raylib.Types.Font)
 
-loadFontFromMemory :: String -> [Int] -> Int -> [Int] -> Int -> IO Raylib.Types.Font
-loadFontFromMemory fileType fileData fontSize fontChars glyphCount = withCString fileType (\t -> withArrayLen fileData (\size d -> withArray fontChars (\c -> c'loadFontFromMemory t (castPtr d) (fromIntegral size) (fromIntegral fontSize) (castPtr c) (fromIntegral glyphCount)))) >>= pop
+loadFontFromMemory :: String -> [Integer] -> Int -> [Int] -> Int -> IO Raylib.Types.Font
+loadFontFromMemory fileType fileData fontSize fontChars glyphCount = withCString fileType (\t -> withArrayLen (map fromIntegral fileData) (\size d -> withArray (map fromIntegral fontChars) (\c -> c'loadFontFromMemory t d (fromIntegral $ size * sizeOf (0 :: CUChar)) (fromIntegral fontSize) c (fromIntegral glyphCount)))) >>= pop
 
 foreign import ccall safe "raylib.h &LoadFontFromMemory"
   p'loadFontFromMemory ::
@@ -3672,8 +3678,8 @@ foreign import ccall safe "raylib.h LoadFontData"
   c'loadFontData ::
     Ptr CUChar -> CInt -> CInt -> Ptr CInt -> CInt -> CInt -> IO (Ptr Raylib.Types.GlyphInfo)
 
-loadFontData :: [Int] -> Int -> [Int] -> Int -> Int -> IO Raylib.Types.GlyphInfo
-loadFontData fileData fontSize fontChars glyphCount fontType = withArrayLen fileData (\size d -> withArray fontChars (\c -> c'loadFontData (castPtr d) (fromIntegral size) (fromIntegral fontSize) (castPtr c) (fromIntegral glyphCount) (fromIntegral fontType))) >>= pop
+loadFontData :: [Integer] -> Int -> [Int] -> Int -> Int -> IO Raylib.Types.GlyphInfo
+loadFontData fileData fontSize fontChars glyphCount fontType = withArrayLen (map fromIntegral fileData) (\size d -> withArray (map fromIntegral fontChars) (\c -> c'loadFontData d (fromIntegral $ size * sizeOf (0 :: CUChar)) (fromIntegral fontSize) c (fromIntegral glyphCount) (fromIntegral fontType))) >>= pop
 
 foreign import ccall safe "raylib.h &LoadFontData"
   p'loadFontData ::
@@ -3767,7 +3773,7 @@ foreign import ccall safe "raylib.h &DrawTextCodepoint"
 foreign import ccall safe "bindings.h DrawTextCodepoints_" c'drawTextCodepoints :: Ptr Raylib.Types.Font -> Ptr CInt -> CInt -> Ptr Raylib.Types.Vector2 -> CFloat -> CFloat -> Ptr Raylib.Types.Color -> IO ()
 
 drawTextCodepoints :: Raylib.Types.Font -> [Int] -> Raylib.Types.Vector2 -> Float -> Float -> Raylib.Types.Color -> IO ()
-drawTextCodepoints font codepoints position fontSize spacing tint = with font (\f -> withArrayLen codepoints (\count cp -> with position (\p -> with tint (c'drawTextCodepoints f (castPtr cp) (fromIntegral count) p (realToFrac fontSize) (realToFrac spacing)))))
+drawTextCodepoints font codepoints position fontSize spacing tint = with font (\f -> withArrayLen (map fromIntegral codepoints) (\count cp -> with position (\p -> with tint (c'drawTextCodepoints f cp (fromIntegral count) p (realToFrac fontSize) (realToFrac spacing)))))
 
 foreign import ccall safe "raylib.h &DrawTextCodepoints"
   p'drawTextCodepoints ::
@@ -3824,12 +3830,12 @@ foreign import ccall safe "raylib.h LoadUTF8"
   c'loadUTF8 ::
     Ptr CInt -> CInt -> IO CString
 
-loadUTF8 :: [Int] -> IO String
+loadUTF8 :: [Integer] -> IO String
 loadUTF8 codepoints =
   withArrayLen
-    codepoints
+    (map fromIntegral codepoints)
     ( \size c ->
-        c'loadUTF8 (castPtr c) (fromIntegral size)
+        c'loadUTF8 c (fromIntegral size)
     )
     >>= ( \s -> do
             val <- peekCString s
@@ -4687,55 +4693,82 @@ foreign import ccall safe "raylib.h &UnloadModelAnimations"
   p'unloadModelAnimations ::
     FunPtr (Ptr Raylib.Types.ModelAnimation -> CUInt -> IO ())
 
-foreign import ccall safe "bindings.h IsModelAnimationValid_" isModelAnimationValid :: Ptr Raylib.Types.Model -> Ptr Raylib.Types.ModelAnimation -> IO CInt
+foreign import ccall safe "bindings.h IsModelAnimationValid_" c'isModelAnimationValid :: Ptr Raylib.Types.Model -> Ptr Raylib.Types.ModelAnimation -> IO CInt
+
+isModelAnimationValid :: Model -> ModelAnimation -> IO Bool
+isModelAnimationValid model animation = toBool <$> with model (with animation . c'isModelAnimationValid)
 
 foreign import ccall safe "raylib.h &IsModelAnimationValid"
   p'isModelAnimationValid ::
     FunPtr (Raylib.Types.Model -> Raylib.Types.ModelAnimation -> IO CInt)
 
-foreign import ccall safe "bindings.h CheckCollisionSpheres_" checkCollisionSpheres :: Ptr Raylib.Types.Vector3 -> CFloat -> Ptr Raylib.Types.Vector3 -> CFloat -> IO CInt
+foreign import ccall safe "bindings.h CheckCollisionSpheres_" c'checkCollisionSpheres :: Ptr Raylib.Types.Vector3 -> CFloat -> Ptr Raylib.Types.Vector3 -> CFloat -> IO CInt
+
+checkCollisionSpheres :: Vector3 -> Float -> Vector3 -> Float -> Bool
+checkCollisionSpheres center1 radius1 center2 radius2 = toBool $ unsafePerformIO (with center1 (\c1 -> with center2 (\c2 -> c'checkCollisionSpheres c1 (realToFrac radius1) c2 (realToFrac radius2))))
 
 foreign import ccall safe "raylib.h &CheckCollisionSpheres"
   p'checkCollisionSpheres ::
     FunPtr (Raylib.Types.Vector3 -> CFloat -> Raylib.Types.Vector3 -> CFloat -> IO CInt)
 
-foreign import ccall safe "bindings.h CheckCollisionBoxes_" checkCollisionBoxes :: Ptr Raylib.Types.BoundingBox -> Ptr Raylib.Types.BoundingBox -> IO CInt
+foreign import ccall safe "bindings.h CheckCollisionBoxes_" c'checkCollisionBoxes :: Ptr Raylib.Types.BoundingBox -> Ptr Raylib.Types.BoundingBox -> IO CInt
+
+checkCollisionBoxes :: BoundingBox -> BoundingBox -> Bool
+checkCollisionBoxes box1 box2 = toBool $ unsafePerformIO (with box1 (with box2 . c'checkCollisionBoxes))
 
 foreign import ccall safe "raylib.h &CheckCollisionBoxes"
   p'checkCollisionBoxes ::
     FunPtr (Raylib.Types.BoundingBox -> Raylib.Types.BoundingBox -> IO CInt)
 
-foreign import ccall safe "bindings.h CheckCollisionBoxSphere_" checkCollisionBoxSphere :: Ptr Raylib.Types.BoundingBox -> Ptr Raylib.Types.Vector3 -> CFloat -> IO CInt
+foreign import ccall safe "bindings.h CheckCollisionBoxSphere_" c'checkCollisionBoxSphere :: Ptr Raylib.Types.BoundingBox -> Ptr Raylib.Types.Vector3 -> CFloat -> IO CInt
+
+checkCollisionBoxSphere :: BoundingBox -> Vector3 -> Float -> Bool
+checkCollisionBoxSphere box center radius = toBool $ unsafePerformIO (with box (\b -> with center (\c -> c'checkCollisionBoxSphere b c (realToFrac radius))))
 
 foreign import ccall safe "raylib.h &CheckCollisionBoxSphere"
   p'checkCollisionBoxSphere ::
     FunPtr (Raylib.Types.BoundingBox -> Raylib.Types.Vector3 -> CFloat -> IO CInt)
 
-foreign import ccall safe "bindings.h GetRayCollisionSphere_" getRayCollisionSphere :: Ptr Raylib.Types.Ray -> Ptr Raylib.Types.Vector3 -> CFloat -> IO (Ptr Raylib.Types.RayCollision)
+foreign import ccall safe "bindings.h GetRayCollisionSphere_" c'getRayCollisionSphere :: Ptr Raylib.Types.Ray -> Ptr Raylib.Types.Vector3 -> CFloat -> IO (Ptr Raylib.Types.RayCollision)
+
+getRayCollisionSphere :: Ray -> Vector3 -> Float -> RayCollision
+getRayCollisionSphere ray center radius = unsafePerformIO $ with ray (\r -> with center (\c -> c'getRayCollisionSphere r c (realToFrac radius))) >>= pop
 
 foreign import ccall safe "raylib.h &GetRayCollisionSphere"
   p'getRayCollisionSphere ::
     FunPtr (Raylib.Types.Ray -> Raylib.Types.Vector3 -> CFloat -> IO Raylib.Types.RayCollision)
 
-foreign import ccall safe "bindings.h GetRayCollisionBox_" getRayCollisionBox :: Ptr Raylib.Types.Ray -> Ptr Raylib.Types.BoundingBox -> IO (Ptr Raylib.Types.RayCollision)
+foreign import ccall safe "bindings.h GetRayCollisionBox_" c'getRayCollisionBox :: Ptr Raylib.Types.Ray -> Ptr Raylib.Types.BoundingBox -> IO (Ptr Raylib.Types.RayCollision)
+
+getRayCollisionBox :: Ray -> BoundingBox -> RayCollision
+getRayCollisionBox ray box = unsafePerformIO $ with ray (with box . c'getRayCollisionBox) >>= pop
 
 foreign import ccall safe "raylib.h &GetRayCollisionBox"
   p'getRayCollisionBox ::
     FunPtr (Raylib.Types.Ray -> Raylib.Types.BoundingBox -> IO Raylib.Types.RayCollision)
 
-foreign import ccall safe "bindings.h GetRayCollisionMesh_" getRayCollisionMesh :: Ptr Raylib.Types.Ray -> Ptr Raylib.Types.Mesh -> Ptr Raylib.Types.Matrix -> IO (Ptr Raylib.Types.RayCollision)
+foreign import ccall safe "bindings.h GetRayCollisionMesh_" c'getRayCollisionMesh :: Ptr Raylib.Types.Ray -> Ptr Raylib.Types.Mesh -> Ptr Raylib.Types.Matrix -> IO (Ptr Raylib.Types.RayCollision)
+
+getRayCollisionMesh :: Ray -> Mesh -> Matrix -> RayCollision
+getRayCollisionMesh ray mesh transform = unsafePerformIO $ with ray (\r -> with mesh (with transform . c'getRayCollisionMesh r)) >>= pop
 
 foreign import ccall safe "raylib.h &GetRayCollisionMesh"
   p'getRayCollisionMesh ::
     FunPtr (Raylib.Types.Ray -> Raylib.Types.Mesh -> Raylib.Types.Matrix -> IO Raylib.Types.RayCollision)
 
-foreign import ccall safe "bindings.h GetRayCollisionTriangle_" getRayCollisionTriangle :: Ptr Raylib.Types.Ray -> Ptr Raylib.Types.Vector3 -> Ptr Raylib.Types.Vector3 -> Ptr Raylib.Types.Vector3 -> IO (Ptr Raylib.Types.RayCollision)
+foreign import ccall safe "bindings.h GetRayCollisionTriangle_" c'getRayCollisionTriangle :: Ptr Raylib.Types.Ray -> Ptr Raylib.Types.Vector3 -> Ptr Raylib.Types.Vector3 -> Ptr Raylib.Types.Vector3 -> IO (Ptr Raylib.Types.RayCollision)
+
+getRayCollisionTriangle :: Ray -> Vector3 -> Vector3 -> Vector3 -> RayCollision
+getRayCollisionTriangle ray v1 v2 v3 = unsafePerformIO $ with ray (\r -> with v1 (\p1 -> with v2 (with v3 . c'getRayCollisionTriangle r p1))) >>= pop
 
 foreign import ccall safe "raylib.h &GetRayCollisionTriangle"
   p'getRayCollisionTriangle ::
     FunPtr (Raylib.Types.Ray -> Raylib.Types.Vector3 -> Raylib.Types.Vector3 -> Raylib.Types.Vector3 -> IO Raylib.Types.RayCollision)
 
-foreign import ccall safe "bindings.h GetRayCollisionQuad_" getRayCollisionQuad :: Ptr Raylib.Types.Ray -> Ptr Raylib.Types.Vector3 -> Ptr Raylib.Types.Vector3 -> Ptr Raylib.Types.Vector3 -> Ptr Raylib.Types.Vector3 -> IO (Ptr Raylib.Types.RayCollision)
+foreign import ccall safe "bindings.h GetRayCollisionQuad_" c'getRayCollisionQuad :: Ptr Raylib.Types.Ray -> Ptr Raylib.Types.Vector3 -> Ptr Raylib.Types.Vector3 -> Ptr Raylib.Types.Vector3 -> Ptr Raylib.Types.Vector3 -> IO (Ptr Raylib.Types.RayCollision)
+
+getRayCollisionQuad :: Ray -> Vector3 -> Vector3 -> Vector3 -> Vector3 -> RayCollision
+getRayCollisionQuad ray v1 v2 v3 v4 = unsafePerformIO $ with ray (\r -> with v1 (\p1 -> with v2 (\p2 -> with v3 (with v4 . c'getRayCollisionQuad r p1 p2)))) >>= pop
 
 foreign import ccall safe "raylib.h &GetRayCollisionQuad"
   p'getRayCollisionQuad ::
@@ -4768,100 +4801,148 @@ foreign import ccall safe "raylib.h &CloseAudioDevice"
     FunPtr (IO ())
 
 foreign import ccall safe "raylib.h IsAudioDeviceReady"
-  isAudioDeviceReady ::
+  c'isAudioDeviceReady ::
     IO CInt
+
+isAudioDeviceReady :: IO Bool
+isAudioDeviceReady = toBool <$> c'isAudioDeviceReady
 
 foreign import ccall safe "raylib.h &IsAudioDeviceReady"
   p'isAudioDeviceReady ::
     FunPtr (IO CInt)
 
 foreign import ccall safe "raylib.h SetMasterVolume"
-  setMasterVolume ::
+  c'setMasterVolume ::
     CFloat -> IO ()
+
+setMasterVolume :: Float -> IO ()
+setMasterVolume volume = c'setMasterVolume (realToFrac volume)
 
 foreign import ccall safe "raylib.h &SetMasterVolume"
   p'setMasterVolume ::
     FunPtr (CFloat -> IO ())
 
-foreign import ccall safe "bindings.h LoadWave_" loadWave :: CString -> IO (Ptr Raylib.Types.Wave)
+foreign import ccall safe "bindings.h LoadWave_" c'loadWave :: CString -> IO (Ptr Raylib.Types.Wave)
+
+loadWave :: String -> IO Wave
+loadWave fileName = withCString fileName c'loadWave >>= pop
 
 foreign import ccall safe "raylib.h &LoadWave"
   p'loadWave ::
     FunPtr (CString -> IO Raylib.Types.Wave)
 
-foreign import ccall safe "bindings.h LoadWaveFromMemory_" loadWaveFromMemory :: CString -> Ptr CUChar -> CInt -> IO (Ptr Raylib.Types.Wave)
+foreign import ccall safe "bindings.h LoadWaveFromMemory_" c'loadWaveFromMemory :: CString -> Ptr CUChar -> CInt -> IO (Ptr Raylib.Types.Wave)
+
+loadWaveFromMemory :: String -> [Integer] -> IO Wave
+loadWaveFromMemory fileType fileData = withCString fileType (\f -> withArrayLen (map fromIntegral fileData) (\size d -> c'loadWaveFromMemory f d (fromIntegral $ size * sizeOf (0 :: CUChar)))) >>= pop
 
 foreign import ccall safe "raylib.h &LoadWaveFromMemory"
   p'loadWaveFromMemory ::
     FunPtr (CString -> Ptr CUChar -> CInt -> IO Raylib.Types.Wave)
 
-foreign import ccall safe "bindings.h LoadSound_" loadSound :: CString -> IO (Ptr Raylib.Types.Sound)
+foreign import ccall safe "bindings.h LoadSound_" c'loadSound :: CString -> IO (Ptr Raylib.Types.Sound)
+
+loadSound :: String -> IO Sound
+loadSound fileName = withCString fileName c'loadSound >>= pop
 
 foreign import ccall safe "raylib.h &LoadSound"
   p'loadSound ::
     FunPtr (CString -> IO Raylib.Types.Sound)
 
-foreign import ccall safe "bindings.h LoadSoundFromWave_" loadSoundFromWave :: Ptr Raylib.Types.Wave -> IO (Ptr Raylib.Types.Sound)
+foreign import ccall safe "bindings.h LoadSoundFromWave_" c'loadSoundFromWave :: Ptr Raylib.Types.Wave -> IO (Ptr Raylib.Types.Sound)
+
+loadSoundFromWave :: Wave -> IO Sound
+loadSoundFromWave wave = with wave c'loadSoundFromWave >>= pop
 
 foreign import ccall safe "raylib.h &LoadSoundFromWave"
   p'loadSoundFromWave ::
     FunPtr (Raylib.Types.Wave -> IO Raylib.Types.Sound)
 
-foreign import ccall safe "bindings.h UpdateSound_" updateSound :: Ptr Raylib.Types.Sound -> Ptr () -> CInt -> IO ()
+foreign import ccall safe "bindings.h UpdateSound_" c'updateSound :: Ptr Raylib.Types.Sound -> Ptr () -> CInt -> IO ()
+
+updateSound :: Sound -> Ptr () -> Int -> IO ()
+updateSound sound dataValue sampleCount = with sound (\s -> c'updateSound s dataValue (fromIntegral sampleCount))
 
 foreign import ccall safe "raylib.h &UpdateSound"
   p'updateSound ::
     FunPtr (Raylib.Types.Sound -> Ptr () -> CInt -> IO ())
 
-foreign import ccall safe "bindings.h UnloadWave_" unloadWave :: Ptr Raylib.Types.Wave -> IO ()
+foreign import ccall safe "bindings.h UnloadWave_" c'unloadWave :: Ptr Raylib.Types.Wave -> IO ()
+
+unloadWave :: Wave -> IO ()
+unloadWave wave = with wave c'unloadWave
 
 foreign import ccall safe "raylib.h &UnloadWave"
   p'unloadWave ::
     FunPtr (Raylib.Types.Wave -> IO ())
 
-foreign import ccall safe "bindings.h UnloadSound_" unloadSound :: Ptr Raylib.Types.Sound -> IO ()
+foreign import ccall safe "bindings.h UnloadSound_" c'unloadSound :: Ptr Raylib.Types.Sound -> IO ()
+
+unloadSound :: Sound -> IO ()
+unloadSound sound = with sound c'unloadSound
 
 foreign import ccall safe "raylib.h &UnloadSound"
   p'unloadSound ::
     FunPtr (Raylib.Types.Sound -> IO ())
 
-foreign import ccall safe "bindings.h ExportWave_" exportWave :: Ptr Raylib.Types.Wave -> CString -> IO CInt
+foreign import ccall safe "bindings.h ExportWave_" c'exportWave :: Ptr Raylib.Types.Wave -> CString -> IO CInt
+
+exportWave :: Wave -> String -> IO Bool
+exportWave wave fileName = toBool <$> with wave (withCString fileName . c'exportWave)
 
 foreign import ccall safe "raylib.h &ExportWave"
   p'exportWave ::
     FunPtr (Raylib.Types.Wave -> CString -> IO CInt)
 
-foreign import ccall safe "bindings.h ExportWaveAsCode_" exportWaveAsCode :: Ptr Raylib.Types.Wave -> CString -> IO CInt
+foreign import ccall safe "bindings.h ExportWaveAsCode_" c'exportWaveAsCode :: Ptr Raylib.Types.Wave -> CString -> IO CInt
+
+exportWaveAsCode :: Wave -> String -> IO Bool
+exportWaveAsCode wave fileName = toBool <$> with wave (withCString fileName . c'exportWaveAsCode)
 
 foreign import ccall safe "raylib.h &ExportWaveAsCode"
   p'exportWaveAsCode ::
     FunPtr (Raylib.Types.Wave -> CString -> IO CInt)
 
-foreign import ccall safe "bindings.h PlaySound_" playSound :: Ptr Raylib.Types.Sound -> IO ()
+foreign import ccall safe "bindings.h PlaySound_" c'playSound :: Ptr Raylib.Types.Sound -> IO ()
+
+playSound :: Sound -> IO ()
+playSound sound = with sound c'playSound
 
 foreign import ccall safe "raylib.h &PlaySound"
   p'playSound ::
     FunPtr (Raylib.Types.Sound -> IO ())
 
-foreign import ccall safe "bindings.h StopSound_" stopSound :: Ptr Raylib.Types.Sound -> IO ()
+foreign import ccall safe "bindings.h StopSound_" c'stopSound :: Ptr Raylib.Types.Sound -> IO ()
+
+stopSound :: Sound -> IO ()
+stopSound sound = with sound c'stopSound
 
 foreign import ccall safe "raylib.h &StopSound"
   p'stopSound ::
     FunPtr (Raylib.Types.Sound -> IO ())
 
-foreign import ccall safe "bindings.h PauseSound_" pauseSound :: Ptr Raylib.Types.Sound -> IO ()
+foreign import ccall safe "bindings.h PauseSound_" c'pauseSound :: Ptr Raylib.Types.Sound -> IO ()
+
+pauseSound :: Sound -> IO ()
+pauseSound sound = with sound c'pauseSound
 
 foreign import ccall safe "raylib.h &PauseSound"
   p'pauseSound ::
     FunPtr (Raylib.Types.Sound -> IO ())
 
-foreign import ccall safe "bindings.h ResumeSound_" resumeSound :: Ptr Raylib.Types.Sound -> IO ()
+foreign import ccall safe "bindings.h ResumeSound_" c'resumeSound :: Ptr Raylib.Types.Sound -> IO ()
+
+resumeSound :: Sound -> IO ()
+resumeSound sound = with sound c'resumeSound
 
 foreign import ccall safe "raylib.h &ResumeSound"
   p'resumeSound ::
     FunPtr (Raylib.Types.Sound -> IO ())
 
-foreign import ccall safe "bindings.h PlaySoundMulti_" playSoundMulti :: Ptr Raylib.Types.Sound -> IO ()
+foreign import ccall safe "bindings.h PlaySoundMulti_" c'playSoundMulti :: Ptr Raylib.Types.Sound -> IO ()
+
+playSoundMulti :: Sound -> IO ()
+playSoundMulti sound = with sound c'playSoundMulti
 
 foreign import ccall safe "raylib.h &PlaySoundMulti"
   p'playSoundMulti ::
@@ -4876,256 +4957,379 @@ foreign import ccall safe "raylib.h &StopSoundMulti"
     FunPtr (IO ())
 
 foreign import ccall safe "raylib.h GetSoundsPlaying"
-  getSoundsPlaying ::
+  c'getSoundsPlaying ::
     IO CInt
+
+getSoundsPlaying :: IO Int
+getSoundsPlaying = fromIntegral <$> c'getSoundsPlaying
 
 foreign import ccall safe "raylib.h &GetSoundsPlaying"
   p'getSoundsPlaying ::
     FunPtr (IO CInt)
 
-foreign import ccall safe "bindings.h IsSoundPlaying_" isSoundPlaying :: Ptr Raylib.Types.Sound -> IO CInt
+foreign import ccall safe "bindings.h IsSoundPlaying_" c'isSoundPlaying :: Ptr Raylib.Types.Sound -> IO CInt
+
+isSoundPlaying :: Sound -> IO Bool
+isSoundPlaying sound = toBool <$> with sound c'isSoundPlaying
 
 foreign import ccall safe "raylib.h &IsSoundPlaying"
   p'isSoundPlaying ::
     FunPtr (Raylib.Types.Sound -> IO CInt)
 
-foreign import ccall safe "bindings.h SetSoundVolume_" setSoundVolume :: Ptr Raylib.Types.Sound -> CFloat -> IO ()
+foreign import ccall safe "bindings.h SetSoundVolume_" c'setSoundVolume :: Ptr Raylib.Types.Sound -> CFloat -> IO ()
+
+setSoundVolume :: Sound -> Float -> IO ()
+setSoundVolume sound volume = with sound (\s -> c'setSoundVolume s (realToFrac volume))
 
 foreign import ccall safe "raylib.h &SetSoundVolume"
   p'setSoundVolume ::
     FunPtr (Raylib.Types.Sound -> CFloat -> IO ())
 
-foreign import ccall safe "bindings.h SetSoundPitch_" setSoundPitch :: Ptr Raylib.Types.Sound -> CFloat -> IO ()
+foreign import ccall safe "bindings.h SetSoundPitch_" c'setSoundPitch :: Ptr Raylib.Types.Sound -> CFloat -> IO ()
+
+setSoundPitch :: Sound -> Float -> IO ()
+setSoundPitch sound pitch = with sound (\s -> c'setSoundPitch s (realToFrac pitch))
 
 foreign import ccall safe "raylib.h &SetSoundPitch"
   p'setSoundPitch ::
     FunPtr (Raylib.Types.Sound -> CFloat -> IO ())
 
-foreign import ccall safe "bindings.h SetSoundPan_" setSoundPan :: Ptr Raylib.Types.Sound -> CFloat -> IO ()
+foreign import ccall safe "bindings.h SetSoundPan_" c'setSoundPan :: Ptr Raylib.Types.Sound -> CFloat -> IO ()
+
+setSoundPan :: Sound -> Float -> IO ()
+setSoundPan sound pan = with sound (\s -> c'setSoundPan s (realToFrac pan))
 
 foreign import ccall safe "raylib.h &SetSoundPan"
   p'setSoundPan ::
     FunPtr (Raylib.Types.Sound -> CFloat -> IO ())
 
-foreign import ccall safe "bindings.h WaveCopy_" waveCopy :: Ptr Raylib.Types.Wave -> IO (Ptr Raylib.Types.Wave)
+foreign import ccall safe "bindings.h WaveCopy_" c'waveCopy :: Ptr Raylib.Types.Wave -> IO (Ptr Raylib.Types.Wave)
+
+waveCopy :: Wave -> IO Wave
+waveCopy wave = with wave c'waveCopy >>= pop
 
 foreign import ccall safe "raylib.h &WaveCopy"
   p'waveCopy ::
     FunPtr (Raylib.Types.Wave -> IO Raylib.Types.Wave)
 
 foreign import ccall safe "raylib.h WaveCrop"
-  waveCrop ::
+  c'waveCrop ::
     Ptr Raylib.Types.Wave -> CInt -> CInt -> IO ()
+
+waveCrop :: Wave -> Int -> Int -> IO Wave
+waveCrop wave initSample finalSample = do
+  new <- waveCopy wave
+  with new (\w -> c'waveCrop w (fromIntegral initSample) (fromIntegral finalSample) >> peek w)
 
 foreign import ccall safe "raylib.h &WaveCrop"
   p'waveCrop ::
     FunPtr (Ptr Raylib.Types.Wave -> CInt -> CInt -> IO ())
 
 foreign import ccall safe "raylib.h WaveFormat"
-  waveFormat ::
+  c'waveFormat ::
     Ptr Raylib.Types.Wave -> CInt -> CInt -> CInt -> IO ()
+
+waveFormat :: Wave -> Int -> Int -> Int -> IO ()
+waveFormat wave sampleRate sampleSize channels = do
+  new <- waveCopy wave
+  with new (\n -> c'waveFormat n (fromIntegral sampleRate) (fromIntegral sampleSize) (fromIntegral channels))
 
 foreign import ccall safe "raylib.h &WaveFormat"
   p'waveFormat ::
     FunPtr (Ptr Raylib.Types.Wave -> CInt -> CInt -> CInt -> IO ())
 
-foreign import ccall safe "bindings.h LoadWaveSamples_" loadWaveSamples :: Ptr Raylib.Types.Wave -> IO (Ptr CFloat)
+foreign import ccall safe "bindings.h LoadWaveSamples_" c'loadWaveSamples :: Ptr Raylib.Types.Wave -> IO (Ptr CFloat)
+
+loadWaveSamples :: Wave -> IO [Float]
+loadWaveSamples wave =
+  with
+    wave
+    ( \w -> do
+        ptr <- c'loadWaveSamples w
+        arr <- peekArray (fromIntegral $ wave'frameCount wave * wave'channels wave) ptr
+        c'unloadWaveSamples ptr
+        return $ map realToFrac arr
+    )
 
 foreign import ccall safe "raylib.h &LoadWaveSamples"
   p'loadWaveSamples ::
     FunPtr (Raylib.Types.Wave -> IO (Ptr CFloat))
 
 foreign import ccall safe "raylib.h UnloadWaveSamples"
-  unloadWaveSamples ::
+  c'unloadWaveSamples ::
     Ptr CFloat -> IO ()
 
 foreign import ccall safe "raylib.h &UnloadWaveSamples"
   p'unloadWaveSamples ::
     FunPtr (Ptr CFloat -> IO ())
 
-foreign import ccall safe "bindings.h LoadMusicStream_" loadMusicStream :: CString -> IO (Ptr Raylib.Types.Music)
+foreign import ccall safe "bindings.h LoadMusicStream_" c'loadMusicStream :: CString -> IO (Ptr Raylib.Types.Music)
+
+loadMusicStream :: String -> IO Music
+loadMusicStream fileName = withCString fileName c'loadMusicStream >>= pop
 
 foreign import ccall safe "raylib.h &LoadMusicStream"
   p'loadMusicStream ::
     FunPtr (CString -> IO Raylib.Types.Music)
 
-foreign import ccall safe "bindings.h LoadMusicStreamFromMemory_" loadMusicStreamFromMemory :: CString -> Ptr CUChar -> CInt -> IO (Ptr Raylib.Types.Music)
+foreign import ccall safe "bindings.h LoadMusicStreamFromMemory_" c'loadMusicStreamFromMemory :: CString -> Ptr CUChar -> CInt -> IO (Ptr Raylib.Types.Music)
+
+loadMusicStreamFromMemory :: String -> [Integer] -> IO Music
+loadMusicStreamFromMemory fileType streamData = withCString fileType (\t -> withArrayLen (map fromIntegral streamData) (\size d -> c'loadMusicStreamFromMemory t d (fromIntegral $ size * sizeOf (0 :: CUChar)))) >>= pop
 
 foreign import ccall safe "raylib.h &LoadMusicStreamFromMemory"
   p'loadMusicStreamFromMemory ::
     FunPtr (CString -> Ptr CUChar -> CInt -> IO Raylib.Types.Music)
 
-foreign import ccall safe "bindings.h UnloadMusicStream_" unloadMusicStream :: Ptr Raylib.Types.Music -> IO ()
+foreign import ccall safe "bindings.h UnloadMusicStream_" c'unloadMusicStream :: Ptr Raylib.Types.Music -> IO ()
+
+unloadMusicStream :: Music -> IO ()
+unloadMusicStream music = with music c'unloadMusicStream
 
 foreign import ccall safe "raylib.h &UnloadMusicStream"
   p'unloadMusicStream ::
     FunPtr (Raylib.Types.Music -> IO ())
 
-foreign import ccall safe "bindings.h PlayMusicStream_" playMusicStream :: Ptr Raylib.Types.Music -> IO ()
+foreign import ccall safe "bindings.h PlayMusicStream_" c'playMusicStream :: Ptr Raylib.Types.Music -> IO ()
+
+playMusicStream :: Music -> IO ()
+playMusicStream music = with music c'playMusicStream
 
 foreign import ccall safe "raylib.h &PlayMusicStream"
   p'playMusicStream ::
     FunPtr (Raylib.Types.Music -> IO ())
 
-foreign import ccall safe "bindings.h IsMusicStreamPlaying_" isMusicStreamPlaying :: Ptr Raylib.Types.Music -> IO CInt
+foreign import ccall safe "bindings.h IsMusicStreamPlaying_" c'isMusicStreamPlaying :: Ptr Raylib.Types.Music -> IO CInt
+
+isMusicStreamPlaying :: Music -> IO Bool
+isMusicStreamPlaying music = toBool <$> with music c'isMusicStreamPlaying
 
 foreign import ccall safe "raylib.h &IsMusicStreamPlaying"
   p'isMusicStreamPlaying ::
     FunPtr (Raylib.Types.Music -> IO CInt)
 
-foreign import ccall safe "bindings.h UpdateMusicStream_" updateMusicStream :: Ptr Raylib.Types.Music -> IO ()
+foreign import ccall safe "bindings.h UpdateMusicStream_" c'updateMusicStream :: Ptr Raylib.Types.Music -> IO ()
+
+updateMusicStream :: Music -> IO ()
+updateMusicStream music = with music c'updateMusicStream
 
 foreign import ccall safe "raylib.h &UpdateMusicStream"
   p'updateMusicStream ::
     FunPtr (Raylib.Types.Music -> IO ())
 
-foreign import ccall safe "bindings.h StopMusicStream_" stopMusicStream :: Ptr Raylib.Types.Music -> IO ()
+foreign import ccall safe "bindings.h StopMusicStream_" c'stopMusicStream :: Ptr Raylib.Types.Music -> IO ()
+
+stopMusicStream :: Music -> IO ()
+stopMusicStream music = with music c'stopMusicStream
 
 foreign import ccall safe "raylib.h &StopMusicStream"
   p'stopMusicStream ::
     FunPtr (Raylib.Types.Music -> IO ())
 
-foreign import ccall safe "bindings.h PauseMusicStream_" pauseMusicStream :: Ptr Raylib.Types.Music -> IO ()
+foreign import ccall safe "bindings.h PauseMusicStream_" c'pauseMusicStream :: Ptr Raylib.Types.Music -> IO ()
+
+pauseMusicStream :: Music -> IO ()
+pauseMusicStream music = with music c'pauseMusicStream
 
 foreign import ccall safe "raylib.h &PauseMusicStream"
   p'pauseMusicStream ::
     FunPtr (Raylib.Types.Music -> IO ())
 
-foreign import ccall safe "bindings.h ResumeMusicStream_" resumeMusicStream :: Ptr Raylib.Types.Music -> IO ()
+foreign import ccall safe "bindings.h ResumeMusicStream_" c'resumeMusicStream :: Ptr Raylib.Types.Music -> IO ()
+
+resumeMusicStream :: Music -> IO ()
+resumeMusicStream music = with music c'resumeMusicStream
 
 foreign import ccall safe "raylib.h &ResumeMusicStream"
   p'resumeMusicStream ::
     FunPtr (Raylib.Types.Music -> IO ())
 
-foreign import ccall safe "bindings.h SeekMusicStream_" seekMusicStream :: Ptr Raylib.Types.Music -> CFloat -> IO ()
+foreign import ccall safe "bindings.h SeekMusicStream_" c'seekMusicStream :: Ptr Raylib.Types.Music -> CFloat -> IO ()
+
+seekMusicStream :: Music -> Float -> IO ()
+seekMusicStream music position = with music (\m -> c'seekMusicStream m (realToFrac position))
 
 foreign import ccall safe "raylib.h &SeekMusicStream"
   p'seekMusicStream ::
     FunPtr (Raylib.Types.Music -> CFloat -> IO ())
 
-foreign import ccall safe "bindings.h SetMusicVolume_" setMusicVolume :: Ptr Raylib.Types.Music -> CFloat -> IO ()
+foreign import ccall safe "bindings.h SetMusicVolume_" c'setMusicVolume :: Ptr Raylib.Types.Music -> CFloat -> IO ()
+
+setMusicVolume :: Music -> Float -> IO ()
+setMusicVolume music volume = with music (\m -> c'setMusicVolume m (realToFrac volume))
 
 foreign import ccall safe "raylib.h &SetMusicVolume"
   p'setMusicVolume ::
     FunPtr (Raylib.Types.Music -> CFloat -> IO ())
 
-foreign import ccall safe "bindings.h SetMusicPitch_" setMusicPitch :: Ptr Raylib.Types.Music -> CFloat -> IO ()
+foreign import ccall safe "bindings.h SetMusicPitch_" c'setMusicPitch :: Ptr Raylib.Types.Music -> CFloat -> IO ()
+
+setMusicPitch :: Music -> Float -> IO ()
+setMusicPitch music pitch = with music (\m -> c'setMusicPitch m (realToFrac pitch))
 
 foreign import ccall safe "raylib.h &SetMusicPitch"
   p'setMusicPitch ::
     FunPtr (Raylib.Types.Music -> CFloat -> IO ())
 
-foreign import ccall safe "bindings.h SetMusicPan_" setMusicPan :: Ptr Raylib.Types.Music -> CFloat -> IO ()
+foreign import ccall safe "bindings.h SetMusicPan_" c'setMusicPan :: Ptr Raylib.Types.Music -> CFloat -> IO ()
+
+setMusicPan :: Music -> Float -> IO ()
+setMusicPan music pan = with music (\m -> c'setMusicPan m (realToFrac pan))
 
 foreign import ccall safe "raylib.h &SetMusicPan"
   p'setMusicPan ::
     FunPtr (Raylib.Types.Music -> CFloat -> IO ())
 
-foreign import ccall safe "bindings.h GetMusicTimeLength_" getMusicTimeLength :: Ptr Raylib.Types.Music -> IO CFloat
+foreign import ccall safe "bindings.h GetMusicTimeLength_" c'getMusicTimeLength :: Ptr Raylib.Types.Music -> IO CFloat
+
+getMusicTimeLength :: Music -> IO Float
+getMusicTimeLength music = realToFrac <$> with music c'getMusicTimeLength
 
 foreign import ccall safe "raylib.h &GetMusicTimeLength"
   p'getMusicTimeLength ::
     FunPtr (Raylib.Types.Music -> IO CFloat)
 
-foreign import ccall safe "bindings.h GetMusicTimePlayed_" getMusicTimePlayed :: Ptr Raylib.Types.Music -> IO CFloat
+foreign import ccall safe "bindings.h GetMusicTimePlayed_" c'getMusicTimePlayed :: Ptr Raylib.Types.Music -> IO CFloat
+
+getMusicTimePlayed :: Music -> IO Float
+getMusicTimePlayed music = realToFrac <$> with music c'getMusicTimePlayed
 
 foreign import ccall safe "raylib.h &GetMusicTimePlayed"
   p'getMusicTimePlayed ::
     FunPtr (Raylib.Types.Music -> IO CFloat)
 
-foreign import ccall safe "bindings.h LoadAudioStream_" loadAudioStream :: CUInt -> CUInt -> CUInt -> IO (Ptr Raylib.Types.AudioStream)
+foreign import ccall safe "bindings.h LoadAudioStream_" c'loadAudioStream :: CUInt -> CUInt -> CUInt -> IO (Ptr Raylib.Types.AudioStream)
+
+loadAudioStream :: Integer -> Integer -> Integer -> IO AudioStream
+loadAudioStream sampleRate sampleSize channels = c'loadAudioStream (fromIntegral sampleRate) (fromIntegral sampleSize) (fromIntegral channels) >>= pop
 
 foreign import ccall safe "raylib.h &LoadAudioStream"
   p'loadAudioStream ::
     FunPtr (CUInt -> CUInt -> CUInt -> IO Raylib.Types.AudioStream)
 
-foreign import ccall safe "bindings.h UnloadAudioStream_" unloadAudioStream :: Ptr Raylib.Types.AudioStream -> IO ()
+foreign import ccall safe "bindings.h UnloadAudioStream_" c'unloadAudioStream :: Ptr Raylib.Types.AudioStream -> IO ()
+
+unloadAudioStream :: AudioStream -> IO ()
+unloadAudioStream stream = with stream c'unloadAudioStream
 
 foreign import ccall safe "raylib.h &UnloadAudioStream"
   p'unloadAudioStream ::
     FunPtr (Raylib.Types.AudioStream -> IO ())
 
-foreign import ccall safe "bindings.h UpdateAudioStream_" updateAudioStream :: Ptr Raylib.Types.AudioStream -> Ptr () -> CInt -> IO ()
+foreign import ccall safe "bindings.h UpdateAudioStream_" c'updateAudioStream :: Ptr Raylib.Types.AudioStream -> Ptr () -> CInt -> IO ()
+
+updateAudioStream :: AudioStream -> Ptr () -> Int -> IO ()
+updateAudioStream stream value frameCount = with stream (\s -> c'updateAudioStream s value (fromIntegral frameCount))
 
 foreign import ccall safe "raylib.h &UpdateAudioStream"
   p'updateAudioStream ::
     FunPtr (Raylib.Types.AudioStream -> Ptr () -> CInt -> IO ())
 
-foreign import ccall safe "bindings.h IsAudioStreamProcessed_" isAudioStreamProcessed :: Ptr Raylib.Types.AudioStream -> IO CInt
+foreign import ccall safe "bindings.h IsAudioStreamProcessed_" c'isAudioStreamProcessed :: Ptr Raylib.Types.AudioStream -> IO CInt
+
+isAudioStreamProcessed :: AudioStream -> IO Bool
+isAudioStreamProcessed stream = toBool <$> with stream c'isAudioStreamProcessed
 
 foreign import ccall safe "raylib.h &IsAudioStreamProcessed"
   p'isAudioStreamProcessed ::
     FunPtr (Raylib.Types.AudioStream -> IO CInt)
 
-foreign import ccall safe "bindings.h PlayAudioStream_" playAudioStream :: Ptr Raylib.Types.AudioStream -> IO ()
+foreign import ccall safe "bindings.h PlayAudioStream_" c'playAudioStream :: Ptr Raylib.Types.AudioStream -> IO ()
+
+playAudioStream :: AudioStream -> IO ()
+playAudioStream stream = with stream c'playAudioStream
 
 foreign import ccall safe "raylib.h &PlayAudioStream"
   p'playAudioStream ::
     FunPtr (Raylib.Types.AudioStream -> IO ())
 
-foreign import ccall safe "bindings.h PauseAudioStream_" pauseAudioStream :: Ptr Raylib.Types.AudioStream -> IO ()
+foreign import ccall safe "bindings.h PauseAudioStream_" c'pauseAudioStream :: Ptr Raylib.Types.AudioStream -> IO ()
+
+pauseAudioStream :: AudioStream -> IO ()
+pauseAudioStream stream = with stream c'pauseAudioStream
 
 foreign import ccall safe "raylib.h &PauseAudioStream"
   p'pauseAudioStream ::
     FunPtr (Raylib.Types.AudioStream -> IO ())
 
-foreign import ccall safe "bindings.h ResumeAudioStream_" resumeAudioStream :: Ptr Raylib.Types.AudioStream -> IO ()
+foreign import ccall safe "bindings.h ResumeAudioStream_" c'resumeAudioStream :: Ptr Raylib.Types.AudioStream -> IO ()
+
+resumeAudioStream :: AudioStream -> IO ()
+resumeAudioStream stream = with stream c'resumeAudioStream
 
 foreign import ccall safe "raylib.h &ResumeAudioStream"
   p'resumeAudioStream ::
     FunPtr (Raylib.Types.AudioStream -> IO ())
 
-foreign import ccall safe "bindings.h IsAudioStreamPlaying_" isAudioStreamPlaying :: Ptr Raylib.Types.AudioStream -> IO CInt
+foreign import ccall safe "bindings.h IsAudioStreamPlaying_" c'isAudioStreamPlaying :: Ptr Raylib.Types.AudioStream -> IO CInt
+
+isAudioStreamPlaying :: AudioStream -> IO Bool
+isAudioStreamPlaying stream = toBool <$> with stream c'isAudioStreamPlaying
 
 foreign import ccall safe "raylib.h &IsAudioStreamPlaying"
   p'isAudioStreamPlaying ::
     FunPtr (Raylib.Types.AudioStream -> IO CInt)
 
-foreign import ccall safe "bindings.h StopAudioStream_" stopAudioStream :: Ptr Raylib.Types.AudioStream -> IO ()
+foreign import ccall safe "bindings.h StopAudioStream_" c'stopAudioStream :: Ptr Raylib.Types.AudioStream -> IO ()
+
+stopAudioStream :: AudioStream -> IO ()
+stopAudioStream stream = with stream c'stopAudioStream
 
 foreign import ccall safe "raylib.h &StopAudioStream"
   p'stopAudioStream ::
     FunPtr (Raylib.Types.AudioStream -> IO ())
 
-foreign import ccall safe "bindings.h SetAudioStreamVolume_" setAudioStreamVolume :: Ptr Raylib.Types.AudioStream -> CFloat -> IO ()
+foreign import ccall safe "bindings.h SetAudioStreamVolume_" c'setAudioStreamVolume :: Ptr Raylib.Types.AudioStream -> CFloat -> IO ()
+
+setAudioStreamVolume :: AudioStream -> Float -> IO ()
+setAudioStreamVolume stream volume = with stream (\s -> c'setAudioStreamVolume s (realToFrac volume))
 
 foreign import ccall safe "raylib.h &SetAudioStreamVolume"
   p'setAudioStreamVolume ::
     FunPtr (Raylib.Types.AudioStream -> CFloat -> IO ())
 
-foreign import ccall safe "bindings.h SetAudioStreamPitch_" setAudioStreamPitch :: Ptr Raylib.Types.AudioStream -> CFloat -> IO ()
+foreign import ccall safe "bindings.h SetAudioStreamPitch_" c'setAudioStreamPitch :: Ptr Raylib.Types.AudioStream -> CFloat -> IO ()
+
+setAudioStreamPitch :: AudioStream -> Float -> IO ()
+setAudioStreamPitch stream pitch = with stream (\s -> c'setAudioStreamPitch s (realToFrac pitch))
 
 foreign import ccall safe "raylib.h &SetAudioStreamPitch"
   p'setAudioStreamPitch ::
     FunPtr (Raylib.Types.AudioStream -> CFloat -> IO ())
 
-foreign import ccall safe "bindings.h SetAudioStreamPan_" setAudioStreamPan :: Ptr Raylib.Types.AudioStream -> CFloat -> IO ()
+foreign import ccall safe "bindings.h SetAudioStreamPan_" c'setAudioStreamPan :: Ptr Raylib.Types.AudioStream -> CFloat -> IO ()
+
+setAudioStreamPan :: AudioStream -> Float -> IO ()
+setAudioStreamPan stream pan = with stream (\s -> c'setAudioStreamPan s (realToFrac pan))
 
 foreign import ccall safe "raylib.h &SetAudioStreamPan"
   p'setAudioStreamPan ::
     FunPtr (Raylib.Types.AudioStream -> CFloat -> IO ())
 
 foreign import ccall safe "raylib.h SetAudioStreamBufferSizeDefault"
-  setAudioStreamBufferSizeDefault ::
+  c'setAudioStreamBufferSizeDefault ::
     CInt -> IO ()
+
+setAudioStreamBufferSizeDefault :: Int -> IO ()
+setAudioStreamBufferSizeDefault = setAudioStreamBufferSizeDefault . fromIntegral
 
 foreign import ccall safe "raylib.h &SetAudioStreamBufferSizeDefault"
   p'setAudioStreamBufferSizeDefault ::
     FunPtr (CInt -> IO ())
 
-foreign import ccall safe "bindings.h SetAudioStreamCallback_" setAudioStreamCallback :: Ptr Raylib.Types.AudioStream -> Ptr AudioCallback -> IO ()
+foreign import ccall safe "bindings.h SetAudioStreamCallback_" c'setAudioStreamCallback :: Ptr Raylib.Types.AudioStream -> Ptr AudioCallback -> IO ()
 
 foreign import ccall safe "raylib.h &SetAudioStreamCallback"
   p'setAudioStreamCallback ::
     FunPtr (Raylib.Types.AudioStream -> AudioCallback -> IO ())
 
-foreign import ccall safe "bindings.h AttachAudioStreamProcessor_" attachAudioStreamProcessor :: Ptr Raylib.Types.AudioStream -> Ptr AudioCallback -> IO ()
+foreign import ccall safe "bindings.h AttachAudioStreamProcessor_" c'attachAudioStreamProcessor :: Ptr Raylib.Types.AudioStream -> Ptr AudioCallback -> IO ()
 
 foreign import ccall safe "raylib.h &AttachAudioStreamProcessor"
   p'attachAudioStreamProcessor ::
     FunPtr (Raylib.Types.AudioStream -> AudioCallback -> IO ())
 
-foreign import ccall safe "bindings.h DetachAudioStreamProcessor_" detachAudioStreamProcessor :: Ptr Raylib.Types.AudioStream -> Ptr AudioCallback -> IO ()
+foreign import ccall safe "bindings.h DetachAudioStreamProcessor_" c'detachAudioStreamProcessor :: Ptr Raylib.Types.AudioStream -> Ptr AudioCallback -> IO ()
 
 foreign import ccall safe "raylib.h &DetachAudioStreamProcessor"
   p'detachAudioStreamProcessor ::

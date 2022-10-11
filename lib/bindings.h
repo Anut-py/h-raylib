@@ -2,604 +2,602 @@
  * @file bindings.h
  * @author Anut-py
  * @brief Required methods for binding Haskell to Raylib
- * 
+ *
  * Haskell does not support interfacing with C directly through structs (e.g. Vector2).
  * In order to achieve this, wrapper functions that use pointer need to be written. This
- * file contains wrapper functions for all Raylib functions that do not take pointers. 
+ * file contains wrapper functions for all Raylib functions that do not take pointers.
  */
 
-#define string char*
 #include "raylib.h"
 
-void SetWindowIcon_(Image* a);
+void SetWindowIcon_(Image *a);
 
-Vector2* GetMonitorPosition_(int a);
+Vector2 *GetMonitorPosition_(int a);
 
-Vector2* GetWindowPosition_();
+Vector2 *GetWindowPosition_();
 
-Vector2* GetWindowScaleDPI_();
+Vector2 *GetWindowScaleDPI_();
 
-void ClearBackground_(Color* a);
+void ClearBackground_(Color *a);
 
-void BeginMode2D_(Camera2D* a);
+void BeginMode2D_(Camera2D *a);
 
-void BeginMode3D_(Camera3D* a);
+void BeginMode3D_(Camera3D *a);
 
-void BeginTextureMode_(RenderTexture* a);
+void BeginTextureMode_(RenderTexture *a);
 
-void BeginShaderMode_(Shader* a);
+void BeginShaderMode_(Shader *a);
 
-void BeginVrStereoMode_(VrStereoConfig* a);
+void BeginVrStereoMode_(VrStereoConfig *a);
 
-VrStereoConfig* LoadVrStereoConfig_(VrDeviceInfo* a);
+VrStereoConfig *LoadVrStereoConfig_(VrDeviceInfo *a);
 
-void UnloadVrStereoConfig_(VrStereoConfig* a);
+void UnloadVrStereoConfig_(VrStereoConfig *a);
 
-Shader* LoadShader_(string a, string b);
+Shader *LoadShader_(char *a, char *b);
 
-Shader* LoadShaderFromMemory_(string a, string b);
+Shader *LoadShaderFromMemory_(char *a, char *b);
 
-int GetShaderLocation_(Shader* a, string b);
+int GetShaderLocation_(Shader *a, char *b);
 
-int GetShaderLocationAttrib_(Shader* a, string b);
+int GetShaderLocationAttrib_(Shader *a, char *b);
 
-void SetShaderValue_(Shader* a, int b, const void* c, int d);
+void SetShaderValue_(Shader *a, int b, const void *c, int d);
 
-void SetShaderValueV_(Shader* a, int b, const void* c, int d, int e);
+void SetShaderValueV_(Shader *a, int b, const void *c, int d, int e);
 
-void SetShaderValueMatrix_(Shader* a, int b, Matrix* c);
+void SetShaderValueMatrix_(Shader *a, int b, Matrix *c);
 
-void SetShaderValueTexture_(Shader* a, int b, Texture* c);
+void SetShaderValueTexture_(Shader *a, int b, Texture *c);
 
-void UnloadShader_(Shader* a);
+void UnloadShader_(Shader *a);
 
-Ray* GetMouseRay_(Vector2* a, Camera3D* b);
+Ray *GetMouseRay_(Vector2 *a, Camera3D *b);
 
-Matrix* GetCameraMatrix_(Camera3D* a);
+Matrix *GetCameraMatrix_(Camera3D *a);
 
-Matrix* GetCameraMatrix2D_(Camera2D* a);
+Matrix *GetCameraMatrix2D_(Camera2D *a);
 
-Vector2* GetWorldToScreen_(Vector3* a, Camera3D* b);
+Vector2 *GetWorldToScreen_(Vector3 *a, Camera3D *b);
 
-Vector2* GetScreenToWorld2D_(Vector2* a, Camera2D* b);
+Vector2 *GetScreenToWorld2D_(Vector2 *a, Camera2D *b);
 
-Vector2* GetWorldToScreenEx_(Vector3* a, Camera3D* b, int c, int d);
+Vector2 *GetWorldToScreenEx_(Vector3 *a, Camera3D *b, int c, int d);
 
-Vector2* GetWorldToScreen2D_(Vector2* a, Camera2D* b);
+Vector2 *GetWorldToScreen2D_(Vector2 *a, Camera2D *b);
 
-FilePathList* LoadDirectoryFiles_(string a);
+FilePathList *LoadDirectoryFiles_(char *a);
 
-FilePathList* LoadDirectoryFilesEx_(string a, string b, int c);
+FilePathList *LoadDirectoryFilesEx_(char *a, char *b, int c);
 
-void UnloadDirectoryFiles_(FilePathList* a);
+void UnloadDirectoryFiles_(FilePathList *a);
 
-FilePathList* LoadDroppedFiles_();
+FilePathList *LoadDroppedFiles_();
 
-void UnloadDroppedFiles_(FilePathList* a);
+void UnloadDroppedFiles_(FilePathList *a);
 
-Vector2* GetMousePosition_();
+Vector2 *GetMousePosition_();
 
-Vector2* GetMouseDelta_();
+Vector2 *GetMouseDelta_();
 
-Vector2* GetMouseWheelMoveV_();
+Vector2 *GetMouseWheelMoveV_();
 
-Vector2* GetTouchPosition_(int a);
+Vector2 *GetTouchPosition_(int a);
 
-Vector2* GetGestureDragVector_();
+Vector2 *GetGestureDragVector_();
 
-Vector2* GetGesturePinchVector_();
+Vector2 *GetGesturePinchVector_();
 
-void SetCameraMode_(Camera3D* a, int b);
+void SetCameraMode_(Camera3D *a, int b);
 
-void SetShapesTexture_(Texture* a, Rectangle* b);
+void SetShapesTexture_(Texture *a, Rectangle *b);
 
-void DrawPixel_(int a, int b, Color* c);
+void DrawPixel_(int a, int b, Color *c);
 
-void DrawPixelV_(Vector2* a, Color* b);
+void DrawPixelV_(Vector2 *a, Color *b);
 
-void DrawLine_(int a, int b, int c, int d, Color* e);
+void DrawLine_(int a, int b, int c, int d, Color *e);
 
-void DrawLineV_(Vector2* a, Vector2* b, Color* c);
+void DrawLineV_(Vector2 *a, Vector2 *b, Color *c);
 
-void DrawLineEx_(Vector2* a, Vector2* b, float c, Color* d);
+void DrawLineEx_(Vector2 *a, Vector2 *b, float c, Color *d);
 
-void DrawLineBezier_(Vector2* a, Vector2* b, float c, Color* d);
+void DrawLineBezier_(Vector2 *a, Vector2 *b, float c, Color *d);
 
-void DrawLineBezierQuad_(Vector2* a, Vector2* b, Vector2* c, float d, Color* e);
+void DrawLineBezierQuad_(Vector2 *a, Vector2 *b, Vector2 *c, float d, Color *e);
 
-void DrawLineBezierCubic_(Vector2* a, Vector2* b, Vector2* c, Vector2* d, float e, Color* f);
+void DrawLineBezierCubic_(Vector2 *a, Vector2 *b, Vector2 *c, Vector2 *d, float e, Color *f);
 
-void DrawLineStrip_(Vector2* a, int b, Color* c);
+void DrawLineStrip_(Vector2 *a, int b, Color *c);
 
-void DrawCircle_(int a, int b, float c, Color* d);
+void DrawCircle_(int a, int b, float c, Color *d);
 
-void DrawCircleSector_(Vector2* a, float b, float c, float d, int e, Color* f);
+void DrawCircleSector_(Vector2 *a, float b, float c, float d, int e, Color *f);
 
-void DrawCircleSectorLines_(Vector2* a, float b, float c, float d, int e, Color* f);
+void DrawCircleSectorLines_(Vector2 *a, float b, float c, float d, int e, Color *f);
 
-void DrawCircleGradient_(int a, int b, float c, Color* d, Color* e);
+void DrawCircleGradient_(int a, int b, float c, Color *d, Color *e);
 
-void DrawCircleV_(Vector2* a, float b, Color* c);
+void DrawCircleV_(Vector2 *a, float b, Color *c);
 
-void DrawCircleLines_(int a, int b, float c, Color* d);
+void DrawCircleLines_(int a, int b, float c, Color *d);
 
-void DrawEllipse_(int a, int b, float c, float d, Color* e);
+void DrawEllipse_(int a, int b, float c, float d, Color *e);
 
-void DrawEllipseLines_(int a, int b, float c, float d, Color* e);
+void DrawEllipseLines_(int a, int b, float c, float d, Color *e);
 
-void DrawRing_(Vector2* a, float b, float c, float d, float e, int f, Color* g);
+void DrawRing_(Vector2 *a, float b, float c, float d, float e, int f, Color *g);
 
-void DrawRingLines_(Vector2* a, float b, float c, float d, float e, int f, Color* g);
+void DrawRingLines_(Vector2 *a, float b, float c, float d, float e, int f, Color *g);
 
-void DrawRectangle_(int a, int b, int c, int d, Color* e);
+void DrawRectangle_(int a, int b, int c, int d, Color *e);
 
-void DrawRectangleV_(Vector2* a, Vector2* b, Color* c);
+void DrawRectangleV_(Vector2 *a, Vector2 *b, Color *c);
 
-void DrawRectangleRec_(Rectangle* a, Color* b);
+void DrawRectangleRec_(Rectangle *a, Color *b);
 
-void DrawRectanglePro_(Rectangle* a, Vector2* b, float c, Color* d);
+void DrawRectanglePro_(Rectangle *a, Vector2 *b, float c, Color *d);
 
-void DrawRectangleGradientV_(int a, int b, int c, int d, Color* e, Color* f);
+void DrawRectangleGradientV_(int a, int b, int c, int d, Color *e, Color *f);
 
-void DrawRectangleGradientH_(int a, int b, int c, int d, Color* e, Color* f);
+void DrawRectangleGradientH_(int a, int b, int c, int d, Color *e, Color *f);
 
-void DrawRectangleGradientEx_(Rectangle* a, Color* b, Color* c, Color* d, Color* e);
+void DrawRectangleGradientEx_(Rectangle *a, Color *b, Color *c, Color *d, Color *e);
 
-void DrawRectangleLines_(int a, int b, int c, int d, Color* e);
+void DrawRectangleLines_(int a, int b, int c, int d, Color *e);
 
-void DrawRectangleLinesEx_(Rectangle* a, float b, Color* c);
+void DrawRectangleLinesEx_(Rectangle *a, float b, Color *c);
 
-void DrawRectangleRounded_(Rectangle* a, float b, int c, Color* d);
+void DrawRectangleRounded_(Rectangle *a, float b, int c, Color *d);
 
-void DrawRectangleRoundedLines_(Rectangle* a, float b, int c, float d, Color* e);
+void DrawRectangleRoundedLines_(Rectangle *a, float b, int c, float d, Color *e);
 
-void DrawTriangle_(Vector2* a, Vector2* b, Vector2* c, Color* d);
+void DrawTriangle_(Vector2 *a, Vector2 *b, Vector2 *c, Color *d);
 
-void DrawTriangleLines_(Vector2* a, Vector2* b, Vector2* c, Color* d);
+void DrawTriangleLines_(Vector2 *a, Vector2 *b, Vector2 *c, Color *d);
 
-void DrawTriangleFan_(Vector2* a, int b, Color* c);
+void DrawTriangleFan_(Vector2 *a, int b, Color *c);
 
-void DrawTriangleStrip_(Vector2* a, int b, Color* c);
+void DrawTriangleStrip_(Vector2 *a, int b, Color *c);
 
-void DrawPoly_(Vector2* a, int b, float c, float d, Color* e);
+void DrawPoly_(Vector2 *a, int b, float c, float d, Color *e);
 
-void DrawPolyLines_(Vector2* a, int b, float c, float d, Color* e);
+void DrawPolyLines_(Vector2 *a, int b, float c, float d, Color *e);
 
-void DrawPolyLinesEx_(Vector2* a, int b, float c, float d, float e, Color* f);
+void DrawPolyLinesEx_(Vector2 *a, int b, float c, float d, float e, Color *f);
 
-int CheckCollisionRecs_(Rectangle* a, Rectangle* b);
+int CheckCollisionRecs_(Rectangle *a, Rectangle *b);
 
-int CheckCollisionCircles_(Vector2* a, float b, Vector2* c, float d);
+int CheckCollisionCircles_(Vector2 *a, float b, Vector2 *c, float d);
 
-int CheckCollisionCircleRec_(Vector2* a, float b, Rectangle* c);
+int CheckCollisionCircleRec_(Vector2 *a, float b, Rectangle *c);
 
-int CheckCollisionPointRec_(Vector2* a, Rectangle* b);
+int CheckCollisionPointRec_(Vector2 *a, Rectangle *b);
 
-int CheckCollisionPointCircle_(Vector2* a, Vector2* b, float c);
+int CheckCollisionPointCircle_(Vector2 *a, Vector2 *b, float c);
 
-int CheckCollisionPointTriangle_(Vector2* a, Vector2* b, Vector2* c, Vector2* d);
+int CheckCollisionPointTriangle_(Vector2 *a, Vector2 *b, Vector2 *c, Vector2 *d);
 
-int CheckCollisionLines_(Vector2* a, Vector2* b, Vector2* c, Vector2* d, Vector2* e);
+int CheckCollisionLines_(Vector2 *a, Vector2 *b, Vector2 *c, Vector2 *d, Vector2 *e);
 
-int CheckCollisionPointLine_(Vector2* a, Vector2* b, Vector2* c, int d);
+int CheckCollisionPointLine_(Vector2 *a, Vector2 *b, Vector2 *c, int d);
 
-Rectangle* GetCollisionRec_(Rectangle* a, Rectangle* b);
+Rectangle *GetCollisionRec_(Rectangle *a, Rectangle *b);
 
-Image* LoadImage_(string a);
+Image *LoadImage_(char *a);
 
-Image* LoadImageRaw_(string a, int b, int c, int d, int e);
+Image *LoadImageRaw_(char *a, int b, int c, int d, int e);
 
-Image* LoadImageAnim_(string a, int* b);
+Image *LoadImageAnim_(char *a, int *b);
 
-Image* LoadImageFromMemory_(string a, unsigned char*  b, int c);
+Image *LoadImageFromMemory_(char *a, unsigned char *b, int c);
 
-Image* LoadImageFromTexture_(Texture* a);
+Image *LoadImageFromTexture_(Texture *a);
 
-Image* LoadImageFromScreen_();
+Image *LoadImageFromScreen_();
 
-void UnloadImage_(Image* a);
+void UnloadImage_(Image *a);
 
-int ExportImage_(Image* a, string b);
+int ExportImage_(Image *a, char *b);
 
-int ExportImageAsCode_(Image* a, string b);
+int ExportImageAsCode_(Image *a, char *b);
 
-Image* GenImageColor_(int a, int b, Color* c);
+Image *GenImageColor_(int a, int b, Color *c);
 
-Image* GenImageGradientV_(int a, int b, Color* c, Color* d);
+Image *GenImageGradientV_(int a, int b, Color *c, Color *d);
 
-Image* GenImageGradientH_(int a, int b, Color* c, Color* d);
+Image *GenImageGradientH_(int a, int b, Color *c, Color *d);
 
-Image* GenImageGradientRadial_(int a, int b, float c, Color* d, Color* e);
+Image *GenImageGradientRadial_(int a, int b, float c, Color *d, Color *e);
 
-Image* GenImageChecked_(int a, int b, int c, int d, Color* e, Color* f);
+Image *GenImageChecked_(int a, int b, int c, int d, Color *e, Color *f);
 
-Image* GenImageWhiteNoise_(int a, int b, float c);
+Image *GenImageWhiteNoise_(int a, int b, float c);
 
-Image* GenImagePerlinNoise_(int a, int b, int c, int d, float e);
+Image *GenImagePerlinNoise_(int a, int b, int c, int d, float e);
 
-Image* GenImageCellular_(int a, int b, int c);
+Image *GenImageCellular_(int a, int b, int c);
 
-Image* ImageCopy_(Image* a);
+Image *ImageCopy_(Image *a);
 
-Image* ImageFromImage_(Image* a, Rectangle* b);
+Image *ImageFromImage_(Image *a, Rectangle *b);
 
-Image* ImageText_(string a, int b, Color* c);
+Image *ImageText_(char *a, int b, Color *c);
 
-Image* ImageTextEx_(Font* a, string b, float c, float d, Color* e);
+Image *ImageTextEx_(Font *a, char *b, float c, float d, Color *e);
 
-void ImageToPOT_(Image* a, Color* b);
+void ImageToPOT_(Image *a, Color *b);
 
-void ImageCrop_(Image* a, Rectangle* b);
+void ImageCrop_(Image *a, Rectangle *b);
 
-void ImageAlphaClear_(Image* a, Color* b, float c);
+void ImageAlphaClear_(Image *a, Color *b, float c);
 
-void ImageAlphaMask_(Image* a, Image* b);
+void ImageAlphaMask_(Image *a, Image *b);
 
-void ImageResizeCanvas_(Image* a, int b, int c, int d, int e, Color* f);
+void ImageResizeCanvas_(Image *a, int b, int c, int d, int e, Color *f);
 
-void ImageColorTint_(Image* a, Color* b);
+void ImageColorTint_(Image *a, Color *b);
 
-void ImageColorReplace_(Image* a, Color* b, Color* c);
+void ImageColorReplace_(Image *a, Color *b, Color *c);
 
-Color* LoadImageColors_(Image* a);
+Color *LoadImageColors_(Image *a);
 
-Color* LoadImagePalette_(Image* a, int b, int* c);
+Color *LoadImagePalette_(Image *a, int b, int *c);
 
-Rectangle* GetImageAlphaBorder_(Image* a, float b);
+Rectangle *GetImageAlphaBorder_(Image *a, float b);
 
-Color* GetImageColor_(Image* a, int b, int c);
+Color *GetImageColor_(Image *a, int b, int c);
 
-void ImageClearBackground_(Image* a, Color* b);
+void ImageClearBackground_(Image *a, Color *b);
 
-void ImageDrawPixel_(Image* a, int b, int c, Color* d);
+void ImageDrawPixel_(Image *a, int b, int c, Color *d);
 
-void ImageDrawPixelV_(Image* a, Vector2* b, Color* c);
+void ImageDrawPixelV_(Image *a, Vector2 *b, Color *c);
 
-void ImageDrawLine_(Image* a, int b, int c, int d, int e, Color* f);
+void ImageDrawLine_(Image *a, int b, int c, int d, int e, Color *f);
 
-void ImageDrawLineV_(Image* a, Vector2* b, Vector2* c, Color* d);
+void ImageDrawLineV_(Image *a, Vector2 *b, Vector2 *c, Color *d);
 
-void ImageDrawCircle_(Image* a, int b, int c, int d, Color* e);
+void ImageDrawCircle_(Image *a, int b, int c, int d, Color *e);
 
-void ImageDrawCircleV_(Image* a, Vector2* b, int c, Color* d);
+void ImageDrawCircleV_(Image *a, Vector2 *b, int c, Color *d);
 
-void ImageDrawCircleLines_(Image* a, int b, int c, int d, Color* e);
+void ImageDrawCircleLines_(Image *a, int b, int c, int d, Color *e);
 
-void ImageDrawCircleLinesV_(Image* a, Vector2* b, int c, Color* d);
+void ImageDrawCircleLinesV_(Image *a, Vector2 *b, int c, Color *d);
 
-void ImageDrawRectangle_(Image* a, int b, int c, int d, int e, Color* f);
+void ImageDrawRectangle_(Image *a, int b, int c, int d, int e, Color *f);
 
-void ImageDrawRectangleV_(Image* a, Vector2* b, Vector2* c, Color* d);
+void ImageDrawRectangleV_(Image *a, Vector2 *b, Vector2 *c, Color *d);
 
-void ImageDrawRectangleRec_(Image* a, Rectangle* b, Color* c);
+void ImageDrawRectangleRec_(Image *a, Rectangle *b, Color *c);
 
-void ImageDrawRectangleLines_(Image* a, Rectangle* b, int c, Color* d);
+void ImageDrawRectangleLines_(Image *a, Rectangle *b, int c, Color *d);
 
-void ImageDraw_(Image* a, Image* b, Rectangle* c, Rectangle* d, Color* e);
+void ImageDraw_(Image *a, Image *b, Rectangle *c, Rectangle *d, Color *e);
 
-void ImageDrawText_(Image* a, string b, int c, int d, int e, Color* f);
+void ImageDrawText_(Image *a, char *b, int c, int d, int e, Color *f);
 
-void ImageDrawTextEx_(Image* a, Font* b, string c, Vector2* d, float e, float f, Color* g);
+void ImageDrawTextEx_(Image *a, Font *b, char *c, Vector2 *d, float e, float f, Color *g);
 
-Texture* LoadTexture_(string a);
+Texture *LoadTexture_(char *a);
 
-Texture* LoadTextureFromImage_(Image* a);
+Texture *LoadTextureFromImage_(Image *a);
 
-Texture* LoadTextureCubemap_(Image* a, int b);
+Texture *LoadTextureCubemap_(Image *a, int b);
 
-RenderTexture* LoadRenderTexture_(int a, int b);
+RenderTexture *LoadRenderTexture_(int a, int b);
 
-void UnloadTexture_(Texture* a);
+void UnloadTexture_(Texture *a);
 
-void UnloadRenderTexture_(RenderTexture* a);
+void UnloadRenderTexture_(RenderTexture *a);
 
-void UpdateTexture_(Texture* a, const void* b);
+void UpdateTexture_(Texture *a, const void *b);
 
-void UpdateTextureRec_(Texture* a, Rectangle* b, const void* c);
+void UpdateTextureRec_(Texture *a, Rectangle *b, const void *c);
 
-void SetTextureFilter_(Texture* a, int b);
+void SetTextureFilter_(Texture *a, int b);
 
-void SetTextureWrap_(Texture* a, int b);
+void SetTextureWrap_(Texture *a, int b);
 
-void DrawTexture_(Texture* a, int b, int c, Color* d);
+void DrawTexture_(Texture *a, int b, int c, Color *d);
 
-void DrawTextureV_(Texture* a, Vector2* b, Color* c);
+void DrawTextureV_(Texture *a, Vector2 *b, Color *c);
 
-void DrawTextureEx_(Texture* a, Vector2* b, float c, float d, Color* e);
+void DrawTextureEx_(Texture *a, Vector2 *b, float c, float d, Color *e);
 
-void DrawTextureRec_(Texture* a, Rectangle* b, Vector2* c, Color* d);
+void DrawTextureRec_(Texture *a, Rectangle *b, Vector2 *c, Color *d);
 
-void DrawTextureQuad_(Texture* a, Vector2* b, Vector2* c, Rectangle* d, Color* e);
+void DrawTextureQuad_(Texture *a, Vector2 *b, Vector2 *c, Rectangle *d, Color *e);
 
-void DrawTextureTiled_(Texture* a, Rectangle* b, Rectangle* c, Vector2* d, float e, float f, Color* g);
+void DrawTextureTiled_(Texture *a, Rectangle *b, Rectangle *c, Vector2 *d, float e, float f, Color *g);
 
-void DrawTexturePro_(Texture* a, Rectangle* b, Rectangle* c, Vector2* d, float e, Color* f);
+void DrawTexturePro_(Texture *a, Rectangle *b, Rectangle *c, Vector2 *d, float e, Color *f);
 
-void DrawTextureNPatch_(Texture* a, NPatchInfo* b, Rectangle* c, Vector2* d, float e, Color* f);
+void DrawTextureNPatch_(Texture *a, NPatchInfo *b, Rectangle *c, Vector2 *d, float e, Color *f);
 
-void DrawTexturePoly_(Texture* a, Vector2* b, Vector2* c, Vector2* d, int e, Color* f);
+void DrawTexturePoly_(Texture *a, Vector2 *b, Vector2 *c, Vector2 *d, int e, Color *f);
 
-Color* Fade_(Color* a, float b);
+Color *Fade_(Color *a, float b);
 
-int ColorToInt_(Color* a);
+int ColorToInt_(Color *a);
 
-Vector4* ColorNormalize_(Color* a);
+Vector4 *ColorNormalize_(Color *a);
 
-Color* ColorFromNormalized_(Vector4* a);
+Color *ColorFromNormalized_(Vector4 *a);
 
-Vector3* ColorToHSV_(Color* a);
+Vector3 *ColorToHSV_(Color *a);
 
-Color* ColorFromHSV_(float a, float b, float c);
+Color *ColorFromHSV_(float a, float b, float c);
 
-Color* ColorAlpha_(Color* a, float b);
+Color *ColorAlpha_(Color *a, float b);
 
-Color* ColorAlphaBlend_(Color* a, Color* b, Color* c);
+Color *ColorAlphaBlend_(Color *a, Color *b, Color *c);
 
-Color* GetColor_(unsigned int a);
+Color *GetColor_(unsigned int a);
 
-Color* GetPixelColor_(void* a, int b);
+Color *GetPixelColor_(void *a, int b);
 
-void SetPixelColor_(void* a, Color* b, int c);
+void SetPixelColor_(void *a, Color *b, int c);
 
-Font* GetFontDefault_();
+Font *GetFontDefault_();
 
-Font* LoadFont_(string a);
+Font *LoadFont_(char *a);
 
-Font* LoadFontEx_(string a, int b, int* c, int d);
+Font *LoadFontEx_(char *a, int b, int *c, int d);
 
-Font* LoadFontFromImage_(Image* a, Color* b, int c);
+Font *LoadFontFromImage_(Image *a, Color *b, int c);
 
-Font* LoadFontFromMemory_(string a, unsigned char* b, int c, int d, int* e, int f);
+Font *LoadFontFromMemory_(char *a, unsigned char *b, int c, int d, int *e, int f);
 
-Image* GenImageFontAtlas_(GlyphInfo* a, Rectangle** b, int c, int d, int e, int f);
+Image *GenImageFontAtlas_(GlyphInfo *a, Rectangle **b, int c, int d, int e, int f);
 
-void UnloadFont_(Font* a);
+void UnloadFont_(Font *a);
 
-int ExportFontAsCode_(Font* a, string b);
+int ExportFontAsCode_(Font *a, char *b);
 
-void DrawText_(string a, int b, int c, int d, Color* e);
+void DrawText_(char *a, int b, int c, int d, Color *e);
 
-void DrawTextEx_(Font* a, string b, Vector2* c, float d, float e, Color* f);
+void DrawTextEx_(Font *a, char *b, Vector2 *c, float d, float e, Color *f);
 
-void DrawTextPro_(Font* a, string b, Vector2* c, Vector2* d, float e, float f, float g, Color* h);
+void DrawTextPro_(Font *a, char *b, Vector2 *c, Vector2 *d, float e, float f, float g, Color *h);
 
-void DrawTextCodepoint_(Font* a, int b, Vector2* c, float d, Color* e);
+void DrawTextCodepoint_(Font *a, int b, Vector2 *c, float d, Color *e);
 
-void DrawTextCodepoints_(Font* a, int* b, int c, Vector2* d, float e, float f, Color* g);
+void DrawTextCodepoints_(Font *a, int *b, int c, Vector2 *d, float e, float f, Color *g);
 
-Vector2* MeasureTextEx_(Font* a, string b, float c, float d);
+Vector2 *MeasureTextEx_(Font *a, char *b, float c, float d);
 
-int GetGlyphIndex_(Font* a, int b);
+int GetGlyphIndex_(Font *a, int b);
 
-GlyphInfo* GetGlyphInfo_(Font* a, int b);
+GlyphInfo *GetGlyphInfo_(Font *a, int b);
 
-Rectangle* GetGlyphAtlasRec_(Font* a, int b);
+Rectangle *GetGlyphAtlasRec_(Font *a, int b);
 
-void DrawLine3D_(Vector3* a, Vector3* b, Color* c);
+void DrawLine3D_(Vector3 *a, Vector3 *b, Color *c);
 
-void DrawPoint3D_(Vector3* a, Color* b);
+void DrawPoint3D_(Vector3 *a, Color *b);
 
-void DrawCircle3D_(Vector3* a, float b, Vector3* c, float d, Color* e);
+void DrawCircle3D_(Vector3 *a, float b, Vector3 *c, float d, Color *e);
 
-void DrawTriangle3D_(Vector3* a, Vector3* b, Vector3* c, Color* d);
+void DrawTriangle3D_(Vector3 *a, Vector3 *b, Vector3 *c, Color *d);
 
-void DrawTriangleStrip3D_(Vector3* a, int b, Color* c);
+void DrawTriangleStrip3D_(Vector3 *a, int b, Color *c);
 
-void DrawCube_(Vector3* a, float b, float c, float d, Color* e);
+void DrawCube_(Vector3 *a, float b, float c, float d, Color *e);
 
-void DrawCubeV_(Vector3* a, Vector3* b, Color* c);
+void DrawCubeV_(Vector3 *a, Vector3 *b, Color *c);
 
-void DrawCubeWires_(Vector3* a, float b, float c, float d, Color* e);
+void DrawCubeWires_(Vector3 *a, float b, float c, float d, Color *e);
 
-void DrawCubeWiresV_(Vector3* a, Vector3* b, Color* c);
+void DrawCubeWiresV_(Vector3 *a, Vector3 *b, Color *c);
 
-void DrawCubeTexture_(Texture* a, Vector3* b, float c, float d, float e, Color* f);
+void DrawCubeTexture_(Texture *a, Vector3 *b, float c, float d, float e, Color *f);
 
-void DrawCubeTextureRec_(Texture* a, Rectangle* b, Vector3* c, float d, float e, float f, Color* g);
+void DrawCubeTextureRec_(Texture *a, Rectangle *b, Vector3 *c, float d, float e, float f, Color *g);
 
-void DrawSphere_(Vector3* a, float b, Color* c);
+void DrawSphere_(Vector3 *a, float b, Color *c);
 
-void DrawSphereEx_(Vector3* a, float b, int c, int d, Color* e);
+void DrawSphereEx_(Vector3 *a, float b, int c, int d, Color *e);
 
-void DrawSphereWires_(Vector3* a, float b, int c, int d, Color* e);
+void DrawSphereWires_(Vector3 *a, float b, int c, int d, Color *e);
 
-void DrawCylinder_(Vector3* a, float b, float c, float d, int e, Color* f);
+void DrawCylinder_(Vector3 *a, float b, float c, float d, int e, Color *f);
 
-void DrawCylinderEx_(Vector3* a, Vector3* b, float c, float d, int e, Color* f);
+void DrawCylinderEx_(Vector3 *a, Vector3 *b, float c, float d, int e, Color *f);
 
-void DrawCylinderWires_(Vector3* a, float b, float c, float d, int e, Color* f);
+void DrawCylinderWires_(Vector3 *a, float b, float c, float d, int e, Color *f);
 
-void DrawCylinderWiresEx_(Vector3* a, Vector3* b, float c, float d, int e, Color* f);
+void DrawCylinderWiresEx_(Vector3 *a, Vector3 *b, float c, float d, int e, Color *f);
 
-void DrawPlane_(Vector3* a, Vector2* b, Color* c);
+void DrawPlane_(Vector3 *a, Vector2 *b, Color *c);
 
-void DrawRay_(Ray* a, Color* b);
+void DrawRay_(Ray *a, Color *b);
 
-Model* LoadModel_(string a);
+Model *LoadModel_(char *a);
 
-Model* LoadModelFromMesh_(Mesh* a);
+Model *LoadModelFromMesh_(Mesh *a);
 
-void UnloadModel_(Model* a);
+void UnloadModel_(Model *a);
 
-void UnloadModelKeepMeshes_(Model* a);
+void UnloadModelKeepMeshes_(Model *a);
 
-BoundingBox* GetModelBoundingBox_(Model* a);
+BoundingBox *GetModelBoundingBox_(Model *a);
 
-void DrawModel_(Model* a, Vector3* b, float c, Color* d);
+void DrawModel_(Model *a, Vector3 *b, float c, Color *d);
 
-void DrawModelEx_(Model* a, Vector3* b, Vector3* c, float d, Vector3* e, Color* f);
+void DrawModelEx_(Model *a, Vector3 *b, Vector3 *c, float d, Vector3 *e, Color *f);
 
-void DrawModelWires_(Model* a, Vector3* b, float c, Color* d);
+void DrawModelWires_(Model *a, Vector3 *b, float c, Color *d);
 
-void DrawModelWiresEx_(Model* a, Vector3* b, Vector3* c, float d, Vector3* e, Color* f);
+void DrawModelWiresEx_(Model *a, Vector3 *b, Vector3 *c, float d, Vector3 *e, Color *f);
 
-void DrawBoundingBox_(BoundingBox* a, Color* b);
+void DrawBoundingBox_(BoundingBox *a, Color *b);
 
-void DrawBillboard_(Camera3D* a, Texture* b, Vector3* c, float d, Color* e);
+void DrawBillboard_(Camera3D *a, Texture *b, Vector3 *c, float d, Color *e);
 
-void DrawBillboardRec_(Camera3D* a, Texture* b, Rectangle* c, Vector3* d, Vector2* e, Color* f);
+void DrawBillboardRec_(Camera3D *a, Texture *b, Rectangle *c, Vector3 *d, Vector2 *e, Color *f);
 
-void DrawBillboardPro_(Camera3D* a, Texture* b, Rectangle* c, Vector3* d, Vector3* e, Vector2* f, Vector2* g, float h, Color* i);
+void DrawBillboardPro_(Camera3D *a, Texture *b, Rectangle *c, Vector3 *d, Vector3 *e, Vector2 *f, Vector2 *g, float h, Color *i);
 
-void UpdateMeshBuffer_(Mesh* a, int b, const void* c, int d, int e);
+void UpdateMeshBuffer_(Mesh *a, int b, const void *c, int d, int e);
 
-void UnloadMesh_(Mesh* a);
+void UnloadMesh_(Mesh *a);
 
-void DrawMesh_(Mesh* a, Material* b, Matrix* c);
+void DrawMesh_(Mesh *a, Material *b, Matrix *c);
 
-void DrawMeshInstanced_(Mesh* a, Material* b, Matrix* c, int d);
+void DrawMeshInstanced_(Mesh *a, Material *b, Matrix *c, int d);
 
-int ExportMesh_(Mesh* a, string b);
+int ExportMesh_(Mesh *a, char *b);
 
-BoundingBox* GetMeshBoundingBox_(Mesh* a);
+BoundingBox *GetMeshBoundingBox_(Mesh *a);
 
-Mesh* GenMeshPoly_(int a, float b);
+Mesh *GenMeshPoly_(int a, float b);
 
-Mesh* GenMeshPlane_(float a, float b, int c, int d);
+Mesh *GenMeshPlane_(float a, float b, int c, int d);
 
-Mesh* GenMeshCube_(float a, float b, float c);
+Mesh *GenMeshCube_(float a, float b, float c);
 
-Mesh* GenMeshSphere_(float a, int b, int c);
+Mesh *GenMeshSphere_(float a, int b, int c);
 
-Mesh* GenMeshHemiSphere_(float a, int b, int c);
+Mesh *GenMeshHemiSphere_(float a, int b, int c);
 
-Mesh* GenMeshCylinder_(float a, float b, int c);
+Mesh *GenMeshCylinder_(float a, float b, int c);
 
-Mesh* GenMeshCone_(float a, float b, int c);
+Mesh *GenMeshCone_(float a, float b, int c);
 
-Mesh* GenMeshTorus_(float a, float b, int c, int d);
+Mesh *GenMeshTorus_(float a, float b, int c, int d);
 
-Mesh* GenMeshKnot_(float a, float b, int c, int d);
+Mesh *GenMeshKnot_(float a, float b, int c, int d);
 
-Mesh* GenMeshHeightmap_(Image* a, Vector3* b);
+Mesh *GenMeshHeightmap_(Image *a, Vector3 *b);
 
-Mesh* GenMeshCubicmap_(Image* a, Vector3* b);
+Mesh *GenMeshCubicmap_(Image *a, Vector3 *b);
 
-Material* LoadMaterialDefault_();
+Material *LoadMaterialDefault_();
 
-void UnloadMaterial_(Material* a);
+void UnloadMaterial_(Material *a);
 
-void SetMaterialTexture_(Material* a, int b, Texture* c);
+void SetMaterialTexture_(Material *a, int b, Texture *c);
 
-void UpdateModelAnimation_(Model* a, ModelAnimation* b, int c);
+void UpdateModelAnimation_(Model *a, ModelAnimation *b, int c);
 
-void UnloadModelAnimation_(ModelAnimation* a);
+void UnloadModelAnimation_(ModelAnimation *a);
 
-int IsModelAnimationValid_(Model* a, ModelAnimation* b);
+int IsModelAnimationValid_(Model *a, ModelAnimation *b);
 
-int CheckCollisionSpheres_(Vector3* a, float b, Vector3* c, float d);
+int CheckCollisionSpheres_(Vector3 *a, float b, Vector3 *c, float d);
 
-int CheckCollisionBoxes_(BoundingBox* a, BoundingBox* b);
+int CheckCollisionBoxes_(BoundingBox *a, BoundingBox *b);
 
-int CheckCollisionBoxSphere_(BoundingBox* a, Vector3* b, float c);
+int CheckCollisionBoxSphere_(BoundingBox *a, Vector3 *b, float c);
 
-RayCollision* GetRayCollisionSphere_(Ray* a, Vector3* b, float c);
+RayCollision *GetRayCollisionSphere_(Ray *a, Vector3 *b, float c);
 
-RayCollision* GetRayCollisionBox_(Ray* a, BoundingBox* b);
+RayCollision *GetRayCollisionBox_(Ray *a, BoundingBox *b);
 
-RayCollision* GetRayCollisionMesh_(Ray* a, Mesh* b, Matrix* c);
+RayCollision *GetRayCollisionMesh_(Ray *a, Mesh *b, Matrix *c);
 
-RayCollision* GetRayCollisionTriangle_(Ray* a, Vector3* b, Vector3* c, Vector3* d);
+RayCollision *GetRayCollisionTriangle_(Ray *a, Vector3 *b, Vector3 *c, Vector3 *d);
 
-RayCollision* GetRayCollisionQuad_(Ray* a, Vector3* b, Vector3* c, Vector3* d, Vector3* e);
+RayCollision *GetRayCollisionQuad_(Ray *a, Vector3 *b, Vector3 *c, Vector3 *d, Vector3 *e);
 
-Wave* LoadWave_(string a);
+Wave *LoadWave_(char *a);
 
-Wave* LoadWaveFromMemory_(string a, unsigned char* b, int c);
+Wave *LoadWaveFromMemory_(char *a, unsigned char *b, int c);
 
-Sound* LoadSound_(string a);
+Sound *LoadSound_(char *a);
 
-Sound* LoadSoundFromWave_(Wave* a);
+Sound *LoadSoundFromWave_(Wave *a);
 
-void UpdateSound_(Sound* a, const void* b, int c);
+void UpdateSound_(Sound *a, const void *b, int c);
 
-void UnloadWave_(Wave* a);
+void UnloadWave_(Wave *a);
 
-void UnloadSound_(Sound* a);
+void UnloadSound_(Sound *a);
 
-int ExportWave_(Wave* a, string b);
+int ExportWave_(Wave *a, char *b);
 
-int ExportWaveAsCode_(Wave* a, string b);
+int ExportWaveAsCode_(Wave *a, char *b);
 
-void PlaySound_(Sound* a);
+void PlaySound_(Sound *a);
 
-void StopSound_(Sound* a);
+void StopSound_(Sound *a);
 
-void PauseSound_(Sound* a);
+void PauseSound_(Sound *a);
 
-void ResumeSound_(Sound* a);
+void ResumeSound_(Sound *a);
 
-void PlaySoundMulti_(Sound* a);
+void PlaySoundMulti_(Sound *a);
 
-int IsSoundPlaying_(Sound* a);
+int IsSoundPlaying_(Sound *a);
 
-void SetSoundVolume_(Sound* a, float b);
+void SetSoundVolume_(Sound *a, float b);
 
-void SetSoundPitch_(Sound* a, float b);
+void SetSoundPitch_(Sound *a, float b);
 
-void SetSoundPan_(Sound* a, float b);
+void SetSoundPan_(Sound *a, float b);
 
-Wave* WaveCopy_(Wave* a);
+Wave *WaveCopy_(Wave *a);
 
-float* LoadWaveSamples_(Wave* a);
+float *LoadWaveSamples_(Wave *a);
 
-Music* LoadMusicStream_(string a);
+Music *LoadMusicStream_(char *a);
 
-Music* LoadMusicStreamFromMemory_(string a, unsigned char* b, int c);
+Music *LoadMusicStreamFromMemory_(char *a, unsigned char *b, int c);
 
-void UnloadMusicStream_(Music* a);
+void UnloadMusicStream_(Music *a);
 
-void PlayMusicStream_(Music* a);
+void PlayMusicStream_(Music *a);
 
-int IsMusicStreamPlaying_(Music* a);
+int IsMusicStreamPlaying_(Music *a);
 
-void UpdateMusicStream_(Music* a);
+void UpdateMusicStream_(Music *a);
 
-void StopMusicStream_(Music* a);
+void StopMusicStream_(Music *a);
 
-void PauseMusicStream_(Music* a);
+void PauseMusicStream_(Music *a);
 
-void ResumeMusicStream_(Music* a);
+void ResumeMusicStream_(Music *a);
 
-void SeekMusicStream_(Music* a, float b);
+void SeekMusicStream_(Music *a, float b);
 
-void SetMusicVolume_(Music* a, float b);
+void SetMusicVolume_(Music *a, float b);
 
-void SetMusicPitch_(Music* a, float b);
+void SetMusicPitch_(Music *a, float b);
 
-void SetMusicPan_(Music* a, float b);
+void SetMusicPan_(Music *a, float b);
 
-float GetMusicTimeLength_(Music* a);
+float GetMusicTimeLength_(Music *a);
 
-float GetMusicTimePlayed_(Music* a);
+float GetMusicTimePlayed_(Music *a);
 
-AudioStream* LoadAudioStream_(unsigned int a, unsigned int b, unsigned int c);
+AudioStream *LoadAudioStream_(unsigned int a, unsigned int b, unsigned int c);
 
-void UnloadAudioStream_(AudioStream* a);
+void UnloadAudioStream_(AudioStream *a);
 
-void UpdateAudioStream_(AudioStream* a, const void* b, int c);
+void UpdateAudioStream_(AudioStream *a, const void *b, int c);
 
-int IsAudioStreamProcessed_(AudioStream* a);
+int IsAudioStreamProcessed_(AudioStream *a);
 
-void PlayAudioStream_(AudioStream* a);
+void PlayAudioStream_(AudioStream *a);
 
-void PauseAudioStream_(AudioStream* a);
+void PauseAudioStream_(AudioStream *a);
 
-void ResumeAudioStream_(AudioStream* a);
+void ResumeAudioStream_(AudioStream *a);
 
-int IsAudioStreamPlaying_(AudioStream* a);
+int IsAudioStreamPlaying_(AudioStream *a);
 
-void StopAudioStream_(AudioStream* a);
+void StopAudioStream_(AudioStream *a);
 
-void SetAudioStreamVolume_(AudioStream* a, float b);
+void SetAudioStreamVolume_(AudioStream *a, float b);
 
-void SetAudioStreamPitch_(AudioStream* a, float b);
+void SetAudioStreamPitch_(AudioStream *a, float b);
 
-void SetAudioStreamPan_(AudioStream* a, float b);
+void SetAudioStreamPan_(AudioStream *a, float b);
 
-void SetAudioStreamCallback_(AudioStream* a, AudioCallback* b);
+void SetAudioStreamCallback_(AudioStream *a, AudioCallback *b);
 
-void AttachAudioStreamProcessor_(AudioStream* a, AudioCallback* b);
+void AttachAudioStreamProcessor_(AudioStream *a, AudioCallback *b);
 
-void DetachAudioStreamProcessor_(AudioStream* a, AudioCallback* b);
-
+void DetachAudioStreamProcessor_(AudioStream *a, AudioCallback *b);

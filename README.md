@@ -76,12 +76,11 @@ GitHub repository and update `h-raylib.cabal` with the relevant config.
 
 ## Contributing
 
-Anybody willing to contribute to the project is welcome to do so. The project
-source code is hosted on [GitHub](https://github.com/Anut-py/h-raylib). This
+Anybody willing to contribute to the project is welcome to do so. This
 library is very new, so please report any bugs in the GitHub issue tracker.
 
-You can run the example code by using `cabal run`.
+You can run the examples by using `cabal run example-project-name`.
 
 ## License
 
-This project is licensed under the Apache License 2.0. See more in the `LICENSE` file.
+This project is licensed under the Apache License 2.0. See more in `LICENSE`.
