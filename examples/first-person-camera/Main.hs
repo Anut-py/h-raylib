@@ -26,7 +26,7 @@ import Raylib.Types (Camera3D (Camera3D), Vector3 (Vector3))
 main :: IO ()
 main = do
   getWorkingDirectory >>= putStrLn
-  initWindow 600 450 "Hello world"
+  initWindow 600 450 "raylib example - first person camera"
   let camera = Camera3D (Vector3 0 0 0) (Vector3 2 0 1) (Vector3 0 1 0) 70 cameraProjection'perspective
   setCameraMode camera cameraMode'firstPerson
   setTargetFPS 60
