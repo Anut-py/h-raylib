@@ -4,6 +4,7 @@ version:              4.5.0.1
 synopsis:             Raylib bindings for Haskell
 
 bug-reports:          https://github.com/Anut-py/h-raylib/issues
+license:              Apache-2.0
 license-file:         LICENSE
 author:               Anut
 maintainer:           Anut
