@@ -2,6 +2,8 @@ cabal-version:        2.4
 name:                 h-raylib
 version:              4.5.0.1
 synopsis:             Raylib bindings for Haskell
+category:             graphics
+description:          This library includes Haskell bindings to the Raylib library. It supports Windows, Mac, Linux, and BSD.
 
 bug-reports:          https://github.com/Anut-py/h-raylib/issues
 license:              Apache-2.0
@@ -51,7 +53,7 @@ flag platform-bsd
 library
   exposed-modules:    Raylib Raylib.Colors Raylib.Types Raylib.Constants
   other-modules:      Raylib.Util
-  build-depends:      base >= 4.14.3
+  build-depends:      base >= 4.0 && <= 4.17
   hs-source-dirs:     src
   default-language:   Haskell2010
 
