@@ -88,19 +88,3 @@ library
     lib
     raylib/src
     raylib/src/external/glfw/include
-
-executable basic-window
-  default-language:   Haskell2010
-  hs-source-dirs:     examples/basic-window
-  main-is:            Main.hs
-  build-depends:
-    base
-    , h-raylib
-
-executable first-person-camera
-  default-language:   Haskell2010
-  hs-source-dirs:     examples/first-person-camera
-  main-is:            Main.hs
-  build-depends:
-    base
-    , h-raylib
