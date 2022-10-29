@@ -669,8 +669,8 @@ data Camera3D = Camera3D
   { camera3D'position :: Vector3,
     camera3D'target :: Vector3,
     camera3D'up :: Vector3,
-    camera3d'fovy :: CFloat,
-    camera3d'projection :: CInt
+    camera3D'fovy :: CFloat,
+    camera3D'projection :: CInt
   }
   deriving (Eq, Show)
 
