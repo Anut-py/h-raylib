@@ -54,7 +54,7 @@ extra-libraries: gdi32 opengl32 winmm kernel32
 You may need to run the following to install [X11](https://en.wikipedia.org/wiki/X_Window_System) (a window manager for Linux).
 
 ```bash
-sudo apt-get install libxrandr-dev libxi-dev libxcursor-dev libxinerama-dev
+sudo apt-get install libx11-dev libxrandr-dev libxi-dev libxcursor-dev libxinerama-dev
 ```
 
 Now, h-raylib should automatically work if you do not disable the `detect-platform` flag. In that case, you may skip the following.
@@ -64,7 +64,7 @@ Now, h-raylib should automatically work if you do not disable the `detect-platfo
 Include the following in your cabal file, or use the `platform-linux` flag when building
 
 ```cabal
-extra-libraries: GL pthread m dl rt X11
+extra-libraries: GL c m pthread dl rt X11 Xinerama Xcursor Xrandr Xi
 ```
 
 ### Other platforms
