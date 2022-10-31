@@ -12,7 +12,6 @@ import Raylib
     drawLine3D,
     endDrawing,
     endMode3D,
-    getWorkingDirectory,
     initWindow,
     setCameraMode,
     setTargetFPS,
