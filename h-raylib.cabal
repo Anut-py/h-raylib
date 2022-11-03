@@ -58,7 +58,7 @@ library
   default-language:   Haskell2010
 
   if flag(platform-windows) || (flag(detect-platform) && os(windows))
-    extra-libraries:  opengl32 gdi32 winmm shell32
+    extra-libraries:  opengl32 gdi32 winmm shell32 gcc
     cc-options:       -DPLATFORM_DESKTOP
   elif flag(platform-linux) || (flag(detect-platform) && os(linux))
     extra-libraries:  GL c m pthread dl rt X11 Xinerama Xcursor Xrandr Xi Xext
