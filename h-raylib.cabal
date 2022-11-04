@@ -50,6 +50,11 @@ flag platform-bsd
   default:            False
   manual:             True
 
+flag mingw-cross
+     description:     Cross-compiling for mingw (used in combination with Windows)
+     default:         False
+     manual:          True
+
 library
   exposed-modules:    Raylib Raylib.Colors Raylib.Types Raylib.Constants
   other-modules:      Raylib.Util
@@ -58,10 +63,13 @@ library
   default-language:   Haskell2010
 
   if flag(platform-windows) || (flag(detect-platform) && os(windows))
-    extra-libraries:  opengl32 gdi32 winmm shell32
+    if flag(mingw-cross)
+      extra-libraries:  opengl32 gdi32 winmm shell32 gcc
+    else
+      extra-libraries:  opengl32 gdi32 winmm shell32
     cc-options:       -DPLATFORM_DESKTOP
   elif flag(platform-linux) || (flag(detect-platform) && os(linux))
-    extra-libraries:  GL c m pthread dl rt X11 Xinerama Xcursor Xrandr Xi
+    extra-libraries:  GL c m pthread dl rt X11 Xinerama Xcursor Xrandr Xi Xext
     cc-options:       -Wno-unused-result -DPLATFORM_DESKTOP
   elif flag(platform-mac) || (flag(detect-platform) && os(darwin))
     frameworks:       OpenGL Cocoa IOKit CoreVideo CoreAudio CoreFoundation
