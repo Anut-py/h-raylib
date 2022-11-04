@@ -1,98 +1,136 @@
-cabal-version:        2.4
-name:                 h-raylib
-version:              4.5.0.2
-synopsis:             Raylib bindings for Haskell
-category:             graphics
-description:          This library includes Haskell bindings to the Raylib library. It supports Windows, Mac, Linux, and BSD.
+cabal-version:      2.4
+name:               h-raylib
+version:            4.5.0.3
+synopsis:           Raylib bindings for Haskell
+category:           graphics
+description:
+  This library includes Haskell bindings to the Raylib library. It supports Windows, Mac, Linux, and BSD.
 
-bug-reports:          https://github.com/Anut-py/h-raylib/issues
-license:              Apache-2.0
-license-file:         LICENSE
-author:               Anut
-maintainer:           Anut
-extra-doc-files:      README.md
+bug-reports:        https://github.com/Anut-py/h-raylib/issues
+license:            Apache-2.0
+license-file:       LICENSE
+author:             Anut
+maintainer:         Anut
+extra-doc-files:    README.md
 extra-source-files:
+  lib/bindings.h
   raylib/src/*.h
   raylib/src/external/*.h
-  raylib/src/external/glfw/include/GLFW/*.h
-  raylib/src/external/glfw/src/*.c
-  raylib/src/external/glfw/src/*.m
-  raylib/src/external/glfw/src/*.h
+  raylib/src/external/glfw/deps/*.c
+  raylib/src/external/glfw/deps/*.h
   raylib/src/external/glfw/deps/glad/*.h
   raylib/src/external/glfw/deps/mingw/*.h
   raylib/src/external/glfw/deps/vs2008/*.h
-  raylib/src/external/glfw/deps/*.h
-  raylib/src/external/glfw/deps/*.c
-  lib/bindings.h
+  raylib/src/external/glfw/include/GLFW/*.h
+  raylib/src/external/glfw/src/*.c
+  raylib/src/external/glfw/src/*.h
+  raylib/src/external/glfw/src/*.m
 
 flag detect-platform
-  description:        Detect platform and automatically add platform-specific configuration
-  default:            True
-  manual:             True
+  description:
+    Detect platform and automatically add platform-specific configuration
+
+  default:     True
+  manual:      True
 
 flag platform-windows
-  description:        Build for Windows
-  default:            False
-  manual:             True
+  description: Build for Windows
+  default:     False
+  manual:      True
 
 flag platform-mac
-  description:        Build for macOS/OSX
-  default:            False
-  manual:             True
+  description: Build for macOS/OSX
+  default:     False
+  manual:      True
 
 flag platform-linux
-  description:        Build for Linux
-  default:            False
-  manual:             True
+  description: Build for Linux
+  default:     False
+  manual:      True
 
 flag platform-bsd
-  description:        Build for FreeBSD, OpenBSD, or NetBSD
-  default:            False
-  manual:             True
+  description: Build for FreeBSD, OpenBSD, or NetBSD
+  default:     False
+  manual:      True
 
 flag mingw-cross
-     description:     Cross-compiling for mingw (used in combination with Windows)
-     default:         False
-     manual:          True
+  description:
+    Cross-compiling for mingw (used in combination with Windows)
+
+  default:     False
+  manual:      True
 
 library
-  exposed-modules:    Raylib Raylib.Colors Raylib.Types Raylib.Constants
-  other-modules:      Raylib.Util
-  build-depends:      base >= 4.0 && <= 4.17
-  hs-source-dirs:     src
-  default-language:   Haskell2010
+  exposed-modules:
+    Raylib
+    Raylib.Colors
+    Raylib.Constants
+    Raylib.Types
 
-  if flag(platform-windows) || (flag(detect-platform) && os(windows))
+  other-modules:    Raylib.Util
+  build-depends:    base >=4.0 && <4.17.0
+  hs-source-dirs:   src
+  default-language: Haskell2010
+
+  if (flag(platform-windows) || (flag(detect-platform) && os(windows)))
     if flag(mingw-cross)
-      extra-libraries:  opengl32 gdi32 winmm shell32 gcc
-    else
-      extra-libraries:  opengl32 gdi32 winmm shell32
-    cc-options:       -DPLATFORM_DESKTOP
-  elif flag(platform-linux) || (flag(detect-platform) && os(linux))
-    extra-libraries:  GL c m pthread dl rt X11 Xinerama Xcursor Xrandr Xi Xext
-    cc-options:       -Wno-unused-result -DPLATFORM_DESKTOP
-  elif flag(platform-mac) || (flag(detect-platform) && os(darwin))
-    frameworks:       OpenGL Cocoa IOKit CoreVideo CoreAudio CoreFoundation
-    cc-options:       -x objective-c -DPLATFORM_DESKTOP
-  elif flag(platform-bsd) || (flag(detect-platform) && (os(freebsd) || os(netbsd) || os(openbsd)))
-    extra-libraries:  GL pthread
-    cc-options:       -DPLATFORM_DESKTOP
-  else
-    -- Unsupported OS, do nothing. If you can get it working on an
-    -- OS that isn't on here, please add it here.
+      extra-libraries:
+        opengl32
+        gdi32
+        winmm
+        shell32
+        gcc
 
+    else
+      extra-libraries:
+        opengl32
+        gdi32
+        winmm
+        shell32
+
+    cc-options: -DPLATFORM_DESKTOP
+
+  elif (flag(platform-linux) || (flag(detect-platform) && os(linux)))
+    extra-libraries:
+      GL
+      c
+      m
+      pthread
+      dl
+      rt
+      X11
+      Xinerama
+      Xcursor
+      Xrandr
+      Xi
+      Xext
+
+    cc-options:      -Wno-unused-result -DPLATFORM_DESKTOP
+
+  elif (flag(platform-mac) || (flag(detect-platform) && os(osx)))
+    frameworks: OpenGL Cocoa IOKit CoreVideo CoreAudio CoreFoundation
+    cc-options: -x objective-c -DPLATFORM_DESKTOP
+
+  elif (flag(platform-bsd) || (flag(detect-platform) && ((os(freebsd) || os(netbsd)) || os(openbsd))))
+    extra-libraries:
+      GL
+      pthread
+
+    cc-options:      -DPLATFORM_DESKTOP
+
+  else
+
+  -- Unsupported OS, do nothing. If you can get it working on an
+  -- OS that isn't on here, please add it here.
   c-sources:
+    lib/bindings.c
     raylib/src/raudio.c
-    raylib/src/rmodels.c
+    raylib/src/rcore.c
     raylib/src/rglfw.c
+    raylib/src/rmodels.c
     raylib/src/rshapes.c
     raylib/src/rtext.c
     raylib/src/rtextures.c
-    raylib/src/rcore.c
     raylib/src/utils.c
-    lib/bindings.c
 
-  include-dirs:
-    lib
-    raylib/src
-    raylib/src/external/glfw/include
+  include-dirs:     lib raylib/src raylib/src/external/glfw/include
