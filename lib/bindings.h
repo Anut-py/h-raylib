@@ -218,6 +218,8 @@ Image *GenImagePerlinNoise_(int a, int b, int c, int d, float e);
 
 Image *GenImageCellular_(int a, int b, int c);
 
+Image *GenImageText_(int a, int b, char *c);
+
 Image *ImageCopy_(Image *a);
 
 Image *ImageFromImage_(Image *a, Rectangle *b);
@@ -308,15 +310,9 @@ void DrawTextureEx_(Texture *a, Vector2 *b, float c, float d, Color *e);
 
 void DrawTextureRec_(Texture *a, Rectangle *b, Vector2 *c, Color *d);
 
-void DrawTextureQuad_(Texture *a, Vector2 *b, Vector2 *c, Rectangle *d, Color *e);
-
-void DrawTextureTiled_(Texture *a, Rectangle *b, Rectangle *c, Vector2 *d, float e, float f, Color *g);
-
 void DrawTexturePro_(Texture *a, Rectangle *b, Rectangle *c, Vector2 *d, float e, Color *f);
 
 void DrawTextureNPatch_(Texture *a, NPatchInfo *b, Rectangle *c, Vector2 *d, float e, Color *f);
-
-void DrawTexturePoly_(Texture *a, Vector2 *b, Vector2 *c, Vector2 *d, int e, Color *f);
 
 Color *Fade_(Color *a, float b);
 
@@ -409,6 +405,10 @@ void DrawCylinderEx_(Vector3 *a, Vector3 *b, float c, float d, int e, Color *f);
 void DrawCylinderWires_(Vector3 *a, float b, float c, float d, int e, Color *f);
 
 void DrawCylinderWiresEx_(Vector3 *a, Vector3 *b, float c, float d, int e, Color *f);
+
+void DrawCapsule_(Vector3 *a, Vector3 *b, float c, int d, int e, Color *f);
+
+void DrawCapsuleEx_(Vector3 *a, Vector3 *b, float c, int d, int e, Color *f);
 
 void DrawPlane_(Vector3 *a, Vector2 *b, Color *c);
 

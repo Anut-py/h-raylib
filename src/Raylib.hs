@@ -1198,11 +1198,11 @@ foreign import ccall safe "raylib.h &SaveFileData"
 
 foreign import ccall safe "raylib.h ExportDataAsCode"
   c'exportDataAsCode ::
-    CString -> CUInt -> CString -> IO CBool
+    Ptr CUChar -> CUInt -> CString -> IO CBool
 
-exportDataAsCode :: String -> Integer -> String -> IO Bool
+exportDataAsCode :: [Integer] -> Integer -> String -> IO Bool
 exportDataAsCode contents size fileName =
-  toBool <$> withCString contents (\c -> withCString fileName (c'exportDataAsCode c (fromIntegral size)))
+  toBool <$> withArray (map fromInteger contents) (\c -> withCString fileName (c'exportDataAsCode c (fromIntegral size)))
 
 foreign import ccall safe "raylib.h &ExportDataAsCode"
   p'exportDataAsCode ::
@@ -2844,6 +2844,16 @@ foreign import ccall safe "raylib.h &GenImageCellular"
   p'genImageCellular ::
     FunPtr (CInt -> CInt -> CInt -> IO Raylib.Types.Image)
 
+foreign import ccall safe "bindings.h GenImageText_" c'genImageText :: CInt -> CInt -> CString -> IO (Ptr Raylib.Types.Image)
+
+genImageText :: Int -> Int -> String -> IO Raylib.Types.Image
+genImageText width height text =
+  withCString text (c'genImageText (fromIntegral width) (fromIntegral height)) >>= pop
+
+foreign import ccall safe "raylib.h &GenImageText"
+  p'genImageText ::
+    FunPtr (CInt -> CInt -> CString -> IO Raylib.Types.Image)
+
 foreign import ccall safe "bindings.h ImageCopy_" c'imageCopy :: Ptr Raylib.Types.Image -> IO (Ptr Raylib.Types.Image)
 
 imageCopy :: Raylib.Types.Image -> IO Raylib.Types.Image
@@ -2951,6 +2961,18 @@ imageAlphaPremultiply image = with image (\i -> c'imageAlphaPremultiply i >> pee
 foreign import ccall safe "raylib.h &ImageAlphaPremultiply"
   p'imageAlphaPremultiply ::
     FunPtr (Ptr Raylib.Types.Image -> IO ())
+
+
+foreign import ccall safe "raylib.h ImageBlurGaussian"
+  c'imageBlurGaussian ::
+    Ptr Raylib.Types.Image -> CInt -> IO ()
+
+imageBlurGaussian :: Raylib.Types.Image -> Int -> IO Raylib.Types.Image
+imageBlurGaussian image blurSize = with image (\i -> c'imageBlurGaussian i (fromIntegral blurSize) >> peek i)
+
+foreign import ccall safe "raylib.h &ImageBlurGaussian"
+  p'imageBlurGaussian ::
+    FunPtr (Ptr Raylib.Types.Image -> CInt -> IO ())
 
 foreign import ccall safe "raylib.h ImageResize"
   c'imageResize ::
@@ -3469,24 +3491,6 @@ foreign import ccall safe "raylib.h &DrawTextureRec"
   p'drawTextureRec ::
     FunPtr (Raylib.Types.Texture -> Raylib.Types.Rectangle -> Raylib.Types.Vector2 -> Raylib.Types.Color -> IO ())
 
-foreign import ccall safe "bindings.h DrawTextureQuad_" c'drawTextureQuad :: Ptr Raylib.Types.Texture -> Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Rectangle -> Ptr Raylib.Types.Color -> IO ()
-
-drawTextureQuad :: Raylib.Types.Texture -> Raylib.Types.Vector2 -> Raylib.Types.Vector2 -> Raylib.Types.Rectangle -> Raylib.Types.Color -> IO ()
-drawTextureQuad texture tiling offset quad tint = with texture (\t -> with tiling (\ti -> with offset (\o -> with quad (with tint . c'drawTextureQuad t ti o))))
-
-foreign import ccall safe "raylib.h &DrawTextureQuad"
-  p'drawTextureQuad ::
-    FunPtr (Raylib.Types.Texture -> Raylib.Types.Vector2 -> Raylib.Types.Vector2 -> Raylib.Types.Rectangle -> Raylib.Types.Color -> IO ())
-
-foreign import ccall safe "bindings.h DrawTextureTiled_" c'drawTextureTiled :: Ptr Raylib.Types.Texture -> Ptr Raylib.Types.Rectangle -> Ptr Raylib.Types.Rectangle -> Ptr Raylib.Types.Vector2 -> CFloat -> CFloat -> Ptr Raylib.Types.Color -> IO ()
-
-drawTextureTiled :: Raylib.Types.Texture -> Raylib.Types.Rectangle -> Raylib.Types.Rectangle -> Raylib.Types.Vector2 -> Float -> Float -> Raylib.Types.Color -> IO ()
-drawTextureTiled texture source dest origin rotation scale tint = with texture (\t -> with source (\s -> with dest (\d -> with origin (\o -> with tint (c'drawTextureTiled t s d o (realToFrac rotation) (realToFrac scale))))))
-
-foreign import ccall safe "raylib.h &DrawTextureTiled"
-  p'drawTextureTiled ::
-    FunPtr (Raylib.Types.Texture -> Raylib.Types.Rectangle -> Raylib.Types.Rectangle -> Raylib.Types.Vector2 -> CFloat -> CFloat -> Raylib.Types.Color -> IO ())
-
 foreign import ccall safe "bindings.h DrawTexturePro_" c'drawTexturePro :: Ptr Raylib.Types.Texture -> Ptr Raylib.Types.Rectangle -> Ptr Raylib.Types.Rectangle -> Ptr Raylib.Types.Vector2 -> CFloat -> Ptr Raylib.Types.Color -> IO ()
 
 drawTexturePro :: Raylib.Types.Texture -> Raylib.Types.Rectangle -> Raylib.Types.Rectangle -> Raylib.Types.Vector2 -> Float -> Raylib.Types.Color -> IO ()
@@ -3504,15 +3508,6 @@ drawTextureNPatch texture nPatchInfo dest origin rotation tint = with texture (\
 foreign import ccall safe "raylib.h &DrawTextureNPatch"
   p'drawTextureNPatch ::
     FunPtr (Raylib.Types.Texture -> Raylib.Types.NPatchInfo -> Raylib.Types.Rectangle -> Raylib.Types.Vector2 -> CFloat -> Raylib.Types.Color -> IO ())
-
-foreign import ccall safe "bindings.h DrawTexturePoly_" c'drawTexturePoly :: Ptr Raylib.Types.Texture -> Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Vector2 -> CInt -> Ptr Raylib.Types.Color -> IO ()
-
-drawTexturePoly :: Raylib.Types.Texture -> Raylib.Types.Vector2 -> [Raylib.Types.Vector2] -> [Raylib.Types.Vector2] -> Raylib.Types.Color -> IO ()
-drawTexturePoly texture center points texcoords tint = with texture (\t -> with center (\c -> withArrayLen points (\numPoints pArr -> withArray texcoords (\tc -> with tint (c'drawTexturePoly t c pArr tc (fromIntegral numPoints))))))
-
-foreign import ccall safe "raylib.h &DrawTexturePoly"
-  p'drawTexturePoly ::
-    FunPtr (Raylib.Types.Texture -> Raylib.Types.Vector2 -> Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Vector2 -> CInt -> Raylib.Types.Color -> IO ())
 
 foreign import ccall safe "bindings.h Fade_" c'fade :: Ptr Raylib.Types.Color -> CFloat -> IO (Ptr Raylib.Types.Color)
 
@@ -4255,6 +4250,24 @@ drawCylinderWiresEx start end startRadius endRadius sides color = with start (\s
 foreign import ccall safe "raylib.h &DrawCylinderWiresEx"
   p'drawCylinderWiresEx ::
     FunPtr (Raylib.Types.Vector3 -> Raylib.Types.Vector3 -> CFloat -> CFloat -> CInt -> Raylib.Types.Color -> IO ())
+
+foreign import ccall safe "bindings.h DrawCapsule_" c'drawCapsule :: Ptr Vector3 -> Ptr Vector3 -> CFloat -> CInt -> CInt -> Ptr Color -> IO ()
+
+drawCapsule :: Vector3 -> Vector3 -> CFloat -> CInt -> CInt -> Color -> IO ()
+drawCapsule start end radius slices rings color = with start (\s -> with end (\e -> with color (c'drawCapsule s e (realToFrac radius) (fromIntegral slices) (fromIntegral rings))))
+
+foreign import ccall safe "raylib.h &DrawCapsule"
+  p'drawCapsule ::
+    FunPtr (Vector3 -> Vector3 -> CFloat -> CInt -> CInt -> Color -> IO ())
+
+foreign import ccall safe "bindings.h DrawCapsuleWires_" c'drawCapsuleWires :: Ptr Vector3 -> Ptr Vector3 -> CFloat -> CInt -> CInt -> Ptr Color -> IO ()
+
+drawCapsuleWires :: Vector3 -> Vector3 -> CFloat -> CInt -> CInt -> Color -> IO ()
+drawCapsuleWires start end radius slices rings color = with start (\s -> with end (\e -> with color (c'drawCapsuleWires s e (realToFrac radius) (fromIntegral slices) (fromIntegral rings))))
+
+foreign import ccall safe "raylib.h &DrawCapsuleWires"
+  p'drawCapsuleWires ::
+    FunPtr (Vector3 -> Vector3 -> CFloat -> CInt -> CInt -> Color -> IO ())
 
 foreign import ccall safe "bindings.h DrawPlane_" c'drawPlane :: Ptr Raylib.Types.Vector3 -> Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Color -> IO ()
 

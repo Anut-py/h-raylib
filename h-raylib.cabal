@@ -61,6 +61,14 @@ flag mingw-cross
   default:     False
   manual:      True
 
+executable first-person-camera
+  default-language:   Haskell2010
+  hs-source-dirs:     src
+  main-is:            Main.hs
+  build-depends:
+    base,
+    h-raylib
+
 library
   exposed-modules:
     Raylib
