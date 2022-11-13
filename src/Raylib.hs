@@ -20,7 +20,8 @@ import Foreign
     withArrayLen,
   )
 import Foreign.C
-  ( CChar (..),
+  ( CBool (..),
+    CChar (..),
     CDouble (..),
     CFloat (..),
     CInt (..),
@@ -127,7 +128,7 @@ foreign import ccall safe "raylib.h &InitWindow"
 
 foreign import ccall safe "raylib.h WindowShouldClose"
   c'windowShouldClose ::
-    IO CInt
+    IO CBool
 
 windowShouldClose :: IO Bool
 windowShouldClose = toBool <$> c'windowShouldClose
@@ -146,7 +147,7 @@ foreign import ccall safe "raylib.h &CloseWindow"
 
 foreign import ccall safe "raylib.h IsWindowReady"
   c'isWindowReady ::
-    IO CInt
+    IO CBool
 
 isWindowReady :: IO Bool
 isWindowReady = toBool <$> c'isWindowReady
@@ -157,7 +158,7 @@ foreign import ccall safe "raylib.h &IsWindowReady"
 
 foreign import ccall safe "raylib.h IsWindowFullscreen"
   c'isWindowFullscreen ::
-    IO CInt
+    IO CBool
 
 isWindowFullscreen :: IO Bool
 isWindowFullscreen = toBool <$> c'isWindowFullscreen
@@ -168,7 +169,7 @@ foreign import ccall safe "raylib.h &IsWindowFullscreen"
 
 foreign import ccall safe "raylib.h IsWindowHidden"
   c'isWindowHidden ::
-    IO CInt
+    IO CBool
 
 isWindowHidden :: IO Bool
 isWindowHidden = toBool <$> c'isWindowHidden
@@ -179,7 +180,7 @@ foreign import ccall safe "raylib.h &IsWindowHidden"
 
 foreign import ccall safe "raylib.h IsWindowMinimized"
   c'isWindowMinimized ::
-    IO CInt
+    IO CBool
 
 isWindowMinimized :: IO Bool
 isWindowMinimized = toBool <$> c'isWindowMinimized
@@ -190,7 +191,7 @@ foreign import ccall safe "raylib.h &IsWindowMinimized"
 
 foreign import ccall safe "raylib.h IsWindowMaximized"
   c'isWindowMaximized ::
-    IO CInt
+    IO CBool
 
 isWindowMaximized :: IO Bool
 isWindowMaximized = toBool <$> c'isWindowMaximized
@@ -201,7 +202,7 @@ foreign import ccall safe "raylib.h &IsWindowMaximized"
 
 foreign import ccall safe "raylib.h IsWindowFocused"
   c'isWindowFocused ::
-    IO CInt
+    IO CBool
 
 isWindowFocused :: IO Bool
 isWindowFocused = toBool <$> c'isWindowFocused
@@ -212,7 +213,7 @@ foreign import ccall safe "raylib.h &IsWindowFocused"
 
 foreign import ccall safe "raylib.h IsWindowResized"
   c'isWindowResized ::
-    IO CInt
+    IO CBool
 
 isWindowResized :: IO Bool
 isWindowResized = toBool <$> c'isWindowResized
@@ -223,7 +224,7 @@ foreign import ccall safe "raylib.h &IsWindowResized"
 
 foreign import ccall safe "raylib.h IsWindowState"
   c'isWindowState ::
-    CUInt -> IO CInt
+    CUInt -> IO CBool
 
 isWindowState :: Integer -> IO Bool
 isWindowState flag = toBool <$> c'isWindowState (fromIntegral flag)
@@ -611,7 +612,7 @@ foreign import ccall safe "raylib.h &HideCursor"
 
 foreign import ccall safe "raylib.h IsCursorHidden"
   c'isCursorHidden ::
-    IO CInt
+    IO CBool
 
 isCursorHidden :: IO Bool
 isCursorHidden = toBool <$> c'isCursorHidden
@@ -638,7 +639,7 @@ foreign import ccall safe "raylib.h &DisableCursor"
 
 foreign import ccall safe "raylib.h IsCursorOnScreen"
   c'isCursorOnScreen ::
-    IO CInt
+    IO CBool
 
 isCursorOnScreen :: IO Bool
 isCursorOnScreen = toBool <$> c'isCursorOnScreen
@@ -1185,7 +1186,7 @@ foreign import ccall safe "raylib.h &UnloadFileData"
 
 foreign import ccall safe "raylib.h SaveFileData"
   c'saveFileData ::
-    CString -> Ptr () -> CUInt -> IO CInt
+    CString -> Ptr () -> CUInt -> IO CBool
 
 saveFileData :: (Storable a) => String -> Ptr a -> Integer -> IO Bool
 saveFileData fileName contents bytesToWrite =
@@ -1197,7 +1198,7 @@ foreign import ccall safe "raylib.h &SaveFileData"
 
 foreign import ccall safe "raylib.h ExportDataAsCode"
   c'exportDataAsCode ::
-    CString -> CUInt -> CString -> IO CInt
+    CString -> CUInt -> CString -> IO CBool
 
 exportDataAsCode :: String -> Integer -> String -> IO Bool
 exportDataAsCode contents size fileName =
@@ -1231,7 +1232,7 @@ foreign import ccall safe "raylib.h &UnloadFileText"
 
 foreign import ccall safe "raylib.h SaveFileText"
   c'saveFileText ::
-    CString -> CString -> IO CInt
+    CString -> CString -> IO CBool
 
 saveFileText :: String -> String -> IO Bool
 saveFileText fileName text = toBool <$> withCString fileName (withCString text . c'saveFileText)
@@ -1242,7 +1243,7 @@ foreign import ccall safe "raylib.h &SaveFileText"
 
 foreign import ccall safe "raylib.h FileExists"
   c'fileExists ::
-    CString -> IO CInt
+    CString -> IO CBool
 
 fileExists :: String -> IO Bool
 fileExists fileName = toBool <$> withCString fileName c'fileExists
@@ -1253,7 +1254,7 @@ foreign import ccall safe "raylib.h &FileExists"
 
 foreign import ccall safe "raylib.h DirectoryExists"
   c'directoryExists ::
-    CString -> IO CInt
+    CString -> IO CBool
 
 directoryExists :: String -> IO Bool
 directoryExists dirPath = toBool <$> withCString dirPath c'directoryExists
@@ -1264,7 +1265,7 @@ foreign import ccall safe "raylib.h &DirectoryExists"
 
 foreign import ccall safe "raylib.h IsFileExtension"
   c'isFileExtension ::
-    CString -> CString -> IO CInt
+    CString -> CString -> IO CBool
 
 isFileExtension :: String -> String -> IO Bool
 isFileExtension fileName ext = toBool <$> withCString fileName (withCString ext . c'isFileExtension)
@@ -1275,7 +1276,7 @@ foreign import ccall safe "raylib.h &IsFileExtension"
 
 foreign import ccall safe "raylib.h GetFileLength"
   c'getFileLength ::
-    CString -> IO CInt
+    CString -> IO CBool
 
 getFileLength :: String -> IO Bool
 getFileLength fileName = toBool <$> withCString fileName c'getFileLength
@@ -1363,7 +1364,7 @@ foreign import ccall safe "raylib.h &GetApplicationDirectory"
 
 foreign import ccall safe "raylib.h ChangeDirectory"
   c'changeDirectory ::
-    CString -> IO CInt
+    CString -> IO CBool
 
 changeDirectory :: String -> IO Bool
 changeDirectory dir = toBool <$> withCString dir c'changeDirectory
@@ -1374,7 +1375,7 @@ foreign import ccall safe "raylib.h &ChangeDirectory"
 
 foreign import ccall safe "raylib.h IsPathFile"
   c'isPathFile ::
-    CString -> IO CInt
+    CString -> IO CBool
 
 isPathFile :: String -> IO Bool
 isPathFile path = toBool <$> withCString path c'isPathFile
@@ -1413,7 +1414,7 @@ foreign import ccall safe "raylib.h &UnloadDirectoryFiles"
 
 foreign import ccall safe "raylib.h IsFileDropped"
   c'isFileDropped ::
-    IO CInt
+    IO CBool
 
 isFileDropped :: IO Bool
 isFileDropped = toBool <$> c'isFileDropped
@@ -1545,7 +1546,7 @@ foreign import ccall safe "raylib.h &DecodeDataBase64"
 
 foreign import ccall safe "raylib.h IsKeyPressed"
   c'isKeyPressed ::
-    CInt -> IO CInt
+    CInt -> IO CBool
 
 isKeyPressed :: Int -> IO Bool
 isKeyPressed key = toBool <$> c'isKeyPressed (fromIntegral key)
@@ -1556,7 +1557,7 @@ foreign import ccall safe "raylib.h &IsKeyPressed"
 
 foreign import ccall safe "raylib.h IsKeyDown"
   c'isKeyDown ::
-    CInt -> IO CInt
+    CInt -> IO CBool
 
 isKeyDown :: Int -> IO Bool
 isKeyDown key = toBool <$> c'isKeyDown (fromIntegral key)
@@ -1567,7 +1568,7 @@ foreign import ccall safe "raylib.h &IsKeyDown"
 
 foreign import ccall safe "raylib.h IsKeyReleased"
   c'isKeyReleased ::
-    CInt -> IO CInt
+    CInt -> IO CBool
 
 isKeyReleased :: Int -> IO Bool
 isKeyReleased key = toBool <$> c'isKeyReleased (fromIntegral key)
@@ -1578,7 +1579,7 @@ foreign import ccall safe "raylib.h &IsKeyReleased"
 
 foreign import ccall safe "raylib.h IsKeyUp"
   c'isKeyUp ::
-    CInt -> IO CInt
+    CInt -> IO CBool
 
 isKeyUp :: Int -> IO Bool
 isKeyUp key = toBool <$> c'isKeyUp (fromIntegral key)
@@ -1622,7 +1623,7 @@ foreign import ccall safe "raylib.h &GetCharPressed"
 
 foreign import ccall safe "raylib.h IsGamepadAvailable"
   c'isGamepadAvailable ::
-    CInt -> IO CInt
+    CInt -> IO CBool
 
 isGamepadAvailable :: Int -> IO Bool
 isGamepadAvailable gamepad = toBool <$> c'isGamepadAvailable (fromIntegral gamepad)
@@ -1644,7 +1645,7 @@ foreign import ccall safe "raylib.h &GetGamepadName"
 
 foreign import ccall safe "raylib.h IsGamepadButtonPressed"
   c'isGamepadButtonPressed ::
-    CInt -> CInt -> IO CInt
+    CInt -> CInt -> IO CBool
 
 isGamepadButtonPressed :: Int -> Int -> IO Bool
 isGamepadButtonPressed gamepad button = toBool <$> c'isGamepadButtonPressed (fromIntegral gamepad) (fromIntegral button)
@@ -1655,7 +1656,7 @@ foreign import ccall safe "raylib.h &IsGamepadButtonPressed"
 
 foreign import ccall safe "raylib.h IsGamepadButtonDown"
   c'isGamepadButtonDown ::
-    CInt -> CInt -> IO CInt
+    CInt -> CInt -> IO CBool
 
 isGamepadButtonDown :: Int -> Int -> IO Bool
 isGamepadButtonDown gamepad button = toBool <$> c'isGamepadButtonDown (fromIntegral gamepad) (fromIntegral button)
@@ -1666,7 +1667,7 @@ foreign import ccall safe "raylib.h &IsGamepadButtonDown"
 
 foreign import ccall safe "raylib.h IsGamepadButtonReleased"
   c'isGamepadButtonReleased ::
-    CInt -> CInt -> IO CInt
+    CInt -> CInt -> IO CBool
 
 isGamepadButtonReleased :: Int -> Int -> IO Bool
 isGamepadButtonReleased gamepad button = toBool <$> c'isGamepadButtonReleased (fromIntegral gamepad) (fromIntegral button)
@@ -1677,7 +1678,7 @@ foreign import ccall safe "raylib.h &IsGamepadButtonReleased"
 
 foreign import ccall safe "raylib.h IsGamepadButtonUp"
   c'isGamepadButtonUp ::
-    CInt -> CInt -> IO CInt
+    CInt -> CInt -> IO CBool
 
 isGamepadButtonUp :: Int -> Int -> IO Bool
 isGamepadButtonUp gamepad button = toBool <$> c'isGamepadButtonUp (fromIntegral gamepad) (fromIntegral button)
@@ -1732,7 +1733,7 @@ foreign import ccall safe "raylib.h &SetGamepadMappings"
 
 foreign import ccall safe "raylib.h IsMouseButtonPressed"
   c'isMouseButtonPressed ::
-    CInt -> IO CInt
+    CInt -> IO CBool
 
 isMouseButtonPressed :: Int -> IO Bool
 isMouseButtonPressed button = toBool <$> c'isMouseButtonPressed (fromIntegral button)
@@ -1743,7 +1744,7 @@ foreign import ccall safe "raylib.h &IsMouseButtonPressed"
 
 foreign import ccall safe "raylib.h IsMouseButtonDown"
   c'isMouseButtonDown ::
-    CInt -> IO CInt
+    CInt -> IO CBool
 
 isMouseButtonDown :: Int -> IO Bool
 isMouseButtonDown button = toBool <$> c'isMouseButtonDown (fromIntegral button)
@@ -1754,7 +1755,7 @@ foreign import ccall safe "raylib.h &IsMouseButtonDown"
 
 foreign import ccall safe "raylib.h IsMouseButtonReleased"
   c'isMouseButtonReleased ::
-    CInt -> IO CInt
+    CInt -> IO CBool
 
 isMouseButtonReleased :: Int -> IO Bool
 isMouseButtonReleased button = toBool <$> c'isMouseButtonReleased (fromIntegral button)
@@ -1765,7 +1766,7 @@ foreign import ccall safe "raylib.h &IsMouseButtonReleased"
 
 foreign import ccall safe "raylib.h IsMouseButtonUp"
   c'isMouseButtonUp ::
-    CInt -> IO CInt
+    CInt -> IO CBool
 
 isMouseButtonUp :: Int -> IO Bool
 isMouseButtonUp button = toBool <$> c'isMouseButtonUp (fromIntegral button)
@@ -1944,7 +1945,7 @@ foreign import ccall safe "raylib.h &SetGesturesEnabled"
 
 foreign import ccall safe "raylib.h IsGestureDetected"
   c'isGestureDetected ::
-    CInt -> IO CInt
+    CInt -> IO CBool
 
 isGestureDetected :: Int -> IO Bool
 isGestureDetected gesture = toBool <$> c'isGestureDetected (fromIntegral gesture)
@@ -2574,13 +2575,7 @@ foreign import ccall safe "raylib.h &DrawPolyLinesEx"
   p'drawPolyLinesEx ::
     FunPtr (Raylib.Types.Vector2 -> CInt -> CFloat -> CFloat -> CFloat -> Raylib.Types.Color -> IO ())
 
--- unsafePerformIO has been used with these collision functions
--- It is OK to use to here because even though we are passing
--- pointers as arguments, they are created through the `with`
--- function, which ensures that all pointers are destroyed.
--- See https://stackoverflow.com/a/10530919/17907758
-
-foreign import ccall safe "bindings.h CheckCollisionRecs_" c'checkCollisionRecs :: Ptr Raylib.Types.Rectangle -> Ptr Raylib.Types.Rectangle -> IO CInt
+foreign import ccall safe "bindings.h CheckCollisionRecs_" c'checkCollisionRecs :: Ptr Raylib.Types.Rectangle -> Ptr Raylib.Types.Rectangle -> IO CBool
 
 checkCollisionRecs :: Raylib.Types.Rectangle -> Raylib.Types.Rectangle -> Bool
 checkCollisionRecs rec1 rec2 = unsafePerformIO $ toBool <$> with rec1 (with rec2 . c'checkCollisionRecs)
@@ -2589,7 +2584,7 @@ foreign import ccall safe "raylib.h &CheckCollisionRecs"
   p'checkCollisionRecs ::
     FunPtr (Raylib.Types.Rectangle -> Raylib.Types.Rectangle -> IO CInt)
 
-foreign import ccall safe "bindings.h CheckCollisionCircles_" c'checkCollisionCircles :: Ptr Raylib.Types.Vector2 -> CFloat -> Ptr Raylib.Types.Vector2 -> CFloat -> IO CInt
+foreign import ccall safe "bindings.h CheckCollisionCircles_" c'checkCollisionCircles :: Ptr Raylib.Types.Vector2 -> CFloat -> Ptr Raylib.Types.Vector2 -> CFloat -> IO CBool
 
 checkCollisionCircles :: Raylib.Types.Vector2 -> Float -> Raylib.Types.Vector2 -> Float -> Bool
 checkCollisionCircles center1 radius1 center2 radius2 =
@@ -2599,7 +2594,7 @@ foreign import ccall safe "raylib.h &CheckCollisionCircles"
   p'checkCollisionCircles ::
     FunPtr (Raylib.Types.Vector2 -> CFloat -> Raylib.Types.Vector2 -> CFloat -> IO CInt)
 
-foreign import ccall safe "bindings.h CheckCollisionCircleRec_" c'checkCollisionCircleRec :: Ptr Raylib.Types.Vector2 -> CFloat -> Ptr Raylib.Types.Rectangle -> IO CInt
+foreign import ccall safe "bindings.h CheckCollisionCircleRec_" c'checkCollisionCircleRec :: Ptr Raylib.Types.Vector2 -> CFloat -> Ptr Raylib.Types.Rectangle -> IO CBool
 
 checkCollisionCircleRec :: Raylib.Types.Vector2 -> Float -> Raylib.Types.Rectangle -> Bool
 checkCollisionCircleRec center radius rect =
@@ -2609,7 +2604,7 @@ foreign import ccall safe "raylib.h &CheckCollisionCircleRec"
   p'checkCollisionCircleRec ::
     FunPtr (Raylib.Types.Vector2 -> CFloat -> Raylib.Types.Rectangle -> IO CInt)
 
-foreign import ccall safe "bindings.h CheckCollisionPointRec_" c'checkCollisionPointRec :: Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Rectangle -> IO CInt
+foreign import ccall safe "bindings.h CheckCollisionPointRec_" c'checkCollisionPointRec :: Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Rectangle -> IO CBool
 
 checkCollisionPointRec :: Raylib.Types.Vector2 -> Raylib.Types.Rectangle -> Bool
 checkCollisionPointRec point rect =
@@ -2619,7 +2614,7 @@ foreign import ccall safe "raylib.h &CheckCollisionPointRec"
   p'checkCollisionPointRec ::
     FunPtr (Raylib.Types.Vector2 -> Raylib.Types.Rectangle -> IO CInt)
 
-foreign import ccall safe "bindings.h CheckCollisionPointCircle_" c'checkCollisionPointCircle :: Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Vector2 -> CFloat -> IO CInt
+foreign import ccall safe "bindings.h CheckCollisionPointCircle_" c'checkCollisionPointCircle :: Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Vector2 -> CFloat -> IO CBool
 
 checkCollisionPointCircle :: Raylib.Types.Vector2 -> Raylib.Types.Vector2 -> Float -> Bool
 checkCollisionPointCircle point center radius =
@@ -2629,7 +2624,7 @@ foreign import ccall safe "raylib.h &CheckCollisionPointCircle"
   p'checkCollisionPointCircle ::
     FunPtr (Raylib.Types.Vector2 -> Raylib.Types.Vector2 -> CFloat -> IO CInt)
 
-foreign import ccall safe "bindings.h CheckCollisionPointTriangle_" c'checkCollisionPointTriangle :: Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Vector2 -> IO CInt
+foreign import ccall safe "bindings.h CheckCollisionPointTriangle_" c'checkCollisionPointTriangle :: Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Vector2 -> IO CBool
 
 checkCollisionPointTriangle :: Raylib.Types.Vector2 -> Raylib.Types.Vector2 -> Raylib.Types.Vector2 -> Raylib.Types.Vector2 -> Bool
 checkCollisionPointTriangle point p1 p2 p3 =
@@ -2639,7 +2634,7 @@ foreign import ccall safe "raylib.h &CheckCollisionPointTriangle"
   p'checkCollisionPointTriangle ::
     FunPtr (Raylib.Types.Vector2 -> Raylib.Types.Vector2 -> Raylib.Types.Vector2 -> Raylib.Types.Vector2 -> IO CInt)
 
-foreign import ccall safe "bindings.h CheckCollisionLines_" c'checkCollisionLines :: Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Vector2 -> IO CInt
+foreign import ccall safe "bindings.h CheckCollisionLines_" c'checkCollisionLines :: Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Vector2 -> IO CBool
 
 -- | If a collision is found, returns @Just collisionPoint@, otherwise returns @Nothing@
 checkCollisionLines :: Raylib.Types.Vector2 -> Raylib.Types.Vector2 -> Raylib.Types.Vector2 -> Raylib.Types.Vector2 -> Maybe Raylib.Types.Vector2
@@ -2656,7 +2651,7 @@ foreign import ccall safe "raylib.h &CheckCollisionLines"
   p'checkCollisionLines ::
     FunPtr (Raylib.Types.Vector2 -> Raylib.Types.Vector2 -> Raylib.Types.Vector2 -> Raylib.Types.Vector2 -> Ptr Raylib.Types.Vector2 -> IO CInt)
 
-foreign import ccall safe "bindings.h CheckCollisionPointLine_" c'checkCollisionPointLine :: Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Vector2 -> CInt -> IO CInt
+foreign import ccall safe "bindings.h CheckCollisionPointLine_" c'checkCollisionPointLine :: Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Vector2 -> CInt -> IO CBool
 
 checkCollisionPointLine :: Raylib.Types.Vector2 -> Raylib.Types.Vector2 -> Raylib.Types.Vector2 -> Int -> Bool
 checkCollisionPointLine point p1 p2 threshold =
@@ -2753,7 +2748,7 @@ foreign import ccall safe "raylib.h &UnloadImage"
   p'unloadImage ::
     FunPtr (Raylib.Types.Image -> IO ())
 
-foreign import ccall safe "bindings.h ExportImage_" c'exportImage :: Ptr Raylib.Types.Image -> CString -> IO CInt
+foreign import ccall safe "bindings.h ExportImage_" c'exportImage :: Ptr Raylib.Types.Image -> CString -> IO CBool
 
 exportImage :: Raylib.Types.Image -> String -> IO Bool
 exportImage image fileName = toBool <$> with image (withCString fileName . c'exportImage)
@@ -2762,7 +2757,7 @@ foreign import ccall safe "raylib.h &ExportImage"
   p'exportImage ::
     FunPtr (Raylib.Types.Image -> CString -> IO CInt)
 
-foreign import ccall safe "bindings.h ExportImageAsCode_" c'exportImageAsCode :: Ptr Raylib.Types.Image -> CString -> IO CInt
+foreign import ccall safe "bindings.h ExportImageAsCode_" c'exportImageAsCode :: Ptr Raylib.Types.Image -> CString -> IO CBool
 
 exportImageAsCode :: Raylib.Types.Image -> String -> IO Bool
 exportImageAsCode image fileName =
@@ -3714,7 +3709,7 @@ foreign import ccall safe "raylib.h &UnloadFont"
   p'unloadFont ::
     FunPtr (Raylib.Types.Font -> IO ())
 
-foreign import ccall safe "bindings.h ExportFontAsCode_" c'exportFontAsCode :: Ptr Raylib.Types.Font -> CString -> IO CInt
+foreign import ccall safe "bindings.h ExportFontAsCode_" c'exportFontAsCode :: Ptr Raylib.Types.Font -> CString -> IO CBool
 
 exportFontAsCode :: Raylib.Types.Font -> String -> IO Bool
 exportFontAsCode font fileName = toBool <$> with font (withCString fileName . c'exportFontAsCode)
@@ -4454,7 +4449,7 @@ foreign import ccall safe "raylib.h &DrawMeshInstanced"
   p'drawMeshInstanced ::
     FunPtr (Raylib.Types.Mesh -> Raylib.Types.Material -> Ptr Raylib.Types.Matrix -> CInt -> IO ())
 
-foreign import ccall safe "bindings.h ExportMesh_" c'exportMesh :: Ptr Raylib.Types.Mesh -> CString -> IO CInt
+foreign import ccall safe "bindings.h ExportMesh_" c'exportMesh :: Ptr Raylib.Types.Mesh -> CString -> IO CBool
 
 exportMesh :: Raylib.Types.Mesh -> String -> IO Bool
 exportMesh mesh fileName = toBool <$> with mesh (withCString fileName . c'exportMesh)
@@ -4693,7 +4688,7 @@ foreign import ccall safe "raylib.h &UnloadModelAnimations"
   p'unloadModelAnimations ::
     FunPtr (Ptr Raylib.Types.ModelAnimation -> CUInt -> IO ())
 
-foreign import ccall safe "bindings.h IsModelAnimationValid_" c'isModelAnimationValid :: Ptr Raylib.Types.Model -> Ptr Raylib.Types.ModelAnimation -> IO CInt
+foreign import ccall safe "bindings.h IsModelAnimationValid_" c'isModelAnimationValid :: Ptr Raylib.Types.Model -> Ptr Raylib.Types.ModelAnimation -> IO CBool
 
 isModelAnimationValid :: Model -> ModelAnimation -> IO Bool
 isModelAnimationValid model animation = toBool <$> with model (with animation . c'isModelAnimationValid)
@@ -4702,7 +4697,7 @@ foreign import ccall safe "raylib.h &IsModelAnimationValid"
   p'isModelAnimationValid ::
     FunPtr (Raylib.Types.Model -> Raylib.Types.ModelAnimation -> IO CInt)
 
-foreign import ccall safe "bindings.h CheckCollisionSpheres_" c'checkCollisionSpheres :: Ptr Raylib.Types.Vector3 -> CFloat -> Ptr Raylib.Types.Vector3 -> CFloat -> IO CInt
+foreign import ccall safe "bindings.h CheckCollisionSpheres_" c'checkCollisionSpheres :: Ptr Raylib.Types.Vector3 -> CFloat -> Ptr Raylib.Types.Vector3 -> CFloat -> IO CBool
 
 checkCollisionSpheres :: Vector3 -> Float -> Vector3 -> Float -> Bool
 checkCollisionSpheres center1 radius1 center2 radius2 = toBool $ unsafePerformIO (with center1 (\c1 -> with center2 (\c2 -> c'checkCollisionSpheres c1 (realToFrac radius1) c2 (realToFrac radius2))))
@@ -4711,7 +4706,7 @@ foreign import ccall safe "raylib.h &CheckCollisionSpheres"
   p'checkCollisionSpheres ::
     FunPtr (Raylib.Types.Vector3 -> CFloat -> Raylib.Types.Vector3 -> CFloat -> IO CInt)
 
-foreign import ccall safe "bindings.h CheckCollisionBoxes_" c'checkCollisionBoxes :: Ptr Raylib.Types.BoundingBox -> Ptr Raylib.Types.BoundingBox -> IO CInt
+foreign import ccall safe "bindings.h CheckCollisionBoxes_" c'checkCollisionBoxes :: Ptr Raylib.Types.BoundingBox -> Ptr Raylib.Types.BoundingBox -> IO CBool
 
 checkCollisionBoxes :: BoundingBox -> BoundingBox -> Bool
 checkCollisionBoxes box1 box2 = toBool $ unsafePerformIO (with box1 (with box2 . c'checkCollisionBoxes))
@@ -4720,7 +4715,7 @@ foreign import ccall safe "raylib.h &CheckCollisionBoxes"
   p'checkCollisionBoxes ::
     FunPtr (Raylib.Types.BoundingBox -> Raylib.Types.BoundingBox -> IO CInt)
 
-foreign import ccall safe "bindings.h CheckCollisionBoxSphere_" c'checkCollisionBoxSphere :: Ptr Raylib.Types.BoundingBox -> Ptr Raylib.Types.Vector3 -> CFloat -> IO CInt
+foreign import ccall safe "bindings.h CheckCollisionBoxSphere_" c'checkCollisionBoxSphere :: Ptr Raylib.Types.BoundingBox -> Ptr Raylib.Types.Vector3 -> CFloat -> IO CBool
 
 checkCollisionBoxSphere :: BoundingBox -> Vector3 -> Float -> Bool
 checkCollisionBoxSphere box center radius = toBool $ unsafePerformIO (with box (\b -> with center (\c -> c'checkCollisionBoxSphere b c (realToFrac radius))))
@@ -4802,7 +4797,7 @@ foreign import ccall safe "raylib.h &CloseAudioDevice"
 
 foreign import ccall safe "raylib.h IsAudioDeviceReady"
   c'isAudioDeviceReady ::
-    IO CInt
+    IO CBool
 
 isAudioDeviceReady :: IO Bool
 isAudioDeviceReady = toBool <$> c'isAudioDeviceReady
@@ -4885,7 +4880,7 @@ foreign import ccall safe "raylib.h &UnloadSound"
   p'unloadSound ::
     FunPtr (Raylib.Types.Sound -> IO ())
 
-foreign import ccall safe "bindings.h ExportWave_" c'exportWave :: Ptr Raylib.Types.Wave -> CString -> IO CInt
+foreign import ccall safe "bindings.h ExportWave_" c'exportWave :: Ptr Raylib.Types.Wave -> CString -> IO CBool
 
 exportWave :: Wave -> String -> IO Bool
 exportWave wave fileName = toBool <$> with wave (withCString fileName . c'exportWave)
@@ -4894,7 +4889,7 @@ foreign import ccall safe "raylib.h &ExportWave"
   p'exportWave ::
     FunPtr (Raylib.Types.Wave -> CString -> IO CInt)
 
-foreign import ccall safe "bindings.h ExportWaveAsCode_" c'exportWaveAsCode :: Ptr Raylib.Types.Wave -> CString -> IO CInt
+foreign import ccall safe "bindings.h ExportWaveAsCode_" c'exportWaveAsCode :: Ptr Raylib.Types.Wave -> CString -> IO CBool
 
 exportWaveAsCode :: Wave -> String -> IO Bool
 exportWaveAsCode wave fileName = toBool <$> with wave (withCString fileName . c'exportWaveAsCode)
@@ -4967,7 +4962,7 @@ foreign import ccall safe "raylib.h &GetSoundsPlaying"
   p'getSoundsPlaying ::
     FunPtr (IO CInt)
 
-foreign import ccall safe "bindings.h IsSoundPlaying_" c'isSoundPlaying :: Ptr Raylib.Types.Sound -> IO CInt
+foreign import ccall safe "bindings.h IsSoundPlaying_" c'isSoundPlaying :: Ptr Raylib.Types.Sound -> IO CBool
 
 isSoundPlaying :: Sound -> IO Bool
 isSoundPlaying sound = toBool <$> with sound c'isSoundPlaying
@@ -5099,7 +5094,7 @@ foreign import ccall safe "raylib.h &PlayMusicStream"
   p'playMusicStream ::
     FunPtr (Raylib.Types.Music -> IO ())
 
-foreign import ccall safe "bindings.h IsMusicStreamPlaying_" c'isMusicStreamPlaying :: Ptr Raylib.Types.Music -> IO CInt
+foreign import ccall safe "bindings.h IsMusicStreamPlaying_" c'isMusicStreamPlaying :: Ptr Raylib.Types.Music -> IO CBool
 
 isMusicStreamPlaying :: Music -> IO Bool
 isMusicStreamPlaying music = toBool <$> with music c'isMusicStreamPlaying
@@ -5225,7 +5220,7 @@ foreign import ccall safe "raylib.h &UpdateAudioStream"
   p'updateAudioStream ::
     FunPtr (Raylib.Types.AudioStream -> Ptr () -> CInt -> IO ())
 
-foreign import ccall safe "bindings.h IsAudioStreamProcessed_" c'isAudioStreamProcessed :: Ptr Raylib.Types.AudioStream -> IO CInt
+foreign import ccall safe "bindings.h IsAudioStreamProcessed_" c'isAudioStreamProcessed :: Ptr Raylib.Types.AudioStream -> IO CBool
 
 isAudioStreamProcessed :: AudioStream -> IO Bool
 isAudioStreamProcessed stream = toBool <$> with stream c'isAudioStreamProcessed
@@ -5261,7 +5256,7 @@ foreign import ccall safe "raylib.h &ResumeAudioStream"
   p'resumeAudioStream ::
     FunPtr (Raylib.Types.AudioStream -> IO ())
 
-foreign import ccall safe "bindings.h IsAudioStreamPlaying_" c'isAudioStreamPlaying :: Ptr Raylib.Types.AudioStream -> IO CInt
+foreign import ccall safe "bindings.h IsAudioStreamPlaying_" c'isAudioStreamPlaying :: Ptr Raylib.Types.AudioStream -> IO CBool
 
 isAudioStreamPlaying :: AudioStream -> IO Bool
 isAudioStreamPlaying stream = toBool <$> with stream c'isAudioStreamPlaying
