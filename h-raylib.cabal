@@ -103,7 +103,6 @@ library
       Xcursor
       Xrandr
       Xi
-      Xext
 
     cc-options:      -Wno-unused-result -DPLATFORM_DESKTOP
 
