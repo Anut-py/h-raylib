@@ -3,8 +3,9 @@ module Raylib.Types where
 
 -- This file includes Haskell counterparts to the structs defined in raylib
 
+-- This file includes Haskell counterparts to the structs defined in raylib
 import Foreign.C
-    ( CString, CChar, CUShort, CUInt, CInt, CUChar, CFloat )
+    ( CString, CChar, CUShort, CUInt, CInt, CUChar, CFloat, CBool )
 import Foreign
     ( Ptr,
       plusPtr,
@@ -1225,8 +1226,8 @@ instance Storable Ray where
             _Bool hit; float distance; Vector3 point; Vector3 normal;
         } RayCollision; -}
 data RayCollision = RayCollision
-  { raycollision'hit :: CInt,
-    raycollision'distance :: CFloat,
+  { rayCollision'hit :: CBool,
+    rayCollision'distance :: CFloat,
     rayCollision'point :: Vector3,
     rayCollision'normal :: Vector3
   }
@@ -1234,7 +1235,7 @@ data RayCollision = RayCollision
 
 p'RayCollision'hit p = plusPtr p 0
 
-p'RayCollision'hit :: Ptr RayCollision -> Ptr CInt
+p'RayCollision'hit :: Ptr RayCollision -> Ptr CBool
 
 p'RayCollision'distance p = plusPtr p 4
 
