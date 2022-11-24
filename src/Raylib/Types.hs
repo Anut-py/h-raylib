@@ -635,12 +635,12 @@ p'Font'recs p = plusPtr p 32
 
 p'Font'recs :: Ptr Font -> Ptr (Ptr Rectangle)
 
-p'Font'glyphs p = plusPtr p 36
+p'Font'glyphs p = plusPtr p 40
 
 p'Font'glyphs :: Ptr Font -> Ptr (Ptr GlyphInfo)
 
 instance Storable Font where
-  sizeOf _ = 40
+  sizeOf _ = 48
   alignment _ = 4
   peek _p = do
     v0 <- peekByteOff _p 0
@@ -648,7 +648,7 @@ instance Storable Font where
     v2 <- peekByteOff _p 8
     v3 <- peekByteOff _p 12
     v4 <- peekByteOff _p 32
-    v5 <- peekByteOff _p 36
+    v5 <- peekByteOff _p 40
     return $ Font v0 v1 v2 v3 v4 v5
   poke _p (Font v0 v1 v2 v3 v4 v5) = do
     pokeByteOff _p 0 v0
@@ -656,7 +656,7 @@ instance Storable Font where
     pokeByteOff _p 8 v2
     pokeByteOff _p 12 v3
     pokeByteOff _p 32 v4
-    pokeByteOff _p 36 v5
+    pokeByteOff _p 40 v5
     return ()
 
 {- typedef struct Camera3D {
