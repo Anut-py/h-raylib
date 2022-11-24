@@ -9,3 +9,7 @@ _13 November 2022_
 _19 November 2022_
 - Replaced `CInt` with `CBool` in `RayCollision`
 - Updated raylib to the master branch
+
+## Version 4.5.0.6
+_24 November 2022_
+- Fixed `Font` marshalling ([#6](https://github.com/Anut-py/h-raylib/issues/6))
