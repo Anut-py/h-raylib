@@ -18,12 +18,12 @@ import Raylib
   )
 import Raylib.Colors (black, white, red)
 import Raylib.Constants (cameraMode'firstPerson, cameraProjection'perspective)
-import Raylib.Types (Camera3D (Camera3D, camera3D'position, camera3D'target), Vector3 (Vector3), Ray (Ray), BoundingBox (BoundingBox), RayCollision (raycollision'hit, rayCollision'point))
+import Raylib.Types (Camera3D (Camera3D, camera3D'position, camera3D'target), Vector3 (Vector3), Ray (Ray), BoundingBox (BoundingBox), RayCollision (rayCollision'point, rayCollision'hit))
 import Foreign (toBool)
 
 main :: IO ()
 main = do
-  initWindow 600 450 "raylib example - first person camera"
+  initWindow 600 450 "raylib example - camera ray collision"
   let camera = Camera3D (Vector3 0 0 0) (Vector3 2 0 1) (Vector3 0 1 0) 70 cameraProjection'perspective
   setCameraMode camera cameraMode'firstPerson
   setTargetFPS 60
@@ -39,14 +39,14 @@ gameLoop camera = do
 
   let ray = Ray (camera3D'position camera) (camera3D'target camera -.- camera3D'position camera)
   let collision = getRayCollisionQuad ray (Vector3 0 0 0) (Vector3 0 2 0) (Vector3 0 2 4) (Vector3 0 0 4)
-  let col = if toBool (raycollision'hit collision) then red else white
+  let col = if toBool (rayCollision'hit collision) then red else white
 
   print collision
 
   beginMode3D camera
 
   drawBoundingBox (BoundingBox (Vector3 0 0 0) (Vector3 0 2 4)) col
-  when (raycollision'hit collision > 0) $ drawPoint3D (rayCollision'point collision) red
+  when (rayCollision'hit collision > 0) $ drawPoint3D (rayCollision'point collision) red
 
   endMode3D
 
