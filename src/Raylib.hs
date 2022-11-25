@@ -63,9 +63,25 @@ import Raylib.Types
     VrDeviceInfo,
     VrStereoConfig,
     Wave (wave'channels, wave'frameCount),
+    MouseButton,
+    MouseCursor,
+    TraceLogLevel,
+    CameraMode,
+    Gesture,
+    BlendMode,
+    CubemapLayout,
+    FontType,
+    TextureWrap,
+    TextureFilter,
+    ConfigFlag,
+    KeyboardKey,
+    GamepadButton,
+    GamepadAxis,
+    ShaderLocationIndex,
+    ShaderUniformDataType,
+    PixelFormat
   )
-import Raylib.Constants (MouseButton, MouseCursor, TraceLogLevel, CameraMode, Gesture, BlendMode, CubemapLayout, FontType, TextureWrap, TextureFilter, ConfigFlags, KeyboardKey, GamepadButton, GamepadAxis, ShaderLocationIndex, ShaderUniformDataType, PixelFormat)
-import Raylib.Util (pop, withArray2D)
+import Raylib.Util (pop, withArray2D, configsToBitflag)
 import Prelude hiding (length)
 
 -- Haskell doesn't support varargs in foreign calls, so these functions are impossible to call from FFI
@@ -227,8 +243,8 @@ foreign import ccall safe "raylib.h IsWindowState"
   c'isWindowState ::
     CUInt -> IO CBool
 
-isWindowState :: ConfigFlags -> IO Bool
-isWindowState flag = toBool <$> c'isWindowState (fromIntegral $ fromEnum flag)
+isWindowState :: [ConfigFlag] -> IO Bool
+isWindowState flags = toBool <$> c'isWindowState (fromIntegral $ configsToBitflag flags)
 
 foreign import ccall safe "raylib.h &IsWindowState"
   p'isWindowState ::
@@ -238,8 +254,8 @@ foreign import ccall safe "raylib.h SetWindowState"
   c'setWindowState ::
     CUInt -> IO ()
 
-setWindowState :: Integer -> IO ()
-setWindowState = c'setWindowState . fromIntegral
+setWindowState :: [ConfigFlag] -> IO ()
+setWindowState = c'setWindowState . fromIntegral . configsToBitflag
 
 foreign import ccall safe "raylib.h &SetWindowState"
   p'setWindowState ::
@@ -249,8 +265,8 @@ foreign import ccall safe "raylib.h ClearWindowState"
   c'clearWindowState ::
     CUInt -> IO ()
 
-clearWindowState :: Integer -> IO ()
-clearWindowState = c'clearWindowState . fromIntegral
+clearWindowState :: [ConfigFlag] -> IO ()
+clearWindowState = c'clearWindowState . fromIntegral . configsToBitflag
 
 foreign import ccall safe "raylib.h &ClearWindowState"
   p'clearWindowState ::
@@ -1717,7 +1733,7 @@ foreign import ccall safe "raylib.h GetGamepadAxisMovement"
     CInt -> CInt -> IO CFloat
 
 getGamepadAxisMovement :: Int -> GamepadAxis -> IO Float
-getGamepadAxisMovement gamepad axis = realToFrac <$> c'getGamepadAxisMovement (fromIntegral gamepad) (fromIntegral axis)
+getGamepadAxisMovement gamepad axis = realToFrac <$> c'getGamepadAxisMovement (fromIntegral gamepad) (fromIntegral $ fromEnum axis)
 
 foreign import ccall safe "raylib.h &GetGamepadAxisMovement"
   p'getGamepadAxisMovement ::
