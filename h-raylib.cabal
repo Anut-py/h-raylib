@@ -1,6 +1,6 @@
 cabal-version:      2.4
 name:               h-raylib
-version:            4.5.0.6
+version:            4.5.0.7
 synopsis:           Raylib bindings for Haskell
 category:           graphics
 description:
@@ -65,7 +65,6 @@ library
   exposed-modules:
     Raylib
     Raylib.Colors
-    Raylib.Constants
     Raylib.Types
 
   other-modules:    Raylib.Util
