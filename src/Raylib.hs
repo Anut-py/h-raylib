@@ -63,8 +63,25 @@ import Raylib.Types
     VrDeviceInfo,
     VrStereoConfig,
     Wave (wave'channels, wave'frameCount),
+    MouseButton,
+    MouseCursor,
+    TraceLogLevel,
+    CameraMode,
+    Gesture,
+    BlendMode,
+    CubemapLayout,
+    FontType,
+    TextureWrap,
+    TextureFilter,
+    ConfigFlag,
+    KeyboardKey,
+    GamepadButton,
+    GamepadAxis,
+    ShaderLocationIndex,
+    ShaderUniformDataType,
+    PixelFormat
   )
-import Raylib.Util (pop, withArray2D)
+import Raylib.Util (pop, withArray2D, configsToBitflag)
 import Prelude hiding (length)
 
 -- Haskell doesn't support varargs in foreign calls, so these functions are impossible to call from FFI
@@ -226,8 +243,8 @@ foreign import ccall safe "raylib.h IsWindowState"
   c'isWindowState ::
     CUInt -> IO CBool
 
-isWindowState :: Integer -> IO Bool
-isWindowState flag = toBool <$> c'isWindowState (fromIntegral flag)
+isWindowState :: [ConfigFlag] -> IO Bool
+isWindowState flags = toBool <$> c'isWindowState (fromIntegral $ configsToBitflag flags)
 
 foreign import ccall safe "raylib.h &IsWindowState"
   p'isWindowState ::
@@ -237,8 +254,8 @@ foreign import ccall safe "raylib.h SetWindowState"
   c'setWindowState ::
     CUInt -> IO ()
 
-setWindowState :: Integer -> IO ()
-setWindowState = c'setWindowState . fromIntegral
+setWindowState :: [ConfigFlag] -> IO ()
+setWindowState = c'setWindowState . fromIntegral . configsToBitflag
 
 foreign import ccall safe "raylib.h &SetWindowState"
   p'setWindowState ::
@@ -248,8 +265,8 @@ foreign import ccall safe "raylib.h ClearWindowState"
   c'clearWindowState ::
     CUInt -> IO ()
 
-clearWindowState :: Integer -> IO ()
-clearWindowState = c'clearWindowState . fromIntegral
+clearWindowState :: [ConfigFlag] -> IO ()
+clearWindowState = c'clearWindowState . fromIntegral . configsToBitflag
 
 foreign import ccall safe "raylib.h &ClearWindowState"
   p'clearWindowState ::
@@ -745,8 +762,8 @@ foreign import ccall safe "raylib.h BeginBlendMode"
   c'beginBlendMode ::
     CInt -> IO ()
 
-beginBlendMode :: Int -> IO ()
-beginBlendMode = c'beginBlendMode . fromIntegral
+beginBlendMode :: BlendMode -> IO ()
+beginBlendMode = c'beginBlendMode . fromIntegral . fromEnum
 
 foreign import ccall safe "raylib.h &BeginBlendMode"
   p'beginBlendMode ::
@@ -852,8 +869,10 @@ foreign import ccall safe "raylib.h &GetShaderLocationAttrib"
 
 foreign import ccall safe "bindings.h SetShaderValue_" c'setShaderValue :: Ptr Raylib.Types.Shader -> CInt -> Ptr () -> CInt -> IO ()
 
-setShaderValue :: Raylib.Types.Shader -> Int -> Ptr () -> Int -> IO ()
-setShaderValue shader locIndex value uniformType = with shader (\s -> c'setShaderValue s (fromIntegral locIndex) value (fromIntegral uniformType))
+-- TODO: This `ShaderLocationIndex` might be a wrong type, this should be examined at a later date
+-- This goes for the other functions below as well using it
+setShaderValue :: Raylib.Types.Shader -> ShaderLocationIndex -> Ptr () -> ShaderUniformDataType -> IO ()
+setShaderValue shader locIndex value uniformType = with shader (\s -> c'setShaderValue s (fromIntegral $ fromEnum locIndex) value (fromIntegral $ fromEnum uniformType))
 
 foreign import ccall safe "raylib.h &SetShaderValue"
   p'setShaderValue ::
@@ -861,8 +880,8 @@ foreign import ccall safe "raylib.h &SetShaderValue"
 
 foreign import ccall safe "bindings.h SetShaderValueV_" c'setShaderValueV :: Ptr Raylib.Types.Shader -> CInt -> Ptr () -> CInt -> CInt -> IO ()
 
-setShaderValueV :: Raylib.Types.Shader -> Int -> Ptr () -> Int -> Int -> IO ()
-setShaderValueV shader locIndex value uniformType count = with shader (\s -> c'setShaderValueV s (fromIntegral locIndex) value (fromIntegral uniformType) (fromIntegral count))
+setShaderValueV :: Raylib.Types.Shader -> ShaderLocationIndex -> Ptr () -> ShaderUniformDataType -> Int -> IO ()
+setShaderValueV shader locIndex value uniformType count = with shader (\s -> c'setShaderValueV s (fromIntegral $ fromEnum locIndex) value (fromIntegral $ fromEnum uniformType) (fromIntegral count))
 
 foreign import ccall safe "raylib.h &SetShaderValueV"
   p'setShaderValueV ::
@@ -870,8 +889,8 @@ foreign import ccall safe "raylib.h &SetShaderValueV"
 
 foreign import ccall safe "bindings.h SetShaderValueMatrix_" c'setShaderValueMatrix :: Ptr Raylib.Types.Shader -> CInt -> Ptr Raylib.Types.Matrix -> IO ()
 
-setShaderValueMatrix :: Raylib.Types.Shader -> Int -> Raylib.Types.Matrix -> IO ()
-setShaderValueMatrix shader locIndex mat = with shader (\s -> with mat (c'setShaderValueMatrix s (fromIntegral locIndex)))
+setShaderValueMatrix :: Raylib.Types.Shader -> ShaderLocationIndex -> Raylib.Types.Matrix -> IO ()
+setShaderValueMatrix shader locIndex mat = with shader (\s -> with mat (c'setShaderValueMatrix s (fromIntegral $ fromEnum locIndex)))
 
 foreign import ccall safe "raylib.h &SetShaderValueMatrix"
   p'setShaderValueMatrix ::
@@ -879,8 +898,8 @@ foreign import ccall safe "raylib.h &SetShaderValueMatrix"
 
 foreign import ccall safe "bindings.h SetShaderValueTexture_" c'setShaderValueTexture :: Ptr Raylib.Types.Shader -> CInt -> Ptr Raylib.Types.Texture -> IO ()
 
-setShaderValueTexture :: Raylib.Types.Shader -> Int -> Raylib.Types.Texture -> IO ()
-setShaderValueTexture shader locIndex tex = with shader (\s -> with tex (c'setShaderValueTexture s (fromIntegral locIndex)))
+setShaderValueTexture :: Raylib.Types.Shader -> ShaderLocationIndex -> Raylib.Types.Texture -> IO ()
+setShaderValueTexture shader locIndex tex = with shader (\s -> with tex (c'setShaderValueTexture s (fromIntegral $ fromEnum locIndex)))
 
 foreign import ccall safe "raylib.h &SetShaderValueTexture"
   p'setShaderValueTexture ::
@@ -1050,8 +1069,8 @@ foreign import ccall safe "raylib.h TraceLog"
   c'traceLog ::
     CInt -> CString -> IO () -- Uses varags, can't implement complete functionality
 
-traceLog :: Int -> String -> IO ()
-traceLog logLevel text = withCString text $ c'traceLog $ fromIntegral logLevel
+traceLog :: TraceLogLevel -> String -> IO ()
+traceLog logLevel text = withCString text $ c'traceLog $ fromIntegral $ fromEnum logLevel
 
 foreign import ccall safe "raylib.h &TraceLog"
   p'traceLog ::
@@ -1061,8 +1080,8 @@ foreign import ccall safe "raylib.h SetTraceLogLevel"
   c'setTraceLogLevel ::
     CInt -> IO ()
 
-setTraceLogLevel :: Int -> IO ()
-setTraceLogLevel logLevel = c'setTraceLogLevel $ fromIntegral logLevel
+setTraceLogLevel :: TraceLogLevel -> IO ()
+setTraceLogLevel = c'setTraceLogLevel . fromIntegral . fromEnum
 
 foreign import ccall safe "raylib.h &SetTraceLogLevel"
   p'setTraceLogLevel ::
@@ -1548,8 +1567,8 @@ foreign import ccall safe "raylib.h IsKeyPressed"
   c'isKeyPressed ::
     CInt -> IO CBool
 
-isKeyPressed :: Int -> IO Bool
-isKeyPressed key = toBool <$> c'isKeyPressed (fromIntegral key)
+isKeyPressed :: KeyboardKey -> IO Bool
+isKeyPressed key = toBool <$> c'isKeyPressed (fromIntegral $ fromEnum key)
 
 foreign import ccall safe "raylib.h &IsKeyPressed"
   p'isKeyPressed ::
@@ -1559,8 +1578,8 @@ foreign import ccall safe "raylib.h IsKeyDown"
   c'isKeyDown ::
     CInt -> IO CBool
 
-isKeyDown :: Int -> IO Bool
-isKeyDown key = toBool <$> c'isKeyDown (fromIntegral key)
+isKeyDown :: KeyboardKey -> IO Bool
+isKeyDown key = toBool <$> c'isKeyDown (fromIntegral $ fromEnum key)
 
 foreign import ccall safe "raylib.h &IsKeyDown"
   p'isKeyDown ::
@@ -1570,8 +1589,8 @@ foreign import ccall safe "raylib.h IsKeyReleased"
   c'isKeyReleased ::
     CInt -> IO CBool
 
-isKeyReleased :: Int -> IO Bool
-isKeyReleased key = toBool <$> c'isKeyReleased (fromIntegral key)
+isKeyReleased :: KeyboardKey -> IO Bool
+isKeyReleased key = toBool <$> c'isKeyReleased (fromIntegral $ fromEnum key)
 
 foreign import ccall safe "raylib.h &IsKeyReleased"
   p'isKeyReleased ::
@@ -1581,8 +1600,8 @@ foreign import ccall safe "raylib.h IsKeyUp"
   c'isKeyUp ::
     CInt -> IO CBool
 
-isKeyUp :: Int -> IO Bool
-isKeyUp key = toBool <$> c'isKeyUp (fromIntegral key)
+isKeyUp :: KeyboardKey -> IO Bool
+isKeyUp key = toBool <$> c'isKeyUp (fromIntegral $ fromEnum key)
 
 foreign import ccall safe "raylib.h &IsKeyUp"
   p'isKeyUp ::
@@ -1592,8 +1611,8 @@ foreign import ccall safe "raylib.h SetExitKey"
   c'setExitKey ::
     CInt -> IO ()
 
-setExitKey :: Int -> IO ()
-setExitKey = c'setExitKey . fromIntegral
+setExitKey :: KeyboardKey -> IO ()
+setExitKey = c'setExitKey . fromIntegral . fromEnum
 
 foreign import ccall safe "raylib.h &SetExitKey"
   p'setExitKey ::
@@ -1603,8 +1622,8 @@ foreign import ccall safe "raylib.h GetKeyPressed"
   c'getKeyPressed ::
     IO CInt
 
-getKeyPressed :: IO Int
-getKeyPressed = fromIntegral <$> c'getKeyPressed
+getKeyPressed :: IO KeyboardKey
+getKeyPressed = toEnum . fromIntegral <$> c'getKeyPressed
 
 foreign import ccall safe "raylib.h &GetKeyPressed"
   p'getKeyPressed ::
@@ -1647,8 +1666,8 @@ foreign import ccall safe "raylib.h IsGamepadButtonPressed"
   c'isGamepadButtonPressed ::
     CInt -> CInt -> IO CBool
 
-isGamepadButtonPressed :: Int -> Int -> IO Bool
-isGamepadButtonPressed gamepad button = toBool <$> c'isGamepadButtonPressed (fromIntegral gamepad) (fromIntegral button)
+isGamepadButtonPressed :: Int -> GamepadButton -> IO Bool
+isGamepadButtonPressed gamepad button = toBool <$> c'isGamepadButtonPressed (fromIntegral gamepad) (fromIntegral $ fromEnum button)
 
 foreign import ccall safe "raylib.h &IsGamepadButtonPressed"
   p'isGamepadButtonPressed ::
@@ -1658,8 +1677,8 @@ foreign import ccall safe "raylib.h IsGamepadButtonDown"
   c'isGamepadButtonDown ::
     CInt -> CInt -> IO CBool
 
-isGamepadButtonDown :: Int -> Int -> IO Bool
-isGamepadButtonDown gamepad button = toBool <$> c'isGamepadButtonDown (fromIntegral gamepad) (fromIntegral button)
+isGamepadButtonDown :: Int -> GamepadButton -> IO Bool
+isGamepadButtonDown gamepad button = toBool <$> c'isGamepadButtonDown (fromIntegral gamepad) (fromIntegral $ fromEnum button)
 
 foreign import ccall safe "raylib.h &IsGamepadButtonDown"
   p'isGamepadButtonDown ::
@@ -1669,8 +1688,8 @@ foreign import ccall safe "raylib.h IsGamepadButtonReleased"
   c'isGamepadButtonReleased ::
     CInt -> CInt -> IO CBool
 
-isGamepadButtonReleased :: Int -> Int -> IO Bool
-isGamepadButtonReleased gamepad button = toBool <$> c'isGamepadButtonReleased (fromIntegral gamepad) (fromIntegral button)
+isGamepadButtonReleased :: Int -> GamepadButton -> IO Bool
+isGamepadButtonReleased gamepad button = toBool <$> c'isGamepadButtonReleased (fromIntegral gamepad) (fromIntegral $ fromEnum button)
 
 foreign import ccall safe "raylib.h &IsGamepadButtonReleased"
   p'isGamepadButtonReleased ::
@@ -1680,8 +1699,8 @@ foreign import ccall safe "raylib.h IsGamepadButtonUp"
   c'isGamepadButtonUp ::
     CInt -> CInt -> IO CBool
 
-isGamepadButtonUp :: Int -> Int -> IO Bool
-isGamepadButtonUp gamepad button = toBool <$> c'isGamepadButtonUp (fromIntegral gamepad) (fromIntegral button)
+isGamepadButtonUp :: Int -> GamepadButton -> IO Bool
+isGamepadButtonUp gamepad button = toBool <$> c'isGamepadButtonUp (fromIntegral gamepad) (fromIntegral $ fromEnum button)
 
 foreign import ccall safe "raylib.h &IsGamepadButtonUp"
   p'isGamepadButtonUp ::
@@ -1691,8 +1710,8 @@ foreign import ccall safe "raylib.h GetGamepadButtonPressed"
   c'getGamepadButtonPressed ::
     IO CInt
 
-getGamepadButtonPressed :: IO Int
-getGamepadButtonPressed = fromIntegral <$> c'getGamepadButtonPressed
+getGamepadButtonPressed :: IO GamepadButton
+getGamepadButtonPressed = toEnum . fromIntegral <$> c'getGamepadButtonPressed
 
 foreign import ccall safe "raylib.h &GetGamepadButtonPressed"
   p'getGamepadButtonPressed ::
@@ -1713,8 +1732,8 @@ foreign import ccall safe "raylib.h GetGamepadAxisMovement"
   c'getGamepadAxisMovement ::
     CInt -> CInt -> IO CFloat
 
-getGamepadAxisMovement :: Int -> Int -> IO Float
-getGamepadAxisMovement gamepad axis = realToFrac <$> c'getGamepadAxisMovement (fromIntegral gamepad) (fromIntegral axis)
+getGamepadAxisMovement :: Int -> GamepadAxis -> IO Float
+getGamepadAxisMovement gamepad axis = realToFrac <$> c'getGamepadAxisMovement (fromIntegral gamepad) (fromIntegral $ fromEnum axis)
 
 foreign import ccall safe "raylib.h &GetGamepadAxisMovement"
   p'getGamepadAxisMovement ::
@@ -1735,8 +1754,8 @@ foreign import ccall safe "raylib.h IsMouseButtonPressed"
   c'isMouseButtonPressed ::
     CInt -> IO CBool
 
-isMouseButtonPressed :: Int -> IO Bool
-isMouseButtonPressed button = toBool <$> c'isMouseButtonPressed (fromIntegral button)
+isMouseButtonPressed :: MouseButton -> IO Bool
+isMouseButtonPressed button = toBool <$> c'isMouseButtonPressed (fromIntegral $ fromEnum button)
 
 foreign import ccall safe "raylib.h &IsMouseButtonPressed"
   p'isMouseButtonPressed ::
@@ -1746,8 +1765,8 @@ foreign import ccall safe "raylib.h IsMouseButtonDown"
   c'isMouseButtonDown ::
     CInt -> IO CBool
 
-isMouseButtonDown :: Int -> IO Bool
-isMouseButtonDown button = toBool <$> c'isMouseButtonDown (fromIntegral button)
+isMouseButtonDown :: MouseButton -> IO Bool
+isMouseButtonDown button = toBool <$> c'isMouseButtonDown (fromIntegral $ fromEnum button)
 
 foreign import ccall safe "raylib.h &IsMouseButtonDown"
   p'isMouseButtonDown ::
@@ -1757,8 +1776,8 @@ foreign import ccall safe "raylib.h IsMouseButtonReleased"
   c'isMouseButtonReleased ::
     CInt -> IO CBool
 
-isMouseButtonReleased :: Int -> IO Bool
-isMouseButtonReleased button = toBool <$> c'isMouseButtonReleased (fromIntegral button)
+isMouseButtonReleased :: MouseButton -> IO Bool
+isMouseButtonReleased button = toBool <$> c'isMouseButtonReleased (fromIntegral $ fromEnum button)
 
 foreign import ccall safe "raylib.h &IsMouseButtonReleased"
   p'isMouseButtonReleased ::
@@ -1768,8 +1787,8 @@ foreign import ccall safe "raylib.h IsMouseButtonUp"
   c'isMouseButtonUp ::
     CInt -> IO CBool
 
-isMouseButtonUp :: Int -> IO Bool
-isMouseButtonUp button = toBool <$> c'isMouseButtonUp (fromIntegral button)
+isMouseButtonUp :: MouseButton -> IO Bool
+isMouseButtonUp button = toBool <$> c'isMouseButtonUp (fromIntegral $ fromEnum button)
 
 foreign import ccall safe "raylib.h &IsMouseButtonUp"
   p'isMouseButtonUp ::
@@ -1872,8 +1891,8 @@ foreign import ccall safe "raylib.h SetMouseCursor"
   c'setMouseCursor ::
     CInt -> IO ()
 
-setMouseCursor :: Int -> IO ()
-setMouseCursor cursor = c'setMouseCursor $ fromIntegral cursor
+setMouseCursor :: MouseCursor -> IO ()
+setMouseCursor cursor = c'setMouseCursor . fromIntegral $ fromEnum cursor
 
 foreign import ccall safe "raylib.h &SetMouseCursor"
   p'setMouseCursor ::
@@ -1947,8 +1966,8 @@ foreign import ccall safe "raylib.h IsGestureDetected"
   c'isGestureDetected ::
     CInt -> IO CBool
 
-isGestureDetected :: Int -> IO Bool
-isGestureDetected gesture = toBool <$> c'isGestureDetected (fromIntegral gesture)
+isGestureDetected :: Gesture -> IO Bool
+isGestureDetected gesture = toBool <$> c'isGestureDetected (fromIntegral $ fromEnum gesture)
 
 foreign import ccall safe "raylib.h &IsGestureDetected"
   p'isGestureDetected ::
@@ -1958,8 +1977,8 @@ foreign import ccall safe "raylib.h GetGestureDetected"
   c'getGestureDetected ::
     IO CInt
 
-getGestureDetected :: IO Int
-getGestureDetected = fromIntegral <$> c'getGestureDetected
+getGestureDetected :: IO Gesture
+getGestureDetected = toEnum . fromIntegral <$> c'getGestureDetected
 
 foreign import ccall safe "raylib.h &GetGestureDetected"
   p'getGestureDetected ::
@@ -2018,8 +2037,8 @@ foreign import ccall safe "raylib.h &GetGesturePinchAngle"
 
 foreign import ccall safe "bindings.h SetCameraMode_" c'setCameraMode :: Ptr Raylib.Types.Camera3D -> CInt -> IO ()
 
-setCameraMode :: Raylib.Types.Camera3D -> Int -> IO ()
-setCameraMode camera mode = with camera (\c -> c'setCameraMode c (fromIntegral mode))
+setCameraMode :: Raylib.Types.Camera3D -> CameraMode -> IO ()
+setCameraMode camera mode = with camera (\c -> c'setCameraMode c (fromIntegral $ fromEnum mode))
 
 foreign import ccall safe "raylib.h &SetCameraMode"
   p'setCameraMode ::
@@ -2684,7 +2703,7 @@ foreign import ccall safe "bindings.h LoadImageRaw_" c'loadImageRaw :: CString -
 
 loadImageRaw :: String -> Int -> Int -> Int -> Int -> IO Raylib.Types.Image
 loadImageRaw fileName width height format headerSize =
-  withCString fileName (\str -> c'loadImageRaw str (fromIntegral width) (fromIntegral height) (fromIntegral format) (fromIntegral headerSize)) >>= pop
+  withCString fileName (\str -> c'loadImageRaw str (fromIntegral width) (fromIntegral height) (fromIntegral $ fromEnum format) (fromIntegral headerSize)) >>= pop
 
 foreign import ccall safe "raylib.h &LoadImageRaw"
   p'loadImageRaw ::
@@ -2896,9 +2915,9 @@ foreign import ccall safe "raylib.h ImageFormat"
   c'imageFormat ::
     Ptr Raylib.Types.Image -> CInt -> IO ()
 
-imageFormat :: Raylib.Types.Image -> Int -> IO Raylib.Types.Image
+imageFormat :: Raylib.Types.Image -> PixelFormat -> IO Raylib.Types.Image
 imageFormat image newFormat =
-  with image (\i -> c'imageFormat i (fromIntegral newFormat) >> peek i)
+  with image (\i -> c'imageFormat i (fromIntegral $ fromEnum newFormat) >> peek i)
 
 foreign import ccall safe "raylib.h &ImageFormat"
   p'imageFormat ::
@@ -3374,8 +3393,8 @@ foreign import ccall safe "raylib.h &LoadTextureFromImage"
 
 foreign import ccall safe "bindings.h LoadTextureCubemap_" c'loadTextureCubemap :: Ptr Raylib.Types.Image -> CInt -> IO (Ptr Raylib.Types.Texture)
 
-loadTextureCubemap :: Raylib.Types.Image -> Int -> IO Raylib.Types.Texture
-loadTextureCubemap image layout = with image (\i -> c'loadTextureCubemap i (fromIntegral layout)) >>= pop
+loadTextureCubemap :: Raylib.Types.Image -> CubemapLayout -> IO Raylib.Types.Texture
+loadTextureCubemap image layout = with image (\i -> c'loadTextureCubemap i (fromIntegral $ fromEnum layout)) >>= pop
 
 foreign import ccall safe "raylib.h &LoadTextureCubemap"
   p'loadTextureCubemap ::
@@ -3439,8 +3458,8 @@ foreign import ccall safe "raylib.h &GenTextureMipmaps"
 
 foreign import ccall safe "bindings.h SetTextureFilter_" c'setTextureFilter :: Ptr Raylib.Types.Texture -> CInt -> IO ()
 
-setTextureFilter :: Raylib.Types.Texture -> Int -> IO Raylib.Types.Texture
-setTextureFilter texture filterType = with texture (\t -> c'setTextureFilter t (fromIntegral filterType) >> peek t)
+setTextureFilter :: Raylib.Types.Texture -> TextureFilter -> IO Raylib.Types.Texture
+setTextureFilter texture filterType = with texture (\t -> c'setTextureFilter t (fromIntegral $ fromEnum filterType) >> peek t)
 
 foreign import ccall safe "raylib.h &SetTextureFilter"
   p'setTextureFilter ::
@@ -3448,8 +3467,8 @@ foreign import ccall safe "raylib.h &SetTextureFilter"
 
 foreign import ccall safe "bindings.h SetTextureWrap_" c'setTextureWrap :: Ptr Raylib.Types.Texture -> CInt -> IO ()
 
-setTextureWrap :: Raylib.Types.Texture -> Int -> IO Raylib.Types.Texture
-setTextureWrap texture wrap = with texture (\t -> c'setTextureWrap t (fromIntegral wrap) >> peek t)
+setTextureWrap :: Raylib.Types.Texture -> TextureWrap -> IO Raylib.Types.Texture
+setTextureWrap texture wrap = with texture (\t -> c'setTextureWrap t (fromIntegral $ fromEnum wrap) >> peek t)
 
 foreign import ccall safe "raylib.h &SetTextureWrap"
   p'setTextureWrap ::
@@ -3457,7 +3476,7 @@ foreign import ccall safe "raylib.h &SetTextureWrap"
 
 foreign import ccall safe "bindings.h DrawTexture_" c'drawTexture :: Ptr Raylib.Types.Texture -> CInt -> CInt -> Ptr Raylib.Types.Color -> IO ()
 
-drawTexture :: Raylib.Types.Texture -> CInt -> CInt -> Raylib.Types.Color -> IO ()
+drawTexture :: Raylib.Types.Texture -> Int -> Int -> Raylib.Types.Color -> IO ()
 drawTexture texture x y tint = with texture (\t -> with tint (c'drawTexture t (fromIntegral x) (fromIntegral y)))
 
 foreign import ccall safe "raylib.h &DrawTexture"
@@ -3592,8 +3611,8 @@ foreign import ccall safe "raylib.h &GetColor"
 
 foreign import ccall safe "bindings.h GetPixelColor_" c'getPixelColor :: Ptr () -> CInt -> IO (Ptr Raylib.Types.Color)
 
-getPixelColor :: Ptr () -> Int -> IO Raylib.Types.Color
-getPixelColor srcPtr format = c'getPixelColor srcPtr (fromIntegral format) >>= pop
+getPixelColor :: Ptr () -> PixelFormat -> IO Raylib.Types.Color
+getPixelColor srcPtr format = c'getPixelColor srcPtr (fromIntegral $ fromEnum format) >>= pop
 
 foreign import ccall safe "raylib.h &GetPixelColor"
   p'getPixelColor ::
@@ -3601,8 +3620,8 @@ foreign import ccall safe "raylib.h &GetPixelColor"
 
 foreign import ccall safe "bindings.h SetPixelColor_" c'setPixelColor :: Ptr () -> Ptr Raylib.Types.Color -> CInt -> IO ()
 
-setPixelColor :: Ptr () -> Raylib.Types.Color -> Int -> IO ()
-setPixelColor dstPtr color format = with color (\c -> c'setPixelColor dstPtr c (fromIntegral format))
+setPixelColor :: Ptr () -> Raylib.Types.Color -> PixelFormat -> IO ()
+setPixelColor dstPtr color format = with color (\c -> c'setPixelColor dstPtr c (fromIntegral $ fromEnum format))
 
 foreign import ccall safe "raylib.h &SetPixelColor"
   p'setPixelColor ::
@@ -3612,8 +3631,8 @@ foreign import ccall safe "raylib.h GetPixelDataSize"
   c'getPixelDataSize ::
     CInt -> CInt -> CInt -> IO CInt
 
-getPixelDataSize :: Int -> Int -> Int -> Int
-getPixelDataSize width height format = unsafePerformIO (fromIntegral <$> c'getPixelDataSize (fromIntegral width) (fromIntegral height) (fromIntegral format))
+getPixelDataSize :: Int -> Int -> PixelFormat -> Int
+getPixelDataSize width height format = unsafePerformIO (fromIntegral <$> c'getPixelDataSize (fromIntegral width) (fromIntegral height) (fromIntegral $ fromEnum format))
 
 foreign import ccall safe "raylib.h &GetPixelDataSize"
   p'getPixelDataSize ::
@@ -3668,15 +3687,14 @@ foreign import ccall safe "raylib.h LoadFontData"
   c'loadFontData ::
     Ptr CUChar -> CInt -> CInt -> Ptr CInt -> CInt -> CInt -> IO (Ptr Raylib.Types.GlyphInfo)
 
-loadFontData :: [Integer] -> Int -> [Int] -> Int -> Int -> IO Raylib.Types.GlyphInfo
-loadFontData fileData fontSize fontChars glyphCount fontType = withArrayLen (map fromIntegral fileData) (\size d -> withArray (map fromIntegral fontChars) (\c -> c'loadFontData d (fromIntegral $ size * sizeOf (0 :: CUChar)) (fromIntegral fontSize) c (fromIntegral glyphCount) (fromIntegral fontType))) >>= pop
+loadFontData :: [Integer] -> Int -> [Int] -> Int -> FontType -> IO Raylib.Types.GlyphInfo
+loadFontData fileData fontSize fontChars glyphCount fontType = withArrayLen (map fromIntegral fileData) (\size d -> withArray (map fromIntegral fontChars) (\c -> c'loadFontData d (fromIntegral $ size * sizeOf (0 :: CUChar)) (fromIntegral fontSize) c (fromIntegral glyphCount) (fromIntegral $ fromEnum fontType))) >>= pop
 
 foreign import ccall safe "raylib.h &LoadFontData"
   p'loadFontData ::
     FunPtr (Ptr CUChar -> CInt -> CInt -> Ptr CInt -> CInt -> CInt -> IO (Ptr Raylib.Types.GlyphInfo))
 
 foreign import ccall safe "bindings.h GenImageFontAtlas_" c'genImageFontAtlas :: Ptr Raylib.Types.GlyphInfo -> Ptr (Ptr Raylib.Types.Rectangle) -> CInt -> CInt -> CInt -> CInt -> IO (Ptr Raylib.Types.Image)
-
 genImageFontAtlas :: [Raylib.Types.GlyphInfo] -> [[Raylib.Types.Rectangle]] -> Int -> Int -> Int -> Int -> IO Raylib.Types.Image
 genImageFontAtlas chars recs glyphCount fontSize padding packMethod = withArray chars (\c -> withArray2D recs (\r -> c'genImageFontAtlas c r (fromIntegral glyphCount) (fromIntegral fontSize) (fromIntegral padding) (fromIntegral packMethod))) >>= pop
 
@@ -4253,7 +4271,7 @@ foreign import ccall safe "raylib.h &DrawCylinderWiresEx"
 
 foreign import ccall safe "bindings.h DrawCapsule_" c'drawCapsule :: Ptr Vector3 -> Ptr Vector3 -> CFloat -> CInt -> CInt -> Ptr Color -> IO ()
 
-drawCapsule :: Vector3 -> Vector3 -> CFloat -> CInt -> CInt -> Color -> IO ()
+drawCapsule :: Vector3 -> Vector3 -> CFloat -> Int -> Int -> Color -> IO ()
 drawCapsule start end radius slices rings color = with start (\s -> with end (\e -> with color (c'drawCapsule s e (realToFrac radius) (fromIntegral slices) (fromIntegral rings))))
 
 foreign import ccall safe "raylib.h &DrawCapsule"
@@ -4262,7 +4280,7 @@ foreign import ccall safe "raylib.h &DrawCapsule"
 
 foreign import ccall safe "bindings.h DrawCapsuleWires_" c'drawCapsuleWires :: Ptr Vector3 -> Ptr Vector3 -> CFloat -> CInt -> CInt -> Ptr Color -> IO ()
 
-drawCapsuleWires :: Vector3 -> Vector3 -> CFloat -> CInt -> CInt -> Color -> IO ()
+drawCapsuleWires :: Vector3 -> Vector3 -> CFloat -> Int -> Int -> Color -> IO ()
 drawCapsuleWires start end radius slices rings color = with start (\s -> with end (\e -> with color (c'drawCapsuleWires s e (realToFrac radius) (fromIntegral slices) (fromIntegral rings))))
 
 foreign import ccall safe "raylib.h &DrawCapsuleWires"

@@ -1,8 +1,10 @@
 {-# OPTIONS -Wall #-}
-module Raylib.Util (c'free, pop, popCArray, withArray2D) where
+module Raylib.Util (c'free, pop, popCArray, withArray2D, configsToBitflag) where
+
+import Raylib.Types (ConfigFlag)
 import Foreign (Ptr, Storable (peek), castPtr, newArray, free, peekArray)
 import Control.Monad (forM_)
-
+import Data.Bits ((.|.))
 -- Internal utility functions
 
 foreign import ccall "stdlib.h free" c'free :: Ptr () -> IO ()
@@ -27,3 +29,7 @@ withArray2D arr func = do
     forM_ arrays free
     free ptr
     return res
+
+configsToBitflag :: [ConfigFlag] -> Integer
+configsToBitflag = fromIntegral . foldr folder (toEnum 0) 
+    where folder a b = (fromEnum a) .|. b

@@ -3,7 +3,6 @@ module Raylib.Types where
 
 -- This file includes Haskell counterparts to the structs defined in raylib
 
--- This file includes Haskell counterparts to the structs defined in raylib
 import Foreign.C
     ( CString, CChar, CUShort, CUInt, CInt, CUChar, CFloat, CBool )
 import Foreign
@@ -11,7 +10,653 @@ import Foreign
       plusPtr,
       pokeArray,
       peekArray,
+      castPtr,
       Storable(pokeByteOff, poke, peek, alignment, sizeOf, peekByteOff) )
+
+
+------------------------------------------------
+-- Raylib enumerations -------------------------
+------------------------------------------------
+
+data ConfigFlag = VsyncHint              
+                 | FullscreenMode         
+                 | WindowResizable        
+                 | WindowUndecorated      
+                 | WindowHidden           
+                 | WindowMinimized        
+                 | WindowMaximized        
+                 | WindowUnfocused        
+                 | WindowTopmost          
+                 | WindowAlwaysRun        
+                 | WindowTransparent      
+                 | WindowHighdpi          
+                 | WindowMousePassthrough 
+                 | Msaa4xHint             
+                 | InterlacedHint         
+  deriving (Eq, Show)
+  
+instance Enum ConfigFlag where
+    fromEnum g = case g of 
+            VsyncHint              -> 64
+            FullscreenMode         -> 2
+            WindowResizable        -> 4
+            WindowUndecorated      -> 8
+            WindowHidden           -> 128
+            WindowMinimized        -> 512
+            WindowMaximized        -> 1024
+            WindowUnfocused        -> 2048
+            WindowTopmost          -> 4096
+            WindowAlwaysRun        -> 256
+            WindowTransparent      -> 16
+            WindowHighdpi          -> 8192
+            WindowMousePassthrough -> 16384
+            Msaa4xHint             -> 32
+            InterlacedHint         -> 65536
+    toEnum x = case x of 
+      64    -> VsyncHint              
+      2     -> FullscreenMode         
+      4     -> WindowResizable        
+      8     -> WindowUndecorated      
+      128   -> WindowHidden           
+      512   -> WindowMinimized        
+      1024  -> WindowMaximized        
+      2048  -> WindowUnfocused        
+      4096  -> WindowTopmost          
+      256   -> WindowAlwaysRun        
+      16    -> WindowTransparent      
+      8192  -> WindowHighdpi          
+      16384 -> WindowMousePassthrough 
+      32    -> Msaa4xHint             
+      65536 -> InterlacedHint         
+      n     -> error $ "Invalid value " ++ show n ++ " for `toEnum`."
+
+data TraceLogLevel = LogAll | LogTrace | LogDebug | LogInfo | LogWarning | LogError | LogFatal | LogNone 
+    deriving (Eq, Show,Enum)
+
+data KeyboardKey = KeyNull        
+                 | KeyApostrophe  
+                 | KeyComma       
+                 | KeyMinus       
+                 | KeyPeriod      
+                 | KeySlash       
+                 | KeyZero        
+                 | KeyOne         
+                 | KeyTwo         
+                 | KeyThree       
+                 | KeyFour        
+                 | KeyFive        
+                 | KeySix         
+                 | KeySeven       
+                 | KeyEight       
+                 | KeyNine        
+                 | KeySemicolon   
+                 | KeyEqual       
+                 | KeyA           
+                 | KeyB           
+                 | KeyC           
+                 | KeyD           
+                 | KeyE           
+                 | KeyF           
+                 | KeyG           
+                 | KeyH           
+                 | KeyI           
+                 | KeyJ           
+                 | KeyK           
+                 | KeyL           
+                 | KeyM           
+                 | KeyN           
+                 | KeyO           
+                 | KeyP           
+                 | KeyQ           
+                 | KeyR           
+                 | KeyS           
+                 | KeyT           
+                 | KeyU           
+                 | KeyV           
+                 | KeyW           
+                 | KeyX           
+                 | KeyY           
+                 | KeyZ           
+                 | KeyLeftBracket 
+                 | KeyBackslash   
+                 | KeyRightBracket
+                 | KeyGrave       
+                 | KeySpace       
+                 | KeyEscape      
+                 | KeyEnter       
+                 | KeyTab         
+                 | KeyBackspace   
+                 | KeyInsert      
+                 | KeyDelete      
+                 | KeyRight       
+                 | KeyLeft        
+                 | KeyDown        
+                 | KeyUp          
+                 | KeyPageUp      
+                 | KeyPageDown    
+                 | KeyHome        
+                 | KeyEnd         
+                 | KeyCapsLock    
+                 | KeyScrollLock  
+                 | KeyNumLock     
+                 | KeyPrintScreen 
+                 | KeyPause       
+                 | KeyF1          
+                 | KeyF2          
+                 | KeyF3          
+                 | KeyF4          
+                 | KeyF5          
+                 | KeyF6          
+                 | KeyF7          
+                 | KeyF8          
+                 | KeyF9          
+                 | KeyF10         
+                 | KeyF11         
+                 | KeyF12         
+                 | KeyLeftShift   
+                 | KeyLeftControl 
+                 | KeyLeftAlt     
+                 | KeyLeftSuper   
+                 | KeyRightShift  
+                 | KeyRightControl
+                 | KeyRightAlt    
+                 | KeyRightSuper  
+                 | KeyKbMenu      
+                 | KeyKp0         
+                 | KeyKp1         
+                 | KeyKp2         
+                 | KeyKp3         
+                 | KeyKp4         
+                 | KeyKp5         
+                 | KeyKp6         
+                 | KeyKp7         
+                 | KeyKp8         
+                 | KeyKp9         
+                 | KeyKpDecimal   
+                 | KeyKpDivide    
+                 | KeyKpMultiply  
+                 | KeyKpSubtract  
+                 | KeyKpAdd       
+                 | KeyKpEnter     
+                 | KeyKpEqual     
+                 | KeyBack        
+                 | KeyMenu        
+                 | KeyVolumeUp    
+                 | KeyVolumeDown  
+
+  deriving (Eq, Show)
+
+instance Enum KeyboardKey where
+    fromEnum k = case k of 
+        KeyNull         -> 0
+        KeyApostrophe   -> 39
+        KeyComma        -> 44
+        KeyMinus        -> 45
+        KeyPeriod       -> 46
+        KeySlash        -> 47
+        KeyZero         -> 48
+        KeyOne          -> 49
+        KeyTwo          -> 50
+        KeyThree        -> 51
+        KeyFour         -> 52
+        KeyFive         -> 53
+        KeySix          -> 54
+        KeySeven        -> 55
+        KeyEight        -> 56
+        KeyNine         -> 57
+        KeySemicolon    -> 59
+        KeyEqual        -> 61
+        KeyA            -> 65
+        KeyB            -> 66
+        KeyC            -> 67
+        KeyD            -> 68
+        KeyE            -> 69
+        KeyF            -> 70
+        KeyG            -> 71
+        KeyH            -> 72
+        KeyI            -> 73
+        KeyJ            -> 74
+        KeyK            -> 75
+        KeyL            -> 76
+        KeyM            -> 77
+        KeyN            -> 78
+        KeyO            -> 79
+        KeyP            -> 80
+        KeyQ            -> 81
+        KeyR            -> 82
+        KeyS            -> 83
+        KeyT            -> 84
+        KeyU            -> 85
+        KeyV            -> 86
+        KeyW            -> 87
+        KeyX            -> 88
+        KeyY            -> 89
+        KeyZ            -> 90
+        KeyLeftBracket  -> 91
+        KeyBackslash    -> 92
+        KeyRightBracket -> 93
+        KeyGrave        -> 96
+        KeySpace        -> 32
+        KeyEscape       -> 256
+        KeyEnter        -> 257
+        KeyTab          -> 258
+        KeyBackspace    -> 259
+        KeyInsert       -> 260
+        KeyDelete       -> 261
+        KeyRight        -> 262
+        KeyLeft         -> 263
+        KeyDown         -> 264
+        KeyUp           -> 265
+        KeyPageUp       -> 266
+        KeyPageDown     -> 267
+        KeyHome         -> 268
+        KeyEnd          -> 269
+        KeyCapsLock     -> 280
+        KeyScrollLock   -> 281
+        KeyNumLock      -> 282
+        KeyPrintScreen  -> 283
+        KeyPause        -> 284
+        KeyF1           -> 290
+        KeyF2           -> 291
+        KeyF3           -> 292
+        KeyF4           -> 293
+        KeyF5           -> 294
+        KeyF6           -> 295
+        KeyF7           -> 296
+        KeyF8           -> 297
+        KeyF9           -> 298
+        KeyF10          -> 299
+        KeyF11          -> 300
+        KeyF12          -> 301
+        KeyLeftShift    -> 340
+        KeyLeftControl  -> 341
+        KeyLeftAlt      -> 342
+        KeyLeftSuper    -> 343
+        KeyRightShift   -> 344
+        KeyRightControl -> 345
+        KeyRightAlt     -> 346
+        KeyRightSuper   -> 347
+        KeyKbMenu       -> 348
+        KeyKp0          -> 320
+        KeyKp1          -> 321
+        KeyKp2          -> 322
+        KeyKp3          -> 323
+        KeyKp4          -> 324
+        KeyKp5          -> 325
+        KeyKp6          -> 326
+        KeyKp7          -> 327
+        KeyKp8          -> 328
+        KeyKp9          -> 329
+        KeyKpDecimal    -> 330
+        KeyKpDivide     -> 331
+        KeyKpMultiply   -> 332
+        KeyKpSubtract   -> 333
+        KeyKpAdd        -> 334
+        KeyKpEnter      -> 335
+        KeyKpEqual      -> 336
+        -- Android buttons
+        KeyBack         -> 4
+        KeyMenu         -> 82
+        KeyVolumeUp     -> 24
+        KeyVolumeDown   -> 25
+
+    toEnum n = case n of 
+       0   -> KeyNull        
+       39  -> KeyApostrophe  
+       44  -> KeyComma       
+       45  -> KeyMinus       
+       46  -> KeyPeriod      
+       47  -> KeySlash       
+       48  -> KeyZero        
+       49  -> KeyOne         
+       50  -> KeyTwo         
+       51  -> KeyThree       
+       52  -> KeyFour        
+       53  -> KeyFive        
+       54  -> KeySix         
+       55  -> KeySeven       
+       56  -> KeyEight       
+       57  -> KeyNine        
+       59  -> KeySemicolon   
+       61  -> KeyEqual       
+       65  -> KeyA           
+       66  -> KeyB           
+       67  -> KeyC           
+       68  -> KeyD           
+       69  -> KeyE           
+       70  -> KeyF           
+       71  -> KeyG           
+       72  -> KeyH           
+       73  -> KeyI           
+       74  -> KeyJ           
+       75  -> KeyK           
+       76  -> KeyL           
+       77  -> KeyM           
+       78  -> KeyN           
+       79  -> KeyO           
+       80  -> KeyP           
+       81  -> KeyQ           
+       82  -> KeyR           
+       83  -> KeyS           
+       84  -> KeyT           
+       85  -> KeyU           
+       86  -> KeyV           
+       87  -> KeyW           
+       88  -> KeyX           
+       89  -> KeyY           
+       90  -> KeyZ           
+       91  -> KeyLeftBracket 
+       92  -> KeyBackslash   
+       93  -> KeyRightBracket
+       96  -> KeyGrave       
+       32  -> KeySpace       
+       256 -> KeyEscape      
+       257 -> KeyEnter       
+       258 -> KeyTab         
+       259 -> KeyBackspace   
+       260 -> KeyInsert      
+       261 -> KeyDelete      
+       262 -> KeyRight       
+       263 -> KeyLeft        
+       264 -> KeyDown        
+       265 -> KeyUp          
+       266 -> KeyPageUp      
+       267 -> KeyPageDown    
+       268 -> KeyHome        
+       269 -> KeyEnd         
+       280 -> KeyCapsLock    
+       281 -> KeyScrollLock  
+       282 -> KeyNumLock     
+       283 -> KeyPrintScreen 
+       284 -> KeyPause       
+       290 -> KeyF1          
+       291 -> KeyF2          
+       292 -> KeyF3          
+       293 -> KeyF4          
+       294 -> KeyF5          
+       295 -> KeyF6          
+       296 -> KeyF7          
+       297 -> KeyF8          
+       298 -> KeyF9          
+       299 -> KeyF10         
+       300 -> KeyF11         
+       301 -> KeyF12         
+       340 -> KeyLeftShift   
+       341 -> KeyLeftControl 
+       342 -> KeyLeftAlt     
+       343 -> KeyLeftSuper   
+       344 -> KeyRightShift  
+       345 -> KeyRightControl
+       346 -> KeyRightAlt    
+       347 -> KeyRightSuper  
+       348 -> KeyKbMenu      
+       320 -> KeyKp0         
+       321 -> KeyKp1         
+       322 -> KeyKp2         
+       323 -> KeyKp3         
+       324 -> KeyKp4         
+       325 -> KeyKp5         
+       326 -> KeyKp6         
+       327 -> KeyKp7         
+       328 -> KeyKp8         
+       329 -> KeyKp9         
+       330 -> KeyKpDecimal   
+       331 -> KeyKpDivide    
+       332 -> KeyKpMultiply  
+       333 -> KeyKpSubtract  
+       334 -> KeyKpAdd       
+       335 -> KeyKpEnter     
+       336 -> KeyKpEqual     
+       -- Android buttons
+       4   -> KeyBack        
+       82  -> KeyMenu        
+       24  -> KeyVolumeUp    
+       25  -> KeyVolumeDown  
+       x   -> error $ "Invalid value " ++ show x ++ " for `fromEnum`."
+
+data MouseButton
+  = MouseButtonLeft
+  | MouseButtonRight
+  | MouseButtonMiddle
+  | MouseButtonSide
+  | MouseButtonExtra
+  | MouseButtonForward
+  | MouseButtonBack
+  deriving (Eq, Show, Enum)
+
+data MouseCursor
+  = MouseCursorDefault
+  | MouseCursorArrow
+  | MouseCursorIbeam
+  | MouseCursorCrosshair
+  | MouseCursorPointingHand
+  | MouseCursorResizeEW
+  | MouseCursorResizeNS
+  | MouseCursorResizeNWSE
+  | MouseCursorResizeNESW
+  | MouseCursorResizeAll
+  | MouseCursorNotAllowed
+ deriving (Eq, Show, Enum)
+
+data GamepadButton = GamepadButtonUnknown 
+                   | GamepadButtonUnknownLeftFaceUp 
+                   | GamepadButtonLeftFaceRight
+                   | GamepadButtonLeftFaceDown 
+                   | GamepadButtonLeftFaceLeft
+                   | GamepadButtonRightFaceUp
+                   | GamepadButtonRightFaceRight 
+                   | GamepadButtonRightFaceDown 
+                   | GamepadButtonRightFaceLeft
+                   | GamepadButtonLeftTrigger1
+                   | GamepadButtonLeftTrigger2 
+                   | GamepadButtonRightTrigger1 
+                   | GamepadButtonRightTrigger2
+                   | GamepadButtonMiddleLeft 
+                   | GamepadButtonMiddle 
+                   | GamepadButtonMiddleRight 
+                   | GamepadButtonLeftThumb 
+                   | GamepadButtonRightThumb 
+    deriving (Eq, Show, Enum)
+
+data GamepadAxis = GamepadAxisLeftX 
+                 | GamepadAxisLeftY
+                 | GamepadAxisRightX 
+                 | GamepadAxisRightY 
+                 | GamepadAxisLeftTrigger 
+                 | GamepadAxisRightTrigger 
+    deriving (Eq, Show, Enum)
+
+data MaterialMapIndex = MaterialMapAlbedo    
+                      | MaterialMapMetalness 
+                      | MaterialMapNormal    
+                      | MaterialMapRoughness 
+                      | MaterialMapOcclusion 
+                      | MaterialMapEmission  
+                      | MaterialMapHeight    
+                      | MaterialMapCubemap   
+                      | MaterialMapIrradiance
+                      | MaterialMapPrefilter 
+                      | MaterialMapBrdf      
+    deriving (Eq, Show, Enum)
+
+data ShaderLocationIndex = ShaderLocVertexPosition  
+                         | ShaderLocVertexTexcoord01
+                         | ShaderLocVertexTexcoord02
+                         | ShaderLocVertexNormal    
+                         | ShaderLocVertexTangent   
+                         | ShaderLocVertexColor     
+                         | ShaderLocMatrixMvp       
+                         | ShaderLocMatrixView      
+                         | ShaderLocMatrixProjection
+                         | ShaderLocMatrixModel     
+                         | ShaderLocMatrixNormal    
+                         | ShaderLocVectorView      
+                         | ShaderLocColorDiffuse    
+                         | ShaderLocColorSpecular   
+                         | ShaderLocColorAmbient    
+                         | ShaderLocMapAlbedo       
+                         | ShaderLocMapMetalness    
+                         | ShaderLocMapNormal       
+                         | ShaderLocMapRoughness    
+                         | ShaderLocMapOcclusion    
+                         | ShaderLocMapEmission     
+                         | ShaderLocMapHeight       
+                         | ShaderLocMapCubemap      
+                         | ShaderLocMapIrradiance   
+                         | ShaderLocMapPrefilter    
+                         | ShaderLocMapBrdf         
+    deriving (Eq, Show, Enum)
+
+data ShaderUniformDataType = ShaderUniformFloat    
+                           | ShaderUniformVec2     
+                           | ShaderUniformVec3      
+                           | ShaderUniformVec4      
+                           | ShaderUniformInt       
+                           | ShaderUniformIvec2     
+                           | ShaderUniformIvec3     
+                           | ShaderUniformIvec4     
+                           | ShaderUniformSampler2d 
+
+    deriving (Eq, Show, Enum)
+
+-- I genuinely have no idea where this is used.
+data ShaderAttributeDataType = ShaderAttribFloat
+                             | ShaderAttribVec2 
+                             | ShaderAttribVec3
+                             | ShaderAttribVec4
+    deriving (Eq, Show, Enum)
+
+data PixelFormat = PixelFormatUncompressedGrayscale   
+                 | PixelFormatUncompressedGrayAlpha   
+                 | PixelFormatUncompressedR5G6B5      
+                 | PixelFormatUncompressedR8G8B8      
+                 | PixelFormatUncompressedR5G5B5A1    
+                 | PixelFormatUncompressedR4G4B4A4    
+                 | PixelFormatUncompressedR8G8B8A8    
+                 | PixelFormatUncompressedR32         
+                 | PixelFormatUncompressedR32G32B32   
+                 | PixelFormatUncompressedR32G32B32A32
+                 | PixelFormatCompressedDxt1Rgb       
+                 | PixelFormatCompressedDxt1Rgba      
+                 | PixelFormatCompressedDxt3Rgba      
+                 | PixelFormatCompressedDxt5Rgba      
+                 | PixelFormatCompressedEtc1Rgb       
+                 | PixelFormatCompressedEtc2Rgb       
+                 | PixelFormatCompressedEtc2EacRgba   
+                 | PixelFormatCompressedPvrtRgb       
+                 | PixelFormatCompressedPvrtRgba      
+                 | PixelFormatCompressedAstc4x4Rgba   
+                 | PixelFormatCompressedAstc8x8Rgba   
+    deriving (Eq, Show, Enum)
+
+instance Storable PixelFormat where
+  sizeOf _ = 4
+  alignment _ = 4
+  peek ptr = do
+    val <- peek (castPtr ptr)
+    return $ toEnum $ fromEnum (val :: CInt)
+  poke ptr v = poke (castPtr ptr) (toEnum $ fromEnum v :: CInt)
+
+data TextureFilter = TextureFilterPoint 
+                   | TextureFilterBilinear 
+                   | TextureFilterTrilinear 
+                   | TextureFilterAnisotropic4x
+                   | TextureFilterAnisotropic8x
+                   | TextureFilterAnisotropic16x
+    deriving Enum
+
+data TextureWrap = TextureWrapRepeat
+                 | TextureWrapClamp 
+                 | TextureWrapMirrorRepeat 
+                 | TextureWrapMirrorClamp
+        deriving Enum
+
+data CubemapLayout = CubemapLayoutAutoDetect 
+                   | CubemapLayoutLineVertical 
+                   | CubemapLayoutLineHorizontal 
+                   | CubemapLayoutCrossThreeByFour 
+                   | CubemapLayoutCrossThreeByThree
+                   | CubemapLayoutPanorama
+    deriving Enum
+
+data FontType = FontDefault | FontBitmap | FontSDF deriving Enum
+
+data BlendMode = BlendAlpha | BlendAdditive | BlendMultiplied | BlendAddColors | BlendSubtractColors | BlendAlphaPremultiply | BlendCustom | BlendCustomSeparate deriving Enum
+
+data Gesture
+  = GestureNone
+  | GestureTap
+  | GestureDoubleTap
+  | GestureHold
+  | GestureDrag
+  | GestureSwipeRight
+  | GestureSwipeLeft
+  | GestureSwipeUp
+  | GestureSwipeDown
+  | GesturePinchIn
+  | GesturePinchOut
+  deriving (Show)
+
+-- NOTE: This is not the ideal solution, I need to make this unjanky
+instance Enum Gesture where
+  fromEnum n = case n of
+    GestureNone       -> 0
+    GestureTap        -> 1
+    GestureDoubleTap  -> 2
+    GestureHold       -> 4
+    GestureDrag       -> 8
+    GestureSwipeRight -> 16
+    GestureSwipeLeft  -> 32
+    GestureSwipeUp    -> 64
+    GestureSwipeDown  -> 128
+    GesturePinchIn    -> 256
+    GesturePinchOut   -> 512
+  toEnum n = case n of
+    0   -> GestureNone
+    1   -> GestureTap
+    2   -> GestureDoubleTap
+    4   -> GestureHold
+    8   -> GestureDrag
+    16  -> GestureSwipeRight
+    32  -> GestureSwipeLeft
+    64  -> GestureSwipeUp
+    128 -> GestureSwipeDown
+    256 -> GesturePinchIn
+    512 -> GesturePinchOut
+    _   -> error "Invalid input"
+
+data CameraMode
+  = CameraModeCustom
+  | CameraModeFree
+  | CameraModeOrbital
+  | CameraModeFirstPerson
+  | CameraModeThirdPerson
+  deriving (Enum)
+
+data CameraProjection = CameraPerspective | CameraOrthographic deriving (Eq, Show, Enum)
+
+instance Storable CameraProjection where
+  sizeOf _ = 4
+  alignment _ = 4
+  peek ptr = do
+    val <- peek (castPtr ptr)
+    return $ toEnum $ fromEnum (val :: CInt)
+  poke ptr v = poke (castPtr ptr) (toEnum $ fromEnum v :: CInt)
+
+data NPatchLayout = NPatchNinePatch | NPatchThreePatchVertical | NPatchThreePatchHorizontal deriving (Eq, Show, Enum)
+
+instance Storable NPatchLayout where
+  sizeOf _ = 4
+  alignment _ = 4
+  peek ptr = do
+    val <- peek (castPtr ptr)
+    return $ toEnum $ fromEnum (val :: CInt)
+  poke ptr v = poke (castPtr ptr) (toEnum $ fromEnum v :: CInt)
+
+
+------------------------------------------------
+-- Raylib structures ---------------------------
+------------------------------------------------
 
 {- typedef struct Vector2 {
             float x; float y;
@@ -348,7 +993,7 @@ data Image = Image
     image'width :: CInt,
     image'height :: CInt,
     image'mipmaps :: CInt,
-    image'format :: CInt
+    image'format :: PixelFormat
   }
   deriving (Eq, Show)
 
@@ -398,7 +1043,7 @@ data Texture = Texture
     texture'width :: CInt,
     texture'height :: CInt,
     texture'mipmaps :: CInt,
-    texture'format :: CInt
+    texture'format :: PixelFormat
   }
   deriving (Eq, Show)
 
@@ -499,7 +1144,7 @@ data NPatchInfo = NPatchInfo
     nPatchinfo'top :: CInt,
     nPatchinfo'right :: CInt,
     nPatchinfo'bottom :: CInt,
-    nPatchinfo'layout :: CInt
+    nPatchinfo'layout :: NPatchLayout
   }
   deriving (Eq, Show)
 
@@ -671,7 +1316,7 @@ data Camera3D = Camera3D
     camera3D'target :: Vector3,
     camera3D'up :: Vector3,
     camera3D'fovy :: CFloat,
-    camera3D'projection :: CInt
+    camera3D'projection :: CameraProjection
   }
   deriving (Eq, Show)
 
