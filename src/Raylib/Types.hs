@@ -18,7 +18,7 @@ import Foreign
 -- Raylib enumerations -------------------------
 ------------------------------------------------
 
-data ConfigFlags = VsyncHint              
+data ConfigFlag = VsyncHint              
                  | FullscreenMode         
                  | WindowResizable        
                  | WindowUndecorated      
@@ -33,8 +33,9 @@ data ConfigFlags = VsyncHint
                  | WindowMousePassthrough 
                  | Msaa4xHint             
                  | InterlacedHint         
-
-instance Enum ConfigFlags where
+  deriving (Eq, Show)
+  
+instance Enum ConfigFlag where
     fromEnum g = case g of 
             VsyncHint              -> 64
             FullscreenMode         -> 2
@@ -69,7 +70,8 @@ instance Enum ConfigFlags where
       65536 -> InterlacedHint         
       n     -> error $ "Invalid value " ++ show n ++ " for `toEnum`."
 
-data TraceLogLevel = LogAll | LogTrace | LogDebug | LogInfo | LogWarning | LogError | LogFatal | LogNone deriving (Enum)
+data TraceLogLevel = LogAll | LogTrace | LogDebug | LogInfo | LogWarning | LogError | LogFatal | LogNone 
+    deriving (Eq, Show,Enum)
 
 data KeyboardKey = KeyNull        
                  | KeyApostrophe  
@@ -181,6 +183,8 @@ data KeyboardKey = KeyNull
                  | KeyMenu        
                  | KeyVolumeUp    
                  | KeyVolumeDown  
+
+  deriving (Eq, Show)
 
 instance Enum KeyboardKey where
     fromEnum k = case k of 
@@ -418,7 +422,7 @@ data MouseButton
   | MouseButtonExtra
   | MouseButtonForward
   | MouseButtonBack
-  deriving (Eq, Ord, Enum)
+  deriving (Eq, Show, Enum)
 
 data MouseCursor
   = MouseCursorDefault
@@ -432,7 +436,7 @@ data MouseCursor
   | MouseCursorResizeNESW
   | MouseCursorResizeAll
   | MouseCursorNotAllowed
-  deriving (Enum)
+ deriving (Eq, Show, Enum)
 
 data GamepadButton = GamepadButtonUnknown 
                    | GamepadButtonUnknownLeftFaceUp 
@@ -452,7 +456,7 @@ data GamepadButton = GamepadButtonUnknown
                    | GamepadButtonMiddleRight 
                    | GamepadButtonLeftThumb 
                    | GamepadButtonRightThumb 
-    deriving Enum
+    deriving (Eq, Show, Enum)
 
 data GamepadAxis = GamepadAxisLeftX 
                  | GamepadAxisLeftY
@@ -460,6 +464,7 @@ data GamepadAxis = GamepadAxisLeftX
                  | GamepadAxisRightY 
                  | GamepadAxisLeftTrigger 
                  | GamepadAxisRightTrigger 
+    deriving (Eq, Show, Enum)
 
 data MaterialMapIndex = MaterialMapAlbedo    
                       | MaterialMapMetalness 
@@ -472,6 +477,7 @@ data MaterialMapIndex = MaterialMapAlbedo
                       | MaterialMapIrradiance
                       | MaterialMapPrefilter 
                       | MaterialMapBrdf      
+    deriving (Eq, Show, Enum)
 
 data ShaderLocationIndex = ShaderLocVertexPosition  
                          | ShaderLocVertexTexcoord01
@@ -499,7 +505,7 @@ data ShaderLocationIndex = ShaderLocVertexPosition
                          | ShaderLocMapIrradiance   
                          | ShaderLocMapPrefilter    
                          | ShaderLocMapBrdf         
-    deriving Enum
+    deriving (Eq, Show, Enum)
 
 data ShaderUniformDataType = ShaderUniformFloat    
                            | ShaderUniformVec2     
@@ -510,14 +516,15 @@ data ShaderUniformDataType = ShaderUniformFloat
                            | ShaderUniformIvec3     
                            | ShaderUniformIvec4     
                            | ShaderUniformSampler2d 
-    deriving Enum
+
+    deriving (Eq, Show, Enum)
 
 -- I genuinely have no idea where this is used.
 data ShaderAttributeDataType = ShaderAttribFloat
                              | ShaderAttribVec2 
                              | ShaderAttribVec3
                              | ShaderAttribVec4
-    deriving Enum
+    deriving (Eq, Show, Enum)
 
 data PixelFormat = PixelFormatUncompressedGrayscale   
                  | PixelFormatUncompressedGrayAlpha   
