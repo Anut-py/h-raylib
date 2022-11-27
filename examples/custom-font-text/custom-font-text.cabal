@@ -8,4 +8,4 @@ executable custom-font-text
   main-is:            Main.hs
   build-depends:
     base
-    , h-raylib >=4.5.0.6
+    , h-raylib >=4.5.0.7

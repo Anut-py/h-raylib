@@ -10,10 +10,9 @@ import Raylib
       initWindow,
       loadFont,
       setTargetFPS,
-      windowShouldClose, changeDirectory, getApplicationDirectory, unloadFont, isKeyPressed )
-import Raylib.Types (Vector2 (Vector2), Font)
+      windowShouldClose, changeDirectory, getApplicationDirectory, unloadFont, isKeyPressed, drawText )
+import Raylib.Types (Vector2 (Vector2), Font, KeyboardKey (KeyUp, KeyDown))
 import Raylib.Colors (rayWhite, black)
-import Raylib.Constants (key'up, key'down)
 import Foreign (fromBool)
 
 mainFontPath :: String
@@ -21,23 +20,24 @@ mainFontPath = "../../../../../../../../../assets/Lato-Regular.ttf"
 
 main :: IO ()
 main = do
-  initWindow 600 450 "raylib example - custom font text"
+  initWindow 800 450 "raylib example - custom font text"
   setTargetFPS 60
   _ <- getApplicationDirectory >>= changeDirectory
 
   mainFont <- loadFont mainFontPath
-  gameLoop mainFont 20.0
+  gameLoop mainFont 20
   unloadFont mainFont
 
-gameLoop :: Font -> Float -> IO ()
+gameLoop :: Font -> Int -> IO ()
 gameLoop mainFont size = do
   beginDrawing
   clearBackground rayWhite
 
-  drawTextEx mainFont "Testing drawTextEx" (Vector2 20.0 12.0) size 1.0 black
+  drawTextEx mainFont "Testing drawTextEx" (Vector2 20.0 12.0) (fromIntegral size) 1.0 black
+  drawText "Press the up and down arrows to change the font size" 20 (size + 15) 24 black
 
-  increaseSize <- isKeyPressed key'up
-  decreaseSize <- isKeyPressed key'down
+  increaseSize <- isKeyPressed KeyUp
+  decreaseSize <- isKeyPressed KeyDown
 
   endDrawing
 
