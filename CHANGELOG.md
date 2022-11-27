@@ -12,8 +12,16 @@ _19 November 2022_
 
 ## Version 4.5.0.6
 _24 November 2022_
-- Fixed `Font` marshalling ([#6](https://github.com/Anut-py/h-raylib/issues/6))
+
+\[[#6](https://github.com/Anut-py/h-raylib/issues/6)\]
+
+- Fixed `Font` marshalling
 
 ## Version 4.5.0.7
 _26 November 2022_
-- Removed all constants that were enums in the original C API and replaced them with sum types deriving Enum. Also removed some CInt usage in the main API. ([#7](https://github.com/Anut-py/h-raylib/pull/7))
+
+\[[#7](https://github.com/Anut-py/h-raylib/pull/7)\]
+
+- Removed all constants that were enums in the original C API and replaced them with sum types deriving Enum
+- Removed some CInt usage in the main API
+- Removed `Raylib.Constants`
