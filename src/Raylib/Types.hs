@@ -409,7 +409,7 @@ instance Enum KeyboardKey where
        336 -> KeyKpEqual     
        -- Android buttons
        4   -> KeyBack        
-       82  -> KeyMenu        
+      --  82  -> KeyMenu        
        24  -> KeyVolumeUp    
        25  -> KeyVolumeDown  
        x   -> error $ "Invalid value " ++ show x ++ " for `fromEnum`."
