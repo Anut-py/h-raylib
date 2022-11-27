@@ -19,8 +19,7 @@ import Raylib
     windowShouldClose, drawCubeWiresV
   )
 import Raylib.Colors (black, white)
-import Raylib.Constants (CameraMode(..), CameraProjection(..))
-import Raylib.Types (Camera3D (Camera3D), Vector3 (Vector3))
+import Raylib.Types (Camera3D (Camera3D), Vector3 (Vector3), CameraProjection (CameraPerspective), CameraMode (CameraModeFirstPerson))
 
 main :: IO ()
 main = do
