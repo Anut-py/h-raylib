@@ -25,3 +25,10 @@ _26 November 2022_
 - Removed all constants that were enums in the original C API and replaced them with sum types deriving Enum
 - Removed some CInt usage in the main API
 - Removed `Raylib.Constants`
+
+## Version 4.5.0.8
+_18 December 2022_
+
+\[[#9](https://github.com/Anut-py/h-raylib/issues/9)\]
+
+- Fixed an issue on Mac where `clang` failed to detect that `rglfw.c` was using objective-c
