@@ -1,6 +1,6 @@
 cabal-version:      2.4
 name:               h-raylib
-version:            4.5.0.7
+version:            4.5.0.8
 synopsis:           Raylib bindings for Haskell
 category:           graphics
 description:
@@ -14,7 +14,10 @@ maintainer:         Anut
 extra-doc-files:    README.md
 extra-source-files:
   CHANGELOG.md
+  lib/bindings.c
   lib/bindings.h
+  lib/rglfw.m
+  raylib/src/*.c
   raylib/src/*.h
   raylib/src/external/*.h
   raylib/src/external/glfw/deps/*.c
@@ -108,7 +111,7 @@ library
 
   elif (flag(platform-mac) || (flag(detect-platform) && os(osx)))
     frameworks: OpenGL Cocoa IOKit CoreVideo CoreAudio CoreFoundation
-    cc-options: -x objective-c -DPLATFORM_DESKTOP
+    cc-options: -DPLATFORM_DESKTOP
 
   elif (flag(platform-bsd) || (flag(detect-platform) && ((os(freebsd) || os(netbsd)) || os(openbsd))))
     extra-libraries:
@@ -118,18 +121,32 @@ library
     cc-options:      -DPLATFORM_DESKTOP
 
   else
+    -- Unsupported OS, do nothing. If you can get it working on an
+    -- OS that isn't on here, please add it here.
+  
+  if (flag(platform-mac) || (flag(detect-platform) && os(osx)))
+    -- Use rgflw.m instead of .c on Mac to force objective-c
+    c-sources:
+      lib/bindings.c
+      lib/rglfw.m
+      raylib/src/raudio.c
+      raylib/src/rcore.c
+      raylib/src/rmodels.c
+      raylib/src/rshapes.c
+      raylib/src/rtext.c
+      raylib/src/rtextures.c
+      raylib/src/utils.c
 
-  -- Unsupported OS, do nothing. If you can get it working on an
-  -- OS that isn't on here, please add it here.
-  c-sources:
-    lib/bindings.c
-    raylib/src/raudio.c
-    raylib/src/rcore.c
-    raylib/src/rglfw.c
-    raylib/src/rmodels.c
-    raylib/src/rshapes.c
-    raylib/src/rtext.c
-    raylib/src/rtextures.c
-    raylib/src/utils.c
+  else
+    c-sources:
+      lib/bindings.c
+      raylib/src/raudio.c
+      raylib/src/rcore.c
+      raylib/src/rglfw.c
+      raylib/src/rmodels.c
+      raylib/src/rshapes.c
+      raylib/src/rtext.c
+      raylib/src/rtextures.c
+      raylib/src/utils.c
 
   include-dirs:     lib raylib/src raylib/src/external/glfw/include
