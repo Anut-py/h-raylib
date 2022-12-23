@@ -32,3 +32,8 @@ _18 December 2022_
 \[[#9](https://github.com/Anut-py/h-raylib/issues/9)\]
 
 - Fixed an issue on Mac where `clang` failed to detect that `rglfw.c` was using objective-c
+
+## Version 4.5.0.9
+_23 December 2022_
+
+- Changed `setConfigFlags` and `setGesturesEnabled` to use an array of flags

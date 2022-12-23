@@ -1058,8 +1058,8 @@ foreign import ccall safe "raylib.h SetConfigFlags"
   c'setConfigFlags ::
     CUInt -> IO ()
 
-setConfigFlags :: Integer -> IO ()
-setConfigFlags flags = c'setConfigFlags $ fromIntegral flags
+setConfigFlags :: [ConfigFlag] -> IO ()
+setConfigFlags flags = c'setConfigFlags $ fromIntegral $ configsToBitflag flags
 
 foreign import ccall safe "raylib.h &SetConfigFlags"
   p'setConfigFlags ::
@@ -1955,8 +1955,8 @@ foreign import ccall safe "raylib.h SetGesturesEnabled"
   c'setGesturesEnabled ::
     CUInt -> IO ()
 
-setGesturesEnabled :: Integer -> IO ()
-setGesturesEnabled flags = c'setGesturesEnabled (fromIntegral flags)
+setGesturesEnabled :: [Gesture] -> IO ()
+setGesturesEnabled flags = c'setGesturesEnabled (fromIntegral $ configsToBitflag flags)
 
 foreign import ccall safe "raylib.h &SetGesturesEnabled"
   p'setGesturesEnabled ::

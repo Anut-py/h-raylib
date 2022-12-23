@@ -1,7 +1,6 @@
 {-# OPTIONS -Wall #-}
 module Raylib.Util (c'free, pop, popCArray, withArray2D, configsToBitflag) where
 
-import Raylib.Types (ConfigFlag)
 import Foreign (Ptr, Storable (peek), castPtr, newArray, free, peekArray)
 import Control.Monad (forM_)
 import Data.Bits ((.|.))
@@ -30,6 +29,6 @@ withArray2D arr func = do
     free ptr
     return res
 
-configsToBitflag :: [ConfigFlag] -> Integer
-configsToBitflag = fromIntegral . foldr folder (toEnum 0) 
-    where folder a b = (fromEnum a) .|. b
+configsToBitflag :: (Enum a) => [a] -> Integer
+configsToBitflag = fromIntegral . foldr folder (toEnum 0)
+    where folder a b = fromEnum a .|. b
