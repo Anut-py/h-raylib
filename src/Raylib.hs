@@ -3582,6 +3582,33 @@ foreign import ccall safe "raylib.h &ColorFromHSV"
   p'colorFromHSV ::
     FunPtr (CFloat -> CFloat -> CFloat -> IO Raylib.Types.Color)
 
+foreign import ccall safe "bindings.h ColorTint_" c'colorTint :: Ptr Color -> Ptr Color -> IO (Ptr Raylib.Types.Color)
+
+colorTint :: Color -> Color -> Raylib.Types.Color
+colorTint color tint = unsafePerformIO $ with color (with tint . c'colorTint) >>= pop
+
+foreign import ccall safe "raylib.h &ColorTint"
+  p'colorTint ::
+    FunPtr (Color -> Color -> IO Raylib.Types.Color)
+
+foreign import ccall safe "bindings.h ColorBrightness_" c'colorBrightness :: Ptr Color -> CFloat -> IO (Ptr Raylib.Types.Color)
+
+colorBrightness :: Color -> Float -> Raylib.Types.Color
+colorBrightness color brightness = unsafePerformIO $ with color (\c -> c'colorBrightness c (realToFrac brightness)) >>= pop
+
+foreign import ccall safe "raylib.h &ColorBrightness"
+  p'colorBrightness ::
+    FunPtr (Color -> CFloat -> IO Raylib.Types.Color)
+
+foreign import ccall safe "bindings.h ColorContrast_" c'colorContrast :: Ptr Color -> CFloat -> IO (Ptr Raylib.Types.Color)
+
+colorContrast :: Color -> Float -> Raylib.Types.Color
+colorContrast color contrast = unsafePerformIO $ with color (\c -> c'colorContrast c (realToFrac contrast)) >>= pop
+
+foreign import ccall safe "raylib.h &ColorContrast"
+  p'colorContrast ::
+    FunPtr (Color -> CFloat -> IO Raylib.Types.Color)
+
 foreign import ccall safe "bindings.h ColorAlpha_" c'colorAlpha :: Ptr Raylib.Types.Color -> CFloat -> IO (Ptr Raylib.Types.Color)
 
 colorAlpha :: Raylib.Types.Color -> Float -> Raylib.Types.Color
@@ -4187,24 +4214,6 @@ drawCubeWiresV position size color = with position (\p -> with size (with color 
 foreign import ccall safe "raylib.h &DrawCubeWiresV"
   p'drawCubeWiresV ::
     FunPtr (Raylib.Types.Vector3 -> Raylib.Types.Vector3 -> Raylib.Types.Color -> IO ())
-
-foreign import ccall safe "bindings.h DrawCubeTexture_" c'drawCubeTexture :: Ptr Raylib.Types.Texture -> Ptr Raylib.Types.Vector3 -> CFloat -> CFloat -> CFloat -> Ptr Raylib.Types.Color -> IO ()
-
-drawCubeTexture :: Raylib.Types.Texture -> Raylib.Types.Vector3 -> Float -> Float -> Float -> Raylib.Types.Color -> IO ()
-drawCubeTexture texture position width height length color = with texture (\t -> with position (\p -> with color (c'drawCubeTexture t p (realToFrac width) (realToFrac height) (realToFrac length))))
-
-foreign import ccall safe "raylib.h &DrawCubeTexture"
-  p'drawCubeTexture ::
-    FunPtr (Raylib.Types.Texture -> Raylib.Types.Vector3 -> CFloat -> CFloat -> CFloat -> Raylib.Types.Color -> IO ())
-
-foreign import ccall safe "bindings.h DrawCubeTextureRec_" c'drawCubeTextureRec :: Ptr Raylib.Types.Texture -> Ptr Raylib.Types.Rectangle -> Ptr Raylib.Types.Vector3 -> CFloat -> CFloat -> CFloat -> Ptr Raylib.Types.Color -> IO ()
-
-drawCubeTextureRec :: Raylib.Types.Texture -> Raylib.Types.Rectangle -> Raylib.Types.Vector3 -> Float -> Float -> Float -> Raylib.Types.Color -> IO ()
-drawCubeTextureRec texture source position width height length color = with texture (\t -> with source (\s -> with position (\p -> with color (c'drawCubeTextureRec t s p (realToFrac width) (realToFrac height) (realToFrac length)))))
-
-foreign import ccall safe "raylib.h &DrawCubeTextureRec"
-  p'drawCubeTextureRec ::
-    FunPtr (Raylib.Types.Texture -> Raylib.Types.Rectangle -> Raylib.Types.Vector3 -> CFloat -> CFloat -> CFloat -> Raylib.Types.Color -> IO ())
 
 foreign import ccall safe "bindings.h DrawSphere_" c'drawSphere :: Ptr Raylib.Types.Vector3 -> CFloat -> Ptr Raylib.Types.Color -> IO ()
 
