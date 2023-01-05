@@ -37,3 +37,9 @@ _18 December 2022_
 _23 December 2022_
 
 - Changed `setConfigFlags` and `setGesturesEnabled` to use an array of flags
+
+## Version 4.5.0.10
+_5 January 2023_
+
+- Restructured to make the examples easier to run
+- Updated raylib to the master branch

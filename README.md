@@ -79,7 +79,7 @@ GitHub repository and update `h-raylib.cabal` with the relevant config.
 Anybody willing to contribute to the project is welcome to do so. This
 library is very new, so please report any bugs in the GitHub issue tracker.
 
-You can run the examples by using `cabal run {example name}`.
+You can run the examples by using `cabal run {example name}` in the project directory.
 
 ## License
 
