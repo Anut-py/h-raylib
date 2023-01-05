@@ -1,0 +1,3 @@
+packages: *.cabal
+package h-raylib
+  flags: +examples

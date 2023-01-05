@@ -16,7 +16,7 @@ import Raylib.Colors (rayWhite, black)
 import Foreign (fromBool)
 
 mainFontPath :: String
-mainFontPath = "../../../../../../../../../assets/Lato-Regular.ttf"
+mainFontPath = "../../../../../../../../../examples/custom-font-text/assets/Lato-Regular.ttf"
 
 main :: IO ()
 main = do
