@@ -901,6 +901,27 @@ Color *ColorFromHSV_(float a, float b, float c)
     return ptr;
 }
 
+Color *ColorTint_(Color* a, Color* b)
+{
+    Color *ptr = (Color *)malloc(sizeof(Color));
+    *ptr = ColorTint(*a, *b);
+    return ptr;
+}
+
+Color *ColorBrightness_(Color* a, float b)
+{
+    Color *ptr = (Color *)malloc(sizeof(Color));
+    *ptr = ColorBrightness(*a, b);
+    return ptr;
+}
+
+Color *ColorContrast_(Color* a, float b)
+{
+    Color *ptr = (Color *)malloc(sizeof(Color));
+    *ptr = ColorContrast(*a, b);
+    return ptr;
+}
+
 Color *ColorAlpha_(Color *a, float b)
 {
     Color *ptr = (Color *)malloc(sizeof(Color));
@@ -1080,16 +1101,6 @@ void DrawCubeWires_(Vector3 *a, float b, float c, float d, Color *e)
 void DrawCubeWiresV_(Vector3 *a, Vector3 *b, Color *c)
 {
     DrawCubeWiresV(*a, *b, *c);
-}
-
-void DrawCubeTexture_(Texture *a, Vector3 *b, float c, float d, float e, Color *f)
-{
-    DrawCubeTexture(*a, *b, c, d, e, *f);
-}
-
-void DrawCubeTextureRec_(Texture *a, Rectangle *b, Vector3 *c, float d, float e, float f, Color *g)
-{
-    DrawCubeTextureRec(*a, *b, *c, d, e, f, *g);
 }
 
 void DrawSphere_(Vector3 *a, float b, Color *c)
