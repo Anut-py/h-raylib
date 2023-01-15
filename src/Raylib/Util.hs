@@ -1,9 +1,10 @@
 {-# OPTIONS -Wall #-}
-module Raylib.Util (c'free, pop, popCArray, withArray2D, configsToBitflag) where
+module Raylib.Util (c'free, pop, popCArray, withArray2D, configsToBitflag, withMaybe, withMaybeCString) where
 
-import Foreign (Ptr, Storable (peek), castPtr, newArray, free, peekArray)
+import Foreign (Ptr, Storable (peek), castPtr, newArray, free, peekArray, with, nullPtr)
 import Control.Monad (forM_)
 import Data.Bits ((.|.))
+import Foreign.C (CString, withCString)
 -- Internal utility functions
 
 foreign import ccall "stdlib.h free" c'free :: Ptr () -> IO ()
@@ -32,3 +33,13 @@ withArray2D arr func = do
 configsToBitflag :: (Enum a) => [a] -> Integer
 configsToBitflag = fromIntegral . foldr folder (toEnum 0)
     where folder a b = fromEnum a .|. b
+
+withMaybe :: (Storable a) => Maybe a -> (Ptr a -> IO b) -> IO b
+withMaybe a f = case a of
+    (Just val) -> with val f
+    Nothing    -> f nullPtr
+
+withMaybeCString :: Maybe String -> (CString -> IO b) -> IO b
+withMaybeCString a f = case a of
+    (Just val) -> withCString val f
+    Nothing    -> f nullPtr

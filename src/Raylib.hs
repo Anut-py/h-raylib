@@ -81,7 +81,7 @@ import Raylib.Types
     ShaderUniformDataType,
     PixelFormat
   )
-import Raylib.Util (pop, withArray2D, configsToBitflag)
+import Raylib.Util (pop, withArray2D, configsToBitflag, withMaybeCString)
 import Prelude hiding (length)
 
 -- Haskell doesn't support varargs in foreign calls, so these functions are impossible to call from FFI
@@ -833,8 +833,9 @@ foreign import ccall safe "raylib.h &UnloadVrStereoConfig"
 
 foreign import ccall safe "bindings.h LoadShader_" c'loadShader :: CString -> CString -> IO (Ptr Raylib.Types.Shader)
 
-loadShader :: String -> String -> IO Raylib.Types.Shader
-loadShader vsFileName fsFileName = withCString vsFileName (withCString fsFileName . c'loadShader) >>= pop
+loadShader :: Maybe String -> Maybe String -> IO Raylib.Types.Shader
+loadShader vsFileName fsFileName = 
+  withMaybeCString vsFileName (withMaybeCString fsFileName . c'loadShader) >>= pop
 
 foreign import ccall safe "raylib.h &LoadShader"
   p'loadShader ::
@@ -842,8 +843,8 @@ foreign import ccall safe "raylib.h &LoadShader"
 
 foreign import ccall safe "bindings.h LoadShaderFromMemory_" c'loadShaderFromMemory :: CString -> CString -> IO (Ptr Raylib.Types.Shader)
 
-loadShaderFromMemory :: String -> String -> IO Raylib.Types.Shader
-loadShaderFromMemory vsCode fsCode = withCString vsCode (withCString fsCode . c'loadShaderFromMemory) >>= pop
+loadShaderFromMemory :: Maybe String -> Maybe String -> IO Raylib.Types.Shader
+loadShaderFromMemory vsCode fsCode = withMaybeCString vsCode (withMaybeCString fsCode . c'loadShaderFromMemory) >>= pop
 
 foreign import ccall safe "raylib.h &LoadShaderFromMemory"
   p'loadShaderFromMemory ::
