@@ -477,7 +477,7 @@ foreign import ccall safe "raylib.h GetMonitorHeight"
   c'getMonitorHeight ::
     CInt -> IO CInt
 
-getMonitorHeight :: Int -> IO CInt
+getMonitorHeight :: Int -> IO Int
 getMonitorHeight monitor = fromIntegral <$> c'getMonitorHeight (fromIntegral monitor)
 
 foreign import ccall safe "raylib.h &GetMonitorHeight"
@@ -488,7 +488,7 @@ foreign import ccall safe "raylib.h GetMonitorPhysicalWidth"
   c'getMonitorPhysicalWidth ::
     CInt -> IO CInt
 
-getMonitorPhysicalWidth :: Int -> IO CInt
+getMonitorPhysicalWidth :: Int -> IO Int
 getMonitorPhysicalWidth monitor = fromIntegral <$> c'getMonitorPhysicalWidth (fromIntegral monitor)
 
 foreign import ccall safe "raylib.h &GetMonitorPhysicalWidth"
