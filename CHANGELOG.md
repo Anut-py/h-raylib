@@ -49,3 +49,8 @@ _14 January, 2023_
 
 - Fixed some function types
 - Allowed omitting fragment/vertex shaders in `loadShader` functions
+
+## Version 4.5.0.12
+_14 January, 2023_
+
+- Removed `ShaderLocationIndex` from some function types
