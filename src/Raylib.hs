@@ -77,7 +77,6 @@ import Raylib.Types
     KeyboardKey,
     GamepadButton,
     GamepadAxis,
-    ShaderLocationIndex,
     ShaderUniformDataType,
     PixelFormat
   )
@@ -870,10 +869,8 @@ foreign import ccall safe "raylib.h &GetShaderLocationAttrib"
 
 foreign import ccall safe "bindings.h SetShaderValue_" c'setShaderValue :: Ptr Raylib.Types.Shader -> CInt -> Ptr () -> CInt -> IO ()
 
--- TODO: This `ShaderLocationIndex` might be a wrong type, this should be examined at a later date
--- This goes for the other functions below as well using it
-setShaderValue :: Raylib.Types.Shader -> ShaderLocationIndex -> Ptr () -> ShaderUniformDataType -> IO ()
-setShaderValue shader locIndex value uniformType = with shader (\s -> c'setShaderValue s (fromIntegral $ fromEnum locIndex) value (fromIntegral $ fromEnum uniformType))
+setShaderValue :: Raylib.Types.Shader -> Int -> Ptr () -> ShaderUniformDataType -> IO ()
+setShaderValue shader locIndex value uniformType = with shader (\s -> c'setShaderValue s (fromIntegral locIndex) value (fromIntegral $ fromEnum uniformType))
 
 foreign import ccall safe "raylib.h &SetShaderValue"
   p'setShaderValue ::
@@ -881,8 +878,8 @@ foreign import ccall safe "raylib.h &SetShaderValue"
 
 foreign import ccall safe "bindings.h SetShaderValueV_" c'setShaderValueV :: Ptr Raylib.Types.Shader -> CInt -> Ptr () -> CInt -> CInt -> IO ()
 
-setShaderValueV :: Raylib.Types.Shader -> ShaderLocationIndex -> Ptr () -> ShaderUniformDataType -> Int -> IO ()
-setShaderValueV shader locIndex value uniformType count = with shader (\s -> c'setShaderValueV s (fromIntegral $ fromEnum locIndex) value (fromIntegral $ fromEnum uniformType) (fromIntegral count))
+setShaderValueV :: Raylib.Types.Shader -> Int -> Ptr () -> ShaderUniformDataType -> Int -> IO ()
+setShaderValueV shader locIndex value uniformType count = with shader (\s -> c'setShaderValueV s (fromIntegral locIndex) value (fromIntegral $ fromEnum uniformType) (fromIntegral count))
 
 foreign import ccall safe "raylib.h &SetShaderValueV"
   p'setShaderValueV ::
@@ -890,8 +887,8 @@ foreign import ccall safe "raylib.h &SetShaderValueV"
 
 foreign import ccall safe "bindings.h SetShaderValueMatrix_" c'setShaderValueMatrix :: Ptr Raylib.Types.Shader -> CInt -> Ptr Raylib.Types.Matrix -> IO ()
 
-setShaderValueMatrix :: Raylib.Types.Shader -> ShaderLocationIndex -> Raylib.Types.Matrix -> IO ()
-setShaderValueMatrix shader locIndex mat = with shader (\s -> with mat (c'setShaderValueMatrix s (fromIntegral $ fromEnum locIndex)))
+setShaderValueMatrix :: Raylib.Types.Shader -> Int -> Raylib.Types.Matrix -> IO ()
+setShaderValueMatrix shader locIndex mat = with shader (\s -> with mat (c'setShaderValueMatrix s (fromIntegral locIndex)))
 
 foreign import ccall safe "raylib.h &SetShaderValueMatrix"
   p'setShaderValueMatrix ::
@@ -899,8 +896,8 @@ foreign import ccall safe "raylib.h &SetShaderValueMatrix"
 
 foreign import ccall safe "bindings.h SetShaderValueTexture_" c'setShaderValueTexture :: Ptr Raylib.Types.Shader -> CInt -> Ptr Raylib.Types.Texture -> IO ()
 
-setShaderValueTexture :: Raylib.Types.Shader -> ShaderLocationIndex -> Raylib.Types.Texture -> IO ()
-setShaderValueTexture shader locIndex tex = with shader (\s -> with tex (c'setShaderValueTexture s (fromIntegral $ fromEnum locIndex)))
+setShaderValueTexture :: Raylib.Types.Shader -> Int -> Raylib.Types.Texture -> IO ()
+setShaderValueTexture shader locIndex tex = with shader (\s -> with tex (c'setShaderValueTexture s (fromIntegral locIndex)))
 
 foreign import ccall safe "raylib.h &SetShaderValueTexture"
   p'setShaderValueTexture ::
