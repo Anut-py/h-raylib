@@ -20,7 +20,7 @@ mainFontPath = "../../../../../../../../../examples/custom-font-text/assets/Lato
 
 main :: IO ()
 main = do
-  initWindow 800 450 "raylib example - custom font text"
+  initWindow 800 450 "raylib [text] example - custom font text"
   setTargetFPS 60
   _ <- getApplicationDirectory >>= changeDirectory
 

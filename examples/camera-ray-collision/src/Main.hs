@@ -22,7 +22,7 @@ import Foreign (toBool)
 
 main :: IO ()
 main = do
-  initWindow 600 450 "raylib example - camera ray collision"
+  initWindow 600 450 "raylib [core] example - camera ray collision"
   let camera = Camera3D (Vector3 0 0 0) (Vector3 2 0 1) (Vector3 0 1 0) 70 CameraPerspective
   setCameraMode camera CameraModeFirstPerson
   setTargetFPS 60

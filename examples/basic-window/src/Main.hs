@@ -16,7 +16,7 @@ import Raylib.Colors (lightGray, rayWhite)
 
 main :: IO ()
 main = do
-  initWindow 600 450 "raylib example - basic window"
+  initWindow 600 450 "raylib [core] example - basic window"
   setTargetFPS 60
   gameLoop
   closeWindow

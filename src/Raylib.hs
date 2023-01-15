@@ -3652,17 +3652,6 @@ foreign import ccall safe "raylib.h &SetPixelColor"
   p'setPixelColor ::
     FunPtr (Ptr () -> Raylib.Types.Color -> CInt -> IO ())
 
-foreign import ccall safe "raylib.h GetPixelDataSize"
-  c'getPixelDataSize ::
-    CInt -> CInt -> CInt -> IO CInt
-
-getPixelDataSize :: Int -> Int -> PixelFormat -> Int
-getPixelDataSize width height format = unsafePerformIO (fromIntegral <$> c'getPixelDataSize (fromIntegral width) (fromIntegral height) (fromIntegral $ fromEnum format))
-
-foreign import ccall safe "raylib.h &GetPixelDataSize"
-  p'getPixelDataSize ::
-    FunPtr (CInt -> CInt -> CInt -> IO CInt)
-
 foreign import ccall safe "bindings.h GetFontDefault_" c'getFontDefault :: IO (Ptr Raylib.Types.Font)
 
 getFontDefault :: IO Raylib.Types.Font
