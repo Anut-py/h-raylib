@@ -1,19 +1,22 @@
 {-# OPTIONS -Wall #-}
 module Main where
 
-import Control.Monad ( unless )
-import Raylib
-    ( beginDrawing,
-      clearBackground,
-      drawTextEx,
-      endDrawing,
-      initWindow,
-      loadFont,
-      setTargetFPS,
-      windowShouldClose, changeDirectory, getApplicationDirectory, unloadFont, isKeyPressed, drawText )
-import Raylib.Types (Vector2 (Vector2), Font, KeyboardKey (KeyUp, KeyDown))
-import Raylib.Colors (rayWhite, black)
+import Control.Monad (unless)
 import Foreign (fromBool)
+import Raylib.Colors (black, rayWhite)
+import Raylib.Core
+  ( beginDrawing,
+    changeDirectory,
+    clearBackground,
+    endDrawing,
+    getApplicationDirectory,
+    initWindow,
+    isKeyPressed,
+    setTargetFPS,
+    windowShouldClose,
+  )
+import Raylib.Text (drawText, drawTextEx, loadFont, unloadFont)
+import Raylib.Types (Font, KeyboardKey (KeyDown, KeyUp), Vector2 (Vector2))
 
 mainFontPath :: String
 mainFontPath = "../../../../../../../../../examples/custom-font-text/assets/Lato-Regular.ttf"

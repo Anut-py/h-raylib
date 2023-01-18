@@ -2,24 +2,23 @@
 module Main where
 
 import Control.Monad (unless)
-import Raylib
+import Raylib.Colors (black, white)
+import Raylib.Core
   ( beginDrawing,
     beginMode3D,
     clearBackground,
     closeWindow,
-    drawCircle3D,
-    drawFPS,
-    drawLine3D,
     endDrawing,
     endMode3D,
     initWindow,
     setCameraMode,
     setTargetFPS,
     updateCamera,
-    windowShouldClose, drawCubeWiresV
+    windowShouldClose,
   )
-import Raylib.Colors (black, white)
-import Raylib.Types (Camera3D (Camera3D), Vector3 (Vector3), CameraProjection (CameraPerspective), CameraMode (CameraModeFirstPerson))
+import Raylib.Models (drawCircle3D, drawCubeWiresV, drawLine3D)
+import Raylib.Text (drawFPS)
+import Raylib.Types (Camera3D (Camera3D), CameraMode (CameraModeFirstPerson), CameraProjection (CameraPerspective), Vector3 (Vector3))
 
 main :: IO ()
 main = do

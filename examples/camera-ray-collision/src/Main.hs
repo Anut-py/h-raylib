@@ -2,23 +2,28 @@
 module Main where
 
 import Control.Monad (unless, when)
-import Raylib
+import Foreign (toBool)
+import Raylib.Colors (black, red, white)
+import Raylib.Core
   ( beginDrawing,
     beginMode3D,
     clearBackground,
     closeWindow,
-    drawFPS,
     endDrawing,
     endMode3D,
     initWindow,
     setCameraMode,
     setTargetFPS,
     updateCamera,
-    windowShouldClose, getRayCollisionQuad, drawBoundingBox, drawPoint3D
+    windowShouldClose,
   )
-import Raylib.Colors (black, white, red)
-import Raylib.Types (Camera3D (Camera3D, camera3D'position, camera3D'target), Vector3 (Vector3), Ray (Ray), BoundingBox (BoundingBox), RayCollision (rayCollision'point, rayCollision'hit), CameraProjection (CameraPerspective), CameraMode (CameraModeFirstPerson))
-import Foreign (toBool)
+import Raylib.Models
+  ( drawBoundingBox,
+    drawPoint3D,
+    getRayCollisionQuad,
+  )
+import Raylib.Text (drawFPS)
+import Raylib.Types (BoundingBox (BoundingBox), Camera3D (Camera3D, camera3D'position, camera3D'target), CameraMode (CameraModeFirstPerson), CameraProjection (CameraPerspective), Ray (Ray), RayCollision (rayCollision'hit, rayCollision'point), Vector3 (Vector3))
 
 main :: IO ()
 main = do

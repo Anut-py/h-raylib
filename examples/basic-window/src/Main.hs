@@ -2,17 +2,17 @@
 module Main where
 
 import Control.Monad (unless)
-import Raylib
+import Raylib.Colors (lightGray, rayWhite)
+import Raylib.Core
   ( beginDrawing,
     clearBackground,
     closeWindow,
-    drawText,
     endDrawing,
     initWindow,
     setTargetFPS,
     windowShouldClose,
   )
-import Raylib.Colors (lightGray, rayWhite)
+import Raylib.Text (drawText)
 
 main :: IO ()
 main = do

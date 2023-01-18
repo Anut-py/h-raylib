@@ -7,6 +7,7 @@ import Foreign
   ( FunPtr,
     Ptr,
     Storable (alignment, peek, peekByteOff, poke, pokeByteOff, sizeOf),
+    Word16,
     Word8,
     castPtr,
     newArray,
@@ -22,9 +23,11 @@ import Foreign.C
     CString,
     CUChar,
     CUInt,
-    CUShort,
+    CUShort, castCharToCChar
   )
 import GHC.IO (unsafePerformIO)
+import Raylib.Util (newMaybeArray, peekMaybeArray, peekStaticArray, peekStaticArrayOff, pokeStaticArrayOff, pokeStaticArray, rightPad)
+import Foreign.C.String (castCCharToChar)
 
 -- Necessary functions
 foreign import ccall safe "raylib.h GetPixelDataSize"
@@ -557,7 +560,8 @@ data ShaderAttributeDataType
   deriving (Eq, Show, Enum)
 
 data PixelFormat
-  = PixelFormatUncompressedGrayscale
+  = PixelFormatUnset
+  | PixelFormatUncompressedGrayscale
   | PixelFormatUncompressedGrayAlpha
   | PixelFormatUncompressedR5G6B5
   | PixelFormatUncompressedR8G8B8
@@ -591,6 +595,7 @@ instance Storable PixelFormat where
 
 instance Enum PixelFormat where
   fromEnum n = case n of
+    PixelFormatUnset -> 0
     PixelFormatUncompressedGrayscale -> 1
     PixelFormatUncompressedGrayAlpha -> 2
     PixelFormatUncompressedR5G6B5 -> 3
@@ -614,6 +619,7 @@ instance Enum PixelFormat where
     PixelFormatCompressedAstc8x8Rgba -> 21
 
   toEnum n = case n of
+    0 -> PixelFormatUnset
     1 -> PixelFormatUncompressedGrayscale
     2 -> PixelFormatUncompressedGrayAlpha
     3 -> PixelFormatUncompressedR5G6B5
@@ -723,8 +729,8 @@ instance Storable CameraProjection where
   alignment _ = 4
   peek ptr = do
     val <- peek (castPtr ptr)
-    return $ toEnum $ fromEnum (val :: CInt)
-  poke ptr v = poke (castPtr ptr) (toEnum $ fromEnum v :: CInt)
+    return (toEnum $ fromEnum (val :: CInt))
+  poke ptr v = poke (castPtr ptr) (fromIntegral (fromEnum v) :: CInt)
 
 data NPatchLayout = NPatchNinePatch | NPatchThreePatchVertical | NPatchThreePatchHorizontal deriving (Eq, Show, Enum)
 
@@ -931,8 +937,7 @@ instance Storable Image where
     mipmaps <- fromIntegral <$> (peekByteOff _p 16 :: IO CInt)
     format <- peekByteOff _p 20
     ptr <- (peekByteOff _p 0 :: IO (Ptr CUChar))
-    let size = getPixelDataSize width height format
-    arr <- peekArray size ptr
+    arr <- peekArray (getPixelDataSize width height format) ptr
     return $ Image (map fromIntegral arr) width height mipmaps format
   poke _p (Image arr width height mipmaps format) = do
     ptr <- newArray (map fromIntegral arr :: [CUChar])
@@ -943,9 +948,6 @@ instance Storable Image where
     pokeByteOff _p 20 format
     return ()
 
-{- typedef struct Texture {
-            unsigned int id; int width; int height; int mipmaps; int format;
-        } Texture; -}
 data Texture = Texture
   { texture'id :: Integer,
     texture'width :: Int,
@@ -977,9 +979,6 @@ type Texture2D = Texture
 
 type TextureCubemap = Texture
 
-{- typedef struct RenderTexture {
-            unsigned int id; Texture texture; Texture depth;
-        } RenderTexture; -}
 data RenderTexture = RenderTexture
   { rendertexture'id :: Integer,
     rendertexture'texture :: Texture,
@@ -1001,583 +1000,324 @@ instance Storable RenderTexture where
     pokeByteOff _p 24 depth
     return ()
 
-{- typedef RenderTexture RenderTexture2D; -}
 type RenderTexture2D = RenderTexture
 
-{- typedef struct NPatchInfo {
-            Rectangle source;
-            int left;
-            int top;
-            int right;
-            int bottom;
-            int layout;
-        } NPatchInfo; -}
 data NPatchInfo = NPatchInfo
   { nPatchinfo'source :: Rectangle,
-    nPatchinfo'left :: CInt,
-    nPatchinfo'top :: CInt,
-    nPatchinfo'right :: CInt,
-    nPatchinfo'bottom :: CInt,
+    nPatchinfo'left :: Int,
+    nPatchinfo'top :: Int,
+    nPatchinfo'right :: Int,
+    nPatchinfo'bottom :: Int,
     nPatchinfo'layout :: NPatchLayout
   }
   deriving (Eq, Show)
-
-p'NPatchInfo'source p = plusPtr p 0
-
-p'NPatchInfo'source :: Ptr NPatchInfo -> Ptr Rectangle
-
-p'NPatchInfo'left p = plusPtr p 16
-
-p'NPatchInfo'left :: Ptr NPatchInfo -> Ptr CInt
-
-p'NPatchInfo'top p = plusPtr p 20
-
-p'NPatchInfo'top :: Ptr NPatchInfo -> Ptr CInt
-
-p'NPatchInfo'right p = plusPtr p 24
-
-p'NPatchInfo'right :: Ptr NPatchInfo -> Ptr CInt
-
-p'NPatchInfo'bottom p = plusPtr p 28
-
-p'NPatchInfo'bottom :: Ptr NPatchInfo -> Ptr CInt
-
-p'NPatchInfo'layout p = plusPtr p 32
-
-p'NPatchInfo'layout :: Ptr NPatchInfo -> Ptr CInt
 
 instance Storable NPatchInfo where
   sizeOf _ = 36
   alignment _ = 4
   peek _p = do
-    v0 <- peekByteOff _p 0
-    v1 <- peekByteOff _p 16
-    v2 <- peekByteOff _p 20
-    v3 <- peekByteOff _p 24
-    v4 <- peekByteOff _p 28
-    v5 <- peekByteOff _p 32
-    return $ NPatchInfo v0 v1 v2 v3 v4 v5
-  poke _p (NPatchInfo v0 v1 v2 v3 v4 v5) = do
-    pokeByteOff _p 0 v0
-    pokeByteOff _p 16 v1
-    pokeByteOff _p 20 v2
-    pokeByteOff _p 24 v3
-    pokeByteOff _p 28 v4
-    pokeByteOff _p 32 v5
+    source <- peekByteOff _p 0
+    left <- fromIntegral <$> (peekByteOff _p 16 :: IO CInt)
+    top <- fromIntegral <$> (peekByteOff _p 20 :: IO CInt)
+    right <- fromIntegral <$> (peekByteOff _p 24 :: IO CInt)
+    bottom <- fromIntegral <$> (peekByteOff _p 28 :: IO CInt)
+    layout <- peekByteOff _p 32
+    return $ NPatchInfo source left right top bottom layout
+  poke _p (NPatchInfo source left right top bottom layout) = do
+    pokeByteOff _p 0 source
+    pokeByteOff _p 16 (fromIntegral left :: CInt)
+    pokeByteOff _p 20 (fromIntegral right :: CInt)
+    pokeByteOff _p 24 (fromIntegral top :: CInt)
+    pokeByteOff _p 28 (fromIntegral bottom :: CInt)
+    pokeByteOff _p 32 layout
     return ()
 
-{- typedef struct GlyphInfo {
-            int value; int offsetX; int offsetY; int advanceX; Image image;
-        } GlyphInfo; -}
 data GlyphInfo = GlyphInfo
-  { glyphinfo'value :: CInt,
-    glyphInfo'offsetX :: CInt,
-    glyphInfo'offsetY :: CInt,
-    glyphInfo'advanceX :: CInt,
+  { glyphinfo'value :: Int,
+    glyphInfo'offsetX :: Int,
+    glyphInfo'offsetY :: Int,
+    glyphInfo'advanceX :: Int,
     glyphinfo'image :: Image
   }
   deriving (Eq, Show)
 
-p'GlyphInfo'value p = plusPtr p 0
-
-p'GlyphInfo'value :: Ptr GlyphInfo -> Ptr CInt
-
-p'GlyphInfo'offsetX p = plusPtr p 4
-
-p'GlyphInfo'offsetX :: Ptr GlyphInfo -> Ptr CInt
-
-p'GlyphInfo'offsetY p = plusPtr p 8
-
-p'GlyphInfo'offsetY :: Ptr GlyphInfo -> Ptr CInt
-
-p'GlyphInfo'advanceX p = plusPtr p 12
-
-p'GlyphInfo'advanceX :: Ptr GlyphInfo -> Ptr CInt
-
-p'GlyphInfo'image p = plusPtr p 16
-
-p'GlyphInfo'image :: Ptr GlyphInfo -> Ptr Image
-
 instance Storable GlyphInfo where
-  sizeOf _ = 36
+  sizeOf _ = 40
   alignment _ = 4
   peek _p = do
-    v0 <- peekByteOff _p 0
-    v1 <- peekByteOff _p 4
-    v2 <- peekByteOff _p 8
-    v3 <- peekByteOff _p 12
-    v4 <- peekByteOff _p 16
-    return $ GlyphInfo v0 v1 v2 v3 v4
-  poke _p (GlyphInfo v0 v1 v2 v3 v4) = do
-    pokeByteOff _p 0 v0
-    pokeByteOff _p 4 v1
-    pokeByteOff _p 8 v2
-    pokeByteOff _p 12 v3
-    pokeByteOff _p 16 v4
+    value <- fromIntegral <$> (peekByteOff _p 0 :: IO CInt)
+    offsetX <- fromIntegral <$> (peekByteOff _p 4 :: IO CInt)
+    offsetY <- fromIntegral <$> (peekByteOff _p 8 :: IO CInt)
+    advanceX <- fromIntegral <$> (peekByteOff _p 12 :: IO CInt)
+    image <- peekByteOff _p 16
+    return $ GlyphInfo value offsetX offsetY advanceX image
+  poke _p (GlyphInfo value offsetX offsetY advanceX image) = do
+    pokeByteOff _p 0 (fromIntegral value :: CInt)
+    pokeByteOff _p 4 (fromIntegral offsetX :: CInt)
+    pokeByteOff _p 8 (fromIntegral offsetY :: CInt)
+    pokeByteOff _p 12 (fromIntegral advanceX :: CInt)
+    pokeByteOff _p 16 image
     return ()
 
-{- typedef struct Font {
-            int baseSize;
-            int glyphCount;
-            int glyphPadding;
-            Texture2D texture;
-            Rectangle * recs;
-            GlyphInfo * glyphs;
-        } Font; -}
 data Font = Font
-  { font'baseSize :: CInt,
-    font'glyphCount :: CInt,
-    font'glyphPadding :: CInt,
+  { font'baseSize :: Int,
+    font'glyphCount :: Int,
+    font'glyphPadding :: Int,
     font'texture :: Texture,
-    font'recs :: Ptr Rectangle,
-    font'glyphs :: Ptr GlyphInfo
+    font'recs :: [Rectangle],
+    font'glyphs :: [GlyphInfo]
   }
   deriving (Eq, Show)
-
-p'Font'baseSize p = plusPtr p 0
-
-p'Font'baseSize :: Ptr Font -> Ptr CInt
-
-p'Font'glyphCount p = plusPtr p 4
-
-p'Font'glyphCount :: Ptr Font -> Ptr CInt
-
-p'Font'glyphPadding p = plusPtr p 8
-
-p'Font'glyphPadding :: Ptr Font -> Ptr CInt
-
-p'Font'texture p = plusPtr p 12
-
-p'Font'texture :: Ptr Font -> Ptr Texture
-
-p'Font'recs p = plusPtr p 32
-
-p'Font'recs :: Ptr Font -> Ptr (Ptr Rectangle)
-
-p'Font'glyphs p = plusPtr p 40
-
-p'Font'glyphs :: Ptr Font -> Ptr (Ptr GlyphInfo)
 
 instance Storable Font where
   sizeOf _ = 48
   alignment _ = 4
   peek _p = do
-    v0 <- peekByteOff _p 0
-    v1 <- peekByteOff _p 4
-    v2 <- peekByteOff _p 8
-    v3 <- peekByteOff _p 12
-    v4 <- peekByteOff _p 32
-    v5 <- peekByteOff _p 40
-    return $ Font v0 v1 v2 v3 v4 v5
-  poke _p (Font v0 v1 v2 v3 v4 v5) = do
-    pokeByteOff _p 0 v0
-    pokeByteOff _p 4 v1
-    pokeByteOff _p 8 v2
-    pokeByteOff _p 12 v3
-    pokeByteOff _p 32 v4
-    pokeByteOff _p 40 v5
+    baseSize <- fromIntegral <$> (peekByteOff _p 0 :: IO CInt)
+    glyphCount <- fromIntegral <$> (peekByteOff _p 4 :: IO CInt)
+    glyphPadding <- fromIntegral <$> (peekByteOff _p 8 :: IO CInt)
+    texture <- peekByteOff _p 12
+    recPtr <- (peekByteOff _p 32 :: IO (Ptr Rectangle))
+    recs <- peekArray glyphCount recPtr
+    glyphPtr <- (peekByteOff _p 40 :: IO (Ptr GlyphInfo))
+    glyphs <- peekArray glyphCount glyphPtr
+    return $ Font baseSize glyphCount glyphPadding texture recs glyphs
+  poke _p (Font baseSize glyphCount glyphPadding texture recs glyphs) = do
+    pokeByteOff _p 0 (fromIntegral baseSize :: CInt)
+    pokeByteOff _p 4 (fromIntegral glyphCount :: CInt)
+    pokeByteOff _p 8 (fromIntegral glyphPadding :: CInt)
+    pokeByteOff _p 12 texture
+    recPtr <- newArray recs
+    pokeByteOff _p 32 recPtr
+    glyphPtr <- newArray glyphs
+    pokeByteOff _p 40 glyphPtr
     return ()
 
-{- typedef struct Camera3D {
-            Vector3 position;
-            Vector3 target;
-            Vector3 up;
-            float fovy;
-            int projection;
-        } Camera3D; -}
 data Camera3D = Camera3D
   { camera3D'position :: Vector3,
     camera3D'target :: Vector3,
     camera3D'up :: Vector3,
-    camera3D'fovy :: CFloat,
+    camera3D'fovy :: Float,
     camera3D'projection :: CameraProjection
   }
   deriving (Eq, Show)
-
-p'Camera3D'position p = plusPtr p 0
-
-p'Camera3D'position :: Ptr Camera3D -> Ptr Vector3
-
-p'Camera3D'target p = plusPtr p 12
-
-p'Camera3D'target :: Ptr Camera3D -> Ptr Vector3
-
-p'Camera3D'up p = plusPtr p 24
-
-p'Camera3D'up :: Ptr Camera3D -> Ptr Vector3
-
-p'Camera3D'fovy p = plusPtr p 36
-
-p'Camera3D'fovy :: Ptr Camera3D -> Ptr CFloat
-
-p'Camera3D'projection p = plusPtr p 40
-
-p'Camera3D'projection :: Ptr Camera3D -> Ptr CInt
 
 instance Storable Camera3D where
   sizeOf _ = 44
   alignment _ = 4
   peek _p = do
-    v0 <- peekByteOff _p 0
-    v1 <- peekByteOff _p 12
-    v2 <- peekByteOff _p 24
-    v3 <- peekByteOff _p 36
-    v4 <- peekByteOff _p 40
-    return $ Camera3D v0 v1 v2 v3 v4
-  poke _p (Camera3D v0 v1 v2 v3 v4) = do
-    pokeByteOff _p 0 v0
-    pokeByteOff _p 12 v1
-    pokeByteOff _p 24 v2
-    pokeByteOff _p 36 v3
-    pokeByteOff _p 40 v4
+    position <- peekByteOff _p 0
+    target <- peekByteOff _p 12
+    up <- peekByteOff _p 24
+    fovy <- realToFrac <$> (peekByteOff _p 36 :: IO CFloat)
+    projection <- peekByteOff _p 40
+    return $ Camera3D position target up fovy projection
+  poke _p (Camera3D position target up fovy projection) = do
+    pokeByteOff _p 0 position
+    pokeByteOff _p 12 target
+    pokeByteOff _p 24 up
+    pokeByteOff _p 36 (realToFrac fovy :: CFloat)
+    pokeByteOff _p 40 projection
     return ()
 
-{- typedef Camera3D Camera; -}
 type Camera = Camera3D
 
-{- typedef struct Camera2D {
-            Vector2 offset; Vector2 target; float rotation; float zoom;
-        } Camera2D; -}
 data Camera2D = Camera2D
   { camera2D'offset :: Vector2,
     camera2D'target :: Vector2,
-    camera2d'rotation :: CFloat,
-    camera2d'zoom :: CFloat
+    camera2d'rotation :: Float,
+    camera2d'zoom :: Float
   }
   deriving (Eq, Show)
-
-p'Camera2D'offset p = plusPtr p 0
-
-p'Camera2D'offset :: Ptr Camera2D -> Ptr Vector2
-
-p'Camera2D'target p = plusPtr p 8
-
-p'Camera2D'target :: Ptr Camera2D -> Ptr Vector2
-
-p'Camera2D'rotation p = plusPtr p 16
-
-p'Camera2D'rotation :: Ptr Camera2D -> Ptr CFloat
-
-p'Camera2D'zoom p = plusPtr p 20
-
-p'Camera2D'zoom :: Ptr Camera2D -> Ptr CFloat
 
 instance Storable Camera2D where
   sizeOf _ = 24
   alignment _ = 4
   peek _p = do
-    v0 <- peekByteOff _p 0
-    v1 <- peekByteOff _p 8
-    v2 <- peekByteOff _p 16
-    v3 <- peekByteOff _p 20
-    return $ Camera2D v0 v1 v2 v3
-  poke _p (Camera2D v0 v1 v2 v3) = do
-    pokeByteOff _p 0 v0
-    pokeByteOff _p 8 v1
-    pokeByteOff _p 16 v2
-    pokeByteOff _p 20 v3
+    offset <- peekByteOff _p 0
+    target <- peekByteOff _p 8
+    rotation <- realToFrac <$> (peekByteOff _p 16 :: IO CFloat)
+    zoom <- realToFrac <$> (peekByteOff _p 20 :: IO CFloat)
+    return $ Camera2D offset target rotation zoom
+  poke _p (Camera2D offset target rotation zoom) = do
+    pokeByteOff _p 0 offset
+    pokeByteOff _p 8 target
+    pokeByteOff _p 16 (realToFrac rotation :: CFloat)
+    pokeByteOff _p 20 (realToFrac zoom :: CFloat)
     return ()
 
-{- typedef struct Mesh {
-            int vertexCount;
-            int triangleCount;
-            float * vertices;
-            float * texcoords;
-            float * texcoords2;
-            float * normals;
-            float * tangents;
-            unsigned char * colors;
-            unsigned short * indices;
-            float * animVertices;
-            float * animNormals;
-            unsigned char * boneIds;
-            float * boneWeights;
-            unsigned int vaoId;
-            unsigned int * vboId;
-        } Mesh; -}
 data Mesh = Mesh
-  { mesh'vertexCount :: CInt,
-    mesh'triangleCount :: CInt,
-    mesh'vertices :: Ptr CFloat,
-    mesh'texcoords :: Ptr CFloat,
-    mesh'texcoords2 :: Ptr CFloat,
-    mesh'normals :: Ptr CFloat,
-    mesh'tangents :: Ptr CFloat,
-    mesh'colors :: Ptr CUChar,
-    mesh'indices :: Ptr CUShort,
-    mesh'animVertices :: Ptr CFloat,
-    mesh'animNormals :: Ptr CFloat,
-    mesh'boneIds :: Ptr CUChar,
-    mesh'boneWeights :: Ptr CFloat,
-    mesh'vaoId :: CUInt,
-    mesh'vboId :: Ptr CUInt
+  { mesh'vertexCount :: Int,
+    mesh'triangleCount :: Int,
+    mesh'vertices :: [Vector3],
+    mesh'texcoords :: [Vector2],
+    mesh'texcoords2 :: Maybe [Vector2],
+    mesh'normals :: [Vector3],
+    mesh'tangents :: Maybe [Vector4],
+    mesh'colors :: Maybe [Color],
+    mesh'indices :: [Word16],
+    mesh'animVertices :: Maybe [Vector3],
+    mesh'animNormals :: Maybe [Vector3],
+    mesh'boneIds :: Maybe [Word8],
+    mesh'boneWeights :: Maybe [Float],
+    mesh'vaoId :: Integer,
+    mesh'vboId :: [Integer]
   }
   deriving (Eq, Show)
-
-p'Mesh'vertexCount p = plusPtr p 0
-
-p'Mesh'vertexCount :: Ptr Mesh -> Ptr CInt
-
-p'Mesh'triangleCount p = plusPtr p 4
-
-p'Mesh'triangleCount :: Ptr Mesh -> Ptr CInt
-
-p'Mesh'vertices p = plusPtr p 8
-
-p'Mesh'vertices :: Ptr Mesh -> Ptr (Ptr CFloat)
-
-p'Mesh'texcoords p = plusPtr p 12
-
-p'Mesh'texcoords :: Ptr Mesh -> Ptr (Ptr CFloat)
-
-p'Mesh'texcoords2 p = plusPtr p 16
-
-p'Mesh'texcoords2 :: Ptr Mesh -> Ptr (Ptr CFloat)
-
-p'Mesh'normals p = plusPtr p 20
-
-p'Mesh'normals :: Ptr Mesh -> Ptr (Ptr CFloat)
-
-p'Mesh'tangents p = plusPtr p 24
-
-p'Mesh'tangents :: Ptr Mesh -> Ptr (Ptr CFloat)
-
-p'Mesh'colors p = plusPtr p 28
-
-p'Mesh'colors :: Ptr Mesh -> Ptr (Ptr CUChar)
-
-p'Mesh'indices p = plusPtr p 32
-
-p'Mesh'indices :: Ptr Mesh -> Ptr (Ptr CUShort)
-
-p'Mesh'animVertices p = plusPtr p 36
-
-p'Mesh'animVertices :: Ptr Mesh -> Ptr (Ptr CFloat)
-
-p'Mesh'animNormals p = plusPtr p 40
-
-p'Mesh'animNormals :: Ptr Mesh -> Ptr (Ptr CFloat)
-
-p'Mesh'boneIds p = plusPtr p 44
-
-p'Mesh'boneIds :: Ptr Mesh -> Ptr (Ptr CUChar)
-
-p'Mesh'boneWeights p = plusPtr p 48
-
-p'Mesh'boneWeights :: Ptr Mesh -> Ptr (Ptr CFloat)
-
-p'Mesh'vaoId p = plusPtr p 52
-
-p'Mesh'vaoId :: Ptr Mesh -> Ptr CUInt
-
-p'Mesh'vboId p = plusPtr p 56
-
-p'Mesh'vboId :: Ptr Mesh -> Ptr (Ptr CUInt)
 
 instance Storable Mesh where
-  sizeOf _ = 60
-  alignment _ = 4
+  sizeOf _ = 112
+  alignment _ = 8
   peek _p = do
-    v0 <- peekByteOff _p 0
-    v1 <- peekByteOff _p 4
-    v2 <- peekByteOff _p 8
-    v3 <- peekByteOff _p 12
-    v4 <- peekByteOff _p 16
-    v5 <- peekByteOff _p 20
-    v6 <- peekByteOff _p 24
-    v7 <- peekByteOff _p 28
-    v8 <- peekByteOff _p 32
-    v9 <- peekByteOff _p 36
-    v10 <- peekByteOff _p 40
-    v11 <- peekByteOff _p 44
-    v12 <- peekByteOff _p 48
-    v13 <- peekByteOff _p 52
-    v14 <- peekByteOff _p 56
-    return $ Mesh v0 v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 v14
-  poke _p (Mesh v0 v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 v14) = do
-    pokeByteOff _p 0 v0
-    pokeByteOff _p 4 v1
-    pokeByteOff _p 8 v2
-    pokeByteOff _p 12 v3
-    pokeByteOff _p 16 v4
-    pokeByteOff _p 20 v5
-    pokeByteOff _p 24 v6
-    pokeByteOff _p 28 v7
-    pokeByteOff _p 32 v8
-    pokeByteOff _p 36 v9
-    pokeByteOff _p 40 v10
-    pokeByteOff _p 44 v11
-    pokeByteOff _p 48 v12
-    pokeByteOff _p 52 v13
-    pokeByteOff _p 56 v14
+    vertexCount <- fromIntegral <$> (peekByteOff _p 0 :: IO CInt)
+    triangleCount <- fromIntegral <$> (peekByteOff _p 4 :: IO CInt)
+    verticesPtr <- (peekByteOff _p 8 :: IO (Ptr Vector3))
+    vertices <- peekArray vertexCount verticesPtr
+    texcoordsPtr <- (peekByteOff _p 16 :: IO (Ptr Vector2))
+    texcoords <- peekArray vertexCount texcoordsPtr
+    texcoords2Ptr <- (peekByteOff _p 24 :: IO (Ptr Vector2))
+    texcoords2 <- peekMaybeArray vertexCount texcoords2Ptr
+    normalsPtr <- (peekByteOff _p 32 :: IO (Ptr Vector3))
+    normals <- peekArray vertexCount normalsPtr
+    tangentsPtr <- (peekByteOff _p 40 :: IO (Ptr Vector4))
+    tangents <- peekMaybeArray vertexCount tangentsPtr
+    colorsPtr <- (peekByteOff _p 48 :: IO (Ptr Color))
+    colors <- peekMaybeArray vertexCount colorsPtr
+    indicesPtr <- (peekByteOff _p 56 :: IO (Ptr CUShort))
+    indices <- map fromIntegral <$> peekArray vertexCount indicesPtr
+    animVerticesPtr <- (peekByteOff _p 64 :: IO (Ptr Vector3))
+    animVertices <- peekMaybeArray vertexCount animVerticesPtr
+    animNormalsPtr <- (peekByteOff _p 72 :: IO (Ptr Vector3))
+    animNormals <- peekMaybeArray vertexCount animNormalsPtr
+    boneIdsPtr <- (peekByteOff _p 80 :: IO (Ptr CUChar))
+    boneIds <- (\m -> map fromIntegral <$> m) <$> peekMaybeArray (vertexCount * 4) boneIdsPtr
+    boneWeightsPtr <- (peekByteOff _p 88 :: IO (Ptr Float))
+    boneWeights <- peekMaybeArray (vertexCount * 4) boneWeightsPtr
+    vaoId <- fromIntegral <$> (peekByteOff _p 96 :: IO CUInt)
+    vboIdPtr <- (peekByteOff _p 104 :: IO (Ptr CUInt))
+    vboId <- map fromIntegral <$> peekArray 7 vboIdPtr
+    return $ Mesh vertexCount triangleCount vertices texcoords texcoords2 normals tangents colors indices animVertices animNormals boneIds boneWeights vaoId vboId
+  poke _p (Mesh vertexCount triangleCount vertices texcoords texcoords2 normals tangents colors indices animVertices animNormals boneIds boneWeights vaoId vboId) = do
+    pokeByteOff _p 0 (fromIntegral vertexCount :: CInt)
+    pokeByteOff _p 4 (fromIntegral triangleCount :: CInt)
+    newArray vertices >>= pokeByteOff _p 8
+    newArray texcoords >>= pokeByteOff _p 16
+    newMaybeArray texcoords2 >>= pokeByteOff _p 24
+    newArray normals >>= pokeByteOff _p 32
+    newMaybeArray tangents >>= pokeByteOff _p 40
+    newMaybeArray colors >>= pokeByteOff _p 48
+    newArray (map fromIntegral indices :: [CUShort]) >>= pokeByteOff _p 56
+    newMaybeArray animVertices >>= pokeByteOff _p 64
+    newMaybeArray animNormals >>= pokeByteOff _p 72
+    newMaybeArray ((\m -> map fromIntegral m :: [CUChar]) <$> boneIds) >>= pokeByteOff _p 80
+    newMaybeArray boneWeights >>= pokeByteOff _p 88
+    pokeByteOff _p 96 (fromIntegral vaoId :: CUInt)
+    newArray (map fromIntegral vboId :: [CUInt]) >>= pokeByteOff _p 104
     return ()
 
-{- typedef struct Shader {
-            unsigned int id; int * locs;
-        } Shader; -}
 data Shader = Shader
-  { shader'id :: CUInt,
-    shader'locs :: Ptr CInt
+  { shader'id :: Integer,
+    shader'locs :: [Int]
   }
   deriving (Eq, Show)
 
-p'Shader'id p = plusPtr p 0
-
-p'Shader'id :: Ptr Shader -> Ptr CUInt
-
-p'Shader'locs p = plusPtr p 4
-
-p'Shader'locs :: Ptr Shader -> Ptr (Ptr CInt)
-
 instance Storable Shader where
-  sizeOf _ = 8
-  alignment _ = 4
+  sizeOf _ = 16
+  alignment _ = 8
   peek _p = do
-    v0 <- peekByteOff _p 0
-    v1 <- peekByteOff _p 4
-    return $ Shader v0 v1
-  poke _p (Shader v0 v1) = do
-    pokeByteOff _p 0 v0
-    pokeByteOff _p 4 v1
+    sId <- fromIntegral <$> (peekByteOff _p 0 :: IO CUInt)
+    locsPtr <- (peekByteOff _p 8 :: IO (Ptr CInt))
+    locs <- map fromIntegral <$> peekArray 32 locsPtr
+    return $ Shader sId locs
+  poke _p (Shader sId locs) = do
+    pokeByteOff _p 0 (fromIntegral sId :: CUInt)
+    newArray (map fromIntegral locs :: [CInt]) >>= pokeByteOff _p 8
     return ()
 
-{- typedef struct MaterialMap {
-            Texture2D texture; Color color; float value;
-        } MaterialMap; -}
 data MaterialMap = MaterialMap
   { materialmap'texture :: Texture,
     materialmap'color :: Color,
-    materialmap'value :: CFloat
+    materialmap'value :: Float
   }
   deriving (Eq, Show)
-
-p'MaterialMap'texture p = plusPtr p 0
-
-p'MaterialMap'texture :: Ptr MaterialMap -> Ptr Texture
-
-p'MaterialMap'color p = plusPtr p 20
-
-p'MaterialMap'color :: Ptr MaterialMap -> Ptr Color
-
-p'MaterialMap'value p = plusPtr p 24
-
-p'MaterialMap'value :: Ptr MaterialMap -> Ptr CFloat
 
 instance Storable MaterialMap where
   sizeOf _ = 28
   alignment _ = 4
   peek _p = do
-    v0 <- peekByteOff _p 0
-    v1 <- peekByteOff _p 20
-    v2 <- peekByteOff _p 24
-    return $ MaterialMap v0 v1 v2
-  poke _p (MaterialMap v0 v1 v2) = do
-    pokeByteOff _p 0 v0
-    pokeByteOff _p 20 v1
-    pokeByteOff _p 24 v2
+    texture <- peekByteOff _p 0
+    color <- peekByteOff _p 20
+    value <- realToFrac <$> (peekByteOff _p 24 :: IO CFloat)
+    return $ MaterialMap texture color value
+  poke _p (MaterialMap texture color value) = do
+    pokeByteOff _p 0 texture
+    pokeByteOff _p 20 color
+    pokeByteOff _p 24 (realToFrac value :: CFloat)
     return ()
 
-{- typedef struct Material {
-            Shader shader; MaterialMap * maps; float params[4];
-        } Material; -}
 data Material = Material
   { material'shader :: Shader,
-    material'maps :: Ptr MaterialMap,
-    material'params :: [CFloat]
+    material'maps :: [MaterialMap],
+    material'params :: [Float]
   }
   deriving (Eq, Show)
 
-p'Material'shader p = plusPtr p 0
-
-p'Material'shader :: Ptr Material -> Ptr Shader
-
-p'Material'maps p = plusPtr p 8
-
-p'Material'maps :: Ptr Material -> Ptr (Ptr MaterialMap)
-
-p'Material'params p = plusPtr p 12
-
-p'Material'params :: Ptr Material -> Ptr CFloat
-
 instance Storable Material where
-  sizeOf _ = 28
-  alignment _ = 4
+  sizeOf _ = 40
+  alignment _ = 8
   peek _p = do
-    v0 <- peekByteOff _p 0
-    v1 <- peekByteOff _p 8
-    v2 <- let s2 = div 16 $ sizeOf (undefined :: CFloat) in peekArray s2 (plusPtr _p 12)
-    return $ Material v0 v1 v2
-  poke _p (Material v0 v1 v2) = do
-    pokeByteOff _p 0 v0
-    pokeByteOff _p 8 v1
-    let s2 = div 16 $ sizeOf (undefined :: CFloat)
-    pokeArray (plusPtr _p 12) (take s2 v2)
+    shader <- peekByteOff _p 0
+    mapsPtr <- (peekByteOff _p 16 :: IO (Ptr MaterialMap))
+    maps <- peekArray 12 mapsPtr
+    params <- map realToFrac <$> peekStaticArrayOff 4 (castPtr _p :: Ptr CFloat) 24
+    print params
+    return $ Material shader maps params
+  poke _p (Material shader maps params) = do
+    pokeByteOff _p 0 shader
+    newArray maps >>= pokeByteOff _p 16
+    pokeStaticArrayOff (castPtr _p :: Ptr CFloat) 24 (map realToFrac params :: [CFloat])
     return ()
 
-{- typedef struct Transform {
-            Vector3 translation; Quaternion rotation; Vector3 scale;
-        } Transform; -}
 data Transform = Transform
   { transform'translation :: Vector3,
-    transform'rotation :: Vector4,
+    transform'rotation :: Quaternion,
     transform'scale :: Vector3
   }
   deriving (Eq, Show)
-
-p'Transform'translation p = plusPtr p 0
-
-p'Transform'translation :: Ptr Transform -> Ptr Vector3
-
-p'Transform'rotation p = plusPtr p 12
-
-p'Transform'rotation :: Ptr Transform -> Ptr Vector4
-
-p'Transform'scale p = plusPtr p 28
-
-p'Transform'scale :: Ptr Transform -> Ptr Vector3
 
 instance Storable Transform where
   sizeOf _ = 40
   alignment _ = 4
   peek _p = do
-    v0 <- peekByteOff _p 0
-    v1 <- peekByteOff _p 12
-    v2 <- peekByteOff _p 28
-    return $ Transform v0 v1 v2
-  poke _p (Transform v0 v1 v2) = do
-    pokeByteOff _p 0 v0
-    pokeByteOff _p 12 v1
-    pokeByteOff _p 28 v2
+    translation <- peekByteOff _p 0
+    rotation <- peekByteOff _p 12
+    scale <- peekByteOff _p 28
+    return $ Transform translation rotation scale
+  poke _p (Transform translation rotation scale) = do
+    pokeByteOff _p 0 translation
+    pokeByteOff _p 12 rotation
+    pokeByteOff _p 28 scale
     return ()
 
 {- typedef struct BoneInfo {
             char name[32]; int parent;
         } BoneInfo; -}
 data BoneInfo = BoneInfo
-  { boneInfo'name :: [CChar],
-    boneinfo'parent :: CInt
+  { boneInfo'name :: String,
+    boneinfo'parent :: Int
   }
   deriving (Eq, Show)
-
-p'BoneInfo'name p = plusPtr p 0
-
-p'BoneInfo'name :: Ptr BoneInfo -> Ptr CChar
-
-p'BoneInfo'parent p = plusPtr p 32
-
-p'BoneInfo'parent :: Ptr BoneInfo -> Ptr CInt
 
 instance Storable BoneInfo where
   sizeOf _ = 36
   alignment _ = 4
   peek _p = do
-    v0 <- let s0 = div 32 $ sizeOf (undefined :: CChar) in peekArray s0 (plusPtr _p 0)
-    v1 <- peekByteOff _p 32
-    return $ BoneInfo v0 v1
-  poke _p (BoneInfo v0 v1) = do
-    let s0 = div 32 $ sizeOf (undefined :: CChar)
-    pokeArray (plusPtr _p 0) (take s0 v0)
-    pokeByteOff _p 32 v1
+    name <- map castCCharToChar . takeWhile (/= 0) <$> peekStaticArray 32 (castPtr _p :: Ptr CChar)
+    parent <- fromIntegral <$> (peekByteOff _p 32 :: IO CInt)
+    return $ BoneInfo name parent
+  poke _p (BoneInfo name parent) = do
+    pokeStaticArray (castPtr _p :: Ptr CChar) (rightPad 32 0 $ map castCharToCChar name)
+    pokeByteOff _p 32 (fromIntegral parent :: CInt)
     return ()
 
 {- typedef struct Model {

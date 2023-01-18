@@ -69,9 +69,7 @@ flag examples
   default:     False
   manual:      True
 
-executable basic-window
-  hs-source-dirs:   examples/basic-window/src
-  main-is:          Main.hs
+common example-options
   default-language: Haskell2010
 
   if !flag(examples)
@@ -81,66 +79,52 @@ executable basic-window
     build-depends:
       , base
       , h-raylib
+
+executable basic-window
+  import:         example-options
+  hs-source-dirs: examples/basic-window/src
+  main-is:        Main.hs
 
 executable camera-ray-collision
-  hs-source-dirs:   examples/camera-ray-collision/src
-  main-is:          Main.hs
-  default-language: Haskell2010
-
-  if !flag(examples)
-    buildable: False
-
-  else
-    build-depends:
-      , base
-      , h-raylib
+  import:         example-options
+  hs-source-dirs: examples/camera-ray-collision/src
+  main-is:        Main.hs
 
 executable custom-font-text
-  hs-source-dirs:   examples/custom-font-text/src
-  main-is:          Main.hs
-  default-language: Haskell2010
-
-  if !flag(examples)
-    buildable: False
-
-  else
-    build-depends:
-      , base
-      , h-raylib
+  import:         example-options
+  hs-source-dirs: examples/custom-font-text/src
+  main-is:        Main.hs
 
 executable first-person-camera
-  hs-source-dirs:   examples/first-person-camera/src
-  main-is:          Main.hs
-  default-language: Haskell2010
-
-  if !flag(examples)
-    buildable: False
-
-  else
-    build-depends:
-      , base
-      , h-raylib
+  import:         example-options
+  hs-source-dirs: examples/first-person-camera/src
+  main-is:        Main.hs
 
 executable basic-images
-  hs-source-dirs:   examples/basic-images/src
-  main-is:          Main.hs
-  default-language: Haskell2010
+  import:         example-options
+  hs-source-dirs: examples/basic-images/src
+  main-is:        Main.hs
 
-  if !flag(examples)
-    buildable: False
-
-  else
-    build-depends:
-      , base
-      , h-raylib
+executable basic-models
+  import:         example-options
+  hs-source-dirs: examples/basic-models/src
+  main-is:        Main.hs
 
 library
   exposed-modules:
-    Raylib
+    Raylib.Audio
     Raylib.Colors
+    Raylib.Core
+    Raylib.Models
+    Raylib.Shapes
+    Raylib.Text
+    Raylib.Textures
     Raylib.Types
 
-  other-modules:    Raylib.Util
+  other-modules:
+    Raylib.Native
+    Raylib.Util
+
   build-depends:    base >=4.0 && <4.17.0
   hs-source-dirs:   src
   default-language: Haskell2010
