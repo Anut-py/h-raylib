@@ -3,6 +3,10 @@ module Raylib.Types where
 
 -- This file includes Haskell counterparts to the structs defined in raylib
 
+-- This file includes Haskell counterparts to the structs defined in raylib
+-- This file includes Haskell counterparts to the structs defined in raylib
+
+-- This file includes Haskell counterparts to the structs defined in raylib
 import Foreign
   ( FunPtr,
     Ptr,
@@ -10,24 +14,27 @@ import Foreign
     Word16,
     Word8,
     castPtr,
+    fromBool,
     newArray,
     peekArray,
     plusPtr,
     pokeArray,
+    toBool,
   )
 import Foreign.C
-  ( CBool,
-    CChar,
+  ( CChar,
     CFloat,
     CInt (..),
+    CShort,
     CString,
     CUChar,
     CUInt,
-    CUShort, castCharToCChar
+    CUShort,
+    castCharToCChar,
   )
-import GHC.IO (unsafePerformIO)
-import Raylib.Util (newMaybeArray, peekMaybeArray, peekStaticArray, peekStaticArrayOff, pokeStaticArrayOff, pokeStaticArray, rightPad)
 import Foreign.C.String (castCCharToChar)
+import GHC.IO (unsafePerformIO)
+import Raylib.Util (newMaybeArray, peekMaybeArray, peekStaticArray, peekStaticArrayOff, pokeStaticArray, pokeStaticArrayOff, rightPad)
 
 -- Necessary functions
 foreign import ccall safe "raylib.h GetPixelDataSize"
@@ -96,7 +103,7 @@ instance Enum ConfigFlag where
     16384 -> WindowMousePassthrough
     32 -> Msaa4xHint
     65536 -> InterlacedHint
-    n -> error $ "Invalid value " ++ show n ++ " for `toEnum`."
+    n -> error $ "(ConfigFlag.toEnum) Invalid value: " ++ show n
 
 data TraceLogLevel = LogAll | LogTrace | LogDebug | LogInfo | LogWarning | LogError | LogFatal | LogNone
   deriving (Eq, Show, Enum)
@@ -440,7 +447,7 @@ instance Enum KeyboardKey where
     --  82  -> KeyMenu
     24 -> KeyVolumeUp
     25 -> KeyVolumeDown
-    x -> error $ "Invalid value " ++ show x ++ " for `fromEnum`."
+    x -> error $ "(KeyboardKey.toEnum) Invalid value: " ++ show x
 
 data MouseButton
   = MouseButtonLeft
@@ -641,7 +648,7 @@ instance Enum PixelFormat where
     19 -> PixelFormatCompressedPvrtRgba
     20 -> PixelFormatCompressedAstc4x4Rgba
     21 -> PixelFormatCompressedAstc8x8Rgba
-    _ -> error "Invalid input"
+    _ -> error $ "(PixelFormat.toEnum) Invalid value: " ++ show n
 
 data TextureFilter
   = TextureFilterPoint
@@ -712,7 +719,7 @@ instance Enum Gesture where
     128 -> GestureSwipeDown
     256 -> GesturePinchIn
     512 -> GesturePinchOut
-    _ -> error "Invalid input"
+    _ -> error $ "(Gesture.toEnum) Invalid value: " ++ show n
 
 data CameraMode
   = CameraModeCustom
@@ -740,7 +747,17 @@ instance Storable NPatchLayout where
   peek ptr = do
     val <- peek (castPtr ptr)
     return $ toEnum $ fromEnum (val :: CInt)
-  poke ptr v = poke (castPtr ptr) (toEnum $ fromEnum v :: CInt)
+  poke ptr v = poke (castPtr ptr) (fromIntegral (fromEnum v) :: CInt)
+
+data MusicContextType = MusicAudioNone | MusicAudioWAV | MusicAudioOGG | MusicAudioFLAC | MusicAudioMP3 | MusicModuleXM | MusicModuleMOD deriving (Eq, Show, Enum)
+
+instance Storable MusicContextType where
+  sizeOf _ = 4
+  alignment _ = 4
+  peek ptr = do
+    val <- peek (castPtr ptr)
+    return $ toEnum $ fromEnum (val :: CInt)
+  poke ptr v = poke (castPtr ptr) (fromIntegral (fromEnum v) :: CInt)
 
 ------------------------------------------------
 -- Raylib structures ---------------------------
@@ -940,8 +957,7 @@ instance Storable Image where
     arr <- peekArray (getPixelDataSize width height format) ptr
     return $ Image (map fromIntegral arr) width height mipmaps format
   poke _p (Image arr width height mipmaps format) = do
-    ptr <- newArray (map fromIntegral arr :: [CUChar])
-    pokeByteOff _p 0 ptr
+    pokeByteOff _p 0 =<< newArray (map fromIntegral arr :: [CUChar])
     pokeByteOff _p 8 (fromIntegral width :: CInt)
     pokeByteOff _p 12 (fromIntegral height :: CInt)
     pokeByteOff _p 16 (fromIntegral mipmaps :: CInt)
@@ -1087,10 +1103,8 @@ instance Storable Font where
     pokeByteOff _p 4 (fromIntegral glyphCount :: CInt)
     pokeByteOff _p 8 (fromIntegral glyphPadding :: CInt)
     pokeByteOff _p 12 texture
-    recPtr <- newArray recs
-    pokeByteOff _p 32 recPtr
-    glyphPtr <- newArray glyphs
-    pokeByteOff _p 40 glyphPtr
+    pokeByteOff _p 32 =<< newArray recs
+    pokeByteOff _p 40 =<< newArray glyphs
     return ()
 
 data Camera3D = Camera3D
@@ -1155,7 +1169,7 @@ data Mesh = Mesh
     mesh'normals :: [Vector3],
     mesh'tangents :: Maybe [Vector4],
     mesh'colors :: Maybe [Color],
-    mesh'indices :: [Word16],
+    mesh'indices :: Maybe [Word16],
     mesh'animVertices :: Maybe [Vector3],
     mesh'animNormals :: Maybe [Vector3],
     mesh'boneIds :: Maybe [Word8],
@@ -1184,7 +1198,7 @@ instance Storable Mesh where
     colorsPtr <- (peekByteOff _p 48 :: IO (Ptr Color))
     colors <- peekMaybeArray vertexCount colorsPtr
     indicesPtr <- (peekByteOff _p 56 :: IO (Ptr CUShort))
-    indices <- map fromIntegral <$> peekArray vertexCount indicesPtr
+    indices <- (\m -> map fromIntegral <$> m) <$> peekMaybeArray vertexCount indicesPtr
     animVerticesPtr <- (peekByteOff _p 64 :: IO (Ptr Vector3))
     animVertices <- peekMaybeArray vertexCount animVerticesPtr
     animNormalsPtr <- (peekByteOff _p 72 :: IO (Ptr Vector3))
@@ -1200,19 +1214,19 @@ instance Storable Mesh where
   poke _p (Mesh vertexCount triangleCount vertices texcoords texcoords2 normals tangents colors indices animVertices animNormals boneIds boneWeights vaoId vboId) = do
     pokeByteOff _p 0 (fromIntegral vertexCount :: CInt)
     pokeByteOff _p 4 (fromIntegral triangleCount :: CInt)
-    newArray vertices >>= pokeByteOff _p 8
-    newArray texcoords >>= pokeByteOff _p 16
+    pokeByteOff _p 8 =<< newArray vertices
+    pokeByteOff _p 16 =<< newArray texcoords
     newMaybeArray texcoords2 >>= pokeByteOff _p 24
-    newArray normals >>= pokeByteOff _p 32
+    pokeByteOff _p 32 =<< newArray normals
     newMaybeArray tangents >>= pokeByteOff _p 40
     newMaybeArray colors >>= pokeByteOff _p 48
-    newArray (map fromIntegral indices :: [CUShort]) >>= pokeByteOff _p 56
+    newMaybeArray ((\m -> map fromIntegral m :: [CUShort]) <$> indices) >>= pokeByteOff _p 56
     newMaybeArray animVertices >>= pokeByteOff _p 64
     newMaybeArray animNormals >>= pokeByteOff _p 72
     newMaybeArray ((\m -> map fromIntegral m :: [CUChar]) <$> boneIds) >>= pokeByteOff _p 80
     newMaybeArray boneWeights >>= pokeByteOff _p 88
     pokeByteOff _p 96 (fromIntegral vaoId :: CUInt)
-    newArray (map fromIntegral vboId :: [CUInt]) >>= pokeByteOff _p 104
+    pokeByteOff _p 104 =<< newArray (map fromIntegral vboId :: [CUInt])
     return ()
 
 data Shader = Shader
@@ -1231,7 +1245,7 @@ instance Storable Shader where
     return $ Shader sId locs
   poke _p (Shader sId locs) = do
     pokeByteOff _p 0 (fromIntegral sId :: CUInt)
-    newArray (map fromIntegral locs :: [CInt]) >>= pokeByteOff _p 8
+    pokeByteOff _p 8 =<< newArray (map fromIntegral locs :: [CInt])
     return ()
 
 data MaterialMap = MaterialMap
@@ -1270,11 +1284,10 @@ instance Storable Material where
     mapsPtr <- (peekByteOff _p 16 :: IO (Ptr MaterialMap))
     maps <- peekArray 12 mapsPtr
     params <- map realToFrac <$> peekStaticArrayOff 4 (castPtr _p :: Ptr CFloat) 24
-    print params
     return $ Material shader maps params
   poke _p (Material shader maps params) = do
     pokeByteOff _p 0 shader
-    newArray maps >>= pokeByteOff _p 16
+    pokeByteOff _p 16 =<< newArray maps
     pokeStaticArrayOff (castPtr _p :: Ptr CFloat) 24 (map realToFrac params :: [CFloat])
     return ()
 
@@ -1299,9 +1312,6 @@ instance Storable Transform where
     pokeByteOff _p 28 scale
     return ()
 
-{- typedef struct BoneInfo {
-            char name[32]; int parent;
-        } BoneInfo; -}
 data BoneInfo = BoneInfo
   { boneInfo'name :: String,
     boneinfo'parent :: Int
@@ -1320,237 +1330,135 @@ instance Storable BoneInfo where
     pokeByteOff _p 32 (fromIntegral parent :: CInt)
     return ()
 
-{- typedef struct Model {
-            Matrix transform;
-            int meshCount;
-            int materialCount;
-            Mesh * meshes;
-            Material * materials;
-            int * meshMaterial;
-            int boneCount;
-            BoneInfo * bones;
-            Transform * bindPose;
-        } Model; -}
 data Model = Model
   { model'transform :: Matrix,
-    model'meshCount :: CInt,
-    model'materialCount :: CInt,
-    model'meshes :: Ptr Mesh,
-    model'materials :: Ptr Material,
-    model'meshMaterial :: Ptr CInt,
-    model'boneCount :: CInt,
-    model'bones :: Ptr BoneInfo,
-    model'bindPose :: Ptr Transform
+    model'meshCount :: Int,
+    model'materialCount :: Int,
+    model'meshes :: [Mesh],
+    model'materials :: [Material],
+    model'meshMaterial :: [Int],
+    model'boneCount :: Int,
+    model'bones :: Maybe [BoneInfo],
+    model'bindPose :: Maybe [Transform]
   }
   deriving (Eq, Show)
-
-p'Model'transform p = plusPtr p 0
-
-p'Model'transform :: Ptr Model -> Ptr Matrix
-
-p'Model'meshCount p = plusPtr p 64
-
-p'Model'meshCount :: Ptr Model -> Ptr CInt
-
-p'Model'materialCount p = plusPtr p 68
-
-p'Model'materialCount :: Ptr Model -> Ptr CInt
-
-p'Model'meshes p = plusPtr p 72
-
-p'Model'meshes :: Ptr Model -> Ptr (Ptr Mesh)
-
-p'Model'materials p = plusPtr p 76
-
-p'Model'materials :: Ptr Model -> Ptr (Ptr Material)
-
-p'Model'meshMaterial p = plusPtr p 80
-
-p'Model'meshMaterial :: Ptr Model -> Ptr (Ptr CInt)
-
-p'Model'boneCount p = plusPtr p 84
-
-p'Model'boneCount :: Ptr Model -> Ptr CInt
-
-p'Model'bones p = plusPtr p 88
-
-p'Model'bones :: Ptr Model -> Ptr (Ptr BoneInfo)
-
-p'Model'bindPose p = plusPtr p 92
-
-p'Model'bindPose :: Ptr Model -> Ptr (Ptr Transform)
 
 instance Storable Model where
-  sizeOf _ = 96
+  sizeOf _ = 120
   alignment _ = 4
   peek _p = do
-    v0 <- peekByteOff _p 0
-    v1 <- peekByteOff _p 64
-    v2 <- peekByteOff _p 68
-    v3 <- peekByteOff _p 72
-    v4 <- peekByteOff _p 76
-    v5 <- peekByteOff _p 80
-    v6 <- peekByteOff _p 84
-    v7 <- peekByteOff _p 88
-    v8 <- peekByteOff _p 92
-    return $ Model v0 v1 v2 v3 v4 v5 v6 v7 v8
-  poke _p (Model v0 v1 v2 v3 v4 v5 v6 v7 v8) = do
-    pokeByteOff _p 0 v0
-    pokeByteOff _p 64 v1
-    pokeByteOff _p 68 v2
-    pokeByteOff _p 72 v3
-    pokeByteOff _p 76 v4
-    pokeByteOff _p 80 v5
-    pokeByteOff _p 84 v6
-    pokeByteOff _p 88 v7
-    pokeByteOff _p 92 v8
+    transform <- peekByteOff _p 0
+    meshCount <- fromIntegral <$> (peekByteOff _p 64 :: IO CInt)
+    materialCount <- fromIntegral <$> (peekByteOff _p 68 :: IO CInt)
+    meshesPtr <- (peekByteOff _p 72 :: IO (Ptr Mesh))
+    meshes <- peekArray meshCount meshesPtr
+    materialsPtr <- (peekByteOff _p 80 :: IO (Ptr Material))
+    materials <- peekArray materialCount materialsPtr
+    meshMaterialPtr <- (peekByteOff _p 88 :: IO (Ptr CInt))
+    meshMaterial <- map fromIntegral <$> peekArray meshCount meshMaterialPtr
+    boneCount <- fromIntegral <$> (peekByteOff _p 96 :: IO CInt)
+    bonesPtr <- (peekByteOff _p 104 :: IO (Ptr BoneInfo))
+    bones <- peekMaybeArray boneCount bonesPtr
+    bindPosePtr <- (peekByteOff _p 112 :: IO (Ptr Transform))
+    bindPose <- peekMaybeArray boneCount bindPosePtr
+    return $ Model transform meshCount materialCount meshes materials meshMaterial boneCount bones bindPose
+  poke _p (Model transform meshCount materialCount meshes materials meshMaterial boneCount bones bindPose) = do
+    pokeByteOff _p 0 transform
+    pokeByteOff _p 64 (fromIntegral meshCount :: CInt)
+    pokeByteOff _p 68 (fromIntegral materialCount :: CInt)
+    pokeByteOff _p 72 =<< newArray meshes
+    pokeByteOff _p 80 =<< newArray materials
+    pokeByteOff _p 88 =<< newArray (map fromIntegral meshMaterial :: [CInt])
+    pokeByteOff _p 96 (fromIntegral boneCount :: CInt)
+    newMaybeArray bones >>= pokeByteOff _p 104
+    newMaybeArray bindPose >>= pokeByteOff _p 112
     return ()
 
-{- typedef struct ModelAnimation {
-            int boneCount;
-            int frameCount;
-            BoneInfo * bones;
-            Transform * * framePoses;
-        } ModelAnimation; -}
 data ModelAnimation = ModelAnimation
-  { modelAnimation'boneCount :: CInt,
-    modelAnimation'frameCount :: CInt,
-    modelAnimation'bones :: Ptr BoneInfo,
-    modelAnimation'framePoses :: Ptr (Ptr Transform)
+  { modelAnimation'boneCount :: Int,
+    modelAnimation'frameCount :: Int,
+    modelAnimation'bones :: [BoneInfo],
+    modelAnimation'framePoses :: [[Transform]]
   }
   deriving (Eq, Show)
 
-p'ModelAnimation'boneCount p = plusPtr p 0
-
-p'ModelAnimation'boneCount :: Ptr ModelAnimation -> Ptr CInt
-
-p'ModelAnimation'frameCount p = plusPtr p 4
-
-p'ModelAnimation'frameCount :: Ptr ModelAnimation -> Ptr CInt
-
-p'ModelAnimation'bones p = plusPtr p 8
-
-p'ModelAnimation'bones :: Ptr ModelAnimation -> Ptr (Ptr BoneInfo)
-
-p'ModelAnimation'framePoses p = plusPtr p 12
-
-p'ModelAnimation'framePoses :: Ptr ModelAnimation -> Ptr (Ptr (Ptr Transform))
-
 instance Storable ModelAnimation where
-  sizeOf _ = 16
+  sizeOf _ = 24
   alignment _ = 4
   peek _p = do
-    v0 <- peekByteOff _p 0
-    v1 <- peekByteOff _p 4
-    v2 <- peekByteOff _p 8
-    v3 <- peekByteOff _p 12
-    return $ ModelAnimation v0 v1 v2 v3
-  poke _p (ModelAnimation v0 v1 v2 v3) = do
-    pokeByteOff _p 0 v0
-    pokeByteOff _p 4 v1
-    pokeByteOff _p 8 v2
-    pokeByteOff _p 12 v3
+    boneCount <- fromIntegral <$> (peekByteOff _p 0 :: IO CInt)
+    frameCount <- fromIntegral <$> (peekByteOff _p 4 :: IO CInt)
+    bonesPtr <- (peekByteOff _p 8 :: IO (Ptr BoneInfo))
+    bones <- peekArray boneCount bonesPtr
+    framePosesPtr <- (peekByteOff _p 16 :: IO (Ptr (Ptr Transform)))
+    framePosesPtrArr <- peekArray frameCount framePosesPtr
+    framePoses <- mapM (peekArray boneCount) framePosesPtrArr
+    return $ ModelAnimation boneCount frameCount bones framePoses
+  poke _p (ModelAnimation boneCount frameCount bones framePoses) = do
+    pokeByteOff _p 0 (fromIntegral boneCount :: CInt)
+    pokeByteOff _p 4 (fromIntegral frameCount :: CInt)
+    pokeByteOff _p 8 =<< newArray bones
+    mapM newArray framePoses >>= newArray >>= pokeByteOff _p 16
     return ()
 
-{- typedef struct Ray {
-            Vector3 position; Vector3 direction;
-        } Ray; -}
 data Ray = Ray
   { ray'position :: Vector3,
     ray'direction :: Vector3
   }
   deriving (Eq, Show)
 
-p'Ray'position p = plusPtr p 0
-
-p'Ray'position :: Ptr Ray -> Ptr Vector3
-
-p'Ray'direction p = plusPtr p 12
-
-p'Ray'direction :: Ptr Ray -> Ptr Vector3
-
 instance Storable Ray where
   sizeOf _ = 24
   alignment _ = 4
   peek _p = do
-    v0 <- peekByteOff _p 0
-    v1 <- peekByteOff _p 12
-    return $ Ray v0 v1
-  poke _p (Ray v0 v1) = do
-    pokeByteOff _p 0 v0
-    pokeByteOff _p 12 v1
+    position <- peekByteOff _p 0
+    direction <- peekByteOff _p 12
+    return $ Ray position direction
+  poke _p (Ray position direction) = do
+    pokeByteOff _p 0 position
+    pokeByteOff _p 12 direction
     return ()
 
-{- typedef struct RayCollision {
-            _Bool hit; float distance; Vector3 point; Vector3 normal;
-        } RayCollision; -}
 data RayCollision = RayCollision
-  { rayCollision'hit :: CBool,
-    rayCollision'distance :: CFloat,
+  { rayCollision'hit :: Bool,
+    rayCollision'distance :: Float,
     rayCollision'point :: Vector3,
     rayCollision'normal :: Vector3
   }
   deriving (Eq, Show)
 
-p'RayCollision'hit p = plusPtr p 0
-
-p'RayCollision'hit :: Ptr RayCollision -> Ptr CBool
-
-p'RayCollision'distance p = plusPtr p 4
-
-p'RayCollision'distance :: Ptr RayCollision -> Ptr CFloat
-
-p'RayCollision'point p = plusPtr p 8
-
-p'RayCollision'point :: Ptr RayCollision -> Ptr Vector3
-
-p'RayCollision'normal p = plusPtr p 20
-
-p'RayCollision'normal :: Ptr RayCollision -> Ptr Vector3
-
 instance Storable RayCollision where
   sizeOf _ = 32
   alignment _ = 4
   peek _p = do
-    v0 <- peekByteOff _p 0
-    v1 <- peekByteOff _p 4
-    v2 <- peekByteOff _p 8
-    v3 <- peekByteOff _p 20
-    return $ RayCollision v0 v1 v2 v3
-  poke _p (RayCollision v0 v1 v2 v3) = do
-    pokeByteOff _p 0 v0
-    pokeByteOff _p 4 v1
-    pokeByteOff _p 8 v2
-    pokeByteOff _p 20 v3
+    hit <- toBool <$> (peekByteOff _p 0 :: IO CInt)
+    distance <- realToFrac <$> (peekByteOff _p 4 :: IO CFloat)
+    point <- peekByteOff _p 8
+    normal <- peekByteOff _p 20
+    return $ RayCollision hit distance point normal
+  poke _p (RayCollision hit distance point normal) = do
+    pokeByteOff _p 0 (fromBool hit :: CInt)
+    pokeByteOff _p 4 (realToFrac distance :: CFloat)
+    pokeByteOff _p 8 point
+    pokeByteOff _p 20 normal
     return ()
 
-{- typedef struct BoundingBox {
-            Vector3 min; Vector3 max;
-        } BoundingBox; -}
 data BoundingBox = BoundingBox
   { boundingBox'min :: Vector3,
     boundingBox'max :: Vector3
   }
   deriving (Eq, Show)
 
-p'BoundingBox'min p = plusPtr p 0
-
-p'BoundingBox'min :: Ptr BoundingBox -> Ptr Vector3
-
-p'BoundingBox'max p = plusPtr p 12
-
-p'BoundingBox'max :: Ptr BoundingBox -> Ptr Vector3
-
 instance Storable BoundingBox where
   sizeOf _ = 24
   alignment _ = 4
   peek _p = do
-    v0 <- peekByteOff _p 0
-    v1 <- peekByteOff _p 12
-    return $ BoundingBox v0 v1
-  poke _p (BoundingBox v0 v1) = do
-    pokeByteOff _p 0 v0
-    pokeByteOff _p 12 v1
+    bMin <- peekByteOff _p 0
+    bMax <- peekByteOff _p 12
+    return $ BoundingBox bMin bMax
+  poke _p (BoundingBox bMin bMax) = do
+    pokeByteOff _p 0 bMin
+    pokeByteOff _p 12 bMax
     return ()
 
 {- typedef struct Wave {
@@ -1558,113 +1466,67 @@ instance Storable BoundingBox where
             unsigned int sampleRate;
             unsigned int sampleSize;
             unsigned int channels;
-            void * data;
+            void * data; wave.frameCount*wave.channels*sizeof(short)
         } Wave; -}
 data Wave = Wave
-  { wave'frameCount :: CUInt,
-    wave'sampleRate :: CUInt,
-    wave'sampleSize :: CUInt,
-    wave'channels :: CUInt,
-    wave'data :: Ptr ()
+  { wave'frameCount :: Integer,
+    wave'sampleRate :: Integer,
+    wave'sampleSize :: Integer,
+    wave'channels :: Integer,
+    wave'data :: [Int]
   }
   deriving (Eq, Show)
-
-p'Wave'frameCount p = plusPtr p 0
-
-p'Wave'frameCount :: Ptr Wave -> Ptr CUInt
-
-p'Wave'sampleRate p = plusPtr p 4
-
-p'Wave'sampleRate :: Ptr Wave -> Ptr CUInt
-
-p'Wave'sampleSize p = plusPtr p 8
-
-p'Wave'sampleSize :: Ptr Wave -> Ptr CUInt
-
-p'Wave'channels p = plusPtr p 12
-
-p'Wave'channels :: Ptr Wave -> Ptr CUInt
-
-p'Wave'data p = plusPtr p 16
-
-p'Wave'data :: Ptr Wave -> Ptr (Ptr ())
 
 instance Storable Wave where
-  sizeOf _ = 20
+  sizeOf _ = 24
   alignment _ = 4
   peek _p = do
-    v0 <- peekByteOff _p 0
-    v1 <- peekByteOff _p 4
-    v2 <- peekByteOff _p 8
-    v3 <- peekByteOff _p 12
-    v4 <- peekByteOff _p 16
-    return $ Wave v0 v1 v2 v3 v4
-  poke _p (Wave v0 v1 v2 v3 v4) = do
-    pokeByteOff _p 0 v0
-    pokeByteOff _p 4 v1
-    pokeByteOff _p 8 v2
-    pokeByteOff _p 12 v3
-    pokeByteOff _p 16 v4
+    frameCount <- fromIntegral <$> (peekByteOff _p 0 :: IO CUInt)
+    sampleRate <- fromIntegral <$> (peekByteOff _p 4 :: IO CUInt)
+    sampleSize <- fromIntegral <$> (peekByteOff _p 8 :: IO CUInt)
+    channels <- fromIntegral <$> (peekByteOff _p 12 :: IO CUInt)
+    wDataPtr <- (peekByteOff _p 16 :: IO (Ptr CShort))
+    wData <- map fromIntegral <$> peekArray (fromInteger $ frameCount * channels) wDataPtr
+    return $ Wave frameCount sampleRate sampleSize channels wData
+  poke _p (Wave frameCount sampleRate sampleSize channels wData) = do
+    pokeByteOff _p 0 (fromIntegral frameCount :: CUInt)
+    pokeByteOff _p 4 (fromIntegral sampleRate :: CUInt)
+    pokeByteOff _p 8 (fromIntegral sampleSize :: CUInt)
+    pokeByteOff _p 12 (fromIntegral channels :: CUInt)
+    pokeByteOff _p 16 =<< newArray (map fromIntegral wData :: [CShort])
     return ()
 
-{- typedef struct rAudioBuffer rAudioBuffer; -}
+-- The implementations of these types are unimportant for the user,
+-- so they are not implemented in Haskell
 data RAudioBuffer = RAudioBuffer
 
-{- typedef struct rAudioProcessor rAudioProcessor; -}
 data RAudioProcessor = RAudioProcessor
 
-{- typedef struct AudioStream {
-            rAudioBuffer * buffer;
-            rAudioProcessor * processor;
-            unsigned int sampleRate;
-            unsigned int sampleSize;
-            unsigned int channels;
-        } AudioStream; -}
 data AudioStream = AudioStream
-  { audioStream'buffer :: Ptr RAudioBuffer,
+  { audioStream'buffer :: Ptr RAudioBuffer, -- TODO: Convert these into ForeignPtrs to make them automatically unload
     audioStream'processor :: Ptr RAudioProcessor,
-    audioStream'sampleRate :: CUInt,
-    audioStream'sampleSize :: CUInt,
-    audiostream'channels :: CUInt
+    audioStream'sampleRate :: Integer,
+    audioStream'sampleSize :: Integer,
+    audiostream'channels :: Integer
   }
   deriving (Eq, Show)
 
-p'AudioStream'buffer p = plusPtr p 0
-
-p'AudioStream'buffer :: Ptr AudioStream -> Ptr (Ptr RAudioBuffer)
-
-p'AudioStream'processor p = plusPtr p 4
-
-p'AudioStream'processor :: Ptr AudioStream -> Ptr (Ptr rAudioProcessor)
-
-p'AudioStream'sampleRate p = plusPtr p 8
-
-p'AudioStream'sampleRate :: Ptr AudioStream -> Ptr CUInt
-
-p'AudioStream'sampleSize p = plusPtr p 12
-
-p'AudioStream'sampleSize :: Ptr AudioStream -> Ptr CUInt
-
-p'AudioStream'channels p = plusPtr p 16
-
-p'AudioStream'channels :: Ptr AudioStream -> Ptr CUInt
-
 instance Storable AudioStream where
-  sizeOf _ = 20
-  alignment _ = 4
+  sizeOf _ = 32
+  alignment _ = 8
   peek _p = do
-    v0 <- peekByteOff _p 0
-    v1 <- peekByteOff _p 4
-    v2 <- peekByteOff _p 8
-    v3 <- peekByteOff _p 12
-    v4 <- peekByteOff _p 16
-    return $ AudioStream v0 v1 v2 v3 v4
-  poke _p (AudioStream v0 v1 v2 v3 v4) = do
-    pokeByteOff _p 0 v0
-    pokeByteOff _p 4 v1
-    pokeByteOff _p 8 v2
-    pokeByteOff _p 12 v3
-    pokeByteOff _p 16 v4
+    buffer <- peekByteOff _p 0
+    processor <- peekByteOff _p 8
+    sampleRate <- fromIntegral <$> (peekByteOff _p 16 :: IO CUInt)
+    sampleSize <- fromIntegral <$> (peekByteOff _p 20 :: IO CUInt)
+    channels <- fromIntegral <$> (peekByteOff _p 24 :: IO CUInt)
+    return $ AudioStream buffer processor sampleRate sampleSize channels
+  poke _p (AudioStream buffer processor sampleRate sampleSize channels) = do
+    pokeByteOff _p 0 buffer
+    pokeByteOff _p 8 processor
+    pokeByteOff _p 16 (fromIntegral sampleRate :: CUInt)
+    pokeByteOff _p 20 (fromIntegral sampleSize :: CUInt)
+    pokeByteOff _p 24 (fromIntegral channels :: CUInt)
     return ()
 
 {- typedef struct Sound {
@@ -1672,28 +1534,20 @@ instance Storable AudioStream where
         } Sound; -}
 data Sound = Sound
   { sound'stream :: AudioStream,
-    sound'frameCount :: CUInt
+    sound'frameCount :: Integer
   }
   deriving (Eq, Show)
 
-p'Sound'stream p = plusPtr p 0
-
-p'Sound'stream :: Ptr Sound -> Ptr AudioStream
-
-p'Sound'frameCount p = plusPtr p 20
-
-p'Sound'frameCount :: Ptr Sound -> Ptr CUInt
-
 instance Storable Sound where
-  sizeOf _ = 24
-  alignment _ = 4
+  sizeOf _ = 40
+  alignment _ = 8
   peek _p = do
-    v0 <- peekByteOff _p 0
-    v1 <- peekByteOff _p 20
-    return $ Sound v0 v1
-  poke _p (Sound v0 v1) = do
-    pokeByteOff _p 0 v0
-    pokeByteOff _p 20 v1
+    stream <- peekByteOff _p 0
+    frameCount <- fromIntegral <$> (peekByteOff _p 32 :: IO CUInt)
+    return $ Sound stream frameCount
+  poke _p (Sound stream frameCount) = do
+    pokeByteOff _p 0 stream
+    pokeByteOff _p 32 (fromIntegral frameCount :: CUInt)
     return ()
 
 {- typedef struct Music {
@@ -1704,50 +1558,30 @@ instance Storable Sound where
             void * ctxData;
         } Music; -}
 data Music = Music
-  { musistream :: AudioStream,
-    musiframeCount :: CUInt,
-    musilooping :: CInt,
-    musictxType :: CInt,
-    musictxData :: Ptr ()
+  { music'stream :: AudioStream,
+    music'frameCount :: Integer,
+    music'looping :: Bool,
+    music'ctxType :: MusicContextType,
+    music'ctxData :: Ptr () -- TODO: Convert this into a ForeignPtr to make it automatically unload
   }
   deriving (Eq, Show)
 
-p'Musistream p = plusPtr p 0
-
-p'Musistream :: Ptr Music -> Ptr AudioStream
-
-p'MusiframeCount p = plusPtr p 20
-
-p'MusiframeCount :: Ptr Music -> Ptr CUInt
-
-p'Musilooping p = plusPtr p 24
-
-p'Musilooping :: Ptr Music -> Ptr CInt
-
-p'MusictxType p = plusPtr p 28
-
-p'MusictxType :: Ptr Music -> Ptr CInt
-
-p'MusictxData p = plusPtr p 32
-
-p'MusictxData :: Ptr Music -> Ptr (Ptr ())
-
 instance Storable Music where
-  sizeOf _ = 36
+  sizeOf _ = 56
   alignment _ = 4
   peek _p = do
-    v0 <- peekByteOff _p 0
-    v1 <- peekByteOff _p 20
-    v2 <- peekByteOff _p 24
-    v3 <- peekByteOff _p 28
-    v4 <- peekByteOff _p 32
-    return $ Music v0 v1 v2 v3 v4
-  poke _p (Music v0 v1 v2 v3 v4) = do
-    pokeByteOff _p 0 v0
-    pokeByteOff _p 20 v1
-    pokeByteOff _p 24 v2
-    pokeByteOff _p 28 v3
-    pokeByteOff _p 32 v4
+    stream <- peekByteOff _p 0
+    frameCount <- fromIntegral <$> (peekByteOff _p 32 :: IO CUInt)
+    looping <- toBool <$> (peekByteOff _p 36 :: IO CInt)
+    ctxType <- peekByteOff _p 40
+    ctxData <- peekByteOff _p 48
+    return $ Music stream frameCount looping ctxType ctxData
+  poke _p (Music stream frameCount looping ctxType ctxData) = do
+    pokeByteOff _p 0 stream
+    pokeByteOff _p 32 (fromIntegral frameCount :: CUInt)
+    pokeByteOff _p 36 (fromBool looping :: CInt)
+    pokeByteOff _p 40 ctxType
+    pokeByteOff _p 48 ctxData
     return ()
 
 {- typedef struct VrDeviceInfo {

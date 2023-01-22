@@ -85,9 +85,19 @@ executable basic-window
   hs-source-dirs: examples/basic-window/src
   main-is:        Main.hs
 
-executable camera-ray-collision
+executable basic-images
   import:         example-options
-  hs-source-dirs: examples/camera-ray-collision/src
+  hs-source-dirs: examples/basic-images/src
+  main-is:        Main.hs
+
+executable basic-models
+  import:         example-options
+  hs-source-dirs: examples/basic-models/src
+  main-is:        Main.hs
+
+executable basic-audio
+  import:         example-options
+  hs-source-dirs: examples/basic-audio/src
   main-is:        Main.hs
 
 executable custom-font-text
@@ -100,14 +110,9 @@ executable first-person-camera
   hs-source-dirs: examples/first-person-camera/src
   main-is:        Main.hs
 
-executable basic-images
+executable camera-ray-collision
   import:         example-options
-  hs-source-dirs: examples/basic-images/src
-  main-is:        Main.hs
-
-executable basic-models
-  import:         example-options
-  hs-source-dirs: examples/basic-models/src
+  hs-source-dirs: examples/camera-ray-collision/src
   main-is:        Main.hs
 
 library

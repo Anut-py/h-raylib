@@ -1,5 +1,3 @@
-{-# LANGUAGE ForeignFunctionInterface #-}
-
 {-# OPTIONS -Wall #-}
 
 module Raylib.Models where

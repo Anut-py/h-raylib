@@ -1,6 +1,5 @@
-{-# LANGUAGE ForeignFunctionInterface #-}
-
 {-# OPTIONS -Wall #-}
+{-# LANGUAGE ForeignFunctionInterface #-}
 
 module Raylib.Audio where
 
