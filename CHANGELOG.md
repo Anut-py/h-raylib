@@ -1,21 +1,33 @@
 # h-raylib changelog
 
-## Version 4.5.0.4
-_13 November, 2022_
-- Replaced `CInt` with `CBool` for functions that return booleans
-- Removed `Xext` dependency (it is no longer required for Nix builds)
+## Version 4.5.0.12
+_14 January, 2023_
 
-## Version 4.5.0.5
-_19 November, 2022_
-- Replaced `CInt` with `CBool` in `RayCollision`
+- Removed `ShaderLocationIndex` from some function types
+
+## Version 4.5.0.11
+_14 January, 2023_
+
+- Fixed some function types
+- Allowed omitting fragment/vertex shaders in `loadShader` functions
+
+## Version 4.5.0.10
+_5 January, 2023_
+
+- Restructured to make the examples easier to run
 - Updated raylib to the master branch
 
-## Version 4.5.0.6
-_24 November, 2022_
+## Version 4.5.0.9
+_23 December, 2022_
 
-\[[#6](https://github.com/Anut-py/h-raylib/issues/6)\]
+- Changed `setConfigFlags` and `setGesturesEnabled` to use an array of flags
 
-- Fixed `Font` marshalling
+## Version 4.5.0.8
+_18 December, 2022_
+
+\[[#9](https://github.com/Anut-py/h-raylib/issues/9)\]
+
+- Fixed an issue on Mac where `clang` failed to detect that `rglfw.c` was using objective-c
 
 ## Version 4.5.0.7
 _26 November, 2022_
@@ -26,31 +38,19 @@ _26 November, 2022_
 - Removed some CInt usage in the main API
 - Removed `Raylib.Constants`
 
-## Version 4.5.0.8
-_18 December, 2022_
+## Version 4.5.0.6
+_24 November, 2022_
 
-\[[#9](https://github.com/Anut-py/h-raylib/issues/9)\]
+\[[#6](https://github.com/Anut-py/h-raylib/issues/6)\]
 
-- Fixed an issue on Mac where `clang` failed to detect that `rglfw.c` was using objective-c
+- Fixed `Font` marshalling
 
-## Version 4.5.0.9
-_23 December, 2022_
-
-- Changed `setConfigFlags` and `setGesturesEnabled` to use an array of flags
-
-## Version 4.5.0.10
-_5 January, 2023_
-
-- Restructured to make the examples easier to run
+## Version 4.5.0.5
+_19 November, 2022_
+- Replaced `CInt` with `CBool` in `RayCollision`
 - Updated raylib to the master branch
 
-## Version 4.5.0.11
-_14 January, 2023_
-
-- Fixed some function types
-- Allowed omitting fragment/vertex shaders in `loadShader` functions
-
-## Version 4.5.0.12
-_14 January, 2023_
-
-- Removed `ShaderLocationIndex` from some function types
+## Version 4.5.0.4
+_13 November, 2022_
+- Replaced `CInt` with `CBool` for functions that return booleans
+- Removed `Xext` dependency (it is no longer required for Nix builds)
