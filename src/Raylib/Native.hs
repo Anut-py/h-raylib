@@ -4,10 +4,7 @@
 
 module Raylib.Native where
 
-import Foreign
-  ( FunPtr,
-    Ptr,
-  )
+import Foreign (Ptr)
 import Foreign.C
   ( CBool (..),
     CDouble (..),
@@ -19,7 +16,8 @@ import Foreign.C
     CUInt (..),
   )
 import Raylib.Types
-  ( AudioStream,
+  ( AudioCallback,
+    AudioStream,
     BoundingBox,
     Camera2D,
     Camera3D,
@@ -28,6 +26,8 @@ import Raylib.Types
     Font,
     GlyphInfo,
     Image,
+    LoadFileDataCallback,
+    LoadFileTextCallback,
     Material,
     Matrix,
     Mesh,
@@ -39,6 +39,8 @@ import Raylib.Types
     RayCollision,
     Rectangle,
     RenderTexture,
+    SaveFileDataCallback,
+    SaveFileTextCallback,
     Shader,
     Sound,
     Texture,
@@ -50,16 +52,6 @@ import Raylib.Types
     Wave,
   )
 import Prelude hiding (length)
-
-type LoadFileDataCallback = FunPtr (CString -> Ptr CUInt -> IO (Ptr CUChar))
-
-type SaveFileDataCallback = FunPtr (CString -> Ptr () -> CUInt -> IO CInt)
-
-type LoadFileTextCallback = FunPtr (CString -> IO CString)
-
-type SaveFileTextCallback = FunPtr (CString -> CString -> IO CInt)
-
-type AudioCallback = FunPtr (Ptr () -> CUInt -> IO ())
 
 -- foreign import ccall safe "wrapper"
 --   mk'TraceLogCallback ::

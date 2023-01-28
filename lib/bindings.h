@@ -4,11 +4,11 @@
  * @brief Required methods for binding Haskell to Raylib
  *
  * Haskell does not support interfacing with C directly through structs (e.g. Vector2).
- * In order to achieve this, wrapper functions that use pointer need to be written. This
+ * In order to achieve this, wrapper functions that use pointers need to be written. This
  * file contains wrapper functions for all Raylib functions that do not take pointers.
  */
 
-#include "raylib.h"
+#include <raylib.h>
 
 void SetWindowIcon_(Image *a);
 

@@ -1,9 +1,9 @@
 {-# OPTIONS -Wall #-}
-module Raylib.Util (c'free, pop, popCArray, withArray2D, configsToBitflag, withMaybe, withMaybeCString, peekMaybeArray, newMaybeArray, peekStaticArray, peekStaticArrayOff, pokeStaticArray, pokeStaticArrayOff, rightPad) where
+module Raylib.Util (c'free, pop, popCArray, withArray2D, configsToBitflag, withMaybe, withMaybeCString, peekMaybe, peekMaybeOff, pokeMaybe, pokeMaybeOff, peekMaybeArray, newMaybeArray, peekStaticArray, peekStaticArrayOff, pokeStaticArray, pokeStaticArrayOff, rightPad) where
 
 import Control.Monad (forM_)
 import Data.Bits ((.|.))
-import Foreign (Ptr, Storable (peek, sizeOf, poke), castPtr, free, newArray, nullPtr, peekArray, plusPtr, with)
+import Foreign (Ptr, Storable (peek, sizeOf, poke, peekByteOff), castPtr, free, newArray, nullPtr, peekArray, plusPtr, with)
 import Foreign.C (CString, withCString)
 
 -- Internal utility functions
@@ -45,6 +45,23 @@ withMaybeCString :: Maybe String -> (CString -> IO b) -> IO b
 withMaybeCString a f = case a of
   (Just val) -> withCString val f
   Nothing -> f nullPtr
+
+peekMaybe :: (Storable a) => Ptr (Ptr a) -> IO (Maybe a)
+peekMaybe ptr = do
+  ref <- peek ptr
+  if ref == nullPtr then return Nothing else Just <$> peek ref
+
+peekMaybeOff :: (Storable a) => Ptr (Ptr a) -> Int -> IO (Maybe a)
+peekMaybeOff ptr off = do
+  ref <- peekByteOff ptr off
+  if ref == nullPtr then return Nothing else Just <$> peek ref
+
+pokeMaybe :: (Storable a) => Ptr (Ptr a) -> Maybe a -> IO ()
+pokeMaybe ptr val = case val of Nothing -> poke ptr nullPtr
+                                Just a -> with a $ poke ptr
+
+pokeMaybeOff :: (Storable a) => Ptr (Ptr a) -> Int -> Maybe a -> IO ()
+pokeMaybeOff ptr off = pokeMaybe (plusPtr ptr off)
 
 peekMaybeArray :: (Storable a) => Int -> Ptr a -> IO (Maybe [a])
 peekMaybeArray size ptr = if ptr == nullPtr then return Nothing else Just <$> peekArray size ptr
