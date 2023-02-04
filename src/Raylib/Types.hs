@@ -15,8 +15,6 @@ import Foreign
     newArray,
     nullPtr,
     peekArray,
-    plusPtr,
-    pokeArray,
     toBool, nullFunPtr
   )
 import Foreign.C
@@ -29,7 +27,7 @@ import Foreign.C
     CUChar,
     CUInt,
     CUShort,
-    castCharToCChar,
+    castCharToCChar, peekCString, newCString
   )
 import Foreign.C.String (castCCharToChar)
 import GHC.IO (unsafePerformIO)
@@ -1505,7 +1503,7 @@ instance Storable Wave where
     pokeByteOff _p 16 =<< newArray (map fromIntegral wData :: [CShort])
     return ()
 
--- These types don't work perfectly right now, I need to fix them later on
+-- These types don't work perfectly right now, I need to fix them later on.
 -- They are currently used as `Ptr`s because peeking/poking them every time
 -- an audio function is called doesn't work properly (they are stored in a
 -- linked list in C, which makes it very difficult to properly peek/poke them)
@@ -1778,222 +1776,105 @@ instance Storable Music where
     pokeByteOff _p 48 ctxData
     return ()
 
-{- typedef struct VrDeviceInfo {
-            int hResolution;
-            int vResolution;
-            float hScreenSize;
-            float vScreenSize;
-            float vScreenCenter;
-            float eyeToScreenDistance;
-            float lensSeparationDistance;
-            float interpupillaryDistance;
-            float lensDistortionValues[4];
-            float chromaAbCorrection[4];
-        } VrDeviceInfo; -}
 data VrDeviceInfo = VrDeviceInfo
-  { vrDeviceInfo'hResolution :: CInt,
-    vrDeviceInfo'vResolution :: CInt,
-    vrDeviceInfo'hScreenSize :: CFloat,
-    vrDeviceInfo'vScreenSize :: CFloat,
-    vrDeviceInfo'vScreenCenter :: CFloat,
-    vrDeviceInfo'eyeToScreenDistance :: CFloat,
-    vrDeviceInfo'lensSeparationDistance :: CFloat,
-    vrDeviceInfo'interpupillaryDistance :: CFloat,
-    vrDeviceInfo'lensDistortionValues :: [CFloat],
-    vrDeviceInfo'chromaAbCorrection :: [CFloat]
+  { vrDeviceInfo'hResolution :: Int,
+    vrDeviceInfo'vResolution :: Int,
+    vrDeviceInfo'hScreenSize :: Float,
+    vrDeviceInfo'vScreenSize :: Float,
+    vrDeviceInfo'vScreenCenter :: Float,
+    vrDeviceInfo'eyeToScreenDistance :: Float,
+    vrDeviceInfo'lensSeparationDistance :: Float,
+    vrDeviceInfo'interpupillaryDistance :: Float,
+    vrDeviceInfo'lensDistortionValues :: [Float],
+    vrDeviceInfo'chromaAbCorrection :: [Float]
   }
   deriving (Eq, Show)
-
-p'VrDeviceInfo'hResolution p = plusPtr p 0
-
-p'VrDeviceInfo'hResolution :: Ptr VrDeviceInfo -> Ptr CInt
-
-p'VrDeviceInfo'vResolution p = plusPtr p 4
-
-p'VrDeviceInfo'vResolution :: Ptr VrDeviceInfo -> Ptr CInt
-
-p'VrDeviceInfo'hScreenSize p = plusPtr p 8
-
-p'VrDeviceInfo'hScreenSize :: Ptr VrDeviceInfo -> Ptr CFloat
-
-p'VrDeviceInfo'vScreenSize p = plusPtr p 12
-
-p'VrDeviceInfo'vScreenSize :: Ptr VrDeviceInfo -> Ptr CFloat
-
-p'VrDeviceInfo'vScreenCenter p = plusPtr p 16
-
-p'VrDeviceInfo'vScreenCenter :: Ptr VrDeviceInfo -> Ptr CFloat
-
-p'VrDeviceInfo'eyeToScreenDistance p = plusPtr p 20
-
-p'VrDeviceInfo'eyeToScreenDistance :: Ptr VrDeviceInfo -> Ptr CFloat
-
-p'VrDeviceInfo'lensSeparationDistance p = plusPtr p 24
-
-p'VrDeviceInfo'lensSeparationDistance :: Ptr VrDeviceInfo -> Ptr CFloat
-
-p'VrDeviceInfo'interpupillaryDistance p = plusPtr p 28
-
-p'VrDeviceInfo'interpupillaryDistance :: Ptr VrDeviceInfo -> Ptr CFloat
-
-p'VrDeviceInfo'lensDistortionValues p = plusPtr p 32
-
-p'VrDeviceInfo'lensDistortionValues :: Ptr VrDeviceInfo -> Ptr CFloat
-
-p'VrDeviceInfo'chromaAbCorrection p = plusPtr p 48
-
-p'VrDeviceInfo'chromaAbCorrection :: Ptr VrDeviceInfo -> Ptr CFloat
 
 instance Storable VrDeviceInfo where
   sizeOf _ = 64
   alignment _ = 4
   peek _p = do
-    v0 <- peekByteOff _p 0
-    v1 <- peekByteOff _p 4
-    v2 <- peekByteOff _p 8
-    v3 <- peekByteOff _p 12
-    v4 <- peekByteOff _p 16
-    v5 <- peekByteOff _p 20
-    v6 <- peekByteOff _p 24
-    v7 <- peekByteOff _p 28
-    v8 <- let s8 = div 16 $ sizeOf (undefined :: CFloat) in peekArray s8 (plusPtr _p 32)
-    v9 <- let s9 = div 16 $ sizeOf (undefined :: CFloat) in peekArray s9 (plusPtr _p 48)
-    return $ VrDeviceInfo v0 v1 v2 v3 v4 v5 v6 v7 v8 v9
-  poke _p (VrDeviceInfo v0 v1 v2 v3 v4 v5 v6 v7 v8 v9) = do
-    pokeByteOff _p 0 v0
-    pokeByteOff _p 4 v1
-    pokeByteOff _p 8 v2
-    pokeByteOff _p 12 v3
-    pokeByteOff _p 16 v4
-    pokeByteOff _p 20 v5
-    pokeByteOff _p 24 v6
-    pokeByteOff _p 28 v7
-    let s8 = div 16 $ sizeOf (undefined :: CFloat)
-    pokeArray (plusPtr _p 32) (take s8 v8)
-    let s9 = div 16 $ sizeOf (undefined :: CFloat)
-    pokeArray (plusPtr _p 48) (take s9 v9)
+    hResolution <- fromIntegral <$> (peekByteOff _p 0 :: IO CInt)
+    vResolution <- fromIntegral <$> (peekByteOff _p 4 :: IO CInt)
+    hScreenSize <- realToFrac <$> (peekByteOff _p 8 :: IO CFloat)
+    vScreenSize <- realToFrac <$> (peekByteOff _p 12 :: IO CFloat)
+    vScreenCenter <- realToFrac <$> (peekByteOff _p 16 :: IO CFloat)
+    eyeToScreenDistance <- realToFrac <$> (peekByteOff _p 20 :: IO CFloat)
+    lensSeparationDistance <- realToFrac <$> (peekByteOff _p 24 :: IO CFloat)
+    interpupillaryDistance <- realToFrac <$> (peekByteOff _p 28 :: IO CFloat)
+    lensDistortionValues <- map realToFrac <$> (peekStaticArrayOff 4 (castPtr _p) 32 :: IO [CFloat])
+    chromaAbCorrection <- map realToFrac <$> (peekStaticArrayOff 4 (castPtr _p) 48 :: IO [CFloat])
+    return $ VrDeviceInfo hResolution vResolution hScreenSize vScreenSize vScreenCenter eyeToScreenDistance lensSeparationDistance interpupillaryDistance lensDistortionValues chromaAbCorrection
+  poke _p (VrDeviceInfo hResolution vResolution hScreenSize vScreenSize vScreenCenter eyeToScreenDistance lensSeparationDistance interpupillaryDistance lensDistortionValues chromaAbCorrection) = do
+    pokeByteOff _p 0 (fromIntegral hResolution :: CInt)
+    pokeByteOff _p 4 (fromIntegral vResolution :: CInt)
+    pokeByteOff _p 8 (realToFrac hScreenSize :: CFloat)
+    pokeByteOff _p 12 (realToFrac vScreenSize :: CFloat)
+    pokeByteOff _p 16 (realToFrac vScreenCenter :: CFloat)
+    pokeByteOff _p 20 (realToFrac eyeToScreenDistance :: CFloat)
+    pokeByteOff _p 24 (realToFrac lensSeparationDistance :: CFloat)
+    pokeByteOff _p 28 (realToFrac interpupillaryDistance :: CFloat)
+    pokeStaticArrayOff (castPtr _p) 32 (map realToFrac lensDistortionValues :: [CFloat])
+    pokeStaticArrayOff (castPtr _p) 48 (map realToFrac chromaAbCorrection :: [CFloat])
     return ()
 
-{- typedef struct VrStereoConfig {
-            Matrix projection[2];
-            Matrix viewOffset[2];
-            float leftLensCenter[2];
-            float rightLensCenter[2];
-            float leftScreenCenter[2];
-            float rightScreenCenter[2];
-            float scale[2];
-            float scaleIn[2];
-        } VrStereoConfig; -}
 data VrStereoConfig = VrStereoConfig
   { vrStereoConfig'projection :: [Matrix],
     vrStereoConfig'viewOffset :: [Matrix],
-    vrStereoConfig'leftLensCenter :: [CFloat],
-    vrStereoConfig'rightLensCenter :: [CFloat],
-    vrStereoConfig'leftScreenCenter :: [CFloat],
-    vrStereoConfig'rightScreenCenter :: [CFloat],
-    vrStereoConfig'scale :: [CFloat],
-    vrStereoConfig'scaleIn :: [CFloat]
+    vrStereoConfig'leftLensCenter :: [Float],
+    vrStereoConfig'rightLensCenter :: [Float],
+    vrStereoConfig'leftScreenCenter :: [Float],
+    vrStereoConfig'rightScreenCenter :: [Float],
+    vrStereoConfig'scale :: [Float],
+    vrStereoConfig'scaleIn :: [Float]
   }
   deriving (Eq, Show)
-
-p'VrStereoConfig'projection p = plusPtr p 0
-
-p'VrStereoConfig'projection :: Ptr VrStereoConfig -> Ptr Matrix
-
-p'VrStereoConfig'viewOffset p = plusPtr p 128
-
-p'VrStereoConfig'viewOffset :: Ptr VrStereoConfig -> Ptr Matrix
-
-p'VrStereoConfig'leftLensCenter p = plusPtr p 256
-
-p'VrStereoConfig'leftLensCenter :: Ptr VrStereoConfig -> Ptr CFloat
-
-p'VrStereoConfig'rightLensCenter p = plusPtr p 264
-
-p'VrStereoConfig'rightLensCenter :: Ptr VrStereoConfig -> Ptr CFloat
-
-p'VrStereoConfig'leftScreenCenter p = plusPtr p 272
-
-p'VrStereoConfig'leftScreenCenter :: Ptr VrStereoConfig -> Ptr CFloat
-
-p'VrStereoConfig'rightScreenCenter p = plusPtr p 280
-
-p'VrStereoConfig'rightScreenCenter :: Ptr VrStereoConfig -> Ptr CFloat
-
-p'VrStereoConfig'scale p = plusPtr p 288
-
-p'VrStereoConfig'scale :: Ptr VrStereoConfig -> Ptr CFloat
-
-p'VrStereoConfig'scaleIn p = plusPtr p 296
-
-p'VrStereoConfig'scaleIn :: Ptr VrStereoConfig -> Ptr CFloat
 
 instance Storable VrStereoConfig where
   sizeOf _ = 304
   alignment _ = 4
   peek _p = do
-    v0 <- let s0 = div 128 $ sizeOf (undefined :: Matrix) in peekArray s0 (plusPtr _p 0)
-    v1 <- let s1 = div 128 $ sizeOf (undefined :: Matrix) in peekArray s1 (plusPtr _p 128)
-    v2 <- let s2 = div 8 $ sizeOf (undefined :: CFloat) in peekArray s2 (plusPtr _p 256)
-    v3 <- let s3 = div 8 $ sizeOf (undefined :: CFloat) in peekArray s3 (plusPtr _p 264)
-    v4 <- let s4 = div 8 $ sizeOf (undefined :: CFloat) in peekArray s4 (plusPtr _p 272)
-    v5 <- let s5 = div 8 $ sizeOf (undefined :: CFloat) in peekArray s5 (plusPtr _p 280)
-    v6 <- let s6 = div 8 $ sizeOf (undefined :: CFloat) in peekArray s6 (plusPtr _p 288)
-    v7 <- let s7 = div 8 $ sizeOf (undefined :: CFloat) in peekArray s7 (plusPtr _p 296)
-    return $ VrStereoConfig v0 v1 v2 v3 v4 v5 v6 v7
-  poke _p (VrStereoConfig v0 v1 v2 v3 v4 v5 v6 v7) = do
-    let s0 = div 128 $ sizeOf (undefined :: Matrix)
-    pokeArray (plusPtr _p 0) (take s0 v0)
-    let s1 = div 128 $ sizeOf (undefined :: Matrix)
-    pokeArray (plusPtr _p 128) (take s1 v1)
-    let s2 = div 8 $ sizeOf (undefined :: CFloat)
-    pokeArray (plusPtr _p 256) (take s2 v2)
-    let s3 = div 8 $ sizeOf (undefined :: CFloat)
-    pokeArray (plusPtr _p 264) (take s3 v3)
-    let s4 = div 8 $ sizeOf (undefined :: CFloat)
-    pokeArray (plusPtr _p 272) (take s4 v4)
-    let s5 = div 8 $ sizeOf (undefined :: CFloat)
-    pokeArray (plusPtr _p 280) (take s5 v5)
-    let s6 = div 8 $ sizeOf (undefined :: CFloat)
-    pokeArray (plusPtr _p 288) (take s6 v6)
-    let s7 = div 8 $ sizeOf (undefined :: CFloat)
-    pokeArray (plusPtr _p 296) (take s7 v7)
+    projection <- peekStaticArrayOff 2 (castPtr _p) 0
+    viewOffset <- peekStaticArrayOff 2 (castPtr _p) 128
+    leftLensCenter <- map realToFrac <$> (peekStaticArrayOff 2 (castPtr _p) 256 :: IO [CFloat])
+    rightLensCenter <- map realToFrac <$> (peekStaticArrayOff 2 (castPtr _p) 264 :: IO [CFloat])
+    leftScreenCenter <- map realToFrac <$> (peekStaticArrayOff 2 (castPtr _p) 272 :: IO [CFloat])
+    rightScreenCenter <- map realToFrac <$> (peekStaticArrayOff 2 (castPtr _p) 280 :: IO [CFloat])
+    scale <- map realToFrac <$> (peekStaticArrayOff 2 (castPtr _p) 288 :: IO [CFloat])
+    scaleIn <- map realToFrac <$> (peekStaticArrayOff 2 (castPtr _p) 296 :: IO [CFloat])
+    return $ VrStereoConfig projection viewOffset leftLensCenter rightLensCenter leftScreenCenter rightScreenCenter scale scaleIn
+  poke _p (VrStereoConfig projection viewOffset leftLensCenter rightLensCenter leftScreenCenter rightScreenCenter scale scaleIn) = do
+    pokeStaticArrayOff (castPtr _p) 0 projection
+    pokeStaticArrayOff (castPtr _p) 128 viewOffset
+    pokeStaticArrayOff (castPtr _p) 256 (map realToFrac leftLensCenter :: [CFloat])
+    pokeStaticArrayOff (castPtr _p) 264 (map realToFrac rightLensCenter :: [CFloat])
+    pokeStaticArrayOff (castPtr _p) 272 (map realToFrac leftScreenCenter :: [CFloat])
+    pokeStaticArrayOff (castPtr _p) 280 (map realToFrac rightScreenCenter :: [CFloat])
+    pokeStaticArrayOff (castPtr _p) 288 (map realToFrac scale :: [CFloat])
+    pokeStaticArrayOff (castPtr _p) 296 (map realToFrac scaleIn :: [CFloat])
     return ()
 
-{- typedef struct FilePathList {
-            unsigned int capacity; unsigned int count; char * * paths;
-        } FilePathList; -}
 data FilePathList = FilePathList
-  { filePathlist'capacity :: CUInt,
-    filePathlist'count :: CUInt,
-    filePathList'paths :: Ptr CString
+  { filePathlist'capacity :: Integer,
+    filePathList'paths :: [String]
   }
   deriving (Eq, Show)
 
-p'FilePathList'capacity p = plusPtr p 0
-
-p'FilePathList'capacity :: Ptr FilePathList -> Ptr CUInt
-
-p'FilePathList'count p = plusPtr p 4
-
-p'FilePathList'count :: Ptr FilePathList -> Ptr CUInt
-
-p'FilePathList'paths p = plusPtr p 8
-
-p'FilePathList'paths :: Ptr FilePathList -> Ptr (Ptr CString)
-
 instance Storable FilePathList where
-  sizeOf _ = 12
+  sizeOf _ = 16
   alignment _ = 4
   peek _p = do
-    v0 <- peekByteOff _p 0
-    v1 <- peekByteOff _p 4
-    v2 <- peekByteOff _p 8
-    return $ FilePathList v0 v1 v2
-  poke _p (FilePathList v0 v1 v2) = do
-    pokeByteOff _p 0 v0
-    pokeByteOff _p 4 v1
-    pokeByteOff _p 8 v2
+    capacity <- fromIntegral <$> (peekByteOff _p 0 :: IO CUInt)
+    count <- fromIntegral <$> (peekByteOff _p 4 :: IO CUInt)
+    pathsPtr <- (peekByteOff _p 8 :: IO (Ptr CString))
+    pathsCStrings <- peekArray count pathsPtr
+    paths <- mapM peekCString pathsCStrings
+    return $ FilePathList capacity paths
+  poke _p (FilePathList capacity paths) = do
+    pokeByteOff _p 0 (fromIntegral capacity :: CUInt)
+    pokeByteOff _p 4 (fromIntegral (length paths) :: CUInt)
+    pathsCStrings <- mapM newCString paths
+    pokeByteOff _p 8 =<< newArray pathsCStrings
     return ()
 
 type LoadFileDataCallback = FunPtr (CString -> Ptr CUInt -> IO (Ptr CUChar))
