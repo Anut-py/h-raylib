@@ -2,7 +2,6 @@
 module Main where
 
 import Control.Monad (unless, when)
-import Foreign (toBool)
 import Raylib.Colors (black, red, white)
 import Raylib.Core
   ( beginDrawing,
@@ -43,12 +42,12 @@ gameLoop camera = do
 
   let ray = Ray (camera3D'position camera) (camera3D'target camera -.- camera3D'position camera)
   let collision = getRayCollisionQuad ray (Vector3 0 0 0) (Vector3 0 2 0) (Vector3 0 2 4) (Vector3 0 0 4)
-  let col = if toBool (rayCollision'hit collision) then red else white
+  let col = if rayCollision'hit collision then red else white
 
   beginMode3D camera
 
   drawBoundingBox (BoundingBox (Vector3 0 0 0) (Vector3 0 2 4)) col
-  when (rayCollision'hit collision > 0) $ drawPoint3D (rayCollision'point collision) red
+  when (rayCollision'hit collision) $ drawPoint3D (rayCollision'point collision) red
 
   endMode3D
 

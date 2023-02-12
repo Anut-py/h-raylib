@@ -9,7 +9,6 @@ import Foreign
     Storable (peek, sizeOf),
     peekArray,
     toBool,
-    with,
     withArray,
     withArrayLen,
   )
@@ -58,7 +57,11 @@ import Raylib.Types
     Rectangle,
     Vector2,
   )
-import Raylib.Util (pop, withArray2D)
+import Raylib.Util
+  ( pop,
+    withArray2D,
+    withFreeable,
+  )
 
 getFontDefault :: IO Raylib.Types.Font
 getFontDefault = c'getFontDefault >>= pop
@@ -70,7 +73,7 @@ loadFontEx :: String -> Int -> [Int] -> Int -> IO Raylib.Types.Font
 loadFontEx fileName fontSize fontChars glyphCount = withCString fileName (\f -> withArray (map fromIntegral fontChars) (\c -> c'loadFontEx f (fromIntegral fontSize) c (fromIntegral glyphCount))) >>= pop
 
 loadFontFromImage :: Raylib.Types.Image -> Raylib.Types.Color -> Int -> IO Raylib.Types.Font
-loadFontFromImage image key firstChar = with image (\i -> with key (\k -> c'loadFontFromImage i k (fromIntegral firstChar))) >>= pop
+loadFontFromImage image key firstChar = withFreeable image (\i -> withFreeable key (\k -> c'loadFontFromImage i k (fromIntegral firstChar))) >>= pop
 
 loadFontFromMemory :: String -> [Integer] -> Int -> [Int] -> Int -> IO Raylib.Types.Font
 loadFontFromMemory fileType fileData fontSize fontChars glyphCount = withCString fileType (\t -> withArrayLen (map fromIntegral fileData) (\size d -> withArray (map fromIntegral fontChars) (\c -> c'loadFontFromMemory t d (fromIntegral $ size * sizeOf (0 :: CUChar)) (fromIntegral fontSize) c (fromIntegral glyphCount)))) >>= pop
@@ -85,43 +88,43 @@ unloadFontData :: [Raylib.Types.GlyphInfo] -> IO ()
 unloadFontData glyphs = withArrayLen glyphs (\size g -> c'unloadFontData g (fromIntegral size))
 
 unloadFont :: Raylib.Types.Font -> IO ()
-unloadFont font = with font c'unloadFont
+unloadFont font = withFreeable font c'unloadFont
 
 exportFontAsCode :: Raylib.Types.Font -> String -> IO Bool
-exportFontAsCode font fileName = toBool <$> with font (withCString fileName . c'exportFontAsCode)
+exportFontAsCode font fileName = toBool <$> withFreeable font (withCString fileName . c'exportFontAsCode)
 
 drawFPS :: Int -> Int -> IO ()
 drawFPS x y = c'drawFPS (fromIntegral x) (fromIntegral y)
 
 drawText :: String -> Int -> Int -> Int -> Raylib.Types.Color -> IO ()
-drawText text x y fontSize color = withCString text (\t -> with color (c'drawText t (fromIntegral x) (fromIntegral y) (fromIntegral fontSize)))
+drawText text x y fontSize color = withCString text (\t -> withFreeable color (c'drawText t (fromIntegral x) (fromIntegral y) (fromIntegral fontSize)))
 
 drawTextEx :: Raylib.Types.Font -> String -> Raylib.Types.Vector2 -> Float -> Float -> Raylib.Types.Color -> IO ()
-drawTextEx font text position fontSize spacing tint = with font (\f -> withCString text (\t -> with position (\p -> with tint (c'drawTextEx f t p (realToFrac fontSize) (realToFrac spacing)))))
+drawTextEx font text position fontSize spacing tint = withFreeable font (\f -> withCString text (\t -> withFreeable position (\p -> withFreeable tint (c'drawTextEx f t p (realToFrac fontSize) (realToFrac spacing)))))
 
 drawTextPro :: Raylib.Types.Font -> String -> Raylib.Types.Vector2 -> Raylib.Types.Vector2 -> Float -> Float -> Float -> Raylib.Types.Color -> IO ()
-drawTextPro font text position origin rotation fontSize spacing tint = with font (\f -> withCString text (\t -> with position (\p -> with origin (\o -> with tint (c'drawTextPro f t p o (realToFrac rotation) (realToFrac fontSize) (realToFrac spacing))))))
+drawTextPro font text position origin rotation fontSize spacing tint = withFreeable font (\f -> withCString text (\t -> withFreeable position (\p -> withFreeable origin (\o -> withFreeable tint (c'drawTextPro f t p o (realToFrac rotation) (realToFrac fontSize) (realToFrac spacing))))))
 
 drawTextCodepoint :: Raylib.Types.Font -> Int -> Raylib.Types.Vector2 -> Float -> Raylib.Types.Color -> IO ()
-drawTextCodepoint font codepoint position fontSize tint = with font (\f -> with position (\p -> with tint (c'drawTextCodepoint f (fromIntegral codepoint) p (realToFrac fontSize))))
+drawTextCodepoint font codepoint position fontSize tint = withFreeable font (\f -> withFreeable position (\p -> withFreeable tint (c'drawTextCodepoint f (fromIntegral codepoint) p (realToFrac fontSize))))
 
 drawTextCodepoints :: Raylib.Types.Font -> [Int] -> Raylib.Types.Vector2 -> Float -> Float -> Raylib.Types.Color -> IO ()
-drawTextCodepoints font codepoints position fontSize spacing tint = with font (\f -> withArrayLen (map fromIntegral codepoints) (\count cp -> with position (\p -> with tint (c'drawTextCodepoints f cp (fromIntegral count) p (realToFrac fontSize) (realToFrac spacing)))))
+drawTextCodepoints font codepoints position fontSize spacing tint = withFreeable font (\f -> withArrayLen (map fromIntegral codepoints) (\count cp -> withFreeable position (\p -> withFreeable tint (c'drawTextCodepoints f cp (fromIntegral count) p (realToFrac fontSize) (realToFrac spacing)))))
 
 measureText :: String -> Int -> IO Int
 measureText text fontSize = fromIntegral <$> withCString text (\t -> c'measureText t (fromIntegral fontSize))
 
 measureTextEx :: Raylib.Types.Font -> String -> Float -> Float -> IO Raylib.Types.Vector2
-measureTextEx font text fontSize spacing = with font (\f -> withCString text (\t -> c'measureTextEx f t (realToFrac fontSize) (realToFrac spacing))) >>= pop
+measureTextEx font text fontSize spacing = withFreeable font (\f -> withCString text (\t -> c'measureTextEx f t (realToFrac fontSize) (realToFrac spacing))) >>= pop
 
 getGlyphIndex :: Raylib.Types.Font -> Int -> IO Int
-getGlyphIndex font codepoint = fromIntegral <$> with font (\f -> c'getGlyphIndex f (fromIntegral codepoint))
+getGlyphIndex font codepoint = fromIntegral <$> withFreeable font (\f -> c'getGlyphIndex f (fromIntegral codepoint))
 
 getGlyphInfo :: Raylib.Types.Font -> Int -> IO Raylib.Types.GlyphInfo
-getGlyphInfo font codepoint = with font (\f -> c'getGlyphInfo f (fromIntegral codepoint)) >>= pop
+getGlyphInfo font codepoint = withFreeable font (\f -> c'getGlyphInfo f (fromIntegral codepoint)) >>= pop
 
 getGlyphAtlasRec :: Raylib.Types.Font -> Int -> IO Raylib.Types.Rectangle
-getGlyphAtlasRec font codepoint = with font (\f -> c'getGlyphAtlasRec f (fromIntegral codepoint)) >>= pop
+getGlyphAtlasRec font codepoint = withFreeable font (\f -> c'getGlyphAtlasRec f (fromIntegral codepoint)) >>= pop
 
 loadUTF8 :: [Integer] -> IO String
 loadUTF8 codepoints =
@@ -145,7 +148,7 @@ loadCodepoints text =
   withCString
     text
     ( \t ->
-        with
+        withFreeable
           0
           ( \n -> do
               res <- c'loadCodepoints t n
@@ -169,7 +172,7 @@ getCodepointNext text =
   withCString
     text
     ( \t ->
-        with
+        withFreeable
           0
           ( \n ->
               do
@@ -184,7 +187,7 @@ getCodepointPrevious text =
   withCString
     text
     ( \t ->
-        with
+        withFreeable
           0
           ( \n ->
               do
@@ -195,4 +198,4 @@ getCodepointPrevious text =
     )
 
 codepointToUTF8 :: Int -> IO String
-codepointToUTF8 codepoint = with 0 (c'codepointToUTF8 $ fromIntegral codepoint) >>= peekCString
+codepointToUTF8 codepoint = withFreeable 0 (c'codepointToUTF8 $ fromIntegral codepoint) >>= peekCString

@@ -9,7 +9,6 @@ import Foreign
     Storable (peek, sizeOf),
     peekArray,
     toBool,
-    with,
     withArrayLen,
   )
 import Foreign.C (CUChar, withCString)
@@ -128,7 +127,10 @@ import Raylib.Types
     Vector3,
     Vector4,
   )
-import Raylib.Util (pop)
+import Raylib.Util
+  ( pop,
+    withFreeable,
+  )
 
 loadImage :: String -> IO Raylib.Types.Image
 loadImage fileName = withCString fileName c'loadImage >>= pop
@@ -140,7 +142,7 @@ loadImageRaw fileName width height format headerSize =
 -- | Returns the final image and the framees in a tuple, e.g. @(img, 18)@
 loadImageAnim :: String -> IO (Raylib.Types.Image, Int)
 loadImageAnim fileName =
-  with
+  withFreeable
     0
     ( \frames ->
         withCString
@@ -157,40 +159,40 @@ loadImageFromMemory fileType fileData =
   withCString fileType (\ft -> withArrayLen (map fromIntegral fileData) (\size fd -> c'loadImageFromMemory ft fd (fromIntegral $ size * sizeOf (0 :: CUChar)))) >>= pop
 
 loadImageFromTexture :: Raylib.Types.Texture -> IO Raylib.Types.Image
-loadImageFromTexture tex = with tex c'loadImageFromTexture >>= pop
+loadImageFromTexture tex = withFreeable tex c'loadImageFromTexture >>= pop
 
 loadImageFromScreen :: IO Raylib.Types.Image
 loadImageFromScreen = c'loadImageFromScreen >>= pop
 
 unloadImage :: Raylib.Types.Image -> IO ()
-unloadImage image = with image c'unloadImage
+unloadImage image = withFreeable image c'unloadImage
 
 exportImage :: Raylib.Types.Image -> String -> IO Bool
-exportImage image fileName = toBool <$> with image (withCString fileName . c'exportImage)
+exportImage image fileName = toBool <$> withFreeable image (withCString fileName . c'exportImage)
 
 exportImageAsCode :: Raylib.Types.Image -> String -> IO Bool
 exportImageAsCode image fileName =
-  toBool <$> with image (withCString fileName . c'exportImageAsCode)
+  toBool <$> withFreeable image (withCString fileName . c'exportImageAsCode)
 
 genImageColor :: Int -> Int -> Raylib.Types.Color -> IO Raylib.Types.Image
 genImageColor width height color =
-  with color (c'genImageColor (fromIntegral width) (fromIntegral height)) >>= pop
+  withFreeable color (c'genImageColor (fromIntegral width) (fromIntegral height)) >>= pop
 
 genImageGradientV :: Int -> Int -> Raylib.Types.Color -> Raylib.Types.Color -> IO Raylib.Types.Image
 genImageGradientV width height top bottom =
-  with top (with bottom . c'genImageGradientV (fromIntegral width) (fromIntegral height)) >>= pop
+  withFreeable top (withFreeable bottom . c'genImageGradientV (fromIntegral width) (fromIntegral height)) >>= pop
 
 genImageGradientH :: Int -> Int -> Raylib.Types.Color -> Raylib.Types.Color -> IO Raylib.Types.Image
 genImageGradientH width height left right =
-  with left (with right . c'genImageGradientH (fromIntegral width) (fromIntegral height)) >>= pop
+  withFreeable left (withFreeable right . c'genImageGradientH (fromIntegral width) (fromIntegral height)) >>= pop
 
 genImageGradientRadial :: Int -> Int -> Float -> Raylib.Types.Color -> Raylib.Types.Color -> IO Raylib.Types.Image
 genImageGradientRadial width height density inner outer =
-  with inner (with outer . c'genImageGradientRadial (fromIntegral width) (fromIntegral height) (realToFrac density)) >>= pop
+  withFreeable inner (withFreeable outer . c'genImageGradientRadial (fromIntegral width) (fromIntegral height) (realToFrac density)) >>= pop
 
 genImageChecked :: Int -> Int -> Int -> Int -> Raylib.Types.Color -> Raylib.Types.Color -> IO Raylib.Types.Image
 genImageChecked width height checksX checksY col1 col2 =
-  with col1 (with col2 . c'genImageChecked (fromIntegral width) (fromIntegral height) (fromIntegral checksX) (fromIntegral checksY)) >>= pop
+  withFreeable col1 (withFreeable col2 . c'genImageChecked (fromIntegral width) (fromIntegral height) (fromIntegral checksX) (fromIntegral checksY)) >>= pop
 
 genImageWhiteNoise :: Int -> Int -> Float -> IO Raylib.Types.Image
 genImageWhiteNoise width height factor =
@@ -208,92 +210,92 @@ genImageText width height text =
   withCString text (c'genImageText (fromIntegral width) (fromIntegral height)) >>= pop
 
 imageCopy :: Raylib.Types.Image -> IO Raylib.Types.Image
-imageCopy image = with image c'imageCopy >>= pop
+imageCopy image = withFreeable image c'imageCopy >>= pop
 
 imageFromImage :: Raylib.Types.Image -> Raylib.Types.Rectangle -> IO Raylib.Types.Image
-imageFromImage image rect = with image (with rect . c'imageFromImage) >>= pop
+imageFromImage image rect = withFreeable image (withFreeable rect . c'imageFromImage) >>= pop
 
 imageText :: String -> Int -> Raylib.Types.Color -> IO Raylib.Types.Image
 imageText text fontSize color =
-  withCString text (\t -> with color $ c'imageText t (fromIntegral fontSize)) >>= pop
+  withCString text (\t -> withFreeable color $ c'imageText t (fromIntegral fontSize)) >>= pop
 
 imageTextEx :: Raylib.Types.Font -> String -> Float -> Float -> Raylib.Types.Color -> IO Raylib.Types.Image
 imageTextEx font text fontSize spacing tint =
-  with font (\f -> withCString text (\t -> with tint $ c'imageTextEx f t (realToFrac fontSize) (realToFrac spacing))) >>= pop
+  withFreeable font (\f -> withCString text (\t -> withFreeable tint $ c'imageTextEx f t (realToFrac fontSize) (realToFrac spacing))) >>= pop
 
 imageFormat :: Raylib.Types.Image -> PixelFormat -> IO Raylib.Types.Image
 imageFormat image newFormat =
-  with image (\i -> c'imageFormat i (fromIntegral $ fromEnum newFormat) >> peek i)
+  withFreeable image (\i -> c'imageFormat i (fromIntegral $ fromEnum newFormat) >> peek i)
 
 imageToPOT :: Raylib.Types.Image -> Raylib.Types.Color -> IO Raylib.Types.Image
-imageToPOT image color = with image (\i -> with color (c'imageToPOT i) >> peek i)
+imageToPOT image color = withFreeable image (\i -> withFreeable color (c'imageToPOT i) >> peek i)
 
 imageCrop :: Raylib.Types.Image -> Raylib.Types.Rectangle -> IO Raylib.Types.Image
-imageCrop image crop = with image (\i -> with crop (c'imageCrop i) >> peek i)
+imageCrop image crop = withFreeable image (\i -> withFreeable crop (c'imageCrop i) >> peek i)
 
 imageAlphaCrop :: Raylib.Types.Image -> Float -> IO Raylib.Types.Image
-imageAlphaCrop image threshold = with image (\i -> c'imageAlphaCrop i (realToFrac threshold) >> peek i)
+imageAlphaCrop image threshold = withFreeable image (\i -> c'imageAlphaCrop i (realToFrac threshold) >> peek i)
 
 imageAlphaClear :: Raylib.Types.Image -> Raylib.Types.Color -> Float -> IO Raylib.Types.Image
-imageAlphaClear image color threshold = with image (\i -> with color (\c -> c'imageAlphaClear i c (realToFrac threshold) >> peek i))
+imageAlphaClear image color threshold = withFreeable image (\i -> withFreeable color (\c -> c'imageAlphaClear i c (realToFrac threshold) >> peek i))
 
 imageAlphaMask :: Raylib.Types.Image -> Raylib.Types.Image -> IO Raylib.Types.Image
-imageAlphaMask image alphaMask = with image (\i -> with alphaMask (c'imageAlphaMask i) >> peek i)
+imageAlphaMask image alphaMask = withFreeable image (\i -> withFreeable alphaMask (c'imageAlphaMask i) >> peek i)
 
 imageAlphaPremultiply :: Raylib.Types.Image -> IO Raylib.Types.Image
-imageAlphaPremultiply image = with image (\i -> c'imageAlphaPremultiply i >> peek i)
+imageAlphaPremultiply image = withFreeable image (\i -> c'imageAlphaPremultiply i >> peek i)
 
 imageBlurGaussian :: Raylib.Types.Image -> Int -> IO Raylib.Types.Image
-imageBlurGaussian image blurSize = with image (\i -> c'imageBlurGaussian i (fromIntegral blurSize) >> peek i)
+imageBlurGaussian image blurSize = withFreeable image (\i -> c'imageBlurGaussian i (fromIntegral blurSize) >> peek i)
 
 imageResize :: Raylib.Types.Image -> Int -> Int -> IO Raylib.Types.Image
-imageResize image newWidth newHeight = with image (\i -> c'imageResize i (fromIntegral newWidth) (fromIntegral newHeight) >> peek i)
+imageResize image newWidth newHeight = withFreeable image (\i -> c'imageResize i (fromIntegral newWidth) (fromIntegral newHeight) >> peek i)
 
 imageResizeNN :: Raylib.Types.Image -> Int -> Int -> IO Raylib.Types.Image
-imageResizeNN image newWidth newHeight = with image (\i -> c'imageResizeNN i (fromIntegral newWidth) (fromIntegral newHeight) >> peek i)
+imageResizeNN image newWidth newHeight = withFreeable image (\i -> c'imageResizeNN i (fromIntegral newWidth) (fromIntegral newHeight) >> peek i)
 
 imageResizeCanvas :: Raylib.Types.Image -> Int -> Int -> Int -> Int -> Raylib.Types.Color -> IO Raylib.Types.Image
-imageResizeCanvas image newWidth newHeight offsetX offsetY fill = with image (\i -> with fill (c'imageResizeCanvas i (fromIntegral newWidth) (fromIntegral newHeight) (fromIntegral offsetX) (fromIntegral offsetY)) >> peek i)
+imageResizeCanvas image newWidth newHeight offsetX offsetY fill = withFreeable image (\i -> withFreeable fill (c'imageResizeCanvas i (fromIntegral newWidth) (fromIntegral newHeight) (fromIntegral offsetX) (fromIntegral offsetY)) >> peek i)
 
 imageMipmaps :: Raylib.Types.Image -> IO Raylib.Types.Image
-imageMipmaps image = with image (\i -> c'imageMipmaps i >> peek i)
+imageMipmaps image = withFreeable image (\i -> c'imageMipmaps i >> peek i)
 
 imageDither :: Raylib.Types.Image -> Int -> Int -> Int -> Int -> IO Raylib.Types.Image
-imageDither image rBpp gBpp bBpp aBpp = with image (\i -> c'imageDither i (fromIntegral rBpp) (fromIntegral gBpp) (fromIntegral bBpp) (fromIntegral aBpp) >> peek i)
+imageDither image rBpp gBpp bBpp aBpp = withFreeable image (\i -> c'imageDither i (fromIntegral rBpp) (fromIntegral gBpp) (fromIntegral bBpp) (fromIntegral aBpp) >> peek i)
 
 imageFlipVertical :: Raylib.Types.Image -> IO Raylib.Types.Image
-imageFlipVertical image = with image (\i -> c'imageFlipVertical i >> peek i)
+imageFlipVertical image = withFreeable image (\i -> c'imageFlipVertical i >> peek i)
 
 imageFlipHorizontal :: Raylib.Types.Image -> IO Raylib.Types.Image
-imageFlipHorizontal image = with image (\i -> c'imageFlipHorizontal i >> peek i)
+imageFlipHorizontal image = withFreeable image (\i -> c'imageFlipHorizontal i >> peek i)
 
 imageRotateCW :: Raylib.Types.Image -> IO Raylib.Types.Image
-imageRotateCW image = with image (\i -> c'imageRotateCW i >> peek i)
+imageRotateCW image = withFreeable image (\i -> c'imageRotateCW i >> peek i)
 
 imageRotateCCW :: Raylib.Types.Image -> IO Raylib.Types.Image
-imageRotateCCW image = with image (\i -> c'imageRotateCCW i >> peek i)
+imageRotateCCW image = withFreeable image (\i -> c'imageRotateCCW i >> peek i)
 
 imageColorTint :: Raylib.Types.Image -> Raylib.Types.Color -> IO Raylib.Types.Image
-imageColorTint image color = with image (\i -> with color (c'imageColorTint i) >> peek i)
+imageColorTint image color = withFreeable image (\i -> withFreeable color (c'imageColorTint i) >> peek i)
 
 imageColorInvert :: Raylib.Types.Image -> IO Raylib.Types.Image
-imageColorInvert image = with image (\i -> c'imageColorInvert i >> peek i)
+imageColorInvert image = withFreeable image (\i -> c'imageColorInvert i >> peek i)
 
 imageColorGrayscale :: Raylib.Types.Image -> IO Raylib.Types.Image
-imageColorGrayscale image = with image (\i -> c'imageColorGrayscale i >> peek i)
+imageColorGrayscale image = withFreeable image (\i -> c'imageColorGrayscale i >> peek i)
 
 imageColorContrast :: Raylib.Types.Image -> Float -> IO Raylib.Types.Image
-imageColorContrast image contrast = with image (\i -> c'imageColorContrast i (realToFrac contrast) >> peek i)
+imageColorContrast image contrast = withFreeable image (\i -> c'imageColorContrast i (realToFrac contrast) >> peek i)
 
 imageColorBrightness :: Raylib.Types.Image -> Int -> IO Raylib.Types.Image
-imageColorBrightness image brightness = with image (\i -> c'imageColorBrightness i (fromIntegral brightness) >> peek i)
+imageColorBrightness image brightness = withFreeable image (\i -> c'imageColorBrightness i (fromIntegral brightness) >> peek i)
 
 imageColorReplace :: Raylib.Types.Image -> Raylib.Types.Color -> Raylib.Types.Color -> IO Raylib.Types.Image
-imageColorReplace image color replace = with image (\i -> with color (with replace . c'imageColorReplace i) >> peek i)
+imageColorReplace image color replace = withFreeable image (\i -> withFreeable color (withFreeable replace . c'imageColorReplace i) >> peek i)
 
 loadImageColors :: Raylib.Types.Image -> IO [Raylib.Types.Color]
 loadImageColors image =
-  with
+  withFreeable
     image
     ( \i -> do
         colors <- c'loadImageColors i
@@ -304,11 +306,11 @@ loadImageColors image =
 
 loadImagePalette :: Raylib.Types.Image -> Int -> IO [Raylib.Types.Color]
 loadImagePalette image maxPaletteSize =
-  with
+  withFreeable
     image
     ( \i -> do
         (palette, num) <-
-          with
+          withFreeable
             0
             ( \size -> do
                 cols <- c'loadImagePalette i (fromIntegral maxPaletteSize) size
@@ -329,142 +331,142 @@ foreign import ccall safe "raylib.h UnloadImagePalette"
     Ptr Raylib.Types.Color -> IO ()
 
 getImageAlphaBorder :: Raylib.Types.Image -> Float -> IO Raylib.Types.Rectangle
-getImageAlphaBorder image threshold = with image (\i -> c'getImageAlphaBorder i (realToFrac threshold)) >>= pop
+getImageAlphaBorder image threshold = withFreeable image (\i -> c'getImageAlphaBorder i (realToFrac threshold)) >>= pop
 
 getImageColor :: Raylib.Types.Image -> Int -> Int -> IO Raylib.Types.Color
-getImageColor image x y = with image (\i -> c'getImageColor i (fromIntegral x) (fromIntegral y)) >>= pop
+getImageColor image x y = withFreeable image (\i -> c'getImageColor i (fromIntegral x) (fromIntegral y)) >>= pop
 
 imageClearBackground :: Raylib.Types.Image -> Raylib.Types.Color -> IO Raylib.Types.Image
-imageClearBackground image color = with image (\i -> with color (c'imageClearBackground i) >> peek i)
+imageClearBackground image color = withFreeable image (\i -> withFreeable color (c'imageClearBackground i) >> peek i)
 
 imageDrawPixel :: Raylib.Types.Image -> Int -> Int -> Raylib.Types.Color -> IO Raylib.Types.Image
-imageDrawPixel image x y color = with image (\i -> with color (c'imageDrawPixel i (fromIntegral x) (fromIntegral y)) >> peek i)
+imageDrawPixel image x y color = withFreeable image (\i -> withFreeable color (c'imageDrawPixel i (fromIntegral x) (fromIntegral y)) >> peek i)
 
 imageDrawPixelV :: Raylib.Types.Image -> Raylib.Types.Vector2 -> Raylib.Types.Color -> IO Raylib.Types.Image
-imageDrawPixelV image position color = with image (\i -> with position (with color . c'imageDrawPixelV i) >> peek i)
+imageDrawPixelV image position color = withFreeable image (\i -> withFreeable position (withFreeable color . c'imageDrawPixelV i) >> peek i)
 
 imageDrawLine :: Raylib.Types.Image -> Int -> Int -> Int -> Int -> Raylib.Types.Color -> IO Raylib.Types.Image
-imageDrawLine image startPosX startPosY endPosX endPosY color = with image (\i -> with color (c'imageDrawLine i (fromIntegral startPosX) (fromIntegral startPosY) (fromIntegral endPosX) (fromIntegral endPosY)) >> peek i)
+imageDrawLine image startPosX startPosY endPosX endPosY color = withFreeable image (\i -> withFreeable color (c'imageDrawLine i (fromIntegral startPosX) (fromIntegral startPosY) (fromIntegral endPosX) (fromIntegral endPosY)) >> peek i)
 
 imageDrawLineV :: Raylib.Types.Image -> Raylib.Types.Vector2 -> Raylib.Types.Vector2 -> Raylib.Types.Color -> IO Raylib.Types.Image
-imageDrawLineV image start end color = with image (\i -> with start (\s -> with end (with color . c'imageDrawLineV i s)) >> peek i)
+imageDrawLineV image start end color = withFreeable image (\i -> withFreeable start (\s -> withFreeable end (withFreeable color . c'imageDrawLineV i s)) >> peek i)
 
 imageDrawCircle :: Raylib.Types.Image -> Int -> Int -> Int -> Raylib.Types.Color -> IO Raylib.Types.Image
-imageDrawCircle image centerX centerY radius color = with image (\i -> with color (c'imageDrawCircle i (fromIntegral centerX) (fromIntegral centerY) (fromIntegral radius)) >> peek i)
+imageDrawCircle image centerX centerY radius color = withFreeable image (\i -> withFreeable color (c'imageDrawCircle i (fromIntegral centerX) (fromIntegral centerY) (fromIntegral radius)) >> peek i)
 
 imageDrawCircleV :: Raylib.Types.Image -> Raylib.Types.Vector2 -> Int -> Raylib.Types.Color -> IO Raylib.Types.Image
-imageDrawCircleV image center radius color = with image (\i -> with center (\c -> with color (c'imageDrawCircleV i c (fromIntegral radius))) >> peek i)
+imageDrawCircleV image center radius color = withFreeable image (\i -> withFreeable center (\c -> withFreeable color (c'imageDrawCircleV i c (fromIntegral radius))) >> peek i)
 
 imageDrawCircleLines :: Raylib.Types.Image -> Int -> Int -> Int -> Raylib.Types.Color -> IO Raylib.Types.Image
-imageDrawCircleLines image centerX centerY radius color = with image (\i -> with color (c'imageDrawCircleLines i (fromIntegral centerX) (fromIntegral centerY) (fromIntegral radius)) >> peek i)
+imageDrawCircleLines image centerX centerY radius color = withFreeable image (\i -> withFreeable color (c'imageDrawCircleLines i (fromIntegral centerX) (fromIntegral centerY) (fromIntegral radius)) >> peek i)
 
 imageDrawCircleLinesV :: Raylib.Types.Image -> Raylib.Types.Vector2 -> Int -> Raylib.Types.Color -> IO Raylib.Types.Image
-imageDrawCircleLinesV image center radius color = with image (\i -> with center (\c -> with color (c'imageDrawCircleLinesV i c (fromIntegral radius))) >> peek i)
+imageDrawCircleLinesV image center radius color = withFreeable image (\i -> withFreeable center (\c -> withFreeable color (c'imageDrawCircleLinesV i c (fromIntegral radius))) >> peek i)
 
 imageDrawRectangle :: Raylib.Types.Image -> Int -> Int -> Int -> Int -> Raylib.Types.Color -> IO Raylib.Types.Image
-imageDrawRectangle image posX posY width height color = with image (\i -> with color (c'imageDrawRectangle i (fromIntegral posX) (fromIntegral posY) (fromIntegral width) (fromIntegral height)) >> peek i)
+imageDrawRectangle image posX posY width height color = withFreeable image (\i -> withFreeable color (c'imageDrawRectangle i (fromIntegral posX) (fromIntegral posY) (fromIntegral width) (fromIntegral height)) >> peek i)
 
 imageDrawRectangleV :: Raylib.Types.Image -> Raylib.Types.Vector2 -> Raylib.Types.Vector2 -> Raylib.Types.Color -> IO Raylib.Types.Image
-imageDrawRectangleV image position size color = with image (\i -> with position (\p -> with size (with color . c'imageDrawRectangleV i p)) >> peek i)
+imageDrawRectangleV image position size color = withFreeable image (\i -> withFreeable position (\p -> withFreeable size (withFreeable color . c'imageDrawRectangleV i p)) >> peek i)
 
 imageDrawRectangleRec :: Raylib.Types.Image -> Raylib.Types.Rectangle -> Raylib.Types.Color -> IO Raylib.Types.Image
-imageDrawRectangleRec image rectangle color = with image (\i -> with rectangle (with color . c'imageDrawRectangleRec i) >> peek i)
+imageDrawRectangleRec image rectangle color = withFreeable image (\i -> withFreeable rectangle (withFreeable color . c'imageDrawRectangleRec i) >> peek i)
 
 imageDrawRectangleLines :: Raylib.Types.Image -> Raylib.Types.Rectangle -> Int -> Raylib.Types.Color -> IO Raylib.Types.Image
-imageDrawRectangleLines image rectangle thickness color = with image (\i -> with rectangle (\r -> with color (c'imageDrawRectangleLines i r (fromIntegral thickness))) >> peek i)
+imageDrawRectangleLines image rectangle thickness color = withFreeable image (\i -> withFreeable rectangle (\r -> withFreeable color (c'imageDrawRectangleLines i r (fromIntegral thickness))) >> peek i)
 
 imageDraw :: Raylib.Types.Image -> Raylib.Types.Image -> Raylib.Types.Rectangle -> Raylib.Types.Rectangle -> Raylib.Types.Color -> IO Raylib.Types.Image
-imageDraw image source srcRec dstRec tint = with image (\i -> with source (\s -> with srcRec (\sr -> with dstRec (with tint . c'imageDraw i s sr))) >> peek i)
+imageDraw image source srcRec dstRec tint = withFreeable image (\i -> withFreeable source (\s -> withFreeable srcRec (\sr -> withFreeable dstRec (withFreeable tint . c'imageDraw i s sr))) >> peek i)
 
 imageDrawText :: Raylib.Types.Image -> String -> Int -> Int -> Int -> Raylib.Types.Color -> IO Raylib.Types.Image
-imageDrawText image text x y fontSize color = with image (\i -> withCString text (\t -> with color (c'imageDrawText i t (fromIntegral x) (fromIntegral y) (fromIntegral fontSize))) >> peek i)
+imageDrawText image text x y fontSize color = withFreeable image (\i -> withCString text (\t -> withFreeable color (c'imageDrawText i t (fromIntegral x) (fromIntegral y) (fromIntegral fontSize))) >> peek i)
 
 imageDrawTextEx :: Raylib.Types.Image -> Raylib.Types.Font -> String -> Raylib.Types.Vector2 -> Float -> Float -> Raylib.Types.Color -> IO Raylib.Types.Image
-imageDrawTextEx image font text position fontSize spacing tint = with image (\i -> with font (\f -> withCString text (\t -> with position (\p -> with tint (c'imageDrawTextEx i f t p (realToFrac fontSize) (realToFrac spacing))))) >> peek i)
+imageDrawTextEx image font text position fontSize spacing tint = withFreeable image (\i -> withFreeable font (\f -> withCString text (\t -> withFreeable position (\p -> withFreeable tint (c'imageDrawTextEx i f t p (realToFrac fontSize) (realToFrac spacing))))) >> peek i)
 
 loadTexture :: String -> IO Raylib.Types.Texture
 loadTexture fileName = withCString fileName c'loadTexture >>= pop
 
 loadTextureFromImage :: Raylib.Types.Image -> IO Raylib.Types.Texture
-loadTextureFromImage image = with image c'loadTextureFromImage >>= pop
+loadTextureFromImage image = withFreeable image c'loadTextureFromImage >>= pop
 
 loadTextureCubemap :: Raylib.Types.Image -> CubemapLayout -> IO Raylib.Types.Texture
-loadTextureCubemap image layout = with image (\i -> c'loadTextureCubemap i (fromIntegral $ fromEnum layout)) >>= pop
+loadTextureCubemap image layout = withFreeable image (\i -> c'loadTextureCubemap i (fromIntegral $ fromEnum layout)) >>= pop
 
 loadRenderTexture :: Int -> Int -> IO Raylib.Types.RenderTexture
 loadRenderTexture width height = c'loadRenderTexture (fromIntegral width) (fromIntegral height) >>= pop
 
 unloadTexture :: Raylib.Types.Texture -> IO ()
-unloadTexture texture = with texture c'unloadTexture
+unloadTexture texture = withFreeable texture c'unloadTexture
 
 unloadRenderTexture :: Raylib.Types.RenderTexture -> IO ()
-unloadRenderTexture target = with target c'unloadRenderTexture
+unloadRenderTexture target = withFreeable target c'unloadRenderTexture
 
 updateTexture :: Raylib.Types.Texture -> Ptr () -> IO Raylib.Types.Texture
-updateTexture texture pixels = with texture (\t -> c'updateTexture t pixels >> peek t)
+updateTexture texture pixels = withFreeable texture (\t -> c'updateTexture t pixels >> peek t)
 
 updateTextureRec :: Raylib.Types.Texture -> Raylib.Types.Rectangle -> Ptr () -> IO Raylib.Types.Texture
-updateTextureRec texture rect pixels = with texture (\t -> with rect (\r -> c'updateTextureRec t r pixels) >> peek t)
+updateTextureRec texture rect pixels = withFreeable texture (\t -> withFreeable rect (\r -> c'updateTextureRec t r pixels) >> peek t)
 
 genTextureMipmaps :: Raylib.Types.Texture -> IO Raylib.Types.Texture
-genTextureMipmaps texture = with texture (\t -> c'genTextureMipmaps t >> peek t)
+genTextureMipmaps texture = withFreeable texture (\t -> c'genTextureMipmaps t >> peek t)
 
 setTextureFilter :: Raylib.Types.Texture -> TextureFilter -> IO Raylib.Types.Texture
-setTextureFilter texture filterType = with texture (\t -> c'setTextureFilter t (fromIntegral $ fromEnum filterType) >> peek t)
+setTextureFilter texture filterType = withFreeable texture (\t -> c'setTextureFilter t (fromIntegral $ fromEnum filterType) >> peek t)
 
 setTextureWrap :: Raylib.Types.Texture -> TextureWrap -> IO Raylib.Types.Texture
-setTextureWrap texture wrap = with texture (\t -> c'setTextureWrap t (fromIntegral $ fromEnum wrap) >> peek t)
+setTextureWrap texture wrap = withFreeable texture (\t -> c'setTextureWrap t (fromIntegral $ fromEnum wrap) >> peek t)
 
 drawTexture :: Raylib.Types.Texture -> Int -> Int -> Raylib.Types.Color -> IO ()
-drawTexture texture x y tint = with texture (\t -> with tint (c'drawTexture t (fromIntegral x) (fromIntegral y)))
+drawTexture texture x y tint = withFreeable texture (\t -> withFreeable tint (c'drawTexture t (fromIntegral x) (fromIntegral y)))
 
 drawTextureV :: Raylib.Types.Texture -> Raylib.Types.Vector2 -> Raylib.Types.Color -> IO ()
-drawTextureV texture position color = with texture (\t -> with position (with color . c'drawTextureV t))
+drawTextureV texture position color = withFreeable texture (\t -> withFreeable position (withFreeable color . c'drawTextureV t))
 
 drawTextureEx :: Raylib.Types.Texture -> Raylib.Types.Vector2 -> Float -> Float -> Raylib.Types.Color -> IO ()
-drawTextureEx texture position rotation scale tint = with texture (\t -> with position (\p -> with tint (c'drawTextureEx t p (realToFrac rotation) (realToFrac scale))))
+drawTextureEx texture position rotation scale tint = withFreeable texture (\t -> withFreeable position (\p -> withFreeable tint (c'drawTextureEx t p (realToFrac rotation) (realToFrac scale))))
 
 drawTextureRec :: Raylib.Types.Texture -> Raylib.Types.Rectangle -> Raylib.Types.Vector2 -> Raylib.Types.Color -> IO ()
-drawTextureRec texture source position tint = with texture (\t -> with source (\s -> with position (with tint . c'drawTextureRec t s)))
+drawTextureRec texture source position tint = withFreeable texture (\t -> withFreeable source (\s -> withFreeable position (withFreeable tint . c'drawTextureRec t s)))
 
 drawTexturePro :: Raylib.Types.Texture -> Raylib.Types.Rectangle -> Raylib.Types.Rectangle -> Raylib.Types.Vector2 -> Float -> Raylib.Types.Color -> IO ()
-drawTexturePro texture source dest origin rotation tint = with texture (\t -> with source (\s -> with dest (\d -> with origin (\o -> with tint (c'drawTexturePro t s d o (realToFrac rotation))))))
+drawTexturePro texture source dest origin rotation tint = withFreeable texture (\t -> withFreeable source (\s -> withFreeable dest (\d -> withFreeable origin (\o -> withFreeable tint (c'drawTexturePro t s d o (realToFrac rotation))))))
 
 drawTextureNPatch :: Raylib.Types.Texture -> Raylib.Types.NPatchInfo -> Raylib.Types.Rectangle -> Raylib.Types.Vector2 -> Float -> Raylib.Types.Color -> IO ()
-drawTextureNPatch texture nPatchInfo dest origin rotation tint = with texture (\t -> with nPatchInfo (\n -> with dest (\d -> with origin (\o -> with tint (c'drawTextureNPatch t n d o (realToFrac rotation))))))
+drawTextureNPatch texture nPatchInfo dest origin rotation tint = withFreeable texture (\t -> withFreeable nPatchInfo (\n -> withFreeable dest (\d -> withFreeable origin (\o -> withFreeable tint (c'drawTextureNPatch t n d o (realToFrac rotation))))))
 
 fade :: Raylib.Types.Color -> Float -> Raylib.Types.Color
-fade color alpha = unsafePerformIO $ with color (\c -> c'fade c (realToFrac alpha)) >>= pop
+fade color alpha = unsafePerformIO $ withFreeable color (\c -> c'fade c (realToFrac alpha)) >>= pop
 
 colorToInt :: Raylib.Types.Color -> Int
-colorToInt color = unsafePerformIO $ fromIntegral <$> with color c'colorToInt
+colorToInt color = unsafePerformIO $ fromIntegral <$> withFreeable color c'colorToInt
 
 colorNormalize :: Raylib.Types.Color -> Raylib.Types.Vector4
-colorNormalize color = unsafePerformIO $ with color c'colorNormalize >>= pop
+colorNormalize color = unsafePerformIO $ withFreeable color c'colorNormalize >>= pop
 
 colorFromNormalized :: Raylib.Types.Vector4 -> Raylib.Types.Color
-colorFromNormalized normalized = unsafePerformIO $ with normalized c'colorFromNormalized >>= pop
+colorFromNormalized normalized = unsafePerformIO $ withFreeable normalized c'colorFromNormalized >>= pop
 
 colorToHSV :: Raylib.Types.Color -> Raylib.Types.Vector3
-colorToHSV color = unsafePerformIO $ with color c'colorToHSV >>= pop
+colorToHSV color = unsafePerformIO $ withFreeable color c'colorToHSV >>= pop
 
 colorFromHSV :: Float -> Float -> Float -> Raylib.Types.Color
 colorFromHSV hue saturation value = unsafePerformIO $ c'colorFromHSV (realToFrac hue) (realToFrac saturation) (realToFrac value) >>= pop
 
 colorTint :: Color -> Color -> Raylib.Types.Color
-colorTint color tint = unsafePerformIO $ with color (with tint . c'colorTint) >>= pop
+colorTint color tint = unsafePerformIO $ withFreeable color (withFreeable tint . c'colorTint) >>= pop
 
 colorBrightness :: Color -> Float -> Raylib.Types.Color
-colorBrightness color brightness = unsafePerformIO $ with color (\c -> c'colorBrightness c (realToFrac brightness)) >>= pop
+colorBrightness color brightness = unsafePerformIO $ withFreeable color (\c -> c'colorBrightness c (realToFrac brightness)) >>= pop
 
 colorContrast :: Color -> Float -> Raylib.Types.Color
-colorContrast color contrast = unsafePerformIO $ with color (\c -> c'colorContrast c (realToFrac contrast)) >>= pop
+colorContrast color contrast = unsafePerformIO $ withFreeable color (\c -> c'colorContrast c (realToFrac contrast)) >>= pop
 
 colorAlpha :: Raylib.Types.Color -> Float -> Raylib.Types.Color
-colorAlpha color alpha = unsafePerformIO $ with color (\c -> c'colorAlpha c (realToFrac alpha)) >>= pop
+colorAlpha color alpha = unsafePerformIO $ withFreeable color (\c -> c'colorAlpha c (realToFrac alpha)) >>= pop
 
 colorAlphaBlend :: Raylib.Types.Color -> Raylib.Types.Color -> Raylib.Types.Color -> Raylib.Types.Color
-colorAlphaBlend dst src tint = unsafePerformIO $ with dst (\d -> with src (with tint . c'colorAlphaBlend d)) >>= pop
+colorAlphaBlend dst src tint = unsafePerformIO $ withFreeable dst (\d -> withFreeable src (withFreeable tint . c'colorAlphaBlend d)) >>= pop
 
 getColor :: Integer -> Raylib.Types.Color
 getColor hexValue = unsafePerformIO $ c'getColor (fromIntegral hexValue) >>= pop
@@ -473,4 +475,4 @@ getPixelColor :: Ptr () -> PixelFormat -> IO Raylib.Types.Color
 getPixelColor srcPtr format = c'getPixelColor srcPtr (fromIntegral $ fromEnum format) >>= pop
 
 setPixelColor :: Ptr () -> Raylib.Types.Color -> PixelFormat -> IO ()
-setPixelColor dstPtr color format = with color (\c -> c'setPixelColor dstPtr c (fromIntegral $ fromEnum format))
+setPixelColor dstPtr color format = withFreeable color (\c -> c'setPixelColor dstPtr c (fromIntegral $ fromEnum format))

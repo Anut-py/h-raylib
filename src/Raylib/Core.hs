@@ -10,7 +10,6 @@ import Foreign
     fromBool,
     peekArray,
     toBool,
-    with,
     withArray,
     withArrayLen,
   )
@@ -184,36 +183,37 @@ import Raylib.Native
     c'windowShouldClose,
   )
 import Raylib.Types
-    ( FilePathList,
-      VrStereoConfig,
-      VrDeviceInfo,
-      Ray,
-      Shader,
-      Camera2D,
-      Camera3D,
-      RenderTexture,
-      Texture,
-      Image,
-      Color,
-      Matrix,
-      Vector3,
-      Vector2,
-      CameraMode,
-      Gesture,
-      BlendMode,
-      ShaderUniformDataType,
-      GamepadAxis,
-      GamepadButton,
-      MouseCursor,
-      MouseButton,
-      KeyboardKey,
-      TraceLogLevel,
-      ConfigFlag,
-      SaveFileTextCallback,
-      LoadFileTextCallback,
-      SaveFileDataCallback,
-      LoadFileDataCallback )
-import Raylib.Util (configsToBitflag, pop, withMaybeCString)
+  ( BlendMode,
+    Camera2D,
+    Camera3D,
+    CameraMode,
+    Color,
+    ConfigFlag,
+    FilePathList,
+    GamepadAxis,
+    GamepadButton,
+    Gesture,
+    Image,
+    KeyboardKey,
+    LoadFileDataCallback,
+    LoadFileTextCallback,
+    Matrix,
+    MouseButton,
+    MouseCursor,
+    Ray,
+    RenderTexture,
+    SaveFileDataCallback,
+    SaveFileTextCallback,
+    Shader,
+    ShaderUniformDataType,
+    Texture,
+    TraceLogLevel,
+    Vector2,
+    Vector3,
+    VrDeviceInfo,
+    VrStereoConfig,
+  )
+import Raylib.Util (configsToBitflag, pop, withFreeable, withMaybeCString)
 
 initWindow :: Int -> Int -> String -> IO ()
 initWindow width height title = withCString title $ c'initWindow (fromIntegral width) (fromIntegral height)
@@ -272,7 +272,7 @@ foreign import ccall safe "raylib.h RestoreWindow"
     IO ()
 
 setWindowIcon :: Raylib.Types.Image -> IO ()
-setWindowIcon image = with image c'setWindowIcon
+setWindowIcon image = withFreeable image c'setWindowIcon
 
 setWindowTitle :: String -> IO ()
 setWindowTitle title = withCString title c'setWindowTitle
@@ -389,7 +389,7 @@ isCursorOnScreen :: IO Bool
 isCursorOnScreen = toBool <$> c'isCursorOnScreen
 
 clearBackground :: Raylib.Types.Color -> IO ()
-clearBackground color = with color c'clearBackground
+clearBackground color = withFreeable color c'clearBackground
 
 foreign import ccall safe "raylib.h BeginDrawing"
   beginDrawing ::
@@ -400,28 +400,28 @@ foreign import ccall safe "raylib.h EndDrawing"
     IO ()
 
 beginMode2D :: Raylib.Types.Camera2D -> IO ()
-beginMode2D camera = with camera c'beginMode2D
+beginMode2D camera = withFreeable camera c'beginMode2D
 
 foreign import ccall safe "raylib.h EndMode2D"
   endMode2D ::
     IO ()
 
 beginMode3D :: Raylib.Types.Camera3D -> IO ()
-beginMode3D camera = with camera c'beginMode3D
+beginMode3D camera = withFreeable camera c'beginMode3D
 
 foreign import ccall safe "raylib.h EndMode3D"
   endMode3D ::
     IO ()
 
 beginTextureMode :: Raylib.Types.RenderTexture -> IO ()
-beginTextureMode renderTexture = with renderTexture c'beginTextureMode
+beginTextureMode renderTexture = withFreeable renderTexture c'beginTextureMode
 
 foreign import ccall safe "raylib.h EndTextureMode"
   endTextureMode ::
     IO ()
 
 beginShaderMode :: Raylib.Types.Shader -> IO ()
-beginShaderMode shader = with shader c'beginShaderMode
+beginShaderMode shader = withFreeable shader c'beginShaderMode
 
 foreign import ccall safe "raylib.h EndShaderMode"
   endShaderMode ::
@@ -442,17 +442,17 @@ foreign import ccall safe "raylib.h EndScissorMode"
     IO ()
 
 beginVrStereoMode :: Raylib.Types.VrStereoConfig -> IO ()
-beginVrStereoMode config = with config c'beginVrStereoMode
+beginVrStereoMode config = withFreeable config c'beginVrStereoMode
 
 foreign import ccall safe "raylib.h EndVrStereoMode"
   endVrStereoMode ::
     IO ()
 
 loadVrStereoConfig :: Raylib.Types.VrDeviceInfo -> IO Raylib.Types.VrStereoConfig
-loadVrStereoConfig deviceInfo = with deviceInfo c'loadVrStereoConfig >>= pop
+loadVrStereoConfig deviceInfo = withFreeable deviceInfo c'loadVrStereoConfig >>= pop
 
 unloadVrStereoConfig :: Raylib.Types.VrStereoConfig -> IO ()
-unloadVrStereoConfig config = with config c'unloadVrStereoConfig
+unloadVrStereoConfig config = withFreeable config c'unloadVrStereoConfig
 
 loadShader :: Maybe String -> Maybe String -> IO Raylib.Types.Shader
 loadShader vsFileName fsFileName =
@@ -462,46 +462,46 @@ loadShaderFromMemory :: Maybe String -> Maybe String -> IO Raylib.Types.Shader
 loadShaderFromMemory vsCode fsCode = withMaybeCString vsCode (withMaybeCString fsCode . c'loadShaderFromMemory) >>= pop
 
 getShaderLocation :: Raylib.Types.Shader -> String -> IO Int
-getShaderLocation shader uniformName = fromIntegral <$> with shader (withCString uniformName . c'getShaderLocation)
+getShaderLocation shader uniformName = fromIntegral <$> withFreeable shader (withCString uniformName . c'getShaderLocation)
 
 getShaderLocationAttrib :: Raylib.Types.Shader -> String -> IO Int
-getShaderLocationAttrib shader attribName = fromIntegral <$> with shader (withCString attribName . c'getShaderLocationAttrib)
+getShaderLocationAttrib shader attribName = fromIntegral <$> withFreeable shader (withCString attribName . c'getShaderLocationAttrib)
 
 setShaderValue :: Raylib.Types.Shader -> Int -> Ptr () -> ShaderUniformDataType -> IO ()
-setShaderValue shader locIndex value uniformType = with shader (\s -> c'setShaderValue s (fromIntegral locIndex) value (fromIntegral $ fromEnum uniformType))
+setShaderValue shader locIndex value uniformType = withFreeable shader (\s -> c'setShaderValue s (fromIntegral locIndex) value (fromIntegral $ fromEnum uniformType))
 
 setShaderValueV :: Raylib.Types.Shader -> Int -> Ptr () -> ShaderUniformDataType -> Int -> IO ()
-setShaderValueV shader locIndex value uniformType count = with shader (\s -> c'setShaderValueV s (fromIntegral locIndex) value (fromIntegral $ fromEnum uniformType) (fromIntegral count))
+setShaderValueV shader locIndex value uniformType count = withFreeable shader (\s -> c'setShaderValueV s (fromIntegral locIndex) value (fromIntegral $ fromEnum uniformType) (fromIntegral count))
 
 setShaderValueMatrix :: Raylib.Types.Shader -> Int -> Raylib.Types.Matrix -> IO ()
-setShaderValueMatrix shader locIndex mat = with shader (\s -> with mat (c'setShaderValueMatrix s (fromIntegral locIndex)))
+setShaderValueMatrix shader locIndex mat = withFreeable shader (\s -> withFreeable mat (c'setShaderValueMatrix s (fromIntegral locIndex)))
 
 setShaderValueTexture :: Raylib.Types.Shader -> Int -> Raylib.Types.Texture -> IO ()
-setShaderValueTexture shader locIndex tex = with shader (\s -> with tex (c'setShaderValueTexture s (fromIntegral locIndex)))
+setShaderValueTexture shader locIndex tex = withFreeable shader (\s -> withFreeable tex (c'setShaderValueTexture s (fromIntegral locIndex)))
 
 unloadShader :: Raylib.Types.Shader -> IO ()
-unloadShader shader = with shader c'unloadShader
+unloadShader shader = withFreeable shader c'unloadShader
 
 getMouseRay :: Raylib.Types.Vector2 -> Raylib.Types.Camera3D -> IO Raylib.Types.Ray
-getMouseRay mousePosition camera = with mousePosition (with camera . c'getMouseRay) >>= pop
+getMouseRay mousePosition camera = withFreeable mousePosition (withFreeable camera . c'getMouseRay) >>= pop
 
 getCameraMatrix :: Raylib.Types.Camera3D -> IO Raylib.Types.Matrix
-getCameraMatrix camera = with camera c'getCameraMatrix >>= pop
+getCameraMatrix camera = withFreeable camera c'getCameraMatrix >>= pop
 
 getCameraMatrix2D :: Raylib.Types.Camera2D -> IO Raylib.Types.Matrix
-getCameraMatrix2D camera = with camera c'getCameraMatrix2D >>= pop
+getCameraMatrix2D camera = withFreeable camera c'getCameraMatrix2D >>= pop
 
 getWorldToScreen :: Raylib.Types.Vector3 -> Raylib.Types.Camera3D -> IO Raylib.Types.Vector2
-getWorldToScreen position camera = with position (with camera . c'getWorldToScreen) >>= pop
+getWorldToScreen position camera = withFreeable position (withFreeable camera . c'getWorldToScreen) >>= pop
 
 getScreenToWorld2D :: Raylib.Types.Vector2 -> Raylib.Types.Camera2D -> IO Raylib.Types.Vector2
-getScreenToWorld2D position camera = with position (with camera . c'getScreenToWorld2D) >>= pop
+getScreenToWorld2D position camera = withFreeable position (withFreeable camera . c'getScreenToWorld2D) >>= pop
 
 getWorldToScreenEx :: Raylib.Types.Vector3 -> Raylib.Types.Camera3D -> Int -> Int -> IO Raylib.Types.Vector2
-getWorldToScreenEx position camera width height = with position (\p -> with camera (\c -> c'getWorldToScreenEx p c (fromIntegral width) (fromIntegral height))) >>= pop
+getWorldToScreenEx position camera width height = withFreeable position (\p -> withFreeable camera (\c -> c'getWorldToScreenEx p c (fromIntegral width) (fromIntegral height))) >>= pop
 
 getWorldToScreen2D :: Raylib.Types.Vector2 -> Raylib.Types.Camera2D -> IO Raylib.Types.Vector2
-getWorldToScreen2D position camera = with position (with camera . c'getWorldToScreen2D) >>= pop
+getWorldToScreen2D position camera = withFreeable position (withFreeable camera . c'getWorldToScreen2D) >>= pop
 
 setTargetFPS :: Int -> IO ()
 setTargetFPS fps = c'setTargetFPS $ fromIntegral fps
@@ -571,7 +571,7 @@ foreign import ccall safe "raylib.h SetSaveFileTextCallback"
 
 loadFileData :: String -> IO [Integer]
 loadFileData fileName =
-  with
+  withFreeable
     0
     ( \size -> do
         withCString
@@ -649,7 +649,7 @@ loadDirectoryFilesEx basePath filterStr scanSubdirs =
   withCString basePath (\b -> withCString filterStr (\f -> c'loadDirectoryFilesEx b f (fromBool scanSubdirs))) >>= pop
 
 unloadDirectoryFiles :: Raylib.Types.FilePathList -> IO ()
-unloadDirectoryFiles files = with files c'unloadDirectoryFiles
+unloadDirectoryFiles files = withFreeable files c'unloadDirectoryFiles
 
 isFileDropped :: IO Bool
 isFileDropped = toBool <$> c'isFileDropped
@@ -658,7 +658,7 @@ loadDroppedFiles :: IO Raylib.Types.FilePathList
 loadDroppedFiles = c'loadDroppedFiles >>= pop
 
 unloadDroppedFiles :: Raylib.Types.FilePathList -> IO ()
-unloadDroppedFiles files = with files c'unloadDroppedFiles
+unloadDroppedFiles files = withFreeable files c'unloadDroppedFiles
 
 getFileModTime :: String -> IO Integer
 getFileModTime fileName = fromIntegral <$> withCString fileName c'getFileModTime
@@ -668,7 +668,7 @@ compressData contents = do
   withArrayLen
     (map fromIntegral contents)
     ( \size c -> do
-        with
+        withFreeable
           0
           ( \ptr -> do
               compressed <- c'compressData c (fromIntegral $ size * sizeOf (0 :: CUChar)) ptr
@@ -683,7 +683,7 @@ decompressData compressedData = do
   withArrayLen
     (map fromIntegral compressedData)
     ( \size c -> do
-        with
+        withFreeable
           0
           ( \ptr -> do
               decompressed <- c'decompressData c (fromIntegral $ size * sizeOf (0 :: CUChar)) ptr
@@ -698,7 +698,7 @@ encodeDataBase64 contents = do
   withArrayLen
     (map fromIntegral contents)
     ( \size c -> do
-        with
+        withFreeable
           0
           ( \ptr -> do
               encoded <- c'encodeDataBase64 c (fromIntegral $ size * sizeOf (0 :: CUChar)) ptr
@@ -713,7 +713,7 @@ decodeDataBase64 encodedData = do
   withArray
     (map fromIntegral encodedData)
     ( \c -> do
-        with
+        withFreeable
           0
           ( \ptr -> do
               decoded <- c'decodeDataBase64 c ptr
@@ -856,11 +856,11 @@ getGesturePinchAngle :: IO Float
 getGesturePinchAngle = realToFrac <$> c'getGesturePinchAngle
 
 setCameraMode :: Raylib.Types.Camera3D -> CameraMode -> IO ()
-setCameraMode camera mode = with camera (\c -> c'setCameraMode c (fromIntegral $ fromEnum mode))
+setCameraMode camera mode = withFreeable camera (\c -> c'setCameraMode c (fromIntegral $ fromEnum mode))
 
 updateCamera :: Raylib.Types.Camera3D -> IO Raylib.Types.Camera3D
 updateCamera camera =
-  with
+  withFreeable
     camera
     ( \c -> do
         c'updateCamera c

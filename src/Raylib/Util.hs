@@ -1,26 +1,59 @@
 {-# OPTIONS -Wall #-}
-module Raylib.Util (c'free, pop, popCArray, withArray2D, configsToBitflag, withMaybe, withMaybeCString, peekMaybe, peekMaybeOff, pokeMaybe, pokeMaybeOff, peekMaybeArray, newMaybeArray, peekStaticArray, peekStaticArrayOff, pokeStaticArray, pokeStaticArrayOff, rightPad) where
 
-import Control.Monad (forM_)
+module Raylib.Util (c'free, p'free, freeMaybePtr, Freeable (..), rlFreeArray, pop, popCArray, withFreeable, withArray2D, configsToBitflag, withMaybe, withMaybeCString, peekMaybe, peekMaybeOff, pokeMaybe, pokeMaybeOff, peekMaybeArray, newMaybeArray, peekStaticArray, peekStaticArrayOff, pokeStaticArray, pokeStaticArrayOff, rightPad) where
+
+import Control.Monad (forM_, unless)
 import Data.Bits ((.|.))
-import Foreign (Ptr, Storable (peek, sizeOf, poke, peekByteOff), castPtr, free, newArray, nullPtr, peekArray, plusPtr, with)
-import Foreign.C (CString, withCString)
+import Foreign (Ptr, Storable (peek, peekByteOff, poke, sizeOf), castPtr, free, malloc, newArray, nullPtr, peekArray, plusPtr, with, FunPtr)
+import Foreign.C (CInt, CString, CUInt, withCString)
 
 -- Internal utility functions
 
 foreign import ccall "stdlib.h free" c'free :: Ptr () -> IO ()
+foreign import ccall "stdlib.h &free" p'free :: FunPtr (Ptr a -> IO ())
 
-pop :: (Storable a) => Ptr a -> IO a
+freeMaybePtr :: Ptr () -> IO ()
+freeMaybePtr ptr = unless (ptr == nullPtr) (c'free ptr)
+
+class Freeable a where
+  rlFreeDependents :: a -> Ptr a -> IO ()
+  rlFreeDependents _ _ = return ()
+
+  rlFree :: a -> Ptr a -> IO ()
+  rlFree val ptr = rlFreeDependents val ptr >> c'free (castPtr ptr)
+
+instance Freeable CInt
+
+instance Freeable CUInt
+
+rlFreeArray :: (Freeable a,Show a, Storable a) => [a] -> Ptr a -> IO ()
+rlFreeArray arr ptr = do
+  forM_
+    [0 .. length arr - 1]
+    ( \i -> do
+        let val = arr !! i in rlFreeDependents val (plusPtr ptr (i * sizeOf val))
+    )
+  c'free $ castPtr ptr
+
+pop :: (Freeable a, Storable a) => Ptr a -> IO a
 pop ptr = do
   val <- peek ptr
-  c'free $ castPtr ptr
+  rlFree val ptr
   return val
 
-popCArray :: (Storable a) => Int -> Ptr a -> IO [a]
+popCArray :: (Freeable a, Storable a) => Int -> Ptr a -> IO [a]
 popCArray count ptr = do
   str <- peekArray count ptr
   c'free $ castPtr ptr
   return str
+
+withFreeable :: (Freeable a, Storable a) => a -> (Ptr a -> IO b) -> IO b
+withFreeable val f = do
+  ptr <- malloc
+  poke ptr val
+  result <- f ptr
+  rlFree val ptr
+  return result
 
 withArray2D :: (Storable a) => [[a]] -> (Ptr (Ptr a) -> IO b) -> IO b
 withArray2D arr func = do
@@ -57,8 +90,9 @@ peekMaybeOff ptr off = do
   if ref == nullPtr then return Nothing else Just <$> peek ref
 
 pokeMaybe :: (Storable a) => Ptr (Ptr a) -> Maybe a -> IO ()
-pokeMaybe ptr val = case val of Nothing -> poke ptr nullPtr
-                                Just a -> with a $ poke ptr
+pokeMaybe ptr val = case val of
+  Nothing -> poke ptr nullPtr
+  Just a -> with a $ poke ptr
 
 pokeMaybeOff :: (Storable a) => Ptr (Ptr a) -> Int -> Maybe a -> IO ()
 pokeMaybeOff ptr off = pokeMaybe (plusPtr ptr off)
@@ -86,7 +120,7 @@ peekStaticArrayOff size ptr off = peekStaticArray size (plusPtr ptr off)
 
 pokeStaticArray :: (Storable a) => Ptr a -> [a] -> IO ()
 pokeStaticArray _ [] = return ()
-pokeStaticArray ptr (x:xs) = poke ptr x >> pokeStaticArray (plusPtr ptr $ sizeOf x) xs
+pokeStaticArray ptr (x : xs) = poke ptr x >> pokeStaticArray (plusPtr ptr $ sizeOf x) xs
 
 pokeStaticArrayOff :: (Storable a) => Ptr a -> Int -> [a] -> IO ()
 pokeStaticArrayOff ptr off = pokeStaticArray (plusPtr ptr off)

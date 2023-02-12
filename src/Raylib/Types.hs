@@ -1,8 +1,13 @@
 {-# OPTIONS -Wall #-}
+{-# LANGUAGE DeriveAnyClass #-}
+
 module Raylib.Types where
 
 -- This file includes Haskell counterparts to the structs defined in raylib
 
+-- This file includes Haskell counterparts to the structs defined in raylib
+
+import Control.Monad (forM_, unless)
 import Foreign
   ( FunPtr,
     Ptr,
@@ -13,9 +18,12 @@ import Foreign
     fromBool,
     malloc,
     newArray,
+    newForeignPtr,
+    nullFunPtr,
     nullPtr,
     peekArray,
-    toBool, nullFunPtr
+    toBool,
+    withForeignPtr,
   )
 import Foreign.C
   ( CBool,
@@ -27,11 +35,14 @@ import Foreign.C
     CUChar,
     CUInt,
     CUShort,
-    castCharToCChar, peekCString, newCString
+    castCharToCChar,
+    newCString,
+    peekCString,
   )
 import Foreign.C.String (castCCharToChar)
 import GHC.IO (unsafePerformIO)
-import Raylib.Util (newMaybeArray, peekMaybeArray, peekStaticArray, peekStaticArrayOff, pokeMaybeOff, pokeStaticArray, pokeStaticArrayOff, rightPad)
+import Raylib.Internal (c'rlGetShaderIdDefault)
+import Raylib.Util (Freeable (rlFreeDependents), c'free, freeMaybePtr, newMaybeArray, p'free, peekMaybeArray, peekStaticArray, peekStaticArrayOff, pokeMaybeOff, pokeStaticArray, pokeStaticArrayOff, rightPad, rlFreeArray)
 
 -- Necessary functions
 foreign import ccall safe "raylib.h GetPixelDataSize"
@@ -65,7 +76,7 @@ data ConfigFlag
   | WindowMousePassthrough
   | Msaa4xHint
   | InterlacedHint
-  deriving (Eq, Show)
+  deriving (Eq, Show, Freeable)
 
 instance Enum ConfigFlag where
   fromEnum g = case g of
@@ -781,7 +792,7 @@ data Vector2 = Vector2
   { vector2'x :: Float,
     vector2'y :: Float
   }
-  deriving (Eq, Show)
+  deriving (Eq, Show, Freeable)
 
 instance Storable Vector2 where
   sizeOf _ = 8
@@ -800,7 +811,7 @@ data Vector3 = Vector3
     vector3'y :: Float,
     vector3'z :: Float
   }
-  deriving (Eq, Show)
+  deriving (Eq, Show, Freeable)
 
 instance Storable Vector3 where
   sizeOf _ = 12
@@ -822,7 +833,7 @@ data Vector4 = Vector4
     vector4'z :: Float,
     vector4'w :: Float
   }
-  deriving (Eq, Show)
+  deriving (Eq, Show, Freeable)
 
 instance Storable Vector4 where
   sizeOf _ = 16
@@ -860,7 +871,7 @@ data Matrix = Matrix
     matrix'm11 :: Float,
     matrix'm15 :: Float
   }
-  deriving (Eq, Show)
+  deriving (Eq, Show, Freeable)
 
 instance Storable Matrix where
   sizeOf _ = 64
@@ -908,7 +919,7 @@ data Color = Color
     color'b :: Word8,
     color'a :: Word8
   }
-  deriving (Eq, Show)
+  deriving (Eq, Show, Freeable)
 
 instance Storable Color where
   sizeOf _ = 4
@@ -932,7 +943,7 @@ data Rectangle = Rectangle
     rectangle'width :: Float,
     rectangle'height :: Float
   }
-  deriving (Eq, Show)
+  deriving (Eq, Show, Freeable)
 
 instance Storable Rectangle where
   sizeOf _ = 16
@@ -978,6 +989,11 @@ instance Storable Image where
     pokeByteOff _p 20 format
     return ()
 
+instance Freeable Image where
+  rlFreeDependents _ ptr = do
+    dataPtr <- (peekByteOff ptr 0 :: IO (Ptr CUChar))
+    c'free $ castPtr dataPtr
+
 data Texture = Texture
   { texture'id :: Integer,
     texture'width :: Int,
@@ -985,7 +1001,7 @@ data Texture = Texture
     texture'mipmaps :: Int,
     texture'format :: PixelFormat
   }
-  deriving (Eq, Show)
+  deriving (Eq, Show, Freeable)
 
 instance Storable Texture where
   sizeOf _ = 20
@@ -1014,7 +1030,7 @@ data RenderTexture = RenderTexture
     rendertexture'texture :: Texture,
     rendertexture'depth :: Texture
   }
-  deriving (Eq, Show)
+  deriving (Eq, Show, Freeable)
 
 instance Storable RenderTexture where
   sizeOf _ = 44
@@ -1040,7 +1056,7 @@ data NPatchInfo = NPatchInfo
     nPatchinfo'bottom :: Int,
     nPatchinfo'layout :: NPatchLayout
   }
-  deriving (Eq, Show)
+  deriving (Eq, Show, Freeable)
 
 instance Storable NPatchInfo where
   sizeOf _ = 36
@@ -1089,6 +1105,11 @@ instance Storable GlyphInfo where
     pokeByteOff _p 16 image
     return ()
 
+instance Freeable GlyphInfo where
+  rlFreeDependents _ ptr = do
+    dataPtr <- (peekByteOff ptr 16 :: IO (Ptr CUChar))
+    c'free $ castPtr dataPtr
+
 data Font = Font
   { font'baseSize :: Int,
     font'glyphCount :: Int,
@@ -1121,6 +1142,13 @@ instance Storable Font where
     pokeByteOff _p 40 =<< newArray glyphs
     return ()
 
+instance Freeable Font where
+  rlFreeDependents val ptr = do
+    recsPtr <- (peekByteOff ptr 32 :: IO (Ptr Rectangle))
+    c'free $ castPtr recsPtr
+    glyphsPtr <- (peekByteOff ptr 40 :: IO (Ptr GlyphInfo))
+    rlFreeArray (font'glyphs val) glyphsPtr
+
 data Camera3D = Camera3D
   { camera3D'position :: Vector3,
     camera3D'target :: Vector3,
@@ -1128,7 +1156,7 @@ data Camera3D = Camera3D
     camera3D'fovy :: Float,
     camera3D'projection :: CameraProjection
   }
-  deriving (Eq, Show)
+  deriving (Eq, Show, Freeable)
 
 instance Storable Camera3D where
   sizeOf _ = 44
@@ -1156,7 +1184,7 @@ data Camera2D = Camera2D
     camera2d'rotation :: Float,
     camera2d'zoom :: Float
   }
-  deriving (Eq, Show)
+  deriving (Eq, Show, Freeable)
 
 instance Storable Camera2D where
   sizeOf _ = 24
@@ -1243,6 +1271,33 @@ instance Storable Mesh where
     pokeByteOff _p 104 =<< newArray (map fromIntegral vboId :: [CUInt])
     return ()
 
+instance Freeable Mesh where
+  rlFreeDependents _ ptr = do
+    verticesPtr <- (peekByteOff ptr 8 :: IO (Ptr Float))
+    c'free $ castPtr verticesPtr
+    texcoordsPtr <- (peekByteOff ptr 16 :: IO (Ptr Vector2))
+    c'free $ castPtr texcoordsPtr
+    texcoords2Ptr <- (peekByteOff ptr 24 :: IO (Ptr Vector2))
+    freeMaybePtr $ castPtr texcoords2Ptr
+    normalsPtr <- (peekByteOff ptr 32 :: IO (Ptr Vector3))
+    c'free $ castPtr normalsPtr
+    tangentsPtr <- (peekByteOff ptr 40 :: IO (Ptr Vector4))
+    freeMaybePtr $ castPtr tangentsPtr
+    colorsPtr <- (peekByteOff ptr 48 :: IO (Ptr Color))
+    freeMaybePtr $ castPtr colorsPtr
+    indicesPtr <- (peekByteOff ptr 56 :: IO (Ptr CUShort))
+    freeMaybePtr $ castPtr indicesPtr
+    animVerticesPtr <- (peekByteOff ptr 64 :: IO (Ptr Vector3))
+    freeMaybePtr $ castPtr animVerticesPtr
+    animNormalsPtr <- (peekByteOff ptr 72 :: IO (Ptr Vector3))
+    freeMaybePtr $ castPtr animNormalsPtr
+    boneIdsPtr <- (peekByteOff ptr 80 :: IO (Ptr CUChar))
+    freeMaybePtr $ castPtr boneIdsPtr
+    boneWeightsPtr <- (peekByteOff ptr 88 :: IO (Ptr Float))
+    freeMaybePtr $ castPtr boneWeightsPtr
+    vboIdPtr <- (peekByteOff ptr 104 :: IO (Ptr CUInt))
+    c'free $ castPtr vboIdPtr
+
 data Shader = Shader
   { shader'id :: Integer,
     shader'locs :: [Int]
@@ -1259,15 +1314,31 @@ instance Storable Shader where
     return $ Shader sId locs
   poke _p (Shader sId locs) = do
     pokeByteOff _p 0 (fromIntegral sId :: CUInt)
-    pokeByteOff _p 8 =<< newArray (map fromIntegral locs :: [CInt])
+    defaultShaderId <- c'rlGetShaderIdDefault
+    locsArr <- newArray (map fromIntegral locs :: [CInt])
+    if sId == fromIntegral defaultShaderId
+      then do
+        locsPtr <- newForeignPtr p'free locsArr
+        withForeignPtr locsPtr $ pokeByteOff _p 8
+      else pokeByteOff _p 8 locsArr
     return ()
+
+instance Freeable Shader where
+  rlFreeDependents val ptr = do
+    defaultShaderId <- c'rlGetShaderIdDefault
+    unless
+      (shader'id val == fromIntegral defaultShaderId)
+      ( do
+          locsPtr <- (peekByteOff ptr 8 :: IO (Ptr CInt))
+          c'free $ castPtr locsPtr
+      )
 
 data MaterialMap = MaterialMap
   { materialmap'texture :: Texture,
     materialmap'color :: Color,
     materialmap'value :: Float
   }
-  deriving (Eq, Show)
+  deriving (Eq, Show, Freeable)
 
 instance Storable MaterialMap where
   sizeOf _ = 28
@@ -1305,12 +1376,18 @@ instance Storable Material where
     pokeStaticArrayOff (castPtr _p :: Ptr CFloat) 24 (map realToFrac params :: [CFloat])
     return ()
 
+instance Freeable Material where
+  rlFreeDependents val ptr = do
+    rlFreeDependents (material'shader val) (castPtr ptr :: Ptr Shader)
+    mapsPtr <- (peekByteOff ptr 16 :: IO (Ptr MaterialMap))
+    rlFreeArray (material'maps val) mapsPtr
+
 data Transform = Transform
   { transform'translation :: Vector3,
     transform'rotation :: Quaternion,
     transform'scale :: Vector3
   }
-  deriving (Eq, Show)
+  deriving (Eq, Show, Freeable)
 
 instance Storable Transform where
   sizeOf _ = 40
@@ -1330,7 +1407,7 @@ data BoneInfo = BoneInfo
   { boneInfo'name :: String,
     boneinfo'parent :: Int
   }
-  deriving (Eq, Show)
+  deriving (Eq, Show, Freeable)
 
 instance Storable BoneInfo where
   sizeOf _ = 36
@@ -1388,6 +1465,19 @@ instance Storable Model where
     newMaybeArray bindPose >>= pokeByteOff _p 112
     return ()
 
+instance Freeable Model where
+  rlFreeDependents val ptr = do
+    meshesPtr <- (peekByteOff ptr 72 :: IO (Ptr Mesh))
+    rlFreeArray (model'meshes val) meshesPtr
+    materialsPtr <- (peekByteOff ptr 80 :: IO (Ptr Material))
+    rlFreeArray (model'materials val) materialsPtr
+    meshMaterialPtr <- (peekByteOff ptr 88 :: IO (Ptr CInt))
+    c'free $ castPtr meshMaterialPtr
+    bonesPtr <- (peekByteOff ptr 104 :: IO (Ptr BoneInfo))
+    freeMaybePtr $ castPtr bonesPtr
+    bindPosePtr <- (peekByteOff ptr 112 :: IO (Ptr Transform))
+    freeMaybePtr $ castPtr bindPosePtr
+
 data ModelAnimation = ModelAnimation
   { modelAnimation'boneCount :: Int,
     modelAnimation'frameCount :: Int,
@@ -1415,11 +1505,20 @@ instance Storable ModelAnimation where
     mapM newArray framePoses >>= newArray >>= pokeByteOff _p 16
     return ()
 
+instance Freeable ModelAnimation where
+  rlFreeDependents val ptr = do
+    bonesPtr <- (peekByteOff ptr 8 :: IO (Ptr BoneInfo))
+    c'free $ castPtr bonesPtr
+    framePosesPtr <- (peekByteOff ptr 16 :: IO (Ptr (Ptr Transform)))
+    framePosesPtrArr <- peekArray (modelAnimation'frameCount val) framePosesPtr
+    forM_ framePosesPtrArr (c'free . castPtr)
+    c'free $ castPtr framePosesPtr
+
 data Ray = Ray
   { ray'position :: Vector3,
     ray'direction :: Vector3
   }
-  deriving (Eq, Show)
+  deriving (Eq, Show, Freeable)
 
 instance Storable Ray where
   sizeOf _ = 24
@@ -1439,7 +1538,7 @@ data RayCollision = RayCollision
     rayCollision'point :: Vector3,
     rayCollision'normal :: Vector3
   }
-  deriving (Eq, Show)
+  deriving (Eq, Show, Freeable)
 
 instance Storable RayCollision where
   sizeOf _ = 32
@@ -1461,7 +1560,7 @@ data BoundingBox = BoundingBox
   { boundingBox'min :: Vector3,
     boundingBox'max :: Vector3
   }
-  deriving (Eq, Show)
+  deriving (Eq, Show, Freeable)
 
 instance Storable BoundingBox where
   sizeOf _ = 24
@@ -1503,6 +1602,11 @@ instance Storable Wave where
     pokeByteOff _p 16 =<< newArray (map fromIntegral wData :: [CShort])
     return ()
 
+instance Freeable Wave where
+  rlFreeDependents _ ptr = do
+    dataPtr <- peekByteOff ptr 16 :: IO (Ptr CShort)
+    c'free $ castPtr dataPtr
+
 -- These types don't work perfectly right now, I need to fix them later on.
 -- They are currently used as `Ptr`s because peeking/poking them every time
 -- an audio function is called doesn't work properly (they are stored in a
@@ -1511,27 +1615,22 @@ data RAudioBuffer = RAudioBuffer
   { rAudioBuffer'converter :: [Int], -- Implemented as an array of 39 integers because binding the entire `ma_data_converter` type is too painful
     rAudioBuffer'callback :: AudioCallback,
     rAudioBuffer'processor :: Maybe RAudioProcessor,
-
     rAudioBuffer'volume :: Float,
     rAudioBuffer'pitch :: Float,
     rAudioBuffer'pan :: Float,
-
     rAudioBuffer'playing :: Bool,
     rAudioBuffer'paused :: Bool,
     rAudioBuffer'looping :: Bool,
     rAudioBuffer'usage :: Int,
-
     rAudioBuffer'isSubBufferProcessed :: [Bool],
     rAudioBuffer'sizeInFrames :: Integer,
     rAudioBuffer'frameCursorPos :: Integer,
     rAudioBuffer'framesProcessed :: Integer,
-
     rAudioBuffer'data :: [Word8],
-    
     rAudioBuffer'next :: Maybe RAudioBuffer,
     rAudioBuffer'prev :: Maybe RAudioBuffer
   }
-  deriving (Eq, Show)
+  deriving (Eq, Show, Freeable)
 
 instance Storable RAudioBuffer where
   sizeOf _ = 392
@@ -1644,7 +1743,7 @@ data RAudioProcessor = RAudioProcessor
     rAudioProcessor'next :: Maybe RAudioProcessor,
     rAudioProcessor'prev :: Maybe RAudioProcessor
   }
-  deriving (Eq, Show)
+  deriving (Eq, Show, Freeable)
 
 instance Storable RAudioProcessor where
   sizeOf _ = 24
@@ -1711,7 +1810,7 @@ data AudioStream = AudioStream
     audioStream'sampleSize :: Integer,
     audiostream'channels :: Integer
   }
-  deriving (Eq, Show)
+  deriving (Eq, Show, Freeable)
 
 instance Storable AudioStream where
   sizeOf _ = 32
@@ -1735,7 +1834,7 @@ data Sound = Sound
   { sound'stream :: AudioStream,
     sound'frameCount :: Integer
   }
-  deriving (Eq, Show)
+  deriving (Eq, Show, Freeable)
 
 instance Storable Sound where
   sizeOf _ = 40
@@ -1756,7 +1855,7 @@ data Music = Music
     music'ctxType :: MusicContextType,
     music'ctxData :: Ptr () -- TODO: Convert this into a ForeignPtr to make it automatically unload
   }
-  deriving (Eq, Show)
+  deriving (Eq, Show, Freeable)
 
 instance Storable Music where
   sizeOf _ = 56
@@ -1788,7 +1887,7 @@ data VrDeviceInfo = VrDeviceInfo
     vrDeviceInfo'lensDistortionValues :: [Float],
     vrDeviceInfo'chromaAbCorrection :: [Float]
   }
-  deriving (Eq, Show)
+  deriving (Eq, Show, Freeable)
 
 instance Storable VrDeviceInfo where
   sizeOf _ = 64
@@ -1828,7 +1927,7 @@ data VrStereoConfig = VrStereoConfig
     vrStereoConfig'scale :: [Float],
     vrStereoConfig'scaleIn :: [Float]
   }
-  deriving (Eq, Show)
+  deriving (Eq, Show, Freeable)
 
 instance Storable VrStereoConfig where
   sizeOf _ = 304
@@ -1876,6 +1975,13 @@ instance Storable FilePathList where
     pathsCStrings <- mapM newCString paths
     pokeByteOff _p 8 =<< newArray pathsCStrings
     return ()
+
+instance Freeable FilePathList where
+  rlFreeDependents val ptr = do
+    pathsPtr <- (peekByteOff ptr 8 :: IO (Ptr CString))
+    pathsCStrings <- peekArray (length $ filePathList'paths val) pathsPtr
+    mapM_ (c'free . castPtr) pathsCStrings
+    c'free $ castPtr pathsPtr
 
 type LoadFileDataCallback = FunPtr (CString -> Ptr CUInt -> IO (Ptr CUChar))
 
