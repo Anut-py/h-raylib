@@ -1,5 +1,16 @@
 # h-raylib changelog
 
+## Version 4.5.1.0
+_12 February, 2023_
+
+- **BREAKING CHANGE**: Changed all types to minimize usage of `Ptr`s
+- **BREAKING CHANGE**: Split the `Raylib` module into six modules: `Raylib.Audio`, `Raylib.Core`, `Raylib.Models`, `Raylib.Shapes`, `Raylib.Text`, and `Raylib.Textures`
+- Added the internal `Freeable` typeclass to prevent memory leaks
+
+\[[#8](https://github.com/Anut-py/h-raylib/issues/8)\]
+
+- Added `Xext` as a dependency again
+
 ## Version 4.5.0.12
 _14 January, 2023_
 
@@ -34,8 +45,8 @@ _26 November, 2022_
 
 \[[#7](https://github.com/Anut-py/h-raylib/pull/7)\]
 
-- Removed all constants that were enums in the original C API and replaced them with sum types deriving Enum
-- Removed some CInt usage in the main API
+- Removed all constants that were enums in the original C API and replaced them with sum types deriving `Enum`
+- Removed some `CInt` usage in the main API
 - Removed `Raylib.Constants`
 
 ## Version 4.5.0.6
