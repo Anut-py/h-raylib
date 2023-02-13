@@ -268,6 +268,8 @@ foreign import ccall safe "bindings.h LoadShader_" c'loadShader :: CString -> CS
 
 foreign import ccall safe "bindings.h LoadShaderFromMemory_" c'loadShaderFromMemory :: CString -> CString -> IO (Ptr Raylib.Types.Shader)
 
+foreign import ccall safe "bindings.h IsShaderReady_" c'isShaderReady :: Ptr Shader -> IO CBool
+
 foreign import ccall safe "bindings.h GetShaderLocation_" c'getShaderLocation :: Ptr Raylib.Types.Shader -> CString -> IO CInt
 
 foreign import ccall safe "bindings.h GetShaderLocationAttrib_" c'getShaderLocationAttrib :: Ptr Raylib.Types.Shader -> CString -> IO CInt
@@ -742,7 +744,6 @@ foreign import ccall safe "bindings.h CheckCollisionPointTriangle_" c'checkColli
 
 foreign import ccall safe "bindings.h CheckCollisionLines_" c'checkCollisionLines :: Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Vector2 -> IO CBool
 
--- | If a collision is found, returns @Just collisionPoint@, otherwise returns @Nothing@
 foreign import ccall safe "bindings.h CheckCollisionPointLine_" c'checkCollisionPointLine :: Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Vector2 -> CInt -> IO CBool
 
 foreign import ccall safe "bindings.h GetCollisionRec_" c'getCollisionRec :: Ptr Raylib.Types.Rectangle -> Ptr Raylib.Types.Rectangle -> IO (Ptr Raylib.Types.Rectangle)
@@ -753,12 +754,13 @@ foreign import ccall safe "bindings.h LoadImageRaw_" c'loadImageRaw :: CString -
 
 foreign import ccall safe "bindings.h LoadImageAnim_" c'loadImageAnim :: CString -> Ptr CInt -> IO (Ptr Raylib.Types.Image)
 
--- | Returns the final image and the framees in a tuple, e.g. @(img, 18)@
 foreign import ccall safe "bindings.h LoadImageFromMemory_" c'loadImageFromMemory :: CString -> Ptr CUChar -> CInt -> IO (Ptr Raylib.Types.Image)
 
 foreign import ccall safe "bindings.h LoadImageFromTexture_" c'loadImageFromTexture :: Ptr Raylib.Types.Texture -> IO (Ptr Raylib.Types.Image)
 
 foreign import ccall safe "bindings.h LoadImageFromScreen_" c'loadImageFromScreen :: IO (Ptr Raylib.Types.Image)
+
+foreign import ccall safe "bindings.h IsImageReady_" c'isImageReady :: Ptr Image -> IO CBool
 
 foreign import ccall safe "bindings.h UnloadImage_" c'unloadImage :: Ptr Raylib.Types.Image -> IO ()
 
@@ -918,7 +920,11 @@ foreign import ccall safe "bindings.h LoadTextureCubemap_" c'loadTextureCubemap 
 
 foreign import ccall safe "bindings.h LoadRenderTexture_" c'loadRenderTexture :: CInt -> CInt -> IO (Ptr Raylib.Types.RenderTexture)
 
+foreign import ccall safe "bindings.h IsTextureReady_" c'isTextureReady :: Ptr Texture -> IO CBool
+
 foreign import ccall safe "bindings.h UnloadTexture_" c'unloadTexture :: Ptr Raylib.Types.Texture -> IO ()
+
+foreign import ccall safe "bindings.h IsRenderTextureReady_" c'isRenderTextureReady :: Ptr RenderTexture -> IO CBool
 
 foreign import ccall safe "bindings.h UnloadRenderTexture_" c'unloadRenderTexture :: Ptr Raylib.Types.RenderTexture -> IO ()
 
@@ -993,6 +999,8 @@ foreign import ccall safe "bindings.h GenImageFontAtlas_" c'genImageFontAtlas ::
 foreign import ccall safe "raylib.h UnloadFontData"
   c'unloadFontData ::
     Ptr Raylib.Types.GlyphInfo -> CInt -> IO ()
+
+foreign import ccall safe "bindings.h IsFontReady_" c'isFontReady :: Ptr Raylib.Types.Font -> IO CBool
 
 foreign import ccall safe "bindings.h UnloadFont_" c'unloadFont :: Ptr Raylib.Types.Font -> IO ()
 
@@ -1174,6 +1182,8 @@ foreign import ccall safe "bindings.h LoadModel_" c'loadModel :: CString -> IO (
 
 foreign import ccall safe "bindings.h LoadModelFromMesh_" c'loadModelFromMesh :: Ptr Raylib.Types.Mesh -> IO (Ptr Raylib.Types.Model)
 
+foreign import ccall safe "bindings.h IsModelReady_" c'isModelReady :: Ptr Raylib.Types.Model -> IO CBool
+
 foreign import ccall safe "bindings.h UnloadModel_" c'unloadModel :: Ptr Raylib.Types.Model -> IO ()
 
 foreign import ccall safe "bindings.h UnloadModelKeepMeshes_" c'unloadModelKeepMeshes :: Ptr Raylib.Types.Model -> IO ()
@@ -1244,6 +1254,8 @@ foreign import ccall safe "raylib.h LoadMaterials"
 
 foreign import ccall safe "bindings.h LoadMaterialDefault_" c'loadMaterialDefault :: IO (Ptr Raylib.Types.Material)
 
+foreign import ccall safe "bindings.h IsMaterialReady_" c'isMaterialReady :: Ptr Raylib.Types.Material -> IO CBool
+
 foreign import ccall safe "bindings.h UnloadMaterial_" c'unloadMaterial :: Ptr Raylib.Types.Material -> IO ()
 
 foreign import ccall safe "bindings.h SetMaterialTexture_" c'setMaterialTexture :: Ptr Raylib.Types.Material -> CInt -> Ptr Raylib.Types.Texture -> IO ()
@@ -1309,7 +1321,11 @@ foreign import ccall safe "bindings.h LoadSoundFromWave_" c'loadSoundFromWave ::
 
 foreign import ccall safe "bindings.h UpdateSound_" c'updateSound :: Ptr Raylib.Types.Sound -> Ptr () -> CInt -> IO ()
 
+foreign import ccall safe "bindings.h IsWaveReady_" c'isWaveReady :: Ptr Raylib.Types.Wave -> IO CBool
+
 foreign import ccall safe "bindings.h UnloadWave_" c'unloadWave :: Ptr Raylib.Types.Wave -> IO ()
+
+foreign import ccall safe "bindings.h IsSoundReady_" c'isSoundReady :: Ptr Raylib.Types.Sound -> IO CBool
 
 foreign import ccall safe "bindings.h UnloadSound_" c'unloadSound :: Ptr Raylib.Types.Sound -> IO ()
 
@@ -1359,6 +1375,8 @@ foreign import ccall safe "bindings.h LoadMusicStream_" c'loadMusicStream :: CSt
 
 foreign import ccall safe "bindings.h LoadMusicStreamFromMemory_" c'loadMusicStreamFromMemory :: CString -> Ptr CUChar -> CInt -> IO (Ptr Raylib.Types.Music)
 
+foreign import ccall safe "bindings.h IsMusicReady_" c'isMusicReady :: Ptr Raylib.Types.Music -> IO CBool
+
 foreign import ccall safe "bindings.h UnloadMusicStream_" c'unloadMusicStream :: Ptr Raylib.Types.Music -> IO ()
 
 foreign import ccall safe "bindings.h PlayMusicStream_" c'playMusicStream :: Ptr Raylib.Types.Music -> IO ()
@@ -1386,6 +1404,8 @@ foreign import ccall safe "bindings.h GetMusicTimeLength_" c'getMusicTimeLength 
 foreign import ccall safe "bindings.h GetMusicTimePlayed_" c'getMusicTimePlayed :: Ptr Raylib.Types.Music -> IO CFloat
 
 foreign import ccall safe "bindings.h LoadAudioStream_" c'loadAudioStream :: CUInt -> CUInt -> CUInt -> IO (Ptr Raylib.Types.AudioStream)
+
+foreign import ccall safe "bindings.h IsAudioStreamReady_" c'isAudioStreamReady :: Ptr Raylib.Types.AudioStream -> IO CBool
 
 foreign import ccall safe "bindings.h UnloadAudioStream_" c'unloadAudioStream :: Ptr Raylib.Types.AudioStream -> IO ()
 

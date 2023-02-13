@@ -87,6 +87,11 @@ Shader *LoadShaderFromMemory_(char *a, char *b)
     return ptr;
 }
 
+bool IsShaderReady_(Shader *a)
+{
+    return IsShaderReady(*a);
+}
+
 int GetShaderLocation_(Shader *a, char *b)
 {
     return GetShaderLocation(*a, b);
@@ -528,6 +533,11 @@ Image *LoadImageFromScreen_()
     return ptr;
 }
 
+bool IsImageReady_(Image *a)
+{
+    return IsImageReady(*a);
+}
+
 void UnloadImage_(Image *a)
 {
     UnloadImage(*a);
@@ -801,9 +811,17 @@ RenderTexture *LoadRenderTexture_(int a, int b)
     return ptr;
 }
 
+bool IsTextureReady_(Texture* a) {
+    return IsTextureReady(*a);
+}
+
 void UnloadTexture_(Texture *a)
 {
     UnloadTexture(*a);
+}
+
+bool IsRenderTextureReady_(RenderTexture* a) {
+    return IsRenderTextureReady(*a);
 }
 
 void UnloadRenderTexture_(RenderTexture *a)
@@ -997,6 +1015,11 @@ Image *GenImageFontAtlas_(GlyphInfo *a, Rectangle **b, int c, int d, int e, int 
     return ptr;
 }
 
+bool IsFontReady_(Font *a)
+{
+    return IsFontReady(*a);
+}
+
 void UnloadFont_(Font *a)
 {
     UnloadFont(*a);
@@ -1172,6 +1195,11 @@ Model *LoadModelFromMesh_(Mesh *a)
     return ptr;
 }
 
+bool IsModelReady_(Model *a)
+{
+    return IsModelReady(*a);
+}
+
 void UnloadModel_(Model *a)
 {
     UnloadModel(*a);
@@ -1345,6 +1373,11 @@ Material *LoadMaterialDefault_()
     return ptr;
 }
 
+bool IsMaterialReady_(Material *a)
+{
+    return IsMaterialReady(*a);
+}
+
 void UnloadMaterial_(Material *a)
 {
     UnloadMaterial(*a);
@@ -1453,9 +1486,17 @@ void UpdateSound_(Sound *a, const void *b, int c)
     UpdateSound(*a, b, c);
 }
 
+bool IsWaveReady_(Wave *a) {
+    return IsWaveReady(*a);
+}
+
 void UnloadWave_(Wave *a)
 {
     UnloadWave(*a);
+}
+
+bool IsSoundReady_(Sound *a) {
+    return IsSoundReady(*a);
 }
 
 void UnloadSound_(Sound *a)
@@ -1544,6 +1585,10 @@ Music *LoadMusicStreamFromMemory_(char *a, unsigned char *b, int c)
     return ptr;
 }
 
+bool IsMusicReady_(Music *a) {
+    return IsMusicReady(*a);
+}
+
 void UnloadMusicStream_(Music *a)
 {
     UnloadMusicStream(*a);
@@ -1614,6 +1659,10 @@ AudioStream *LoadAudioStream_(unsigned int a, unsigned int b, unsigned int c)
     AudioStream *ptr = (AudioStream *)malloc(sizeof(AudioStream));
     *ptr = LoadAudioStream(a, b, c);
     return ptr;
+}
+
+bool IsAudioStreamReady_(AudioStream *a) {
+    return IsAudioStreamReady(*a);
 }
 
 void UnloadAudioStream_(AudioStream *a)

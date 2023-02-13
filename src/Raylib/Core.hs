@@ -180,7 +180,7 @@ import Raylib.Native
     c'unloadVrStereoConfig,
     c'updateCamera,
     c'waitTime,
-    c'windowShouldClose,
+    c'windowShouldClose, c'isShaderReady
   )
 import Raylib.Types
   ( BlendMode,
@@ -460,6 +460,9 @@ loadShader vsFileName fsFileName =
 
 loadShaderFromMemory :: Maybe String -> Maybe String -> IO Raylib.Types.Shader
 loadShaderFromMemory vsCode fsCode = withMaybeCString vsCode (withMaybeCString fsCode . c'loadShaderFromMemory) >>= pop
+
+isShaderReady :: Shader -> IO Bool
+isShaderReady shader = toBool <$> withFreeable shader c'isShaderReady
 
 getShaderLocation :: Raylib.Types.Shader -> String -> IO Int
 getShaderLocation shader uniformName = fromIntegral <$> withFreeable shader (withCString uniformName . c'getShaderLocation)

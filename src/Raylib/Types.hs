@@ -772,6 +772,7 @@ data MusicContextType
   | MusicAudioOGG
   | MusicAudioFLAC
   | MusicAudioMP3
+  | MusicAudioQOA
   | MusicModuleXM
   | MusicModuleMOD
   deriving (Eq, Show, Enum)

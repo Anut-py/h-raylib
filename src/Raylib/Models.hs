@@ -84,7 +84,7 @@ import Raylib.Native
     c'unloadModelKeepMeshes,
     c'updateMeshBuffer,
     c'updateModelAnimation,
-    c'uploadMesh,
+    c'uploadMesh, c'isModelReady, c'isMaterialReady
   )
 import Raylib.Types
   ( BoundingBox,
@@ -181,6 +181,9 @@ loadModelFromMesh mesh = do
   poke ptr mesh
   model <- c'loadModelFromMesh ptr
   pop model
+
+isModelReady :: Raylib.Types.Model -> IO Bool
+isModelReady model = toBool <$> withFreeable model c'isModelReady
 
 unloadModel :: Raylib.Types.Model -> IO ()
 unloadModel model = withFreeable model c'unloadModel
@@ -288,6 +291,9 @@ loadMaterials fileName =
 
 loadMaterialDefault :: IO Raylib.Types.Material
 loadMaterialDefault = c'loadMaterialDefault >>= pop
+
+isMaterialReady :: Raylib.Types.Material -> IO Bool
+isMaterialReady material = toBool <$> withFreeable material c'isMaterialReady
 
 unloadMaterial :: Raylib.Types.Material -> IO ()
 unloadMaterial material = withFreeable material c'unloadMaterial

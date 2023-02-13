@@ -65,7 +65,7 @@ import Raylib.Native
     c'updateSound,
     c'waveCopy,
     c'waveCrop,
-    c'waveFormat,
+    c'waveFormat, c'isWaveReady, c'isSoundReady, c'isMusicReady, c'isAudioStreamReady
   )
 import Raylib.Types
   ( AudioStream,
@@ -110,8 +110,14 @@ loadSoundFromWave wave = withFreeable wave c'loadSoundFromWave >>= pop
 updateSound :: Sound -> Ptr () -> Int -> IO ()
 updateSound sound dataValue sampleCount = withFreeable sound (\s -> c'updateSound s dataValue (fromIntegral sampleCount))
 
+isWaveReady :: Wave -> IO Bool
+isWaveReady wave = toBool <$> withFreeable wave c'isWaveReady
+
 unloadWave :: Wave -> IO ()
 unloadWave wave = withFreeable wave c'unloadWave
+
+isSoundReady :: Sound -> IO Bool
+isSoundReady sound = toBool <$> withFreeable sound c'isSoundReady
 
 unloadSound :: Sound -> IO ()
 unloadSound sound = withFreeable sound c'unloadSound
@@ -186,6 +192,9 @@ loadMusicStream fileName = withCString fileName c'loadMusicStream >>= pop
 loadMusicStreamFromMemory :: String -> [Integer] -> IO Music
 loadMusicStreamFromMemory fileType streamData = withCString fileType (\t -> withArrayLen (map fromIntegral streamData) (\size d -> c'loadMusicStreamFromMemory t d (fromIntegral $ size * sizeOf (0 :: CUChar)))) >>= pop
 
+isMusicReady :: Music -> IO Bool
+isMusicReady music = toBool <$> withFreeable music c'isMusicReady
+
 unloadMusicStream :: Music -> IO ()
 unloadMusicStream music = withFreeable music c'unloadMusicStream
 
@@ -227,6 +236,9 @@ getMusicTimePlayed music = realToFrac <$> withFreeable music c'getMusicTimePlaye
 
 loadAudioStream :: Integer -> Integer -> Integer -> IO AudioStream
 loadAudioStream sampleRate sampleSize channels = c'loadAudioStream (fromIntegral sampleRate) (fromIntegral sampleSize) (fromIntegral channels) >>= pop
+
+isAudioStreamReady :: AudioStream -> IO Bool
+isAudioStreamReady stream = toBool <$> withFreeable stream c'isAudioStreamReady
 
 unloadAudioStream :: AudioStream -> IO ()
 unloadAudioStream stream = withFreeable stream c'unloadAudioStream

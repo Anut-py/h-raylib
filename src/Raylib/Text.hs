@@ -46,7 +46,7 @@ import Raylib.Native
     c'measureText,
     c'measureTextEx,
     c'unloadFont,
-    c'unloadFontData,
+    c'unloadFontData, c'isFontReady
   )
 import Raylib.Types
   ( Color,
@@ -86,6 +86,9 @@ genImageFontAtlas chars recs glyphCount fontSize padding packMethod = withArray 
 
 unloadFontData :: [Raylib.Types.GlyphInfo] -> IO ()
 unloadFontData glyphs = withArrayLen glyphs (\size g -> c'unloadFontData g (fromIntegral size))
+
+isFontReady :: Raylib.Types.Font -> IO Bool
+isFontReady font = toBool <$> withFreeable font c'isFontReady
 
 unloadFont :: Raylib.Types.Font -> IO ()
 unloadFont font = withFreeable font c'unloadFont

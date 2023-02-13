@@ -38,6 +38,8 @@ Shader *LoadShader_(char *a, char *b);
 
 Shader *LoadShaderFromMemory_(char *a, char *b);
 
+bool IsShaderReady_(Shader *a);
+
 int GetShaderLocation_(Shader *a, char *b);
 
 int GetShaderLocationAttrib_(Shader *a, char *b);
@@ -196,6 +198,8 @@ Image *LoadImageFromTexture_(Texture *a);
 
 Image *LoadImageFromScreen_();
 
+bool IsImageReady_(Image *a);
+
 void UnloadImage_(Image *a);
 
 int ExportImage_(Image *a, char *b);
@@ -290,7 +294,11 @@ Texture *LoadTextureCubemap_(Image *a, int b);
 
 RenderTexture *LoadRenderTexture_(int a, int b);
 
+bool IsTextureReady_(Texture* a);
+
 void UnloadTexture_(Texture *a);
+
+bool IsRenderTextureReady_(RenderTexture* a);
 
 void UnloadRenderTexture_(RenderTexture *a);
 
@@ -347,6 +355,8 @@ Font *LoadFontFromImage_(Image *a, Color *b, int c);
 Font *LoadFontFromMemory_(char *a, unsigned char *b, int c, int d, int *e, int f);
 
 Image *GenImageFontAtlas_(GlyphInfo *a, Rectangle **b, int c, int d, int e, int f);
+
+bool IsFontReady_(Font* a);
 
 void UnloadFont_(Font *a);
 
@@ -418,6 +428,8 @@ Model *LoadModel_(char *a);
 
 Model *LoadModelFromMesh_(Mesh *a);
 
+bool IsModelReady_(Model* a);
+
 void UnloadModel_(Model *a);
 
 void UnloadModelKeepMeshes_(Model *a);
@@ -476,6 +488,8 @@ Mesh *GenMeshCubicmap_(Image *a, Vector3 *b);
 
 Material *LoadMaterialDefault_();
 
+bool IsMaterialReady_(Material *a);
+
 void UnloadMaterial_(Material *a);
 
 void SetMaterialTexture_(Material *a, int b, Texture *c);
@@ -512,7 +526,11 @@ Sound *LoadSoundFromWave_(Wave *a);
 
 void UpdateSound_(Sound *a, const void *b, int c);
 
+bool IsWaveReady_(Wave *a);
+
 void UnloadWave_(Wave *a);
+
+bool IsSoundReady_(Sound *a);
 
 void UnloadSound_(Sound *a);
 
@@ -546,6 +564,8 @@ Music *LoadMusicStream_(char *a);
 
 Music *LoadMusicStreamFromMemory_(char *a, unsigned char *b, int c);
 
+bool IsMusicReady_(Music *a);
+
 void UnloadMusicStream_(Music *a);
 
 void PlayMusicStream_(Music *a);
@@ -573,6 +593,8 @@ float GetMusicTimeLength_(Music *a);
 float GetMusicTimePlayed_(Music *a);
 
 AudioStream *LoadAudioStream_(unsigned int a, unsigned int b, unsigned int c);
+
+bool IsAudioStreamReady_(AudioStream *a);
 
 void UnloadAudioStream_(AudioStream *a);
 

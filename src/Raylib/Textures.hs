@@ -109,7 +109,7 @@ import Raylib.Native
     c'unloadRenderTexture,
     c'unloadTexture,
     c'updateTexture,
-    c'updateTextureRec,
+    c'updateTextureRec, c'isImageReady, c'isTextureReady, c'isRenderTextureReady
   )
 import Raylib.Types
   ( Color,
@@ -163,6 +163,9 @@ loadImageFromTexture tex = withFreeable tex c'loadImageFromTexture >>= pop
 
 loadImageFromScreen :: IO Raylib.Types.Image
 loadImageFromScreen = c'loadImageFromScreen >>= pop
+
+isImageReady :: Image -> IO Bool
+isImageReady image = toBool <$> withFreeable image c'isImageReady
 
 unloadImage :: Raylib.Types.Image -> IO ()
 unloadImage image = withFreeable image c'unloadImage
@@ -396,8 +399,14 @@ loadTextureCubemap image layout = withFreeable image (\i -> c'loadTextureCubemap
 loadRenderTexture :: Int -> Int -> IO Raylib.Types.RenderTexture
 loadRenderTexture width height = c'loadRenderTexture (fromIntegral width) (fromIntegral height) >>= pop
 
+isTextureReady :: Texture -> IO Bool
+isTextureReady texture = toBool <$> withFreeable texture c'isTextureReady
+
 unloadTexture :: Raylib.Types.Texture -> IO ()
 unloadTexture texture = withFreeable texture c'unloadTexture
+
+isRenderTextureReady :: RenderTexture -> IO Bool
+isRenderTextureReady renderTexture = toBool <$> withFreeable renderTexture c'isRenderTextureReady
 
 unloadRenderTexture :: Raylib.Types.RenderTexture -> IO ()
 unloadRenderTexture target = withFreeable target c'unloadRenderTexture
