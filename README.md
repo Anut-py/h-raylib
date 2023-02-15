@@ -41,13 +41,7 @@ This library has been tested on Windows and Ubuntu through WSL. It may not work 
 
 h-raylib should automatically work if you do not disable the `detect-platform` flag. In that case, you may skip this step.
 
-**If you do disable the `detect-platform` flag when building:**
-
-Add the following in your cabal file, or use the `platform-windows` flag when building.
-
-```cabal
-extra-libraries: gdi32 opengl32 winmm kernel32
-```
+**If you do disable the `detect-platform` flag when building,** use the `platform-windows` flag when building.
 
 ### Ubuntu/Debian based systems
 
@@ -59,13 +53,7 @@ sudo apt-get install libx11-dev libxrandr-dev libxi-dev libxcursor-dev libxinera
 
 Now, h-raylib should automatically work if you do not disable the `detect-platform` flag. In that case, you may skip the following.
 
-**If you do disable the `detect-platform` flag when building:**
-
-Include the following in your cabal file, or use the `platform-linux` flag when building
-
-```cabal
-extra-libraries: GL c m pthread dl rt X11 Xinerama Xcursor Xrandr Xi
-```
+**If you do disable the `detect-platform` flag when building,** use the `platform-linux` flag when building
 
 ### Other platforms
 
