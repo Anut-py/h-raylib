@@ -1,5 +1,10 @@
 # h-raylib changelog
 
+## Version 4.5.1.1
+_14 February, 2023_
+
+- Fixed C include errors
+
 ## Version 4.5.1.0
 _12 February, 2023_
 
