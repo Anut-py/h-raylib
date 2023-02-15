@@ -20,6 +20,7 @@ extra-source-files:
   raylib/src/*.c
   raylib/src/*.h
   raylib/src/external/*.h
+  raylib/src/external/*.c
   raylib/src/external/glfw/deps/*.c
   raylib/src/external/glfw/deps/*.h
   raylib/src/external/glfw/deps/glad/*.h
