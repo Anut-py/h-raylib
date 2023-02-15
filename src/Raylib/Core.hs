@@ -119,6 +119,7 @@ import Raylib.Native
     c'isMouseButtonReleased,
     c'isMouseButtonUp,
     c'isPathFile,
+    c'isShaderReady,
     c'isWindowFocused,
     c'isWindowFullscreen,
     c'isWindowHidden,
@@ -180,7 +181,7 @@ import Raylib.Native
     c'unloadVrStereoConfig,
     c'updateCamera,
     c'waitTime,
-    c'windowShouldClose, c'isShaderReady
+    c'windowShouldClose,
   )
 import Raylib.Types
   ( BlendMode,

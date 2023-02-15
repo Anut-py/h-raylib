@@ -4,12 +4,13 @@ module Raylib.Util (c'free, p'free, freeMaybePtr, Freeable (..), rlFreeArray, po
 
 import Control.Monad (forM_, unless)
 import Data.Bits ((.|.))
-import Foreign (Ptr, Storable (peek, peekByteOff, poke, sizeOf), castPtr, free, malloc, newArray, nullPtr, peekArray, plusPtr, with, FunPtr)
+import Foreign (FunPtr, Ptr, Storable (peek, peekByteOff, poke, sizeOf), castPtr, free, malloc, newArray, nullPtr, peekArray, plusPtr, with)
 import Foreign.C (CInt, CString, CUInt, withCString)
 
 -- Internal utility functions
 
 foreign import ccall "stdlib.h free" c'free :: Ptr () -> IO ()
+
 foreign import ccall "stdlib.h &free" p'free :: FunPtr (Ptr a -> IO ())
 
 freeMaybePtr :: Ptr () -> IO ()
@@ -26,7 +27,7 @@ instance Freeable CInt
 
 instance Freeable CUInt
 
-rlFreeArray :: (Freeable a,Show a, Storable a) => [a] -> Ptr a -> IO ()
+rlFreeArray :: (Freeable a, Show a, Storable a) => [a] -> Ptr a -> IO ()
 rlFreeArray arr ptr = do
   forM_
     [0 .. length arr - 1]

@@ -6,10 +6,11 @@ import Foreign
   ( Ptr,
     Storable (peek, poke),
     fromBool,
+    malloc,
     peekArray,
     toBool,
     withArray,
-    withArrayLen, malloc
+    withArrayLen,
   )
 import Foreign.C (CFloat, withCString)
 import GHC.IO (unsafePerformIO)
@@ -68,7 +69,9 @@ import Raylib.Native
     c'getRayCollisionQuad,
     c'getRayCollisionSphere,
     c'getRayCollisionTriangle,
+    c'isMaterialReady,
     c'isModelAnimationValid,
+    c'isModelReady,
     c'loadMaterialDefault,
     c'loadMaterials,
     c'loadModel,
@@ -84,7 +87,7 @@ import Raylib.Native
     c'unloadModelKeepMeshes,
     c'updateMeshBuffer,
     c'updateModelAnimation,
-    c'uploadMesh, c'isModelReady, c'isMaterialReady
+    c'uploadMesh,
   )
 import Raylib.Types
   ( BoundingBox,

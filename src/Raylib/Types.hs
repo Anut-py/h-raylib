@@ -1805,7 +1805,7 @@ instance Storable RAudioProcessor where
             pokeByteOff basePtr 16 prevPtr
 
 data AudioStream = AudioStream
-  { audioStream'buffer :: Ptr RAudioBuffer, -- TODO: Convert these into ForeignPtrs to make them automatically unload
+  { audioStream'buffer :: Ptr RAudioBuffer,
     audioStream'processor :: Ptr RAudioProcessor,
     audioStream'sampleRate :: Integer,
     audioStream'sampleSize :: Integer,
@@ -1854,7 +1854,7 @@ data Music = Music
     music'frameCount :: Integer,
     music'looping :: Bool,
     music'ctxType :: MusicContextType,
-    music'ctxData :: Ptr () -- TODO: Convert this into a ForeignPtr to make it automatically unload
+    music'ctxData :: Ptr ()
   }
   deriving (Eq, Show, Freeable)
 

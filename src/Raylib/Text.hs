@@ -36,6 +36,7 @@ import Raylib.Native
     c'getGlyphAtlasRec,
     c'getGlyphIndex,
     c'getGlyphInfo,
+    c'isFontReady,
     c'loadCodepoints,
     c'loadFont,
     c'loadFontData,
@@ -46,7 +47,7 @@ import Raylib.Native
     c'measureText,
     c'measureTextEx,
     c'unloadFont,
-    c'unloadFontData, c'isFontReady
+    c'unloadFontData,
   )
 import Raylib.Types
   ( Color,

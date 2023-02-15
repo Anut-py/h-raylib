@@ -90,6 +90,9 @@ import Raylib.Native
     c'imageText,
     c'imageTextEx,
     c'imageToPOT,
+    c'isImageReady,
+    c'isRenderTextureReady,
+    c'isTextureReady,
     c'loadImage,
     c'loadImageAnim,
     c'loadImageColors,
@@ -109,7 +112,7 @@ import Raylib.Native
     c'unloadRenderTexture,
     c'unloadTexture,
     c'updateTexture,
-    c'updateTextureRec, c'isImageReady, c'isTextureReady, c'isRenderTextureReady
+    c'updateTextureRec,
   )
 import Raylib.Types
   ( Color,

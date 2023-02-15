@@ -1,8 +1,8 @@
 /**
- * See bindings.h
+ * See rl_bindings.h
  */
 
-#include "bindings.h"
+#include "rl_bindings.h"
 #include <stdlib.h>
 
 void SetWindowIcon_(Image *a)

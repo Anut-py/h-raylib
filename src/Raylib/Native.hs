@@ -4,7 +4,7 @@
 
 module Raylib.Native where
 
-import Foreign (Ptr)
+import Foreign (FunPtr, Ptr)
 import Foreign.C
   ( CBool (..),
     CDouble (..),
@@ -35,6 +35,7 @@ import Raylib.Types
     ModelAnimation,
     Music,
     NPatchInfo,
+    RAudioBuffer,
     Ray,
     RayCollision,
     Rectangle,
@@ -1438,3 +1439,7 @@ foreign import ccall safe "bindings.h SetAudioStreamCallback_" c'setAudioStreamC
 foreign import ccall safe "bindings.h AttachAudioStreamProcessor_" c'attachAudioStreamProcessor :: Ptr Raylib.Types.AudioStream -> Ptr AudioCallback -> IO ()
 
 foreign import ccall safe "bindings.h DetachAudioStreamProcessor_" c'detachAudioStreamProcessor :: Ptr Raylib.Types.AudioStream -> Ptr AudioCallback -> IO ()
+
+foreign import ccall safe "rl_internal.h &UnloadAudioBuffer_" p'unloadAudioBuffer :: FunPtr (Ptr Raylib.Types.RAudioBuffer -> IO ())
+
+foreign import ccall safe "rl_internal.h UnloadMusicStreamData" c'unloadMusicStreamData :: CInt -> Ptr () -> IO ()

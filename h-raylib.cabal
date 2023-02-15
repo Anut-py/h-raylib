@@ -14,8 +14,8 @@ maintainer:         Anut
 extra-doc-files:    README.md
 extra-source-files:
   CHANGELOG.md
-  lib/bindings.c
-  lib/bindings.h
+  lib/*.c
+  lib/*.h
   lib/rglfw.m
   raylib/src/*.c
   raylib/src/*.h
@@ -191,7 +191,7 @@ library
   if (flag(platform-mac) || (flag(detect-platform) && os(osx)))
     -- Use rgflw.m instead of .c on Mac to force objective-c
     c-sources:
-      lib/bindings.c
+      lib/rl_bindings.c
       lib/rglfw.m
       raylib/src/raudio.c
       raylib/src/rcore.c
@@ -203,7 +203,8 @@ library
 
   else
     c-sources:
-      lib/bindings.c
+      lib/rl_bindings.c
+      lib/rl_internal.c
       raylib/src/raudio.c
       raylib/src/rcore.c
       raylib/src/rglfw.c

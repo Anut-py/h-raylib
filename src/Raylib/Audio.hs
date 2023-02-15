@@ -3,15 +3,18 @@
 
 module Raylib.Audio where
 
+import Control.Monad (void)
 import Foreign
   ( FunPtr,
     Ptr,
     Storable (peek, sizeOf),
+    newForeignPtr,
     peekArray,
     toBool,
     withArrayLen,
   )
 import Foreign.C (CUChar, CUInt, withCString)
+import qualified Foreign.Concurrent as C
 import Raylib.Native
   ( c'exportWave,
     c'exportWaveAsCode,
@@ -21,8 +24,12 @@ import Raylib.Native
     c'isAudioDeviceReady,
     c'isAudioStreamPlaying,
     c'isAudioStreamProcessed,
+    c'isAudioStreamReady,
+    c'isMusicReady,
     c'isMusicStreamPlaying,
     c'isSoundPlaying,
+    c'isSoundReady,
+    c'isWaveReady,
     c'loadAudioStream,
     c'loadMusicStream,
     c'loadMusicStreamFromMemory,
@@ -57,6 +64,7 @@ import Raylib.Native
     c'stopSound,
     c'unloadAudioStream,
     c'unloadMusicStream,
+    c'unloadMusicStreamData,
     c'unloadSound,
     c'unloadWave,
     c'unloadWaveSamples,
@@ -65,11 +73,12 @@ import Raylib.Native
     c'updateSound,
     c'waveCopy,
     c'waveCrop,
-    c'waveFormat, c'isWaveReady, c'isSoundReady, c'isMusicReady, c'isAudioStreamReady
+    c'waveFormat,
+    p'unloadAudioBuffer,
   )
 import Raylib.Types
-  ( AudioStream,
-    Music,
+  ( AudioStream (audioStream'buffer),
+    Music (music'ctxData, music'ctxType, music'stream),
     Sound,
     Wave (wave'channels, wave'frameCount),
   )
@@ -187,10 +196,18 @@ loadWaveSamples wave =
     )
 
 loadMusicStream :: String -> IO Music
-loadMusicStream fileName = withCString fileName c'loadMusicStream >>= pop
+loadMusicStream fileName = do
+  music <- withCString fileName c'loadMusicStream >>= pop
+  addFinalizerToAudioStream $ music'stream music
+  addFinalizerToMusicStream music
+  return music
 
 loadMusicStreamFromMemory :: String -> [Integer] -> IO Music
-loadMusicStreamFromMemory fileType streamData = withCString fileType (\t -> withArrayLen (map fromIntegral streamData) (\size d -> c'loadMusicStreamFromMemory t d (fromIntegral $ size * sizeOf (0 :: CUChar)))) >>= pop
+loadMusicStreamFromMemory fileType streamData = do
+  music <- withCString fileType (\t -> withArrayLen (map fromIntegral streamData) (\size d -> c'loadMusicStreamFromMemory t d (fromIntegral $ size * sizeOf (0 :: CUChar)))) >>= pop
+  addFinalizerToAudioStream $ music'stream music
+  addFinalizerToMusicStream music
+  return music
 
 isMusicReady :: Music -> IO Bool
 isMusicReady music = toBool <$> withFreeable music c'isMusicReady
@@ -235,7 +252,10 @@ getMusicTimePlayed :: Music -> IO Float
 getMusicTimePlayed music = realToFrac <$> withFreeable music c'getMusicTimePlayed
 
 loadAudioStream :: Integer -> Integer -> Integer -> IO AudioStream
-loadAudioStream sampleRate sampleSize channels = c'loadAudioStream (fromIntegral sampleRate) (fromIntegral sampleSize) (fromIntegral channels) >>= pop
+loadAudioStream sampleRate sampleSize channels = do
+  stream <- c'loadAudioStream (fromIntegral sampleRate) (fromIntegral sampleSize) (fromIntegral channels) >>= pop
+  addFinalizerToAudioStream stream
+  return stream
 
 isAudioStreamReady :: AudioStream -> IO Bool
 isAudioStreamReady stream = toBool <$> withFreeable stream c'isAudioStreamReady
@@ -275,3 +295,16 @@ setAudioStreamPan stream pan = withFreeable stream (\s -> c'setAudioStreamPan s 
 
 setAudioStreamBufferSizeDefault :: Int -> IO ()
 setAudioStreamBufferSizeDefault = setAudioStreamBufferSizeDefault . fromIntegral
+
+addFinalizerToAudioStream :: AudioStream -> IO ()
+addFinalizerToAudioStream stream = void (newForeignPtr p'unloadAudioBuffer (audioStream'buffer stream)) -- Automatically unload audio buffer when it is no longer being used
+
+-- Foreign.Concurrent might not call the finalizer, so this may need to be revised in the future
+addFinalizerToMusicStream :: Music -> IO ()
+addFinalizerToMusicStream music = do
+  let ctxData = music'ctxData music
+  _ <-
+    C.newForeignPtr
+      ctxData
+      (c'unloadMusicStreamData (fromIntegral $ fromEnum $ music'ctxType music) ctxData) -- Automatically unload music context data when it is no longer being used
+  return ()

@@ -1,5 +1,5 @@
 /**
- * @file bindings.h
+ * @file rl_bindings.h
  * @author Anut-py
  * @brief Required methods for binding Haskell to Raylib
  *
