@@ -3,9 +3,11 @@
 ## Version 4.5.1.2
 _21 February, 2023_
 
-- **BREAKING CHANGE**: Removed unloading functions
+- **BREAKING CHANGE**: Removed asset unloading functions
+- **BREAKING CHANGE**: Changed `Camera3D` API to match C code
 - Added code to automatically unload assets
 - Added mathematical operators for vector types
+- Updated raylib to the master branch
 
 ## Version 4.5.1.1
 _14 February, 2023_
