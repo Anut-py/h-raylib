@@ -20,6 +20,7 @@ import Foreign.C
     peekCString,
     withCString,
   )
+import Raylib.Internal (addShaderId, unloadFrameBuffers, unloadShaders, unloadTextures, unloadVaoIds, unloadVboIds)
 import Raylib.Native
   ( c'beginBlendMode,
     c'beginMode2D,
@@ -31,6 +32,7 @@ import Raylib.Native
     c'changeDirectory,
     c'clearBackground,
     c'clearWindowState,
+    c'closeWindow,
     c'compressData,
     c'decodeDataBase64,
     c'decompressData,
@@ -142,11 +144,6 @@ import Raylib.Native
     c'openURL,
     c'saveFileData,
     c'saveFileText,
-    c'setCameraAltControl,
-    c'setCameraMode,
-    c'setCameraMoveControls,
-    c'setCameraPanControl,
-    c'setCameraSmoothZoomControl,
     c'setClipboardText,
     c'setConfigFlags,
     c'setExitKey,
@@ -164,6 +161,7 @@ import Raylib.Native
     c'setTargetFPS,
     c'setTraceLogLevel,
     c'setWindowIcon,
+    c'setWindowIcons,
     c'setWindowMinSize,
     c'setWindowMonitor,
     c'setWindowOpacity,
@@ -175,7 +173,7 @@ import Raylib.Native
     c'traceLog,
     c'updateCamera,
     c'waitTime,
-    c'windowShouldClose, c'closeWindow
+    c'windowShouldClose,
   )
 import Raylib.Types
   ( BlendMode,
@@ -209,7 +207,6 @@ import Raylib.Types
     VrStereoConfig,
   )
 import Raylib.Util (configsToBitflag, pop, popCArray, popCString, withFreeable, withMaybeCString)
-import Raylib.Internal ( unloadShaders, addShaderId, unloadTextures, unloadFrameBuffers, unloadVaoIds, unloadVboIds )
 
 initWindow :: Int -> Int -> String -> IO ()
 initWindow width height title = withCString title $ c'initWindow (fromIntegral width) (fromIntegral height)
@@ -274,6 +271,9 @@ foreign import ccall safe "raylib.h RestoreWindow"
 
 setWindowIcon :: Raylib.Types.Image -> IO ()
 setWindowIcon image = withFreeable image c'setWindowIcon
+
+setWindowIcons :: [Raylib.Types.Image] -> IO ()
+setWindowIcons images = withArrayLen images (\l ptr -> c'setWindowIcons ptr (fromIntegral l))
 
 setWindowTitle :: String -> IO ()
 setWindowTitle title = withCString title c'setWindowTitle
@@ -847,33 +847,11 @@ getGesturePinchVector = c'getGesturePinchVector >>= pop
 getGesturePinchAngle :: IO Float
 getGesturePinchAngle = realToFrac <$> c'getGesturePinchAngle
 
-setCameraMode :: Raylib.Types.Camera3D -> CameraMode -> IO ()
-setCameraMode camera mode = withFreeable camera (\c -> c'setCameraMode c (fromIntegral $ fromEnum mode))
-
-updateCamera :: Raylib.Types.Camera3D -> IO Raylib.Types.Camera3D
-updateCamera camera =
+updateCamera :: Raylib.Types.Camera3D -> CameraMode -> IO Raylib.Types.Camera3D
+updateCamera camera mode =
   withFreeable
     camera
     ( \c -> do
-        c'updateCamera c
+        c'updateCamera c (fromIntegral $ fromEnum mode)
         peek c
     )
-
-setCameraPanControl :: Int -> IO ()
-setCameraPanControl keyPan = c'setCameraPanControl $ fromIntegral keyPan
-
-setCameraAltControl :: Int -> IO ()
-setCameraAltControl keyAlt = c'setCameraAltControl $ fromIntegral keyAlt
-
-setCameraSmoothZoomControl :: Int -> IO ()
-setCameraSmoothZoomControl keySmoothZoom = c'setCameraSmoothZoomControl $ fromIntegral keySmoothZoom
-
-setCameraMoveControls :: Int -> Int -> Int -> Int -> Int -> Int -> IO ()
-setCameraMoveControls keyFront keyBack keyRight keyLeft keyUp keyDown =
-  c'setCameraMoveControls
-    (fromIntegral keyFront)
-    (fromIntegral keyBack)
-    (fromIntegral keyRight)
-    (fromIntegral keyLeft)
-    (fromIntegral keyUp)
-    (fromIntegral keyDown)

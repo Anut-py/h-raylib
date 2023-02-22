@@ -15,6 +15,7 @@ import Foreign.C
     peekCString,
     withCString,
   )
+import Raylib.Internal (addTextureId)
 import Raylib.Native
   ( c'codepointToUTF8,
     c'drawFPS,
@@ -50,14 +51,16 @@ import Raylib.Types
     GlyphInfo,
     Image,
     Rectangle,
-    Vector2, Texture (texture'id)
+    Texture (texture'id),
+    Vector2,
   )
 import Raylib.Util
   ( pop,
+    popCArray,
+    popCString,
     withArray2D,
-    withFreeable, popCString, popCArray
+    withFreeable,
   )
-import Raylib.Internal ( addTextureId )
 
 getFontDefault :: IO Raylib.Types.Font
 getFontDefault = c'getFontDefault >>= pop

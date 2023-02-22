@@ -11,10 +11,9 @@ import Raylib.Core
     endDrawing,
     endMode3D,
     initWindow,
-    setCameraMode,
     setTargetFPS,
     updateCamera,
-    windowShouldClose,
+    windowShouldClose, disableCursor
   )
 import Raylib.Models
   ( drawBoundingBox,
@@ -27,10 +26,13 @@ import Raylib.Types (BoundingBox (BoundingBox), Camera3D (Camera3D, camera3D'pos
 main :: IO ()
 main = do
   initWindow 600 450 "raylib [core] example - camera ray collision"
-  let camera = Camera3D (Vector3 0 0 0) (Vector3 2 0 1) (Vector3 0 1 0) 70 CameraPerspective
-  setCameraMode camera CameraModeFirstPerson
   setTargetFPS 60
+  disableCursor
+  
+  let camera = Camera3D (Vector3 0 0 0) (Vector3 2 0 1) (Vector3 0 1 0) 70 CameraPerspective
+  
   gameLoop camera
+
   closeWindow
 
 gameLoop :: Camera3D -> IO ()
@@ -52,7 +54,7 @@ gameLoop camera = do
   endMode3D
 
   endDrawing
-  newCam <- updateCamera camera
+  newCam <- updateCamera camera CameraModeFirstPerson
   shouldClose <- windowShouldClose
   unless shouldClose $ gameLoop newCam
 

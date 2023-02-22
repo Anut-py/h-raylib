@@ -105,7 +105,8 @@ import Raylib.Types
   )
 import Raylib.Util
   ( pop,
-    withFreeable, popCArray
+    popCArray,
+    withFreeable,
   )
 import Prelude hiding (length)
 

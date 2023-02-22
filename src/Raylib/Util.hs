@@ -5,7 +5,7 @@ module Raylib.Util (c'free, p'free, freeMaybePtr, Freeable (..), rlFreeArray, rl
 import Control.Monad (forM_, unless)
 import Data.Bits ((.|.))
 import Foreign (FunPtr, Ptr, Storable (peek, peekByteOff, poke, sizeOf), castPtr, free, malloc, newArray, nullPtr, peekArray, plusPtr, with)
-import Foreign.C (CInt, CString, CUInt, withCString, CUChar, peekCString, CFloat)
+import Foreign.C (CFloat, CInt, CString, CUChar, CUInt, peekCString, withCString)
 
 -- Internal utility functions
 

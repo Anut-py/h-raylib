@@ -7,12 +7,15 @@ import Foreign
   ( FunPtr,
     Ptr,
     Storable (peek, sizeOf),
+    castPtr,
     toBool,
-    withArrayLen, castPtr
+    withArrayLen,
   )
 import Foreign.C (CUChar, CUInt, withCString)
+import Raylib.Internal (addAudioBuffer, addCtxData, unloadAudioBuffers, unloadCtxData)
 import Raylib.Native
-  ( c'exportWave,
+  ( c'closeAudioDevice,
+    c'exportWave,
     c'exportWaveAsCode,
     c'getMusicTimeLength,
     c'getMusicTimePlayed,
@@ -63,7 +66,7 @@ import Raylib.Native
     c'updateSound,
     c'waveCopy,
     c'waveCrop,
-    c'waveFormat, c'closeAudioDevice
+    c'waveFormat,
   )
 import Raylib.Types
   ( AudioStream (audioStream'buffer),
@@ -76,7 +79,6 @@ import Raylib.Util
     popCArray,
     withFreeable,
   )
-import Raylib.Internal ( addCtxData, unloadCtxData, addAudioBuffer, unloadAudioBuffers )
 
 foreign import ccall safe "raylib.h InitAudioDevice"
   initAudioDevice ::
@@ -267,4 +269,3 @@ setAudioStreamPan stream pan = withFreeable stream (\s -> c'setAudioStreamPan s 
 
 setAudioStreamBufferSizeDefault :: Int -> IO ()
 setAudioStreamBufferSizeDefault = setAudioStreamBufferSizeDefault . fromIntegral
-

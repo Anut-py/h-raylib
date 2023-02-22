@@ -146,6 +146,8 @@ foreign import ccall safe "raylib.h ClearWindowState"
 
 foreign import ccall safe "rl_bindings.h SetWindowIcon_" c'setWindowIcon :: Ptr Raylib.Types.Image -> IO ()
 
+foreign import ccall safe "raylib.h SetWindowIcons" c'setWindowIcons :: Ptr Raylib.Types.Image -> CInt -> IO ()
+
 foreign import ccall safe "raylib.h SetWindowTitle"
   c'setWindowTitle ::
     CString -> IO ()
@@ -636,27 +638,9 @@ foreign import ccall safe "raylib.h GetGesturePinchAngle"
   c'getGesturePinchAngle ::
     IO CFloat
 
-foreign import ccall safe "rl_bindings.h SetCameraMode_" c'setCameraMode :: Ptr Raylib.Types.Camera3D -> CInt -> IO ()
-
 foreign import ccall safe "raylib.h UpdateCamera"
   c'updateCamera ::
-    Ptr Raylib.Types.Camera3D -> IO ()
-
-foreign import ccall safe "raylib.h SetCameraPanControl"
-  c'setCameraPanControl ::
-    CInt -> IO ()
-
-foreign import ccall safe "raylib.h SetCameraAltControl"
-  c'setCameraAltControl ::
-    CInt -> IO ()
-
-foreign import ccall safe "raylib.h SetCameraSmoothZoomControl"
-  c'setCameraSmoothZoomControl ::
-    CInt -> IO ()
-
-foreign import ccall safe "raylib.h SetCameraMoveControls"
-  c'setCameraMoveControls ::
-    CInt -> CInt -> CInt -> CInt -> CInt -> CInt -> IO ()
+    Ptr Raylib.Types.Camera3D -> CInt -> IO ()
 
 foreign import ccall safe "rl_bindings.h SetShapesTexture_" c'setShapesTexture :: Ptr Raylib.Types.Texture -> Ptr Raylib.Types.Rectangle -> IO ()
 
@@ -1446,3 +1430,7 @@ foreign import ccall safe "rl_bindings.h SetAudioStreamCallback_" c'setAudioStre
 foreign import ccall safe "rl_bindings.h AttachAudioStreamProcessor_" c'attachAudioStreamProcessor :: Ptr Raylib.Types.AudioStream -> Ptr AudioCallback -> IO ()
 
 foreign import ccall safe "rl_bindings.h DetachAudioStreamProcessor_" c'detachAudioStreamProcessor :: Ptr Raylib.Types.AudioStream -> Ptr AudioCallback -> IO ()
+
+foreign import ccall safe "rl_bindings.h AttachAudioMixedProcessor_" c'attachAudioMixedProcessor :: Ptr AudioCallback -> IO ()
+
+foreign import ccall safe "rl_bindings.h DetachAudioMixedProcessor_" c'detachAudioMixedProcessor :: Ptr AudioCallback -> IO ()

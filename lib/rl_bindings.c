@@ -249,11 +249,6 @@ Vector2 *GetGesturePinchVector_()
     return ptr;
 }
 
-void SetCameraMode_(Camera3D *a, int b)
-{
-    SetCameraMode(*a, b);
-}
-
 void SetShapesTexture_(Texture *a, Rectangle *b)
 {
     SetShapesTexture(*a, *b);
@@ -1733,4 +1728,12 @@ void AttachAudioStreamProcessor_(AudioStream *a, AudioCallback *b)
 void DetachAudioStreamProcessor_(AudioStream *a, AudioCallback *b)
 {
     DetachAudioStreamProcessor(*a, *b);
+}
+
+void AttachAudioMixedProcessor_(AudioCallback *a) {
+    AttachAudioMixedProcessor(*a);
+}
+
+void DetachAudioMixedProcessor_(AudioCallback *a) {
+    DetachAudioMixedProcessor(*a);
 }

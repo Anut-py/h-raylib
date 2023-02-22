@@ -90,8 +90,6 @@ Vector2 *GetGestureDragVector_();
 
 Vector2 *GetGesturePinchVector_();
 
-void SetCameraMode_(Camera3D *a, int b);
-
 void SetShapesTexture_(Texture *a, Rectangle *b);
 
 void DrawPixel_(int a, int b, Color *c);
@@ -623,3 +621,7 @@ void SetAudioStreamCallback_(AudioStream *a, AudioCallback *b);
 void AttachAudioStreamProcessor_(AudioStream *a, AudioCallback *b);
 
 void DetachAudioStreamProcessor_(AudioStream *a, AudioCallback *b);
+
+void AttachAudioMixedProcessor_(AudioCallback *a);
+
+void DetachAudioMixedProcessor_(AudioCallback *a);

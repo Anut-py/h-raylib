@@ -13,6 +13,7 @@ import Foreign
   )
 import Foreign.C (CUChar, withCString)
 import GHC.IO (unsafePerformIO)
+import Raylib.Internal (addFrameBuffer, addTextureId)
 import Raylib.Native
   ( c'colorAlpha,
     c'colorAlphaBlend,
@@ -132,7 +133,6 @@ import Raylib.Util
     popCArray,
     withFreeable,
   )
-import Raylib.Internal (addTextureId, addFrameBuffer)
 
 loadImage :: String -> IO Raylib.Types.Image
 loadImage fileName = withCString fileName c'loadImage >>= pop
@@ -391,7 +391,7 @@ loadTextureCubemap image layout = do
 
 loadRenderTexture :: Int -> Int -> IO Raylib.Types.RenderTexture
 loadRenderTexture width height = do
-  renderTexture <-  c'loadRenderTexture (fromIntegral width) (fromIntegral height) >>= pop
+  renderTexture <- c'loadRenderTexture (fromIntegral width) (fromIntegral height) >>= pop
   addFrameBuffer $ renderTexture'id renderTexture
   addTextureId $ texture'id $ renderTexture'texture renderTexture
   return renderTexture
