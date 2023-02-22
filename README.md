@@ -64,13 +64,7 @@ GitHub repository and update `h-raylib.cabal` with the relevant config.
 
 ## Contributing
 
-Anybody willing to contribute to the project is welcome to do so. This
-library is very new, so please report any bugs in the GitHub issue tracker.
-
-You can run the examples by using `cabal run {example name}` in the project directory.
-
-You can use `run-all-examples.sh` to run all of the examples in one go. In the future I will add an example that uses
-all the major functions for testing if everything is working correctly.
+See [CONTRIBUTING.md](https://github.com/Anut-py/h-raylib/blob/master/CHANGELOG.md).
 
 ## License
 

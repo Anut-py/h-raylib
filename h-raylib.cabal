@@ -4,14 +4,14 @@ version:            4.5.1.1
 synopsis:           Raylib bindings for Haskell
 category:           graphics
 description:
-  This library includes Haskell bindings to the Raylib library. It supports Windows, Mac, Linux, and BSD.
+  This library contains Haskell bindings to the Raylib library. It supports Windows, Mac, Linux, and BSD.
 
 bug-reports:        https://github.com/Anut-py/h-raylib/issues
 license:            Apache-2.0
 license-file:       LICENSE
 author:             Anut
 maintainer:         Anut
-extra-doc-files:    README.md
+extra-doc-files:    CONTRIBUTING.md README.md ROADMAP.md
 extra-source-files:
   CHANGELOG.md
   lib/*.c
