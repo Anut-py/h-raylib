@@ -3,10 +3,6 @@
 
 module Raylib.Types where
 
--- This file includes Haskell counterparts to the structs defined in raylib
-
--- This file includes Haskell counterparts to the structs defined in raylib
-
 import Control.Monad (forM_, unless)
 import Foreign
   ( FunPtr,
@@ -40,17 +36,8 @@ import Foreign.C
     peekCString,
   )
 import Foreign.C.String (castCCharToChar)
-import GHC.IO (unsafePerformIO)
-import Raylib.Internal (c'rlGetShaderIdDefault)
+import Raylib.Internal (c'rlGetShaderIdDefault, getPixelDataSize)
 import Raylib.Util (Freeable (rlFreeDependents), c'free, freeMaybePtr, newMaybeArray, p'free, peekMaybeArray, peekStaticArray, peekStaticArrayOff, pokeMaybeOff, pokeStaticArray, pokeStaticArrayOff, rightPad, rlFreeArray, rlFreeMaybeArray)
-
--- Necessary functions
-foreign import ccall safe "raylib.h GetPixelDataSize"
-  c'getPixelDataSize ::
-    CInt -> CInt -> CInt -> IO CInt
-
-getPixelDataSize :: Int -> Int -> PixelFormat -> Int
-getPixelDataSize width height format = unsafePerformIO (fromIntegral <$> c'getPixelDataSize (fromIntegral width) (fromIntegral height) (fromIntegral $ fromEnum format))
 
 ------------------------------------------------
 -- Raylib enumerations -------------------------
@@ -782,7 +769,7 @@ instance Storable MusicContextType where
   poke ptr v = poke (castPtr ptr) (fromIntegral (fromEnum v) :: CInt)
 
 ------------------------------------------------
--- Raylib structures ---------------------------
+-- Raylib typeclasses --------------------------
 ------------------------------------------------
 
 class Vector a where
@@ -816,6 +803,10 @@ class Vector a where
   -- Vector magnitude
   magnitude :: a -> Float
   magnitude x = sqrt $ x |.| x
+
+------------------------------------------------
+-- Raylib structures ---------------------------
+------------------------------------------------
 
 data Vector2 = Vector2
   { vector2'x :: Float,
@@ -1039,7 +1030,7 @@ instance Storable Image where
     mipmaps <- fromIntegral <$> (peekByteOff _p 16 :: IO CInt)
     format <- peekByteOff _p 20
     ptr <- (peekByteOff _p 0 :: IO (Ptr CUChar))
-    arr <- peekArray (getPixelDataSize width height format) ptr
+    arr <- peekArray (getPixelDataSize width height (fromEnum format)) ptr
     return $ Image (map fromIntegral arr) width height mipmaps format
   poke _p (Image arr width height mipmaps format) = do
     pokeByteOff _p 0 =<< newArray (map fromIntegral arr :: [CUChar])
@@ -2042,6 +2033,10 @@ instance Freeable FilePathList where
     pathsCStrings <- peekArray (length $ filePathList'paths val) pathsPtr
     mapM_ (c'free . castPtr) pathsCStrings
     c'free $ castPtr pathsPtr
+
+------------------------------------------------
+-- Raylib callbacks ----------------------------
+------------------------------------------------
 
 type LoadFileDataCallback = FunPtr (CString -> Ptr CUInt -> IO (Ptr CUChar))
 

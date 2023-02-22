@@ -1,12 +1,13 @@
 {-# OPTIONS -Wall #-}
 {-# LANGUAGE ForeignFunctionInterface #-}
 
-module Raylib.Internal (unloadShaders, unloadTextures, unloadFrameBuffers, unloadVaoIds, unloadVboIds, unloadCtxData, unloadAudioBuffers, addShaderId, addTextureId, addFrameBuffer, addVaoId, addVboIds, addCtxData, addAudioBuffer, c'rlGetShaderIdDefault) where
+module Raylib.Internal (unloadShaders, unloadTextures, unloadFrameBuffers, unloadVaoIds, unloadVboIds, unloadCtxData, unloadAudioBuffers, addShaderId, addTextureId, addFrameBuffer, addVaoId, addVboIds, addCtxData, addAudioBuffer, c'rlGetShaderIdDefault, getPixelDataSize) where
 
 import Control.Monad (forM_, unless, when)
 import Data.IORef (IORef, modifyIORef, newIORef, readIORef)
 import Foreign (Ptr)
 import Foreign.C (CInt (..), CUInt (..))
+import GHC.IO (unsafePerformIO)
 
 shaderIds :: IO (IORef [CUInt])
 shaderIds = newIORef []
@@ -142,3 +143,10 @@ foreign import ccall safe "rlgl.h rlUnloadVertexBuffer" c'rlUnloadVertexBuffer :
 foreign import ccall safe "rl_internal.h UnloadMusicStreamData" c'unloadMusicStreamData :: CInt -> Ptr () -> IO ()
 
 foreign import ccall safe "rl_internal.h UnloadAudioBuffer_" c'unloadAudioBuffer :: Ptr () -> IO ()
+
+foreign import ccall safe "raylib.h GetPixelDataSize"
+  c'getPixelDataSize ::
+    CInt -> CInt -> CInt -> IO CInt
+
+getPixelDataSize :: Int -> Int -> Int -> Int
+getPixelDataSize width height format = unsafePerformIO (fromIntegral <$> c'getPixelDataSize (fromIntegral width) (fromIntegral height) (fromIntegral format))
