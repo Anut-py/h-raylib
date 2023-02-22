@@ -64,7 +64,7 @@ GitHub repository and update `h-raylib.cabal` with the relevant config.
 
 ## Contributing
 
-See [CONTRIBUTING.md](https://github.com/Anut-py/h-raylib/blob/master/CHANGELOG.md).
+See [CONTRIBUTING.md](https://github.com/Anut-py/h-raylib/blob/master/CONTRIBUTING.md).
 
 ## License
 
