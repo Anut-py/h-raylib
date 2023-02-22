@@ -1,6 +1,6 @@
 # h-raylib changelog
 
-## Version 4.5.1.2
+## Version 4.5.2.0
 _21 February, 2023_
 
 - **BREAKING CHANGE**: Removed asset unloading functions
