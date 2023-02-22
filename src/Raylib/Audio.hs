@@ -3,18 +3,14 @@
 
 module Raylib.Audio where
 
-import Control.Monad (void)
 import Foreign
   ( FunPtr,
     Ptr,
     Storable (peek, sizeOf),
-    newForeignPtr,
-    peekArray,
     toBool,
-    withArrayLen,
+    withArrayLen, castPtr
   )
 import Foreign.C (CUChar, CUInt, withCString)
-import qualified Foreign.Concurrent as C
 import Raylib.Native
   ( c'exportWave,
     c'exportWaveAsCode,
@@ -62,19 +58,12 @@ import Raylib.Native
     c'stopAudioStream,
     c'stopMusicStream,
     c'stopSound,
-    c'unloadAudioStream,
-    c'unloadMusicStream,
-    c'unloadMusicStreamData,
-    c'unloadSound,
-    c'unloadWave,
-    c'unloadWaveSamples,
     c'updateAudioStream,
     c'updateMusicStream,
     c'updateSound,
     c'waveCopy,
     c'waveCrop,
-    c'waveFormat,
-    p'unloadAudioBuffer,
+    c'waveFormat, c'closeAudioDevice
   )
 import Raylib.Types
   ( AudioStream (audioStream'buffer),
@@ -84,20 +73,20 @@ import Raylib.Types
   )
 import Raylib.Util
   ( pop,
+    popCArray,
     withFreeable,
   )
+import Raylib.Internal ( addCtxData, unloadCtxData, addAudioBuffer, unloadAudioBuffers )
 
 foreign import ccall safe "raylib.h InitAudioDevice"
   initAudioDevice ::
     IO ()
 
-foreign import ccall safe "raylib.h CloseAudioDevice"
-  closeAudioDevice ::
-    IO ()
+closeAudioDevice :: IO ()
+closeAudioDevice = unloadCtxData >> unloadAudioBuffers >> c'closeAudioDevice
 
 type AudioCallback = FunPtr (Ptr () -> CUInt -> IO ())
 
--- TODO: redesign this
 isAudioDeviceReady :: IO Bool
 isAudioDeviceReady = toBool <$> c'isAudioDeviceReady
 
@@ -122,14 +111,8 @@ updateSound sound dataValue sampleCount = withFreeable sound (\s -> c'updateSoun
 isWaveReady :: Wave -> IO Bool
 isWaveReady wave = toBool <$> withFreeable wave c'isWaveReady
 
-unloadWave :: Wave -> IO ()
-unloadWave wave = withFreeable wave c'unloadWave
-
 isSoundReady :: Sound -> IO Bool
 isSoundReady sound = toBool <$> withFreeable sound c'isSoundReady
-
-unloadSound :: Sound -> IO ()
-unloadSound sound = withFreeable sound c'unloadSound
 
 exportWave :: Wave -> String -> IO Bool
 exportWave wave fileName = toBool <$> withFreeable wave (withCString fileName . c'exportWave)
@@ -188,32 +171,24 @@ loadWaveSamples :: Wave -> IO [Float]
 loadWaveSamples wave =
   withFreeable
     wave
-    ( \w -> do
-        ptr <- c'loadWaveSamples w
-        arr <- peekArray (fromIntegral $ wave'frameCount wave * wave'channels wave) ptr
-        c'unloadWaveSamples ptr
-        return $ map realToFrac arr
-    )
+    (\w -> map realToFrac <$> (popCArray (fromIntegral $ wave'frameCount wave * wave'channels wave) =<< c'loadWaveSamples w))
 
 loadMusicStream :: String -> IO Music
 loadMusicStream fileName = do
   music <- withCString fileName c'loadMusicStream >>= pop
-  addFinalizerToAudioStream $ music'stream music
-  addFinalizerToMusicStream music
+  addAudioBuffer $ castPtr (audioStream'buffer $ music'stream music)
+  addCtxData (fromEnum $ music'ctxType music) (music'ctxData music)
   return music
 
 loadMusicStreamFromMemory :: String -> [Integer] -> IO Music
 loadMusicStreamFromMemory fileType streamData = do
   music <- withCString fileType (\t -> withArrayLen (map fromIntegral streamData) (\size d -> c'loadMusicStreamFromMemory t d (fromIntegral $ size * sizeOf (0 :: CUChar)))) >>= pop
-  addFinalizerToAudioStream $ music'stream music
-  addFinalizerToMusicStream music
+  addAudioBuffer $ castPtr (audioStream'buffer $ music'stream music)
+  addCtxData (fromEnum $ music'ctxType music) (music'ctxData music)
   return music
 
 isMusicReady :: Music -> IO Bool
 isMusicReady music = toBool <$> withFreeable music c'isMusicReady
-
-unloadMusicStream :: Music -> IO ()
-unloadMusicStream music = withFreeable music c'unloadMusicStream
 
 playMusicStream :: Music -> IO ()
 playMusicStream music = withFreeable music c'playMusicStream
@@ -254,14 +229,11 @@ getMusicTimePlayed music = realToFrac <$> withFreeable music c'getMusicTimePlaye
 loadAudioStream :: Integer -> Integer -> Integer -> IO AudioStream
 loadAudioStream sampleRate sampleSize channels = do
   stream <- c'loadAudioStream (fromIntegral sampleRate) (fromIntegral sampleSize) (fromIntegral channels) >>= pop
-  addFinalizerToAudioStream stream
+  addAudioBuffer $ castPtr (audioStream'buffer stream)
   return stream
 
 isAudioStreamReady :: AudioStream -> IO Bool
 isAudioStreamReady stream = toBool <$> withFreeable stream c'isAudioStreamReady
-
-unloadAudioStream :: AudioStream -> IO ()
-unloadAudioStream stream = withFreeable stream c'unloadAudioStream
 
 updateAudioStream :: AudioStream -> Ptr () -> Int -> IO ()
 updateAudioStream stream value frameCount = withFreeable stream (\s -> c'updateAudioStream s value (fromIntegral frameCount))
@@ -296,15 +268,3 @@ setAudioStreamPan stream pan = withFreeable stream (\s -> c'setAudioStreamPan s 
 setAudioStreamBufferSizeDefault :: Int -> IO ()
 setAudioStreamBufferSizeDefault = setAudioStreamBufferSizeDefault . fromIntegral
 
-addFinalizerToAudioStream :: AudioStream -> IO ()
-addFinalizerToAudioStream stream = void (newForeignPtr p'unloadAudioBuffer (audioStream'buffer stream)) -- Automatically unload audio buffer when it is no longer being used
-
--- Foreign.Concurrent might not call the finalizer, so this may need to be revised in the future
-addFinalizerToMusicStream :: Music -> IO ()
-addFinalizerToMusicStream music = do
-  let ctxData = music'ctxData music
-  _ <-
-    C.newForeignPtr
-      ctxData
-      (c'unloadMusicStreamData (fromIntegral $ fromEnum $ music'ctxType music) ctxData) -- Automatically unload music context data when it is no longer being used
-  return ()

@@ -5,17 +5,13 @@
 module Raylib.Text where
 
 import Foreign
-  ( Ptr,
-    Storable (peek, sizeOf),
-    peekArray,
+  ( Storable (peek, sizeOf),
     toBool,
     withArray,
     withArrayLen,
   )
 import Foreign.C
-  ( CInt,
-    CString,
-    CUChar,
+  ( CUChar,
     peekCString,
     withCString,
   )
@@ -46,38 +42,49 @@ import Raylib.Native
     c'loadUTF8,
     c'measureText,
     c'measureTextEx,
-    c'unloadFont,
-    c'unloadFontData,
   )
 import Raylib.Types
   ( Color,
-    Font,
+    Font (font'texture),
     FontType,
     GlyphInfo,
     Image,
     Rectangle,
-    Vector2,
+    Vector2, Texture (texture'id)
   )
 import Raylib.Util
   ( pop,
     withArray2D,
-    withFreeable,
+    withFreeable, popCString, popCArray
   )
+import Raylib.Internal ( addTextureId )
 
 getFontDefault :: IO Raylib.Types.Font
 getFontDefault = c'getFontDefault >>= pop
 
 loadFont :: String -> IO Raylib.Types.Font
-loadFont fileName = withCString fileName c'loadFont >>= pop
+loadFont fileName = do
+  font <- withCString fileName c'loadFont >>= pop
+  addTextureId $ texture'id $ font'texture font
+  return font
 
 loadFontEx :: String -> Int -> [Int] -> Int -> IO Raylib.Types.Font
-loadFontEx fileName fontSize fontChars glyphCount = withCString fileName (\f -> withArray (map fromIntegral fontChars) (\c -> c'loadFontEx f (fromIntegral fontSize) c (fromIntegral glyphCount))) >>= pop
+loadFontEx fileName fontSize fontChars glyphCount = do
+  font <- withCString fileName (\f -> withArray (map fromIntegral fontChars) (\c -> c'loadFontEx f (fromIntegral fontSize) c (fromIntegral glyphCount))) >>= pop
+  addTextureId $ texture'id $ font'texture font
+  return font
 
 loadFontFromImage :: Raylib.Types.Image -> Raylib.Types.Color -> Int -> IO Raylib.Types.Font
-loadFontFromImage image key firstChar = withFreeable image (\i -> withFreeable key (\k -> c'loadFontFromImage i k (fromIntegral firstChar))) >>= pop
+loadFontFromImage image key firstChar = do
+  font <- withFreeable image (\i -> withFreeable key (\k -> c'loadFontFromImage i k (fromIntegral firstChar))) >>= pop
+  addTextureId $ texture'id $ font'texture font
+  return font
 
 loadFontFromMemory :: String -> [Integer] -> Int -> [Int] -> Int -> IO Raylib.Types.Font
-loadFontFromMemory fileType fileData fontSize fontChars glyphCount = withCString fileType (\t -> withArrayLen (map fromIntegral fileData) (\size d -> withArray (map fromIntegral fontChars) (\c -> c'loadFontFromMemory t d (fromIntegral $ size * sizeOf (0 :: CUChar)) (fromIntegral fontSize) c (fromIntegral glyphCount)))) >>= pop
+loadFontFromMemory fileType fileData fontSize fontChars glyphCount = do
+  font <- withCString fileType (\t -> withArrayLen (map fromIntegral fileData) (\size d -> withArray (map fromIntegral fontChars) (\c -> c'loadFontFromMemory t d (fromIntegral $ size * sizeOf (0 :: CUChar)) (fromIntegral fontSize) c (fromIntegral glyphCount)))) >>= pop
+  addTextureId $ texture'id $ font'texture font
+  return font
 
 loadFontData :: [Integer] -> Int -> [Int] -> Int -> FontType -> IO Raylib.Types.GlyphInfo
 loadFontData fileData fontSize fontChars glyphCount fontType = withArrayLen (map fromIntegral fileData) (\size d -> withArray (map fromIntegral fontChars) (\c -> c'loadFontData d (fromIntegral $ size * sizeOf (0 :: CUChar)) (fromIntegral fontSize) c (fromIntegral glyphCount) (fromIntegral $ fromEnum fontType))) >>= pop
@@ -85,14 +92,8 @@ loadFontData fileData fontSize fontChars glyphCount fontType = withArrayLen (map
 genImageFontAtlas :: [Raylib.Types.GlyphInfo] -> [[Raylib.Types.Rectangle]] -> Int -> Int -> Int -> Int -> IO Raylib.Types.Image
 genImageFontAtlas chars recs glyphCount fontSize padding packMethod = withArray chars (\c -> withArray2D recs (\r -> c'genImageFontAtlas c r (fromIntegral glyphCount) (fromIntegral fontSize) (fromIntegral padding) (fromIntegral packMethod))) >>= pop
 
-unloadFontData :: [Raylib.Types.GlyphInfo] -> IO ()
-unloadFontData glyphs = withArrayLen glyphs (\size g -> c'unloadFontData g (fromIntegral size))
-
 isFontReady :: Raylib.Types.Font -> IO Bool
 isFontReady font = toBool <$> withFreeable font c'isFontReady
-
-unloadFont :: Raylib.Types.Font -> IO ()
-unloadFont font = withFreeable font c'unloadFont
 
 exportFontAsCode :: Raylib.Types.Font -> String -> IO Bool
 exportFontAsCode font fileName = toBool <$> withFreeable font (withCString fileName . c'exportFontAsCode)
@@ -137,15 +138,7 @@ loadUTF8 codepoints =
     ( \size c ->
         c'loadUTF8 c (fromIntegral size)
     )
-    >>= ( \s -> do
-            val <- peekCString s
-            unloadUTF8 s
-            return val
-        )
-
-foreign import ccall safe "raylib.h UnloadUTF8"
-  unloadUTF8 ::
-    CString -> IO ()
+    >>= popCString
 
 loadCodepoints :: String -> IO [Int]
 loadCodepoints text =
@@ -157,15 +150,9 @@ loadCodepoints text =
           ( \n -> do
               res <- c'loadCodepoints t n
               num <- peek n
-              arr <- peekArray (fromIntegral num) res
-              unloadCodepoints res
-              return $ fromIntegral <$> arr
+              map fromIntegral <$> popCArray (fromIntegral num) res
           )
     )
-
-foreign import ccall safe "raylib.h UnloadCodepoints"
-  unloadCodepoints ::
-    Ptr CInt -> IO ()
 
 getCodepointCount :: String -> IO Int
 getCodepointCount text = fromIntegral <$> withCString text c'getCodepointCount

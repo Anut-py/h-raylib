@@ -13,9 +13,9 @@ import Raylib.Core
     initWindow,
     isKeyPressed,
     setTargetFPS,
-    windowShouldClose,
+    windowShouldClose, closeWindow
   )
-import Raylib.Text (drawText, drawTextEx, loadFont, unloadFont)
+import Raylib.Text (drawText, drawTextEx, loadFont)
 import Raylib.Types (Font, KeyboardKey (KeyDown, KeyUp), Vector2 (Vector2))
 
 mainFontPath :: String
@@ -29,7 +29,8 @@ main = do
 
   mainFont <- loadFont mainFontPath
   gameLoop mainFont 20
-  unloadFont mainFont
+
+  closeWindow
 
 gameLoop :: Font -> Int -> IO ()
 gameLoop mainFont size = do

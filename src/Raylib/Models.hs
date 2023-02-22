@@ -2,11 +2,11 @@
 
 module Raylib.Models where
 
+import Control.Monad (forM_)
 import Foreign
   ( Ptr,
-    Storable (peek, poke),
+    Storable (peek),
     fromBool,
-    malloc,
     peekArray,
     toBool,
     withArray,
@@ -14,6 +14,7 @@ import Foreign
   )
 import Foreign.C (CFloat, withCString)
 import GHC.IO (unsafePerformIO)
+import Raylib.Internal (addShaderId, addTextureId, addVaoId, addVboIds)
 import Raylib.Native
   ( c'checkCollisionBoxSphere,
     c'checkCollisionBoxes,
@@ -79,12 +80,6 @@ import Raylib.Native
     c'loadModelFromMesh,
     c'setMaterialTexture,
     c'setModelMeshMaterial,
-    c'unloadMaterial,
-    c'unloadMesh,
-    c'unloadModel,
-    c'unloadModelAnimation,
-    c'unloadModelAnimations,
-    c'unloadModelKeepMeshes,
     c'updateMeshBuffer,
     c'updateModelAnimation,
     c'uploadMesh,
@@ -94,21 +89,23 @@ import Raylib.Types
     Camera3D,
     Color,
     Image,
-    Material,
+    Material (material'maps, material'shader),
+    MaterialMap (materialMap'texture),
     Matrix,
-    Mesh,
-    Model,
+    Mesh (mesh'vaoId, mesh'vboId),
+    Model (model'materials, model'meshes),
     ModelAnimation,
     Ray,
     RayCollision,
     Rectangle,
-    Texture,
+    Shader (shader'id),
+    Texture (texture'id),
     Vector2,
     Vector3,
   )
 import Raylib.Util
   ( pop,
-    withFreeable,
+    withFreeable, popCArray
   )
 import Prelude hiding (length)
 
@@ -176,23 +173,20 @@ drawGrid :: Int -> Float -> IO ()
 drawGrid slices spacing = c'drawGrid (fromIntegral slices) (realToFrac spacing)
 
 loadModel :: String -> IO Raylib.Types.Model
-loadModel fileName = withCString fileName c'loadModel >>= pop
+loadModel fileName = do
+  model <- withCString fileName c'loadModel >>= pop
+  forM_ (model'meshes model) storeMeshData
+  storeMaterialData $ model'materials model
+  return model
 
 loadModelFromMesh :: Raylib.Types.Mesh -> IO Raylib.Types.Model
 loadModelFromMesh mesh = do
-  ptr <- malloc
-  poke ptr mesh
-  model <- c'loadModelFromMesh ptr
-  pop model
+  model <- withFreeable mesh c'loadModelFromMesh >>= pop
+  storeMaterialData $ model'materials model
+  return model
 
 isModelReady :: Raylib.Types.Model -> IO Bool
 isModelReady model = toBool <$> withFreeable model c'isModelReady
-
-unloadModel :: Raylib.Types.Model -> IO ()
-unloadModel model = withFreeable model c'unloadModel
-
-unloadModelKeepMeshes :: Raylib.Types.Model -> IO ()
-unloadModelKeepMeshes model = withFreeable model c'unloadModelKeepMeshes
 
 getModelBoundingBox :: Raylib.Types.Model -> IO Raylib.Types.BoundingBox
 getModelBoundingBox model = withFreeable model c'getModelBoundingBox >>= pop
@@ -222,13 +216,10 @@ drawBillboardPro :: Raylib.Types.Camera3D -> Raylib.Types.Texture -> Raylib.Type
 drawBillboardPro camera texture source position up size origin rotation tint = withFreeable camera (\c -> withFreeable texture (\t -> withFreeable source (\s -> withFreeable position (\p -> withFreeable up (\u -> withFreeable size (\sz -> withFreeable origin (\o -> withFreeable tint (c'drawBillboardPro c t s p u sz o (realToFrac rotation)))))))))
 
 uploadMesh :: Raylib.Types.Mesh -> Bool -> IO Raylib.Types.Mesh
-uploadMesh mesh dynamic = withFreeable mesh (\m -> c'uploadMesh m (fromBool dynamic) >> peek m)
+uploadMesh mesh dynamic = withFreeable mesh (\m -> c'uploadMesh m (fromBool dynamic) >> peek m >>= storeMeshData)
 
 updateMeshBuffer :: Raylib.Types.Mesh -> Int -> Ptr () -> Int -> Int -> IO ()
 updateMeshBuffer mesh index dataValue dataSize offset = withFreeable mesh (\m -> c'updateMeshBuffer m (fromIntegral index) dataValue (fromIntegral dataSize) (fromIntegral offset))
-
-unloadMesh :: Raylib.Types.Mesh -> IO ()
-unloadMesh mesh = withFreeable mesh c'unloadMesh
 
 drawMesh :: Raylib.Types.Mesh -> Raylib.Types.Material -> Raylib.Types.Matrix -> IO ()
 drawMesh mesh material transform = withFreeable mesh (\m -> withFreeable material (withFreeable transform . c'drawMesh m))
@@ -246,37 +237,44 @@ genMeshTangents :: Raylib.Types.Mesh -> IO Raylib.Types.Mesh
 genMeshTangents mesh = withFreeable mesh (\m -> c'genMeshTangents m >> peek m)
 
 genMeshPoly :: Int -> Float -> IO Raylib.Types.Mesh
-genMeshPoly sides radius = c'genMeshPoly (fromIntegral sides) (realToFrac radius) >>= pop
+genMeshPoly sides radius = c'genMeshPoly (fromIntegral sides) (realToFrac radius) >>= pop >>= storeMeshData
 
 genMeshPlane :: Float -> Float -> Int -> Int -> IO Raylib.Types.Mesh
-genMeshPlane width length resX resZ = c'genMeshPlane (realToFrac width) (realToFrac length) (fromIntegral resX) (fromIntegral resZ) >>= pop
+genMeshPlane width length resX resZ = c'genMeshPlane (realToFrac width) (realToFrac length) (fromIntegral resX) (fromIntegral resZ) >>= pop >>= storeMeshData
 
 genMeshCube :: Float -> Float -> Float -> IO Raylib.Types.Mesh
-genMeshCube width height length = c'genMeshCube (realToFrac width) (realToFrac height) (realToFrac length) >>= pop
+genMeshCube width height length = c'genMeshCube (realToFrac width) (realToFrac height) (realToFrac length) >>= pop >>= storeMeshData
 
 genMeshSphere :: Float -> Int -> Int -> IO Raylib.Types.Mesh
-genMeshSphere radius rings slices = c'genMeshSphere (realToFrac radius) (fromIntegral rings) (fromIntegral slices) >>= pop
+genMeshSphere radius rings slices = c'genMeshSphere (realToFrac radius) (fromIntegral rings) (fromIntegral slices) >>= pop >>= storeMeshData
 
 genMeshHemiSphere :: Float -> Int -> Int -> IO Raylib.Types.Mesh
-genMeshHemiSphere radius rings slices = c'genMeshHemiSphere (realToFrac radius) (fromIntegral rings) (fromIntegral slices) >>= pop
+genMeshHemiSphere radius rings slices = c'genMeshHemiSphere (realToFrac radius) (fromIntegral rings) (fromIntegral slices) >>= pop >>= storeMeshData
 
 genMeshCylinder :: Float -> Float -> Int -> IO Raylib.Types.Mesh
-genMeshCylinder radius height slices = c'genMeshCylinder (realToFrac radius) (realToFrac height) (fromIntegral slices) >>= pop
+genMeshCylinder radius height slices = c'genMeshCylinder (realToFrac radius) (realToFrac height) (fromIntegral slices) >>= pop >>= storeMeshData
 
 genMeshCone :: Float -> Float -> Int -> IO Raylib.Types.Mesh
-genMeshCone radius height slices = c'genMeshCone (realToFrac radius) (realToFrac height) (fromIntegral slices) >>= pop
+genMeshCone radius height slices = c'genMeshCone (realToFrac radius) (realToFrac height) (fromIntegral slices) >>= pop >>= storeMeshData
 
 genMeshTorus :: Float -> Float -> Int -> Int -> IO Raylib.Types.Mesh
-genMeshTorus radius size radSeg sides = c'genMeshTorus (realToFrac radius) (realToFrac size) (fromIntegral radSeg) (fromIntegral sides) >>= pop
+genMeshTorus radius size radSeg sides = c'genMeshTorus (realToFrac radius) (realToFrac size) (fromIntegral radSeg) (fromIntegral sides) >>= pop >>= storeMeshData
 
 genMeshKnot :: Float -> Float -> Int -> Int -> IO Raylib.Types.Mesh
-genMeshKnot radius size radSeg sides = c'genMeshKnot (realToFrac radius) (realToFrac size) (fromIntegral radSeg) (fromIntegral sides) >>= pop
+genMeshKnot radius size radSeg sides = c'genMeshKnot (realToFrac radius) (realToFrac size) (fromIntegral radSeg) (fromIntegral sides) >>= pop >>= storeMeshData
 
 genMeshHeightmap :: Raylib.Types.Image -> Raylib.Types.Vector3 -> IO Raylib.Types.Mesh
-genMeshHeightmap heightmap size = withFreeable heightmap (withFreeable size . c'genMeshHeightmap) >>= pop
+genMeshHeightmap heightmap size = withFreeable heightmap (withFreeable size . c'genMeshHeightmap) >>= pop >>= storeMeshData
 
 genMeshCubicmap :: Raylib.Types.Image -> Raylib.Types.Vector3 -> IO Raylib.Types.Mesh
-genMeshCubicmap cubicmap cubeSize = withFreeable cubicmap (withFreeable cubeSize . c'genMeshCubicmap) >>= pop
+genMeshCubicmap cubicmap cubeSize = withFreeable cubicmap (withFreeable cubeSize . c'genMeshCubicmap) >>= pop >>= storeMeshData
+
+-- Internal
+storeMeshData :: Mesh -> IO Mesh
+storeMeshData mesh = do
+  addVaoId $ mesh'vaoId mesh
+  addVboIds $ mesh'vboId mesh
+  return mesh
 
 loadMaterials :: String -> IO [Raylib.Types.Material]
 loadMaterials fileName =
@@ -288,8 +286,21 @@ loadMaterials fileName =
           ( \n -> do
               ptr <- c'loadMaterials f n
               num <- peek n
-              peekArray (fromIntegral num) ptr
+              materials <- popCArray (fromIntegral num) ptr
+              storeMaterialData materials
+              return materials
           )
+    )
+
+storeMaterialData :: [Material] -> IO ()
+storeMaterialData materials =
+  forM_
+    materials
+    ( \mat -> do
+        addShaderId $ shader'id $ material'shader mat
+        case material'maps mat of
+          Nothing -> return ()
+          (Just maps) -> forM_ maps (addTextureId . texture'id . materialMap'texture)
     )
 
 loadMaterialDefault :: IO Raylib.Types.Material
@@ -297,9 +308,6 @@ loadMaterialDefault = c'loadMaterialDefault >>= pop
 
 isMaterialReady :: Raylib.Types.Material -> IO Bool
 isMaterialReady material = toBool <$> withFreeable material c'isMaterialReady
-
-unloadMaterial :: Raylib.Types.Material -> IO ()
-unloadMaterial material = withFreeable material c'unloadMaterial
 
 setMaterialTexture :: Raylib.Types.Material -> Int -> Raylib.Types.Texture -> IO Raylib.Types.Material
 setMaterialTexture material mapType texture = withFreeable material (\m -> withFreeable texture (c'setMaterialTexture m (fromIntegral mapType)) >> peek m)
@@ -323,12 +331,6 @@ loadModelAnimations fileName =
 
 updateModelAnimation :: Raylib.Types.Model -> Raylib.Types.ModelAnimation -> Int -> IO ()
 updateModelAnimation model animation frame = withFreeable model (\m -> withFreeable animation (\a -> c'updateModelAnimation m a (fromIntegral frame)))
-
-unloadModelAnimation :: ModelAnimation -> IO ()
-unloadModelAnimation animation = withFreeable animation c'unloadModelAnimation
-
-unloadModelAnimations :: [ModelAnimation] -> IO ()
-unloadModelAnimations animations = withArrayLen animations (\num a -> c'unloadModelAnimations a (fromIntegral num))
 
 isModelAnimationValid :: Model -> ModelAnimation -> IO Bool
 isModelAnimationValid model animation = toBool <$> withFreeable model (withFreeable animation . c'isModelAnimationValid)

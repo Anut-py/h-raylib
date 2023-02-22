@@ -173,15 +173,9 @@ import Raylib.Native
     c'setWindowTitle,
     c'takeScreenshot,
     c'traceLog,
-    c'unloadDirectoryFiles,
-    c'unloadDroppedFiles,
-    c'unloadFileData,
-    c'unloadFileText,
-    c'unloadShader,
-    c'unloadVrStereoConfig,
     c'updateCamera,
     c'waitTime,
-    c'windowShouldClose,
+    c'windowShouldClose, c'closeWindow
   )
 import Raylib.Types
   ( BlendMode,
@@ -205,7 +199,7 @@ import Raylib.Types
     RenderTexture,
     SaveFileDataCallback,
     SaveFileTextCallback,
-    Shader,
+    Shader (shader'id),
     ShaderUniformDataType,
     Texture,
     TraceLogLevel,
@@ -214,7 +208,8 @@ import Raylib.Types
     VrDeviceInfo,
     VrStereoConfig,
   )
-import Raylib.Util (configsToBitflag, pop, withFreeable, withMaybeCString)
+import Raylib.Util (configsToBitflag, pop, popCArray, popCString, withFreeable, withMaybeCString)
+import Raylib.Internal ( unloadShaders, addShaderId, unloadTextures, unloadFrameBuffers, unloadVaoIds, unloadVboIds )
 
 initWindow :: Int -> Int -> String -> IO ()
 initWindow width height title = withCString title $ c'initWindow (fromIntegral width) (fromIntegral height)
@@ -222,9 +217,14 @@ initWindow width height title = withCString title $ c'initWindow (fromIntegral w
 windowShouldClose :: IO Bool
 windowShouldClose = toBool <$> c'windowShouldClose
 
-foreign import ccall safe "raylib.h CloseWindow"
-  closeWindow ::
-    IO ()
+closeWindow :: IO ()
+closeWindow = do
+  unloadShaders
+  unloadTextures
+  unloadFrameBuffers
+  unloadVaoIds
+  unloadVboIds
+  c'closeWindow
 
 isWindowReady :: IO Bool
 isWindowReady = toBool <$> c'isWindowReady
@@ -452,15 +452,17 @@ foreign import ccall safe "raylib.h EndVrStereoMode"
 loadVrStereoConfig :: Raylib.Types.VrDeviceInfo -> IO Raylib.Types.VrStereoConfig
 loadVrStereoConfig deviceInfo = withFreeable deviceInfo c'loadVrStereoConfig >>= pop
 
-unloadVrStereoConfig :: Raylib.Types.VrStereoConfig -> IO ()
-unloadVrStereoConfig config = withFreeable config c'unloadVrStereoConfig
-
 loadShader :: Maybe String -> Maybe String -> IO Raylib.Types.Shader
-loadShader vsFileName fsFileName =
-  withMaybeCString vsFileName (withMaybeCString fsFileName . c'loadShader) >>= pop
+loadShader vsFileName fsFileName = do
+  shader <- withMaybeCString vsFileName (withMaybeCString fsFileName . c'loadShader) >>= pop
+  addShaderId $ shader'id shader
+  return shader
 
 loadShaderFromMemory :: Maybe String -> Maybe String -> IO Raylib.Types.Shader
-loadShaderFromMemory vsCode fsCode = withMaybeCString vsCode (withMaybeCString fsCode . c'loadShaderFromMemory) >>= pop
+loadShaderFromMemory vsCode fsCode = do
+  shader <- withMaybeCString vsCode (withMaybeCString fsCode . c'loadShaderFromMemory) >>= pop
+  addShaderId $ shader'id shader
+  return shader
 
 isShaderReady :: Shader -> IO Bool
 isShaderReady shader = toBool <$> withFreeable shader c'isShaderReady
@@ -482,9 +484,6 @@ setShaderValueMatrix shader locIndex mat = withFreeable shader (\s -> withFreeab
 
 setShaderValueTexture :: Raylib.Types.Shader -> Int -> Raylib.Types.Texture -> IO ()
 setShaderValueTexture shader locIndex tex = withFreeable shader (\s -> withFreeable tex (c'setShaderValueTexture s (fromIntegral locIndex)))
-
-unloadShader :: Raylib.Types.Shader -> IO ()
-unloadShader shader = withFreeable shader c'unloadShader
 
 getMouseRay :: Raylib.Types.Vector2 -> Raylib.Types.Camera3D -> IO Raylib.Types.Ray
 getMouseRay mousePosition camera = withFreeable mousePosition (withFreeable camera . c'getMouseRay) >>= pop
@@ -583,9 +582,7 @@ loadFileData fileName =
           ( \path -> do
               ptr <- c'loadFileData path size
               arrSize <- fromIntegral <$> peek size
-              arr <- peekArray arrSize ptr
-              c'unloadFileData ptr
-              return $ map fromIntegral arr
+              map fromIntegral <$> popCArray arrSize ptr
           )
     )
 
@@ -598,10 +595,7 @@ exportDataAsCode contents size fileName =
   toBool <$> withArray (map fromInteger contents) (\c -> withCString fileName (c'exportDataAsCode c (fromIntegral size)))
 
 loadFileText :: String -> IO String
-loadFileText fileName = withCString fileName c'loadFileText >>= peekCString
-
-unloadFileText :: String -> IO ()
-unloadFileText text = withCString text c'unloadFileText
+loadFileText fileName = withCString fileName c'loadFileText >>= popCString
 
 saveFileText :: String -> String -> IO Bool
 saveFileText fileName text = toBool <$> withCString fileName (withCString text . c'saveFileText)
@@ -652,17 +646,11 @@ loadDirectoryFilesEx :: String -> String -> Bool -> IO Raylib.Types.FilePathList
 loadDirectoryFilesEx basePath filterStr scanSubdirs =
   withCString basePath (\b -> withCString filterStr (\f -> c'loadDirectoryFilesEx b f (fromBool scanSubdirs))) >>= pop
 
-unloadDirectoryFiles :: Raylib.Types.FilePathList -> IO ()
-unloadDirectoryFiles files = withFreeable files c'unloadDirectoryFiles
-
 isFileDropped :: IO Bool
 isFileDropped = toBool <$> c'isFileDropped
 
 loadDroppedFiles :: IO Raylib.Types.FilePathList
 loadDroppedFiles = c'loadDroppedFiles >>= pop
-
-unloadDroppedFiles :: Raylib.Types.FilePathList -> IO ()
-unloadDroppedFiles files = withFreeable files c'unloadDroppedFiles
 
 getFileModTime :: String -> IO Integer
 getFileModTime fileName = fromIntegral <$> withCString fileName c'getFileModTime

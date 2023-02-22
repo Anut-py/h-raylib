@@ -1,11 +1,11 @@
 {-# OPTIONS -Wall #-}
 
-module Raylib.Util (c'free, p'free, freeMaybePtr, Freeable (..), rlFreeArray, pop, popCArray, withFreeable, withArray2D, configsToBitflag, withMaybe, withMaybeCString, peekMaybe, peekMaybeOff, pokeMaybe, pokeMaybeOff, peekMaybeArray, newMaybeArray, peekStaticArray, peekStaticArrayOff, pokeStaticArray, pokeStaticArrayOff, rightPad) where
+module Raylib.Util (c'free, p'free, freeMaybePtr, Freeable (..), rlFreeArray, rlFreeMaybeArray, pop, popCArray, popCString, withFreeable, withArray2D, configsToBitflag, withMaybe, withMaybeCString, peekMaybe, peekMaybeOff, pokeMaybe, pokeMaybeOff, peekMaybeArray, newMaybeArray, peekStaticArray, peekStaticArrayOff, pokeStaticArray, pokeStaticArrayOff, rightPad) where
 
 import Control.Monad (forM_, unless)
 import Data.Bits ((.|.))
 import Foreign (FunPtr, Ptr, Storable (peek, peekByteOff, poke, sizeOf), castPtr, free, malloc, newArray, nullPtr, peekArray, plusPtr, with)
-import Foreign.C (CInt, CString, CUInt, withCString)
+import Foreign.C (CInt, CString, CUInt, withCString, CUChar, peekCString, CFloat)
 
 -- Internal utility functions
 
@@ -27,7 +27,11 @@ instance Freeable CInt
 
 instance Freeable CUInt
 
-rlFreeArray :: (Freeable a, Show a, Storable a) => [a] -> Ptr a -> IO ()
+instance Freeable CUChar
+
+instance Freeable CFloat
+
+rlFreeArray :: (Freeable a, Storable a) => [a] -> Ptr a -> IO ()
 rlFreeArray arr ptr = do
   forM_
     [0 .. length arr - 1]
@@ -35,6 +39,10 @@ rlFreeArray arr ptr = do
         let val = arr !! i in rlFreeDependents val (plusPtr ptr (i * sizeOf val))
     )
   c'free $ castPtr ptr
+
+rlFreeMaybeArray :: (Freeable a, Storable a) => Maybe [a] -> Ptr a -> IO ()
+rlFreeMaybeArray Nothing _ = return ()
+rlFreeMaybeArray (Just arr) ptr = rlFreeArray arr ptr
 
 pop :: (Freeable a, Storable a) => Ptr a -> IO a
 pop ptr = do
@@ -45,6 +53,12 @@ pop ptr = do
 popCArray :: (Freeable a, Storable a) => Int -> Ptr a -> IO [a]
 popCArray count ptr = do
   str <- peekArray count ptr
+  c'free $ castPtr ptr
+  return str
+
+popCString :: CString -> IO String
+popCString ptr = do
+  str <- peekCString ptr
   c'free $ castPtr ptr
   return str
 

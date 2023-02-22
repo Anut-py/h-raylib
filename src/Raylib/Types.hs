@@ -42,7 +42,7 @@ import Foreign.C
 import Foreign.C.String (castCCharToChar)
 import GHC.IO (unsafePerformIO)
 import Raylib.Internal (c'rlGetShaderIdDefault)
-import Raylib.Util (Freeable (rlFreeDependents), c'free, freeMaybePtr, newMaybeArray, p'free, peekMaybeArray, peekStaticArray, peekStaticArrayOff, pokeMaybeOff, pokeStaticArray, pokeStaticArrayOff, rightPad, rlFreeArray)
+import Raylib.Util (Freeable (rlFreeDependents), c'free, freeMaybePtr, newMaybeArray, p'free, peekMaybeArray, peekStaticArray, peekStaticArrayOff, pokeMaybeOff, pokeStaticArray, pokeStaticArrayOff, rightPad, rlFreeArray, rlFreeMaybeArray)
 
 -- Necessary functions
 foreign import ccall safe "raylib.h GetPixelDataSize"
@@ -51,10 +51,6 @@ foreign import ccall safe "raylib.h GetPixelDataSize"
 
 getPixelDataSize :: Int -> Int -> PixelFormat -> Int
 getPixelDataSize width height format = unsafePerformIO (fromIntegral <$> c'getPixelDataSize (fromIntegral width) (fromIntegral height) (fromIntegral $ fromEnum format))
-
-foreign import ccall safe "raylib.h &GetPixelDataSize"
-  p'getPixelDataSize ::
-    FunPtr (CInt -> CInt -> CInt -> IO CInt)
 
 ------------------------------------------------
 -- Raylib enumerations -------------------------
@@ -789,6 +785,38 @@ instance Storable MusicContextType where
 -- Raylib structures ---------------------------
 ------------------------------------------------
 
+class Vector a where
+  -- Vector-vector addition
+  (|+|) :: a -> a -> a
+
+  -- Vector-vector subtraction
+  (|-|) :: a -> a -> a
+  v1 |-| v2 = v1 |+| inverse v2
+
+  -- Vector-scalar multiplication
+  (|*|) :: a -> Float -> a
+
+  -- Vector-scalar division
+  (|/|) :: a -> Float -> a
+  v |/| num = v |*| (1 / num)
+
+  -- Vector-vector dot product
+  (|.|) :: a -> a -> Float
+
+  -- Zero vector
+  zero :: a
+
+  -- Vector additive inverse
+  inverse :: a -> a
+
+  -- Normalize vector (same direction, magnitude 1)
+  normalize :: a -> a
+  normalize v = v |/| magnitude v
+
+  -- Vector magnitude
+  magnitude :: a -> Float
+  magnitude x = sqrt $ x |.| x
+
 data Vector2 = Vector2
   { vector2'x :: Float,
     vector2'y :: Float
@@ -806,6 +834,15 @@ instance Storable Vector2 where
     pokeByteOff _p 0 (realToFrac x :: CFloat)
     pokeByteOff _p 4 (realToFrac y :: CFloat)
     return ()
+
+instance Vector Vector2 where
+  (Vector2 x1 y1) |+| (Vector2 x2 y2) = Vector2 (x1 + x2) (y1 + y2)
+  (Vector2 x y) |*| num = Vector2 (x * num) (y * num)
+
+  (Vector2 x1 y1) |.| (Vector2 x2 y2) = (x1 * x2) + (y1 * y2)
+
+  zero = Vector2 0 0
+  inverse (Vector2 x y) = Vector2 (- x) (- y)
 
 data Vector3 = Vector3
   { vector3'x :: Float,
@@ -827,6 +864,19 @@ instance Storable Vector3 where
     pokeByteOff _p 4 (realToFrac y :: CFloat)
     pokeByteOff _p 8 (realToFrac z :: CFloat)
     return ()
+
+-- Vector cross-product
+cross :: Vector3 -> Vector3 -> Vector3
+(Vector3 x1 y1 z1) `cross` (Vector3 x2 y2 z2) = Vector3 (y1 * z2 - z1 * y2) (z1 * x2 - x1 * z2) (x1 * y2 - y1 * x2)
+
+instance Vector Vector3 where
+  (Vector3 x1 y1 z1) |+| (Vector3 x2 y2 z2) = Vector3 (x1 + x2) (y1 + y2) (z1 + z2)
+  (Vector3 x y z) |*| num = Vector3 (x * num) (y * num) (z * num)
+
+  (Vector3 x1 y1 z1) |.| (Vector3 x2 y2 z2) = (x1 * x2) + (y1 * y2) + (z1 * z2)
+
+  zero = Vector3 0 0 0
+  inverse (Vector3 x y z) = Vector3 (- x) (- y) (- z)
 
 data Vector4 = Vector4
   { vector4'x :: Float,
@@ -851,6 +901,15 @@ instance Storable Vector4 where
     pokeByteOff _p 8 (realToFrac z :: CFloat)
     pokeByteOff _p 12 (realToFrac w :: CFloat)
     return ()
+
+instance Vector Vector4 where
+  (Vector4 x1 y1 z1 w1) |+| (Vector4 x2 y2 z2 w2) = Vector4 (x1 + x2) (y1 + y2) (z1 + z2) (w1 + w2)
+  (Vector4 x y z w) |*| num = Vector4 (x * num) (y * num) (z * num) (w * num)
+
+  (Vector4 x1 y1 z1 w1) |.| (Vector4 x2 y2 z2 w2) = (x1 * x2) + (y1 * y2) + (z1 * z2) + (w1 * w2)
+
+  zero = Vector4 0 0 0 0
+  inverse (Vector4 x y z w) = Vector4 (- x) (- y) (- z) (- w)
 
 type Quaternion = Vector4
 
@@ -1027,9 +1086,9 @@ type Texture2D = Texture
 type TextureCubemap = Texture
 
 data RenderTexture = RenderTexture
-  { rendertexture'id :: Integer,
-    rendertexture'texture :: Texture,
-    rendertexture'depth :: Texture
+  { renderTexture'id :: Integer,
+    renderTexture'texture :: Texture,
+    renderTexture'depth :: Texture
   }
   deriving (Eq, Show, Freeable)
 
@@ -1050,12 +1109,12 @@ instance Storable RenderTexture where
 type RenderTexture2D = RenderTexture
 
 data NPatchInfo = NPatchInfo
-  { nPatchinfo'source :: Rectangle,
-    nPatchinfo'left :: Int,
-    nPatchinfo'top :: Int,
-    nPatchinfo'right :: Int,
-    nPatchinfo'bottom :: Int,
-    nPatchinfo'layout :: NPatchLayout
+  { nPatchInfo'source :: Rectangle,
+    nPatchInfo'left :: Int,
+    nPatchInfo'top :: Int,
+    nPatchInfo'right :: Int,
+    nPatchInfo'bottom :: Int,
+    nPatchInfo'layout :: NPatchLayout
   }
   deriving (Eq, Show, Freeable)
 
@@ -1080,11 +1139,11 @@ instance Storable NPatchInfo where
     return ()
 
 data GlyphInfo = GlyphInfo
-  { glyphinfo'value :: Int,
+  { glyphInfo'value :: Int,
     glyphInfo'offsetX :: Int,
     glyphInfo'offsetY :: Int,
     glyphInfo'advanceX :: Int,
-    glyphinfo'image :: Image
+    glyphInfo'image :: Image
   }
   deriving (Eq, Show)
 
@@ -1182,8 +1241,8 @@ type Camera = Camera3D
 data Camera2D = Camera2D
   { camera2D'offset :: Vector2,
     camera2D'target :: Vector2,
-    camera2d'rotation :: Float,
-    camera2d'zoom :: Float
+    camera2D'rotation :: Float,
+    camera2D'zoom :: Float
   }
   deriving (Eq, Show, Freeable)
 
@@ -1218,7 +1277,7 @@ data Mesh = Mesh
     mesh'boneIds :: Maybe [Word8],
     mesh'boneWeights :: Maybe [Float],
     mesh'vaoId :: Integer,
-    mesh'vboId :: [Integer]
+    mesh'vboId :: Maybe [Integer]
   }
   deriving (Eq, Show)
 
@@ -1252,7 +1311,7 @@ instance Storable Mesh where
     boneWeights <- peekMaybeArray (vertexCount * 4) boneWeightsPtr
     vaoId <- fromIntegral <$> (peekByteOff _p 96 :: IO CUInt)
     vboIdPtr <- (peekByteOff _p 104 :: IO (Ptr CUInt))
-    vboId <- map fromIntegral <$> peekArray 7 vboIdPtr
+    vboId <- (\m -> map fromIntegral <$> m) <$> peekMaybeArray 7 vboIdPtr
     return $ Mesh vertexCount triangleCount vertices texcoords texcoords2 normals tangents colors indices animVertices animNormals boneIds boneWeights vaoId vboId
   poke _p (Mesh vertexCount triangleCount vertices texcoords texcoords2 normals tangents colors indices animVertices animNormals boneIds boneWeights vaoId vboId) = do
     pokeByteOff _p 0 (fromIntegral vertexCount :: CInt)
@@ -1263,13 +1322,13 @@ instance Storable Mesh where
     pokeByteOff _p 32 =<< newArray normals
     newMaybeArray tangents >>= pokeByteOff _p 40
     newMaybeArray colors >>= pokeByteOff _p 48
-    newMaybeArray ((\m -> map fromIntegral m :: [CUShort]) <$> indices) >>= pokeByteOff _p 56
+    newMaybeArray (map fromIntegral <$> indices :: Maybe [CUShort]) >>= pokeByteOff _p 56
     newMaybeArray animVertices >>= pokeByteOff _p 64
     newMaybeArray animNormals >>= pokeByteOff _p 72
-    newMaybeArray ((\m -> map fromIntegral m :: [CUChar]) <$> boneIds) >>= pokeByteOff _p 80
+    newMaybeArray (map fromIntegral <$> boneIds :: Maybe [CUChar]) >>= pokeByteOff _p 80
     newMaybeArray boneWeights >>= pokeByteOff _p 88
     pokeByteOff _p 96 (fromIntegral vaoId :: CUInt)
-    pokeByteOff _p 104 =<< newArray (map fromIntegral vboId :: [CUInt])
+    newMaybeArray (map fromIntegral <$> vboId :: Maybe [CUInt]) >>= pokeByteOff _p 104
     return ()
 
 instance Freeable Mesh where
@@ -1335,9 +1394,9 @@ instance Freeable Shader where
       )
 
 data MaterialMap = MaterialMap
-  { materialmap'texture :: Texture,
-    materialmap'color :: Color,
-    materialmap'value :: Float
+  { materialMap'texture :: Texture,
+    materialMap'color :: Color,
+    materialMap'value :: Float
   }
   deriving (Eq, Show, Freeable)
 
@@ -1357,7 +1416,7 @@ instance Storable MaterialMap where
 
 data Material = Material
   { material'shader :: Shader,
-    material'maps :: [MaterialMap],
+    material'maps :: Maybe [MaterialMap],
     material'params :: [Float]
   }
   deriving (Eq, Show)
@@ -1368,12 +1427,12 @@ instance Storable Material where
   peek _p = do
     shader <- peekByteOff _p 0
     mapsPtr <- (peekByteOff _p 16 :: IO (Ptr MaterialMap))
-    maps <- peekArray 12 mapsPtr
+    maps <- peekMaybeArray 12 mapsPtr
     params <- map realToFrac <$> peekStaticArrayOff 4 (castPtr _p :: Ptr CFloat) 24
     return $ Material shader maps params
   poke _p (Material shader maps params) = do
     pokeByteOff _p 0 shader
-    pokeByteOff _p 16 =<< newArray maps
+    pokeByteOff _p 16 =<< newMaybeArray maps
     pokeStaticArrayOff (castPtr _p :: Ptr CFloat) 24 (map realToFrac params :: [CFloat])
     return ()
 
@@ -1381,7 +1440,7 @@ instance Freeable Material where
   rlFreeDependents val ptr = do
     rlFreeDependents (material'shader val) (castPtr ptr :: Ptr Shader)
     mapsPtr <- (peekByteOff ptr 16 :: IO (Ptr MaterialMap))
-    rlFreeArray (material'maps val) mapsPtr
+    rlFreeMaybeArray (material'maps val) mapsPtr
 
 data Transform = Transform
   { transform'translation :: Vector3,
@@ -1608,10 +1667,10 @@ instance Freeable Wave where
     dataPtr <- peekByteOff ptr 16 :: IO (Ptr CShort)
     c'free $ castPtr dataPtr
 
--- These types don't work perfectly right now, I need to fix them later on.
+-- RAudioBuffer/Processor don't work perfectly right now, I need to fix them later on.
 -- They are currently used as `Ptr`s because peeking/poking them every time
 -- an audio function is called doesn't work properly (they are stored in a
--- linked list in C, which makes it very difficult to properly peek/poke them)
+-- linked list in C, which makes it very difficult to properly marshal them)
 data RAudioBuffer = RAudioBuffer
   { rAudioBuffer'converter :: [Int], -- Implemented as an array of 39 integers because binding the entire `ma_data_converter` type is too painful
     rAudioBuffer'callback :: AudioCallback,

@@ -25,7 +25,7 @@ import Raylib.Textures
     loadRenderTexture,
     loadTextureFromImage,
   )
-import Raylib.Types (Rectangle (Rectangle), RenderTexture (rendertexture'texture), Texture, Vector2 (Vector2))
+import Raylib.Types (Rectangle (Rectangle), RenderTexture (renderTexture'texture), Texture, Vector2 (Vector2))
 
 logoPath :: String
 logoPath = "../../../../../../../../../examples/basic-images/assets/raylib-logo.png"
@@ -57,7 +57,7 @@ gameLoop texture logo rt = do
 
   clearBackground white
   drawTexture texture 0 0 orange
-  drawTexturePro (rendertexture'texture rt) (Rectangle 0 0 200 (-200)) (Rectangle 50 50 300 300) (Vector2 0 0) 0 white
+  drawTexturePro (renderTexture'texture rt) (Rectangle 0 0 200 (-200)) (Rectangle 50 50 300 300) (Vector2 0 0) 0 white
   drawTexturePro logo (Rectangle 0 0 256 256) (Rectangle 375 50 175 175) (Vector2 0 0) 0 white
 
   endDrawing

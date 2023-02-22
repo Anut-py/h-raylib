@@ -4,10 +4,10 @@
 
 module Raylib.Textures where
 
+import Control.Monad ((<=<))
 import Foreign
   ( Ptr,
     Storable (peek, sizeOf),
-    peekArray,
     toBool,
     withArrayLen,
   )
@@ -108,9 +108,6 @@ import Raylib.Native
     c'setPixelColor,
     c'setTextureFilter,
     c'setTextureWrap,
-    c'unloadImage,
-    c'unloadRenderTexture,
-    c'unloadTexture,
     c'updateTexture,
     c'updateTextureRec,
   )
@@ -122,8 +119,8 @@ import Raylib.Types
     NPatchInfo,
     PixelFormat,
     Rectangle,
-    RenderTexture,
-    Texture,
+    RenderTexture (renderTexture'id, renderTexture'texture),
+    Texture (texture'id),
     TextureFilter,
     TextureWrap,
     Vector2,
@@ -132,8 +129,10 @@ import Raylib.Types
   )
 import Raylib.Util
   ( pop,
+    popCArray,
     withFreeable,
   )
+import Raylib.Internal (addTextureId, addFrameBuffer)
 
 loadImage :: String -> IO Raylib.Types.Image
 loadImage fileName = withCString fileName c'loadImage >>= pop
@@ -142,7 +141,7 @@ loadImageRaw :: String -> Int -> Int -> Int -> Int -> IO Raylib.Types.Image
 loadImageRaw fileName width height format headerSize =
   withCString fileName (\str -> c'loadImageRaw str (fromIntegral width) (fromIntegral height) (fromIntegral $ fromEnum format) (fromIntegral headerSize)) >>= pop
 
--- | Returns the final image and the framees in a tuple, e.g. @(img, 18)@
+-- | Returns the animation and the frames in a tuple
 loadImageAnim :: String -> IO (Raylib.Types.Image, Int)
 loadImageAnim fileName =
   withFreeable
@@ -169,9 +168,6 @@ loadImageFromScreen = c'loadImageFromScreen >>= pop
 
 isImageReady :: Image -> IO Bool
 isImageReady image = toBool <$> withFreeable image c'isImageReady
-
-unloadImage :: Raylib.Types.Image -> IO ()
-unloadImage image = withFreeable image c'unloadImage
 
 exportImage :: Raylib.Types.Image -> String -> IO Bool
 exportImage image fileName = toBool <$> withFreeable image (withCString fileName . c'exportImage)
@@ -303,12 +299,7 @@ loadImageColors :: Raylib.Types.Image -> IO [Raylib.Types.Color]
 loadImageColors image =
   withFreeable
     image
-    ( \i -> do
-        colors <- c'loadImageColors i
-        colArray <- peekArray (fromIntegral $ Raylib.Types.image'width image * Raylib.Types.image'height image) colors
-        unloadImageColors colors
-        return colArray
-    )
+    (popCArray (fromIntegral $ Raylib.Types.image'width image * Raylib.Types.image'height image) <=< c'loadImageColors)
 
 loadImagePalette :: Raylib.Types.Image -> Int -> IO [Raylib.Types.Color]
 loadImagePalette image maxPaletteSize =
@@ -323,18 +314,8 @@ loadImagePalette image maxPaletteSize =
                 s <- peek size
                 return (cols, s)
             )
-        colArray <- peekArray (fromIntegral num) palette
-        unloadImagePalette palette
-        return colArray
+        popCArray (fromIntegral num) palette
     )
-
-foreign import ccall safe "raylib.h UnloadImageColors"
-  unloadImageColors ::
-    Ptr Raylib.Types.Color -> IO ()
-
-foreign import ccall safe "raylib.h UnloadImagePalette"
-  unloadImagePalette ::
-    Ptr Raylib.Types.Color -> IO ()
 
 getImageAlphaBorder :: Raylib.Types.Image -> Float -> IO Raylib.Types.Rectangle
 getImageAlphaBorder image threshold = withFreeable image (\i -> c'getImageAlphaBorder i (realToFrac threshold)) >>= pop
@@ -391,28 +372,35 @@ imageDrawTextEx :: Raylib.Types.Image -> Raylib.Types.Font -> String -> Raylib.T
 imageDrawTextEx image font text position fontSize spacing tint = withFreeable image (\i -> withFreeable font (\f -> withCString text (\t -> withFreeable position (\p -> withFreeable tint (c'imageDrawTextEx i f t p (realToFrac fontSize) (realToFrac spacing))))) >> peek i)
 
 loadTexture :: String -> IO Raylib.Types.Texture
-loadTexture fileName = withCString fileName c'loadTexture >>= pop
+loadTexture fileName = do
+  texture <- withCString fileName c'loadTexture >>= pop
+  addTextureId $ texture'id texture
+  return texture
 
 loadTextureFromImage :: Raylib.Types.Image -> IO Raylib.Types.Texture
-loadTextureFromImage image = withFreeable image c'loadTextureFromImage >>= pop
+loadTextureFromImage image = do
+  texture <- withFreeable image c'loadTextureFromImage >>= pop
+  addTextureId $ texture'id texture
+  return texture
 
 loadTextureCubemap :: Raylib.Types.Image -> CubemapLayout -> IO Raylib.Types.Texture
-loadTextureCubemap image layout = withFreeable image (\i -> c'loadTextureCubemap i (fromIntegral $ fromEnum layout)) >>= pop
+loadTextureCubemap image layout = do
+  texture <- withFreeable image (\i -> c'loadTextureCubemap i (fromIntegral $ fromEnum layout)) >>= pop
+  addTextureId $ texture'id texture
+  return texture
 
 loadRenderTexture :: Int -> Int -> IO Raylib.Types.RenderTexture
-loadRenderTexture width height = c'loadRenderTexture (fromIntegral width) (fromIntegral height) >>= pop
+loadRenderTexture width height = do
+  renderTexture <-  c'loadRenderTexture (fromIntegral width) (fromIntegral height) >>= pop
+  addFrameBuffer $ renderTexture'id renderTexture
+  addTextureId $ texture'id $ renderTexture'texture renderTexture
+  return renderTexture
 
 isTextureReady :: Texture -> IO Bool
 isTextureReady texture = toBool <$> withFreeable texture c'isTextureReady
 
-unloadTexture :: Raylib.Types.Texture -> IO ()
-unloadTexture texture = withFreeable texture c'unloadTexture
-
 isRenderTextureReady :: RenderTexture -> IO Bool
 isRenderTextureReady renderTexture = toBool <$> withFreeable renderTexture c'isRenderTextureReady
-
-unloadRenderTexture :: Raylib.Types.RenderTexture -> IO ()
-unloadRenderTexture target = withFreeable target c'unloadRenderTexture
 
 updateTexture :: Raylib.Types.Texture -> Ptr () -> IO Raylib.Types.Texture
 updateTexture texture pixels = withFreeable texture (\t -> c'updateTexture t pixels >> peek t)
