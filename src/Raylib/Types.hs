@@ -1298,8 +1298,8 @@ instance Storable Mesh where
     animNormals <- peekMaybeArray vertexCount animNormalsPtr
     boneIdsPtr <- (peekByteOff _p 80 :: IO (Ptr CUChar))
     boneIds <- (\m -> map fromIntegral <$> m) <$> peekMaybeArray (vertexCount * 4) boneIdsPtr
-    boneWeightsPtr <- (peekByteOff _p 88 :: IO (Ptr Float))
-    boneWeights <- peekMaybeArray (vertexCount * 4) boneWeightsPtr
+    boneWeightsPtr <- (peekByteOff _p 88 :: IO (Ptr CFloat))
+    boneWeights <- (map realToFrac <$>) <$> peekMaybeArray (vertexCount * 4) boneWeightsPtr
     vaoId <- fromIntegral <$> (peekByteOff _p 96 :: IO CUInt)
     vboIdPtr <- (peekByteOff _p 104 :: IO (Ptr CUInt))
     vboId <- (\m -> map fromIntegral <$> m) <$> peekMaybeArray 7 vboIdPtr
@@ -1317,7 +1317,7 @@ instance Storable Mesh where
     newMaybeArray animVertices >>= pokeByteOff _p 64
     newMaybeArray animNormals >>= pokeByteOff _p 72
     newMaybeArray (map fromIntegral <$> boneIds :: Maybe [CUChar]) >>= pokeByteOff _p 80
-    newMaybeArray boneWeights >>= pokeByteOff _p 88
+    newMaybeArray (map realToFrac <$> boneWeights :: Maybe [CFloat]) >>= pokeByteOff _p 88
     pokeByteOff _p 96 (fromIntegral vaoId :: CUInt)
     newMaybeArray (map fromIntegral <$> vboId :: Maybe [CUInt]) >>= pokeByteOff _p 104
     return ()
@@ -1344,7 +1344,7 @@ instance Freeable Mesh where
     freeMaybePtr $ castPtr animNormalsPtr
     boneIdsPtr <- (peekByteOff ptr 80 :: IO (Ptr CUChar))
     freeMaybePtr $ castPtr boneIdsPtr
-    boneWeightsPtr <- (peekByteOff ptr 88 :: IO (Ptr Float))
+    boneWeightsPtr <- (peekByteOff ptr 88 :: IO (Ptr CFloat))
     freeMaybePtr $ castPtr boneWeightsPtr
     vboIdPtr <- (peekByteOff ptr 104 :: IO (Ptr CUInt))
     c'free $ castPtr vboIdPtr
