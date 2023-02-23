@@ -14,22 +14,14 @@ maintainer:         Anut
 extra-doc-files:    CONTRIBUTING.md README.md ROADMAP.md
 extra-source-files:
   CHANGELOG.md
+  examples/**/*.obj
+  examples/**/*.mtl
   lib/*.c
   lib/*.h
   lib/rglfw.m
-  raylib/src/*.c
-  raylib/src/*.h
-  raylib/src/external/*.h
-  raylib/src/external/*.c
-  raylib/src/external/glfw/deps/*.c
-  raylib/src/external/glfw/deps/*.h
-  raylib/src/external/glfw/deps/glad/*.h
-  raylib/src/external/glfw/deps/mingw/*.h
-  raylib/src/external/glfw/deps/vs2008/*.h
-  raylib/src/external/glfw/include/GLFW/*.h
-  raylib/src/external/glfw/src/*.c
-  raylib/src/external/glfw/src/*.h
-  raylib/src/external/glfw/src/*.m
+  raylib/**/*.c
+  raylib/**/*.h
+  raylib/**/*.m
 
 flag detect-platform
   description:

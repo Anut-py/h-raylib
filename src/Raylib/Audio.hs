@@ -4,14 +4,13 @@
 module Raylib.Audio where
 
 import Foreign
-  ( FunPtr,
-    Ptr,
+  ( Ptr,
     Storable (peek, sizeOf),
     castPtr,
     toBool,
     withArrayLen,
   )
-import Foreign.C (CUChar, CUInt, withCString)
+import Foreign.C (CUChar, withCString)
 import Raylib.Internal (addAudioBuffer, addCtxData, unloadAudioBuffers, unloadCtxData)
 import Raylib.Native
   ( c'closeAudioDevice,
@@ -86,8 +85,6 @@ foreign import ccall safe "raylib.h InitAudioDevice"
 
 closeAudioDevice :: IO ()
 closeAudioDevice = unloadCtxData >> unloadAudioBuffers >> c'closeAudioDevice
-
-type AudioCallback = FunPtr (Ptr () -> CUInt -> IO ())
 
 isAudioDeviceReady :: IO Bool
 isAudioDeviceReady = toBool <$> c'isAudioDeviceReady

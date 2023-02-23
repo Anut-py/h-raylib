@@ -138,9 +138,6 @@ import Raylib.Native
     c'loadShader,
     c'loadShaderFromMemory,
     c'loadVrStereoConfig,
-    c'memAlloc,
-    c'memFree,
-    c'memRealloc,
     c'openURL,
     c'saveFileData,
     c'saveFileText,
@@ -473,10 +470,10 @@ getShaderLocation shader uniformName = fromIntegral <$> withFreeable shader (wit
 getShaderLocationAttrib :: Raylib.Types.Shader -> String -> IO Int
 getShaderLocationAttrib shader attribName = fromIntegral <$> withFreeable shader (withCString attribName . c'getShaderLocationAttrib)
 
-setShaderValue :: Raylib.Types.Shader -> Int -> Ptr () -> ShaderUniformDataType -> IO ()
+setShaderValue :: Raylib.Types.Shader -> Int -> Ptr () -> ShaderUniformDataType -> IO () -- TODO: improve
 setShaderValue shader locIndex value uniformType = withFreeable shader (\s -> c'setShaderValue s (fromIntegral locIndex) value (fromIntegral $ fromEnum uniformType))
 
-setShaderValueV :: Raylib.Types.Shader -> Int -> Ptr () -> ShaderUniformDataType -> Int -> IO ()
+setShaderValueV :: Raylib.Types.Shader -> Int -> Ptr () -> ShaderUniformDataType -> Int -> IO () -- TODO: improve
 setShaderValueV shader locIndex value uniformType count = withFreeable shader (\s -> c'setShaderValueV s (fromIntegral locIndex) value (fromIntegral $ fromEnum uniformType) (fromIntegral count))
 
 setShaderValueMatrix :: Raylib.Types.Shader -> Int -> Raylib.Types.Matrix -> IO ()
@@ -536,15 +533,6 @@ traceLog logLevel text = withCString text $ c'traceLog $ fromIntegral $ fromEnum
 setTraceLogLevel :: TraceLogLevel -> IO ()
 setTraceLogLevel = c'setTraceLogLevel . fromIntegral . fromEnum
 
-memAlloc :: (Storable a) => Int -> IO (Ptr a)
-memAlloc size = castPtr <$> c'memAlloc (fromIntegral size)
-
-memRealloc :: (Storable a, Storable b) => Ptr a -> Int -> IO (Ptr b)
-memRealloc ptr size = castPtr <$> c'memRealloc (castPtr ptr) (fromIntegral size)
-
-memFree :: (Storable a) => Ptr a -> IO ()
-memFree = c'memFree . castPtr
-
 openURL :: String -> IO ()
 openURL url = withCString url c'openURL
 
@@ -563,14 +551,6 @@ foreign import ccall safe "raylib.h SetLoadFileTextCallback"
 foreign import ccall safe "raylib.h SetSaveFileTextCallback"
   setSaveFileTextCallback ::
     SaveFileTextCallback -> IO ()
-
--- These functions use varargs so they can't be implemented through FFI
--- foreign import ccall safe "raylib.h SetTraceLogCallback"
---   SetTraceLogCallback ::
---     TraceLogCallback -> IO ()
--- foreign import ccall safe "raylib.h &SetTraceLogCallback"
---   p'SetTraceLogCallback ::
---     FunPtr (TraceLogCallback -> IO ())
 
 loadFileData :: String -> IO [Integer]
 loadFileData fileName =
