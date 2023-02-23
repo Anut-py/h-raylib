@@ -5,8 +5,10 @@ module Raylib.Models where
 import Control.Monad (forM_)
 import Foreign
   ( Ptr,
-    Storable (peek),
+    Storable (peek, poke),
+    castPtr,
     fromBool,
+    malloc,
     peekArray,
     toBool,
     withArray,
@@ -104,7 +106,8 @@ import Raylib.Types
     Vector3,
   )
 import Raylib.Util
-  ( pop,
+  ( c'free,
+    pop,
     popCArray,
     withFreeable,
   )
@@ -182,7 +185,10 @@ loadModel fileName = do
 
 loadModelFromMesh :: Raylib.Types.Mesh -> IO Raylib.Types.Model
 loadModelFromMesh mesh = do
-  model <- withFreeable mesh c'loadModelFromMesh >>= pop
+  meshPtr <- malloc
+  poke meshPtr mesh
+  model <- c'loadModelFromMesh meshPtr >>= pop
+  c'free $ castPtr meshPtr
   storeMaterialData $ model'materials model
   return model
 
