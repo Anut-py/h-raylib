@@ -1,6 +1,6 @@
 cabal-version:      2.4
 name:               h-raylib
-version:            4.5.2.0
+version:            4.5.3.0
 synopsis:           Raylib bindings for Haskell
 category:           graphics
 description:
@@ -11,11 +11,17 @@ license:            Apache-2.0
 license-file:       LICENSE
 author:             Anut
 maintainer:         Anut
-extra-doc-files:    CONTRIBUTING.md README.md ROADMAP.md
+extra-doc-files:
+  CONTRIBUTING.md
+  README.md
+  ROADMAP.md
+
 extra-source-files:
   CHANGELOG.md
-  examples/**/*.obj
+  examples/**/*.frag
   examples/**/*.mtl
+  examples/**/*.obj
+  examples/**/*.vert
   lib/*.c
   lib/*.h
   lib/rglfw.m
@@ -83,6 +89,11 @@ executable basic-images
   hs-source-dirs: examples/basic-images/src
   main-is:        Main.hs
 
+executable basic-shaders
+  import:         example-options
+  hs-source-dirs: examples/basic-shaders/src
+  main-is:        Main.hs
+
 executable basic-models
   import:         example-options
   hs-source-dirs: examples/basic-models/src
@@ -110,24 +121,30 @@ executable camera-ray-collision
 
 library
   exposed-modules:
-    Raylib.Audio
-    Raylib.Colors
     Raylib.Core
-    Raylib.Models
-    Raylib.Shapes
-    Raylib.Text
-    Raylib.Textures
+    Raylib.Core.Audio
+    Raylib.Core.Models
+    Raylib.Core.Shapes
+    Raylib.Core.Text
+    Raylib.Core.Textures
     Raylib.Types
+    Raylib.Util
+    Raylib.Util.Colors
 
   other-modules:
-    Raylib.Native
-    Raylib.Util
+    Raylib.ForeignUtil
     Raylib.Internal
+    Raylib.Native
 
-  build-depends:    base >=4.0 && <4.17.0
+  build-depends:
+    , base        >=4.0   && <4.17.0
+    , containers  >=0.6.0 && <0.6.7.0
+
   hs-source-dirs:   src
   default-language: Haskell2010
-  other-extensions: ForeignFunctionInterface, DeriveAnyClass
+  other-extensions:
+    DeriveAnyClass
+    ForeignFunctionInterface
 
   if (flag(platform-windows) || (flag(detect-platform) && os(windows)))
     if flag(mingw-cross)
@@ -147,7 +164,8 @@ library
         shell32
         gcc_eh
 
-    cc-options: -DPLATFORM_DESKTOP -D_ftelli64=ftello64 -D_fseeki64=fseeko64
+    cc-options:
+      -DPLATFORM_DESKTOP -D_ftelli64=ftello64 -D_fseeki64=fseeko64
 
   elif (flag(platform-linux) || (flag(detect-platform) && os(linux)))
     extra-libraries:
@@ -184,8 +202,8 @@ library
   if (flag(platform-mac) || (flag(detect-platform) && os(osx)))
     -- Use rgflw.m instead of .c on Mac to force objective-c
     c-sources:
-      lib/rl_bindings.c
       lib/rglfw.m
+      lib/rl_bindings.c
       raylib/src/raudio.c
       raylib/src/rcore.c
       raylib/src/rmodels.c
