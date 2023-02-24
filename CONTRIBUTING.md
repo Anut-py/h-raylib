@@ -12,7 +12,7 @@ You can use `run-all-examples.sh` to run all of the examples in one go.
 
 _This section only contains h-raylib specific information. For information about raylib in general, view the [raylib wiki](https://github.com/raysan5/raylib/wiki)._
 
-This project is split into 8 public modules. `Raylib.Types` contains all of raylib's types and low-level code to convert them to and from raw bytes. `Raylib.Colors` contains some colors defined by raylib. The other 6 public modules, `Core`, `Shapes`, `Textures`, `Text`, `Models`, and `Audio`, correspond to their respective raylib modules.
+This project is split into 8 public modules. `Raylib.Types` contains all of raylib's types and low-level code to convert them to and from raw bytes. `Raylib.Util` contains miscellaneous utility functions. `Raylib.Util.Colors` contains some colors defined by raylib. The other 6 public modules, `Raylib.Core`, `Raylib.Core.Shapes`, `Raylib.Core.Textures`, `Raylib.Core.Text`, `Raylib.Core.Models`, and `Raylib.Core.Audio`, correspond to their respective raylib modules.
 
 The functions in h-raylib are an almost one-to-one mapping to their corresponding raylib functions. The types are, in some cases, slightly modified if it is possible to utilize Haskell features.
 
@@ -26,13 +26,17 @@ The enumerations section contains Haskell sum types that are instances of `Enum`
 
 The typeclasses section contains Haskell typeclasses that are derived by some of the types in the structures section.
 
-The structures section contains Haskell types that correspond to each of raylib's `structs`. Each field in these types is named `typeName'fieldName` (e.g. the C struct `Vector2`'s `x` field is called `vector2'x` in Haskell). These structs also all derive the typeclass `Freeable` (declared in the internal `Raylib.Util` module). This typeclass allows types to describe how to properly free all the data associated with a pointer to that type. For example, `Image`'s implementation of `Freeable` also frees the pointer stored in the `Image.data` field in C. Finally, all of these types derive `Storable`, obviously, to convert them to and from pointers.
+The structures section contains Haskell types that correspond to each of raylib's `structs`. Each field in these types is named `typeName'fieldName` (e.g. the C struct `Vector2`'s `x` field is called `vector2'x` in Haskell). These structs also all derive the typeclass `Freeable` (declared in the internal `Raylib.ForeignUtil` module). This typeclass allows types to describe how to properly free all the data associated with a pointer to that type. For example, `Image`'s implementation of `Freeable` also frees the pointer stored in the `Image.data` field in C. Finally, all of these types derive `Storable`, obviously, to convert them to and from pointers.
 
 The callbacks section contains `FunPtr` types that are passed to some functions. _NOTE: These callbacks are very unlikely to be used, so they may be removed in the future._
 
-### Raylib.Colors
+### Raylib.Util
 
-`Raylib.Colors` is very simple: it declares 26 colors defined in `raylib.h`, namely `lightGray`, `gray`, `darkGray`, `yellow`, `gold`, `orange`, `pink`, `red`, `maroon`, `green`, `lime`, `darkGreen`, `skyBlue`, `blue`, `darkBlue`, `purple`, `violet`, `darkPurple`, `beige`, `brown`, `darkBrown`, `white`, `black`, `blank`, `magenta`, and `rayWhite`.
+`Raylib.Util` contains some functions that may be useful for an h-raylib application. These functions are Haskell-only; i.e. they are not connected to C in any way.
+
+### Raylib.Util.Colors
+
+`Raylib.Util.Colors` is very simple: it declares 26 colors defined in `raylib.h`, namely `lightGray`, `gray`, `darkGray`, `yellow`, `gold`, `orange`, `pink`, `red`, `maroon`, `green`, `lime`, `darkGreen`, `skyBlue`, `blue`, `darkBlue`, `purple`, `violet`, `darkPurple`, `beige`, `brown`, `darkBrown`, `white`, `black`, `blank`, `magenta`, and `rayWhite`.
 
 ### The other 6 modules
 
@@ -40,7 +44,7 @@ These modules contain only functions. Each of these functions corresponds to a C
 
 ### Private modules
 
-h-raylib has 3 modules that are not exposed for external use: `Raylib.Native`, `Raylib.Internal`, and `Raylib.Util`.
+h-raylib has 3 modules that are not exposed for external use: `Raylib.Native`, `Raylib.Internal`, and `Raylib.ForeignUtil`.
 
 #### Raylib.Native
 
@@ -50,9 +54,9 @@ h-raylib has 3 modules that are not exposed for external use: `Raylib.Native`, `
 
 `Raylib.Internal` contains some functions used for automatic memory management. The automatic memory management flow is summarized in the "Memory management" section.
 
-#### Raylib.Util
+#### Raylib.ForeignUtil
 
-`Raylib.Util` contains miscellaneous utility functions for marshalling values to/from C. The most notable thing in this module is the `Freeable` typeclass.
+`Raylib.ForeignUtil` contains miscellaneous utility functions for marshalling values to/from C. The most notable thing in this module is the `Freeable` typeclass.
 
 The `Freeable` typeclass contains two methods, `rlFreeDependents` and `rlFree`. `rlFree` receives a pointer and frees all of the data associated with it, including the pointer itself. `rlFreeDependents` only frees the data "dependent" on the pointer, which usually means dynamic C arrays, i.e. pointers.
 
