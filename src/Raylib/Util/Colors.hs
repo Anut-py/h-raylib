@@ -1,5 +1,5 @@
 {-# OPTIONS -Wall #-}
-module Raylib.Colors
+module Raylib.Util.Colors
   ( lightGray,
     gray,
     darkGray,

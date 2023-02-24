@@ -9,7 +9,6 @@
 
 void UnloadAudioBuffer_(rAudioBuffer *buffer) {
     UnloadAudioBuffer(buffer);
-    TRACELOG(LOG_INFO, "AUDIO: h-raylib successfully auto-unloaded buffer");
 }
 
 void UnloadMusicStreamData(int ctxType, void *ctxData) {
@@ -18,5 +17,4 @@ void UnloadMusicStreamData(int ctxType, void *ctxData) {
     music.ctxType = ctxType;
 
     UnloadMusicStream(music);
-    TRACELOG(LOG_INFO, "AUDIO: h-raylib successfully auto-unloaded music stream");
 }

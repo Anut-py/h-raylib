@@ -1,7 +1,7 @@
 {-# OPTIONS -Wall #-}
 {-# LANGUAGE ForeignFunctionInterface #-}
 
-module Raylib.Audio where
+module Raylib.Core.Audio where
 
 import Foreign
   ( Ptr,
@@ -73,7 +73,7 @@ import Raylib.Types
     Sound,
     Wave (wave'channels, wave'frameCount),
   )
-import Raylib.Util
+import Raylib.ForeignUtil
   ( pop,
     popCArray,
     withFreeable,

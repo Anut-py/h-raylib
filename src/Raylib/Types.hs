@@ -37,7 +37,7 @@ import Foreign.C
   )
 import Foreign.C.String (castCCharToChar)
 import Raylib.Internal (c'rlGetShaderIdDefault, getPixelDataSize)
-import Raylib.Util (Freeable (rlFreeDependents), c'free, freeMaybePtr, newMaybeArray, p'free, peekMaybeArray, peekStaticArray, peekStaticArrayOff, pokeMaybeOff, pokeStaticArray, pokeStaticArrayOff, rightPad, rlFreeArray, rlFreeMaybeArray)
+import Raylib.ForeignUtil (Freeable (rlFreeDependents), c'free, freeMaybePtr, newMaybeArray, p'free, peekMaybeArray, peekStaticArray, peekStaticArrayOff, pokeMaybeOff, pokeStaticArray, pokeStaticArrayOff, rightPad, rlFreeArray, rlFreeMaybeArray)
 
 ------------------------------------------------
 -- Raylib enumerations -------------------------
@@ -538,16 +538,124 @@ data ShaderLocationIndex
   deriving (Eq, Show, Enum)
 
 data ShaderUniformDataType
-  = ShaderUniformFloat
-  | ShaderUniformVec2
-  | ShaderUniformVec3
-  | ShaderUniformVec4
-  | ShaderUniformInt
-  | ShaderUniformIvec2
-  | ShaderUniformIvec3
-  | ShaderUniformIvec4
-  | ShaderUniformSampler2d
+  = ShaderUniformFloatType
+  | ShaderUniformVec2Type
+  | ShaderUniformVec3Type
+  | ShaderUniformVec4Type
+  | ShaderUniformIntType
+  | ShaderUniformIVec2Type
+  | ShaderUniformIVec3Type
+  | ShaderUniformIVec4Type
+  | ShaderUniformSampler2DType
   deriving (Eq, Show, Enum)
+
+data ShaderUniformData
+  = ShaderUniformFloat Float
+  | ShaderUniformVec2 Vector2
+  | ShaderUniformVec3 Vector3
+  | ShaderUniformVec4 Vector4
+  | ShaderUniformInt Int
+  | ShaderUniformIVec2 (Int, Int)
+  | ShaderUniformIVec3 (Int, Int, Int)
+  | ShaderUniformIVec4 (Int, Int, Int, Int)
+  | ShaderUniformSampler2D Integer -- I believe this takes a texture ID as the argument
+  deriving (Eq, Show)
+
+data ShaderUniformDataV
+  = ShaderUniformFloatV [Float]
+  | ShaderUniformVec2V [Vector2]
+  | ShaderUniformVec3V [Vector3]
+  | ShaderUniformVec4V [Vector4]
+  | ShaderUniformIntV [Int]
+  | ShaderUniformIVec2V [(Int, Int)]
+  | ShaderUniformIVec3V [(Int, Int, Int)]
+  | ShaderUniformIVec4V [(Int, Int, Int, Int)]
+  | ShaderUniformSampler2DV [Integer]
+  deriving (Eq, Show)
+
+-- I don't know if there's a cleaner way to do this
+unpackShaderUniformData :: ShaderUniformData -> IO (ShaderUniformDataType, Ptr ())
+unpackShaderUniformData x = do
+  case x of
+    (ShaderUniformFloat f) ->
+      do
+        ptr <- malloc
+        poke ptr (realToFrac f :: CFloat)
+        return (ShaderUniformFloatType, castPtr ptr)
+    (ShaderUniformVec2 v) ->
+      do
+        ptr <- newArray (map realToFrac (asList v) :: [CFloat])
+        return (ShaderUniformVec2Type, castPtr ptr)
+    (ShaderUniformVec3 v) ->
+      do
+        ptr <- newArray (map realToFrac (asList v) :: [CFloat])
+        return (ShaderUniformVec3Type, castPtr ptr)
+    (ShaderUniformVec4 v) ->
+      do
+        ptr <- newArray (map realToFrac (asList v) :: [CFloat])
+        return (ShaderUniformVec4Type, castPtr ptr)
+    (ShaderUniformInt i) ->
+      do
+        ptr <- malloc
+        poke ptr (fromIntegral i :: CInt)
+        return (ShaderUniformIntType, castPtr ptr)
+    (ShaderUniformIVec2 (i1, i2)) ->
+      do
+        ptr <- newArray (map fromIntegral [i1, i2] :: [CInt])
+        return (ShaderUniformIVec2Type, castPtr ptr)
+    (ShaderUniformIVec3 (i1, i2, i3)) ->
+      do
+        ptr <- newArray (map fromIntegral [i1, i2, i3] :: [CInt])
+        return (ShaderUniformIVec3Type, castPtr ptr)
+    (ShaderUniformIVec4 (i1, i2, i3, i4)) ->
+      do
+        ptr <- newArray (map fromIntegral [i1, i2, i3, i4] :: [CInt])
+        return (ShaderUniformIVec4Type, castPtr ptr)
+    (ShaderUniformSampler2D sId) ->
+      do
+        ptr <- malloc
+        poke ptr (fromIntegral sId :: CInt)
+        return (ShaderUniformSampler2DType, castPtr ptr)
+
+unpackShaderUniformDataV :: ShaderUniformDataV -> IO (ShaderUniformDataType, Ptr (), Int)
+unpackShaderUniformDataV xs = do
+  case xs of
+    (ShaderUniformFloatV fs) ->
+      do
+        ptr <- newArray (map realToFrac fs :: [CFloat])
+        return (ShaderUniformFloatType, castPtr ptr, length fs)
+    (ShaderUniformVec2V vs) ->
+      do
+        ptr <- newArray (map realToFrac $ concatMap asList vs :: [CFloat])
+        return (ShaderUniformVec2Type, castPtr ptr, length vs)
+    (ShaderUniformVec3V vs) ->
+      do
+        ptr <- newArray (map realToFrac $ concatMap asList vs :: [CFloat])
+        return (ShaderUniformVec3Type, castPtr ptr, length vs)
+    (ShaderUniformVec4V vs) ->
+      do
+        ptr <- newArray (map realToFrac $ concatMap asList vs :: [CFloat])
+        return (ShaderUniformVec4Type, castPtr ptr, length vs)
+    (ShaderUniformIntV is) ->
+      do
+        ptr <- newArray (map fromIntegral is :: [CInt])
+        return (ShaderUniformIntType, castPtr ptr, length is)
+    (ShaderUniformIVec2V is) ->
+      do
+        ptr <- newArray (map fromIntegral $ concatMap (\(x, y) -> [x, y]) is :: [CInt])
+        return (ShaderUniformIVec2Type, castPtr ptr, length is)
+    (ShaderUniformIVec3V is) ->
+      do
+        ptr <- newArray (map fromIntegral $ concatMap (\(x, y, z) -> [x, y, z]) is :: [CInt])
+        return (ShaderUniformIVec3Type, castPtr ptr, length is)
+    (ShaderUniformIVec4V is) ->
+      do
+        ptr <- newArray (map fromIntegral $ concatMap (\(x, y, z, w) -> [x, y, z, w]) is :: [CInt])
+        return (ShaderUniformIVec4Type, castPtr ptr, length is)
+    (ShaderUniformSampler2DV sIds) ->
+      do
+        ptr <- newArray (map fromIntegral sIds :: [CInt])
+        return (ShaderUniformSampler2DType, castPtr ptr, length sIds)
 
 -- I genuinely have no idea where this is used.
 data ShaderAttributeDataType
@@ -773,6 +881,9 @@ instance Storable MusicContextType where
 ------------------------------------------------
 
 class Vector a where
+  -- List representation of the vector
+  asList :: a -> [Float]
+
   -- Vector-vector addition
   (|+|) :: a -> a -> a
 
@@ -827,6 +938,8 @@ instance Storable Vector2 where
     return ()
 
 instance Vector Vector2 where
+  asList (Vector2 x y) = [x, y]
+
   (Vector2 x1 y1) |+| (Vector2 x2 y2) = Vector2 (x1 + x2) (y1 + y2)
   (Vector2 x y) |*| num = Vector2 (x * num) (y * num)
 
@@ -861,6 +974,8 @@ cross :: Vector3 -> Vector3 -> Vector3
 (Vector3 x1 y1 z1) `cross` (Vector3 x2 y2 z2) = Vector3 (y1 * z2 - z1 * y2) (z1 * x2 - x1 * z2) (x1 * y2 - y1 * x2)
 
 instance Vector Vector3 where
+  asList (Vector3 x y z) = [x, y, z]
+
   (Vector3 x1 y1 z1) |+| (Vector3 x2 y2 z2) = Vector3 (x1 + x2) (y1 + y2) (z1 + z2)
   (Vector3 x y z) |*| num = Vector3 (x * num) (y * num) (z * num)
 
@@ -894,6 +1009,8 @@ instance Storable Vector4 where
     return ()
 
 instance Vector Vector4 where
+  asList (Vector4 x y z w) = [x, y, z, w]
+
   (Vector4 x1 y1 z1 w1) |+| (Vector4 x2 y2 z2 w2) = Vector4 (x1 + x2) (y1 + y2) (z1 + z2) (w1 + w2)
   (Vector4 x y z w) |*| num = Vector4 (x * num) (y * num) (z * num) (w * num)
 
@@ -963,6 +1080,9 @@ instance Storable Matrix where
     pokeByteOff _p 56 (realToFrac m11 :: CFloat)
     pokeByteOff _p 60 (realToFrac m15 :: CFloat)
     return ()
+
+vectorToColor :: Vector4 -> Color
+vectorToColor (Vector4 x y z w) = Color (round $ x * 255) (round $ y * 255) (round $ z * 255) (round $ w * 255)
 
 data Color = Color
   { color'r :: Word8,
@@ -1474,8 +1594,6 @@ instance Storable BoneInfo where
 
 data Model = Model
   { model'transform :: Matrix,
-    model'meshCount :: Int,
-    model'materialCount :: Int,
     model'meshes :: [Mesh],
     model'materials :: [Material],
     model'meshMaterial :: [Int],
@@ -1503,11 +1621,11 @@ instance Storable Model where
     bones <- peekMaybeArray boneCount bonesPtr
     bindPosePtr <- (peekByteOff _p 112 :: IO (Ptr Transform))
     bindPose <- peekMaybeArray boneCount bindPosePtr
-    return $ Model transform meshCount materialCount meshes materials meshMaterial boneCount bones bindPose
-  poke _p (Model transform meshCount materialCount meshes materials meshMaterial boneCount bones bindPose) = do
+    return $ Model transform meshes materials meshMaterial boneCount bones bindPose
+  poke _p (Model transform meshes materials meshMaterial boneCount bones bindPose) = do
     pokeByteOff _p 0 transform
-    pokeByteOff _p 64 (fromIntegral meshCount :: CInt)
-    pokeByteOff _p 68 (fromIntegral materialCount :: CInt)
+    pokeByteOff _p 64 (fromIntegral $ length meshes :: CInt)
+    pokeByteOff _p 68 (fromIntegral $ length materials :: CInt)
     pokeByteOff _p 72 =<< newArray meshes
     pokeByteOff _p 80 =<< newArray materials
     pokeByteOff _p 88 =<< newArray (map fromIntegral meshMaterial :: [CInt])

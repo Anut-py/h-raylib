@@ -2,11 +2,11 @@
 
 module Main where
 
-import Control.Monad (unless)
-import Raylib.Core (changeDirectory, closeWindow, getApplicationDirectory, initWindow, setTargetFPS, beginDrawing, endDrawing, windowShouldClose, clearBackground, beginMode3D, endMode3D, updateCamera, disableCursor)
-import Raylib.Models (genMeshCube, loadModelFromMesh, drawModel, loadModel, drawGrid)
-import Raylib.Types (Model, Camera3D (Camera3D), Vector3 (Vector3), CameraProjection (CameraPerspective), Camera, CameraMode (CameraModeFirstPerson))
-import Raylib.Colors (white, orange)
+import Raylib.Core (beginDrawing, beginMode3D, changeDirectory, clearBackground, closeWindow, disableCursor, endDrawing, endMode3D, getApplicationDirectory, initWindow, setTargetFPS, updateCamera)
+import Raylib.Core.Models (drawGrid, drawModel, genMeshCube, loadModel, loadModelFromMesh)
+import Raylib.Types (Camera3D (Camera3D), CameraMode (CameraModeFirstPerson), CameraProjection (CameraPerspective), Vector3 (Vector3))
+import Raylib.Util (whileWindowOpen_)
+import Raylib.Util.Colors (orange, white)
 
 modelPath :: String
 modelPath = "../../../../../../../../../examples/basic-models/assets/Model.obj"
@@ -24,25 +24,23 @@ main = do
 
   let camera = Camera3D (Vector3 3 2 3) (Vector3 0 0 0) (Vector3 0 1 0) 70 CameraPerspective
 
-  gameLoop cubeModel customModel camera
+  whileWindowOpen_
+    ( \c -> do
+        beginDrawing
+
+        clearBackground white
+        beginMode3D c
+
+        drawGrid 20 2.0
+        drawModel cubeModel (Vector3 0 1.5 0) 1 orange
+        drawModel customModel (Vector3 (-5) 1 0) 1 white
+
+        endMode3D
+
+        endDrawing
+
+        updateCamera c CameraModeFirstPerson
+    )
+    camera
 
   closeWindow
-
-gameLoop :: Model -> Model -> Camera -> IO ()
-gameLoop cubeModel customModel camera = do
-  beginDrawing
-
-  clearBackground white
-  beginMode3D camera
-
-  drawGrid 20 2.0
-  drawModel cubeModel (Vector3 0 1.5 0) 1 orange
-  drawModel customModel (Vector3 (-5) 1 0) 1 white
-
-  endMode3D
-
-  endDrawing
-
-  newCamera <- updateCamera camera CameraModeFirstPerson
-  shouldClose <- windowShouldClose
-  unless shouldClose $ gameLoop cubeModel customModel newCamera

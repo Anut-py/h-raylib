@@ -1,6 +1,6 @@
 {-# OPTIONS -Wall #-}
 
-module Raylib.Shapes where
+module Raylib.Core.Shapes where
 
 import Data.List (genericLength)
 import Foreign (Storable (peek), toBool, withArray)
@@ -55,7 +55,7 @@ import Raylib.Native
     c'setShapesTexture,
   )
 import Raylib.Types (Color, Rectangle, Texture, Vector2 (Vector2))
-import Raylib.Util (pop, withFreeable)
+import Raylib.ForeignUtil (pop, withFreeable)
 
 setShapesTexture :: Raylib.Types.Texture -> Raylib.Types.Rectangle -> IO ()
 setShapesTexture tex source = withFreeable tex (withFreeable source . c'setShapesTexture)

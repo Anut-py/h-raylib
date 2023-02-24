@@ -2,7 +2,7 @@
 
 {-# OPTIONS -Wall #-}
 
-module Raylib.Textures where
+module Raylib.Core.Textures where
 
 import Control.Monad ((<=<))
 import Foreign
@@ -128,7 +128,7 @@ import Raylib.Types
     Vector3,
     Vector4,
   )
-import Raylib.Util
+import Raylib.ForeignUtil
   ( pop,
     popCArray,
     withFreeable,

@@ -2,7 +2,7 @@
 
 {-# OPTIONS -Wall #-}
 
-module Raylib.Text where
+module Raylib.Core.Text where
 
 import Foreign
   ( Storable (peek, sizeOf),
@@ -54,7 +54,7 @@ import Raylib.Types
     Texture (texture'id),
     Vector2,
   )
-import Raylib.Util
+import Raylib.ForeignUtil
   ( pop,
     popCArray,
     popCString,

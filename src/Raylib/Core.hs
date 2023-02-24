@@ -3,6 +3,8 @@
 
 module Raylib.Core where
 
+import Data.IORef (modifyIORef', readIORef)
+import qualified Data.Map as Map
 import Foreign
   ( Ptr,
     Storable (peek, sizeOf),
@@ -20,7 +22,7 @@ import Foreign.C
     peekCString,
     withCString,
   )
-import Raylib.Internal (addShaderId, unloadFrameBuffers, unloadShaders, unloadTextures, unloadVaoIds, unloadVboIds)
+import Raylib.Internal (addShaderId, shaderLocations, unloadFrameBuffers, unloadShaders, unloadTextures, unloadVaoIds, unloadVboIds)
 import Raylib.Native
   ( c'beginBlendMode,
     c'beginMode2D,
@@ -195,15 +197,18 @@ import Raylib.Types
     SaveFileDataCallback,
     SaveFileTextCallback,
     Shader (shader'id),
-    ShaderUniformDataType,
+    ShaderUniformData,
+    ShaderUniformDataV,
     Texture,
     TraceLogLevel,
     Vector2,
     Vector3,
     VrDeviceInfo,
     VrStereoConfig,
+    unpackShaderUniformData,
+    unpackShaderUniformDataV,
   )
-import Raylib.Util (configsToBitflag, pop, popCArray, popCString, withFreeable, withMaybeCString)
+import Raylib.ForeignUtil (c'free, configsToBitflag, pop, popCArray, popCString, withFreeable, withMaybeCString)
 
 initWindow :: Int -> Int -> String -> IO ()
 initWindow width height title = withCString title $ c'initWindow (fromIntegral width) (fromIntegral height)
@@ -465,16 +470,50 @@ isShaderReady :: Shader -> IO Bool
 isShaderReady shader = toBool <$> withFreeable shader c'isShaderReady
 
 getShaderLocation :: Raylib.Types.Shader -> String -> IO Int
-getShaderLocation shader uniformName = fromIntegral <$> withFreeable shader (withCString uniformName . c'getShaderLocation)
+getShaderLocation shader uniformName = do
+  let sId = shader'id shader
+  locs <- readIORef shaderLocations
+  -- TODO: Clean this up if possible
+  case Map.lookup sId locs of
+    Nothing -> do
+      idx <- locIdx
+      let newMap = Map.fromList [(uniformName, idx)]
+      modifyIORef' shaderLocations (Map.insert sId newMap)
+      return idx
+    Just m -> case Map.lookup uniformName m of
+      Nothing -> do
+        idx <- locIdx
+        let newMap = Map.insert uniformName idx m
+        modifyIORef' shaderLocations (Map.insert sId newMap)
+        return idx
+      Just val -> return val
+  where
+    locIdx = fromIntegral <$> withFreeable shader (withCString uniformName . c'getShaderLocation)
 
 getShaderLocationAttrib :: Raylib.Types.Shader -> String -> IO Int
 getShaderLocationAttrib shader attribName = fromIntegral <$> withFreeable shader (withCString attribName . c'getShaderLocationAttrib)
 
-setShaderValue :: Raylib.Types.Shader -> Int -> Ptr () -> ShaderUniformDataType -> IO () -- TODO: improve
-setShaderValue shader locIndex value uniformType = withFreeable shader (\s -> c'setShaderValue s (fromIntegral locIndex) value (fromIntegral $ fromEnum uniformType))
+setShaderValue :: Shader -> String -> ShaderUniformData -> IO ()
+setShaderValue shader uniformName value = do
+  idx <- getShaderLocation shader uniformName
+  nativeSetShaderValue shader idx value
 
-setShaderValueV :: Raylib.Types.Shader -> Int -> Ptr () -> ShaderUniformDataType -> Int -> IO () -- TODO: improve
-setShaderValueV shader locIndex value uniformType count = withFreeable shader (\s -> c'setShaderValueV s (fromIntegral locIndex) value (fromIntegral $ fromEnum uniformType) (fromIntegral count))
+setShaderValueV :: Shader -> String -> ShaderUniformDataV -> IO ()
+setShaderValueV shader uniformName values = do
+  idx <- getShaderLocation shader uniformName
+  nativeSetShaderValueV shader idx values
+
+nativeSetShaderValue :: Raylib.Types.Shader -> Int -> ShaderUniformData -> IO ()
+nativeSetShaderValue shader locIndex value = do
+  (uniformType, ptr) <- unpackShaderUniformData value
+  withFreeable shader (\s -> c'setShaderValue s (fromIntegral locIndex) ptr (fromIntegral $ fromEnum uniformType))
+  c'free $ castPtr ptr
+
+nativeSetShaderValueV :: Raylib.Types.Shader -> Int -> ShaderUniformDataV -> IO ()
+nativeSetShaderValueV shader locIndex values = do
+  (uniformType, ptr, l) <- unpackShaderUniformDataV values
+  withFreeable shader (\s -> c'setShaderValueV s (fromIntegral locIndex) ptr (fromIntegral $ fromEnum uniformType) (fromIntegral l))
+  c'free $ castPtr ptr
 
 setShaderValueMatrix :: Raylib.Types.Shader -> Int -> Raylib.Types.Matrix -> IO ()
 setShaderValueMatrix shader locIndex mat = withFreeable shader (\s -> withFreeable mat (c'setShaderValueMatrix s (fromIntegral locIndex)))

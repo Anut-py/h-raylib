@@ -2,12 +2,11 @@
 
 module Main where
 
-import Control.Monad (unless)
-import Raylib.Core (changeDirectory, closeWindow, getApplicationDirectory, initWindow, setTargetFPS, beginDrawing, endDrawing, windowShouldClose, clearBackground)
-import Raylib.Types (Music)
-import Raylib.Colors (rayWhite, lightGray)
-import Raylib.Audio (loadMusicStream, playMusicStream, initAudioDevice, closeAudioDevice, updateMusicStream)
-import Raylib.Text (drawText)
+import Raylib.Core (beginDrawing, changeDirectory, clearBackground, closeWindow, endDrawing, getApplicationDirectory, initWindow, setTargetFPS)
+import Raylib.Core.Audio (closeAudioDevice, initAudioDevice, loadMusicStream, playMusicStream, updateMusicStream)
+import Raylib.Core.Text (drawText)
+import Raylib.Util (whileWindowOpen0)
+import Raylib.Util.Colors (lightGray, rayWhite)
 
 musicPath :: String
 musicPath = "../../../../../../../../../examples/basic-audio/assets/mini1111.xm"
@@ -23,20 +22,17 @@ main = do
   music <- loadMusicStream musicPath
   playMusicStream music
 
-  gameLoop music
+  whileWindowOpen0
+    ( do
+        beginDrawing
+
+        clearBackground rayWhite
+        drawText "You should hear music playing!" 20 20 20 lightGray
+
+        endDrawing
+
+        updateMusicStream music
+    )
 
   closeAudioDevice
   closeWindow
-
-gameLoop :: Music -> IO ()
-gameLoop music = do
-  beginDrawing
-
-  clearBackground rayWhite
-  drawText "You should hear music playing!" 20 20 20 lightGray
-
-  endDrawing
-
-  updateMusicStream music
-  shouldClose <- windowShouldClose
-  unless shouldClose $ gameLoop music

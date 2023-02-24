@@ -1,6 +1,6 @@
 {-# OPTIONS -Wall #-}
 
-module Raylib.Models where
+module Raylib.Core.Models where
 
 import Control.Monad (forM_)
 import Foreign
@@ -105,7 +105,7 @@ import Raylib.Types
     Vector2,
     Vector3,
   )
-import Raylib.Util
+import Raylib.ForeignUtil
   ( c'free,
     pop,
     popCArray,
