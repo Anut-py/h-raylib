@@ -1,5 +1,12 @@
 # h-raylib changelog
 
+## Version 4.5.3.0
+_24 February, 2023_
+
+-  **BREAKING CHANGE**: Restructured project; the main modules are moved into `Raylib/Core` and `Raylib.Colors` is now `Raylib.Util.Colors`
+- Changed `setShaderValue` and `setShaderValueV` to consume Haskell values rather than `Ptr`s
+- Added the `Raylib.Util` module for utility functions
+
 ## Version 4.5.2.0
 _21 February, 2023_
 
