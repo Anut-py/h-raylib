@@ -12,7 +12,7 @@ You can use `run-all-examples.sh` to run all of the examples in one go.
 
 _This section only contains h-raylib specific information. For information about raylib in general, view the [raylib wiki](https://github.com/raysan5/raylib/wiki)._
 
-This project is split into 8 public modules. `Raylib.Types` contains all of raylib's types and low-level code to convert them to and from raw bytes. `Raylib.Util` contains miscellaneous utility functions. `Raylib.Util.Colors` contains some colors defined by raylib. The other 6 public modules, `Raylib.Core`, `Raylib.Core.Shapes`, `Raylib.Core.Textures`, `Raylib.Core.Text`, `Raylib.Core.Models`, and `Raylib.Core.Audio`, correspond to their respective raylib modules.
+This project is split into 9 public modules. `Raylib.Types` contains all of raylib's types and low-level code to convert them to and from raw bytes. `Raylib.Util` contains miscellaneous utility functions. `Raylib.Util.Colors` contains some colors defined by raylib. The other 6 public modules, `Raylib.Core`, `Raylib.Core.Shapes`, `Raylib.Core.Textures`, `Raylib.Core.Text`, `Raylib.Core.Models`, and `Raylib.Core.Audio`, correspond to their respective raylib modules.
 
 The functions in h-raylib are an almost one-to-one mapping to their corresponding raylib functions. The types are, in some cases, slightly modified if it is possible to utilize Haskell features.
 
