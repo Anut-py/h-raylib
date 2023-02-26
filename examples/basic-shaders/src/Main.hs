@@ -19,9 +19,9 @@ import Raylib.Core
     loadShader,
     setShaderValue,
     setTargetFPS,
-    updateCamera,
+    updateCamera
   )
-import Raylib.Core.Models (drawModel, drawSphere, genMeshCube, loadModelFromMesh)
+import Raylib.Core.Models (drawModel, genMeshCube, loadModelFromMesh, genMeshSphere, genMeshPlane, drawSphereWires)
 import Raylib.Core.Text (drawText)
 import Raylib.Types
   ( Camera3D (Camera3D, camera3D'position),
@@ -35,22 +35,23 @@ import Raylib.Types
       ),
     Vector3 (Vector3),
     Vector4 (Vector4, vector4'w),
-    vectorToColor,
+    vectorToColor
   )
 import Raylib.Util (whileWindowOpen_, setMaterialShader)
-import Raylib.Util.Colors (black, orange, white)
+import Raylib.Util.Colors (black, orange, white, blue, lightGray)
+import Numeric (showFFloat)
 
 assetsPath :: String
 assetsPath = "../../../../../../../../../examples/basic-shaders/assets/"
 
 main :: IO ()
 main = do
-  initWindow 1300 800 "raylib [core] example - basic shaders"
+  initWindow 1300 800 "raylib [shaders] example - basic shaders"
   setTargetFPS 60
   disableCursor
   _ <- changeDirectory =<< getApplicationDirectory
 
-  let camera = Camera3D (Vector3 1 2 3) (Vector3 1 0 1) (Vector3 0 1 0) 45 CameraPerspective
+  let camera = Camera3D (Vector3 1 3 3) (Vector3 1 0 1) (Vector3 0 1 0) 45 CameraPerspective
 
   shader <- loadShader (Just $ assetsPath ++ "lighting.vert") (Just $ assetsPath ++ "lighting.frag")
 
@@ -72,6 +73,14 @@ main = do
   cubeModel' <- loadModelFromMesh cubeMesh
   let cubeModel = setMaterialShader cubeModel' 0 shader
 
+  sphereMesh <- genMeshSphere 0.5 32 32
+  sphereModel' <- loadModelFromMesh sphereMesh
+  let sphereModel = setMaterialShader sphereModel' 0 shader
+
+  planeMesh <- genMeshPlane 100 100 20 20
+  planeModel' <- loadModelFromMesh planeMesh
+  let planeModel = setMaterialShader planeModel' 0 shader
+
   whileWindowOpen_
     ( \(c, ls, ss) -> do
         beginDrawing
@@ -79,8 +88,10 @@ main = do
 
         beginMode3D c
 
-        drawModel cubeModel (Vector3 0 0 0) 1 orange
-        drawSphere pointLightPosition 0.25 $ vectorToColor (pointLightColor {vector4'w = ls / 3.0})
+        drawModel cubeModel (Vector3 0 1 0) 1 orange
+        drawModel sphereModel (Vector3 2 0.5 2) 1 blue
+        drawModel planeModel (Vector3 0 0 0) 1 lightGray
+        drawSphereWires pointLightPosition 0.25 12 12 $ vectorToColor (pointLightColor {vector4'w = ls / 3})
 
         endMode3D
 
@@ -108,10 +119,10 @@ main = do
         when (uDown || jDown) $ setShaderValue shader "specularStrength" (ShaderUniformFloat newSpecularStrength)
 
         drawText "Press the Y and H keys to increase and decrease the diffuse strength." 10 10 20 white
-        drawText ("Current diffuse strength: " ++ take 4 (show newLightStrength)) 10 40 20 white
+        drawText ("Current diffuse strength: " ++ showFFloat (Just 2) newLightStrength "") 10 40 20 white
 
         drawText "Press the U and J keys to increase and decrease the specular strength." 10 80 20 white
-        drawText ("Current specular strength: " ++ take 4 (show newSpecularStrength)) 10 110 20 white
+        drawText ("Current specular strength: " ++ showFFloat (Just 2) newSpecularStrength "") 10 110 20 white
 
         endDrawing
 

@@ -21,7 +21,7 @@ uniform sampler2D texture0;
 
 void main()
 {
-    vec4 texColor = texture(texture0, fragTexCoord);
+    vec4 objectColor = texture(texture0, fragTexCoord) * colDiffuse * fragColor;
     
     // Ambient lighting
     vec3 ambient = (ambientStrength * ambientLightColor).xyz;
@@ -38,5 +38,5 @@ void main()
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), 16);
     vec3 specular = specularStrength * spec * pointLightColor.xyz;
 
-    finalColor = vec4(specular + diffuse + ambient, 1.0) * texColor * colDiffuse * fragColor;
+    finalColor = vec4(specular + diffuse + ambient, 1.0) * objectColor;
 }
