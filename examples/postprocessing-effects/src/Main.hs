@@ -36,6 +36,7 @@ main = do
   let shaders = [("None", defaultShader), ("Grayscale", grayscaleShader), ("Blur", blurShader), ("Pixelate", pixelateShader), ("Bloom", bloomShader)]
 
   setShaderValue blurShader "renderSize" (ShaderUniformVec2 (Vector2 (fromIntegral width) (fromIntegral height)))
+  setShaderValue pixelateShader "renderSize" (ShaderUniformVec2 (Vector2 (fromIntegral width) (fromIntegral height)))
   setShaderValue bloomShader "renderSize" (ShaderUniformVec2 (Vector2 (fromIntegral width) (fromIntegral height)))
 
   whileWindowOpen_
