@@ -12,7 +12,7 @@ import Raylib.Types
     Vector (normalize, (|-|)),
   )
 
--- | Gets the direction of a camera as a ray
+-- | Gets the direction of a camera as a ray.
 cameraDirectionRay :: Camera3D -> Ray
 cameraDirectionRay camera = Ray (camera3D'position camera) (normalize $ camera3D'target camera |-| camera3D'position camera)
 

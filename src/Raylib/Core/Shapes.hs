@@ -57,35 +57,35 @@ import Raylib.Native
 import Raylib.Types (Color, Rectangle, Texture, Vector2 (Vector2))
 import Raylib.ForeignUtil (pop, withFreeable)
 
-setShapesTexture :: Raylib.Types.Texture -> Raylib.Types.Rectangle -> IO ()
+setShapesTexture :: Texture -> Rectangle -> IO ()
 setShapesTexture tex source = withFreeable tex (withFreeable source . c'setShapesTexture)
 
-drawPixel :: Int -> Int -> Raylib.Types.Color -> IO ()
+drawPixel :: Int -> Int -> Color -> IO ()
 drawPixel x y color = withFreeable color $ c'drawPixel (fromIntegral x) (fromIntegral y)
 
-drawPixelV :: Raylib.Types.Vector2 -> Raylib.Types.Color -> IO ()
+drawPixelV :: Vector2 -> Color -> IO ()
 drawPixelV position color = withFreeable position (withFreeable color . c'drawPixelV)
 
-drawLine :: Int -> Int -> Int -> Int -> Raylib.Types.Color -> IO ()
+drawLine :: Int -> Int -> Int -> Int -> Color -> IO ()
 drawLine startX startY endX endY color =
   withFreeable color $ c'drawLine (fromIntegral startX) (fromIntegral startY) (fromIntegral endX) (fromIntegral endY)
 
-drawLineV :: Raylib.Types.Vector2 -> Raylib.Types.Vector2 -> Raylib.Types.Color -> IO ()
+drawLineV :: Vector2 -> Vector2 -> Color -> IO ()
 drawLineV start end color = withFreeable start (\s -> withFreeable end (withFreeable color . c'drawLineV s))
 
-drawLineEx :: Raylib.Types.Vector2 -> Raylib.Types.Vector2 -> Float -> Raylib.Types.Color -> IO ()
+drawLineEx :: Vector2 -> Vector2 -> Float -> Color -> IO ()
 drawLineEx start end thickness color =
   withFreeable start (\s -> withFreeable end (\e -> withFreeable color (c'drawLineEx s e (realToFrac thickness))))
 
-drawLineBezier :: Raylib.Types.Vector2 -> Raylib.Types.Vector2 -> Float -> Raylib.Types.Color -> IO ()
+drawLineBezier :: Vector2 -> Vector2 -> Float -> Color -> IO ()
 drawLineBezier start end thickness color =
   withFreeable start (\s -> withFreeable end (\e -> withFreeable color (c'drawLineBezier s e (realToFrac thickness))))
 
-drawLineBezierQuad :: Raylib.Types.Vector2 -> Raylib.Types.Vector2 -> Raylib.Types.Vector2 -> Float -> Raylib.Types.Color -> IO ()
+drawLineBezierQuad :: Vector2 -> Vector2 -> Vector2 -> Float -> Color -> IO ()
 drawLineBezierQuad start end control thickness color =
   withFreeable start (\s -> withFreeable end (\e -> withFreeable control (\c -> withFreeable color (c'drawLineBezierQuad s e c (realToFrac thickness)))))
 
-drawLineBezierCubic :: Raylib.Types.Vector2 -> Raylib.Types.Vector2 -> Raylib.Types.Vector2 -> Raylib.Types.Vector2 -> Float -> Raylib.Types.Color -> IO ()
+drawLineBezierCubic :: Vector2 -> Vector2 -> Vector2 -> Vector2 -> Float -> Color -> IO ()
 drawLineBezierCubic start end startControl endControl thickness color =
   withFreeable
     start
@@ -108,13 +108,13 @@ drawLineBezierCubic start end startControl endControl thickness color =
           )
     )
 
-drawLineStrip :: [Raylib.Types.Vector2] -> Raylib.Types.Color -> IO ()
+drawLineStrip :: [Vector2] -> Color -> IO ()
 drawLineStrip points color = withArray points (\p -> withFreeable color $ c'drawLineStrip p (genericLength points))
 
-drawCircle :: Int -> Int -> Float -> Raylib.Types.Color -> IO ()
+drawCircle :: Int -> Int -> Float -> Color -> IO ()
 drawCircle centerX centerY radius color = withFreeable color (c'drawCircle (fromIntegral centerX) (fromIntegral centerY) (realToFrac radius))
 
-drawCircleSector :: Raylib.Types.Vector2 -> Float -> Float -> Float -> Int -> Raylib.Types.Color -> IO ()
+drawCircleSector :: Vector2 -> Float -> Float -> Float -> Int -> Color -> IO ()
 drawCircleSector center radius startAngle endAngle segments color =
   withFreeable
     center
@@ -125,7 +125,7 @@ drawCircleSector center radius startAngle endAngle segments color =
           )
     )
 
-drawCircleSectorLines :: Raylib.Types.Vector2 -> Float -> Float -> Float -> Int -> Raylib.Types.Color -> IO ()
+drawCircleSectorLines :: Vector2 -> Float -> Float -> Float -> Int -> Color -> IO ()
 drawCircleSectorLines center radius startAngle endAngle segments color =
   withFreeable
     center
@@ -136,27 +136,27 @@ drawCircleSectorLines center radius startAngle endAngle segments color =
           )
     )
 
-drawCircleGradient :: Int -> Int -> Float -> Raylib.Types.Color -> Raylib.Types.Color -> IO ()
+drawCircleGradient :: Int -> Int -> Float -> Color -> Color -> IO ()
 drawCircleGradient centerX centerY radius color1 color2 =
   withFreeable color1 (withFreeable color2 . c'drawCircleGradient (fromIntegral centerX) (fromIntegral centerY) (realToFrac radius))
 
-drawCircleV :: Raylib.Types.Vector2 -> Float -> Raylib.Types.Color -> IO ()
+drawCircleV :: Vector2 -> Float -> Color -> IO ()
 drawCircleV center radius color =
   withFreeable center (\c -> withFreeable color (c'drawCircleV c (realToFrac radius)))
 
-drawCircleLines :: Int -> Int -> Float -> Raylib.Types.Color -> IO ()
+drawCircleLines :: Int -> Int -> Float -> Color -> IO ()
 drawCircleLines centerX centerY radius color =
   withFreeable color (c'drawCircleLines (fromIntegral centerX) (fromIntegral centerY) (realToFrac radius))
 
-drawEllipse :: Int -> Int -> Float -> Float -> Raylib.Types.Color -> IO ()
+drawEllipse :: Int -> Int -> Float -> Float -> Color -> IO ()
 drawEllipse centerX centerY radiusH radiusV color =
   withFreeable color (c'drawEllipse (fromIntegral centerX) (fromIntegral centerY) (realToFrac radiusH) (realToFrac radiusV))
 
-drawEllipseLines :: Int -> Int -> Float -> Float -> Raylib.Types.Color -> IO ()
+drawEllipseLines :: Int -> Int -> Float -> Float -> Color -> IO ()
 drawEllipseLines centerX centerY radiusH radiusV color =
   withFreeable color (c'drawEllipseLines (fromIntegral centerX) (fromIntegral centerY) (realToFrac radiusH) (realToFrac radiusV))
 
-drawRing :: Raylib.Types.Vector2 -> Float -> Float -> Float -> Float -> Int -> Raylib.Types.Color -> IO ()
+drawRing :: Vector2 -> Float -> Float -> Float -> Float -> Int -> Color -> IO ()
 drawRing center innerRadius outerRadius startAngle endAngle segments color =
   withFreeable
     center
@@ -173,7 +173,7 @@ drawRing center innerRadius outerRadius startAngle endAngle segments color =
           )
     )
 
-drawRingLines :: Raylib.Types.Vector2 -> Float -> Float -> Float -> Float -> Int -> Raylib.Types.Color -> IO ()
+drawRingLines :: Vector2 -> Float -> Float -> Float -> Float -> Int -> Color -> IO ()
 drawRingLines center innerRadius outerRadius startAngle endAngle segments color =
   withFreeable
     center
@@ -190,21 +190,21 @@ drawRingLines center innerRadius outerRadius startAngle endAngle segments color 
           )
     )
 
-drawRectangle :: Int -> Int -> Int -> Int -> Raylib.Types.Color -> IO ()
+drawRectangle :: Int -> Int -> Int -> Int -> Color -> IO ()
 drawRectangle posX posY width height color =
   withFreeable color (c'drawRectangle (fromIntegral posX) (fromIntegral posY) (fromIntegral width) (fromIntegral height))
 
-drawRectangleV :: Raylib.Types.Vector2 -> Raylib.Types.Vector2 -> Raylib.Types.Color -> IO ()
+drawRectangleV :: Vector2 -> Vector2 -> Color -> IO ()
 drawRectangleV position size color = withFreeable position (\p -> withFreeable size (withFreeable color . c'drawRectangleV p))
 
-drawRectangleRec :: Raylib.Types.Rectangle -> Raylib.Types.Color -> IO ()
+drawRectangleRec :: Rectangle -> Color -> IO ()
 drawRectangleRec rect color = withFreeable rect (withFreeable color . c'drawRectangleRec)
 
-drawRectanglePro :: Raylib.Types.Rectangle -> Raylib.Types.Vector2 -> Float -> Raylib.Types.Color -> IO ()
+drawRectanglePro :: Rectangle -> Vector2 -> Float -> Color -> IO ()
 drawRectanglePro rect origin rotation color =
   withFreeable color (\c -> withFreeable rect (\r -> withFreeable origin (\o -> c'drawRectanglePro r o (realToFrac rotation) c)))
 
-drawRectangleGradientV :: Int -> Int -> Int -> Int -> Raylib.Types.Color -> Raylib.Types.Color -> IO ()
+drawRectangleGradientV :: Int -> Int -> Int -> Int -> Color -> Color -> IO ()
 drawRectangleGradientV posX posY width height color1 color2 =
   withFreeable
     color1
@@ -216,7 +216,7 @@ drawRectangleGradientV posX posY width height color1 color2 =
           (fromIntegral height)
     )
 
-drawRectangleGradientH :: Int -> Int -> Int -> Int -> Raylib.Types.Color -> Raylib.Types.Color -> IO ()
+drawRectangleGradientH :: Int -> Int -> Int -> Int -> Color -> Color -> IO ()
 drawRectangleGradientH posX posY width height color1 color2 =
   withFreeable
     color1
@@ -228,7 +228,7 @@ drawRectangleGradientH posX posY width height color1 color2 =
           (fromIntegral height)
     )
 
-drawRectangleGradientEx :: Raylib.Types.Rectangle -> Raylib.Types.Color -> Raylib.Types.Color -> Raylib.Types.Color -> Raylib.Types.Color -> IO ()
+drawRectangleGradientEx :: Rectangle -> Color -> Color -> Color -> Color -> IO ()
 drawRectangleGradientEx rect col1 col2 col3 col4 =
   withFreeable
     rect
@@ -244,23 +244,23 @@ drawRectangleGradientEx rect col1 col2 col3 col4 =
           )
     )
 
-drawRectangleLines :: Int -> Int -> Int -> Int -> Raylib.Types.Color -> IO ()
+drawRectangleLines :: Int -> Int -> Int -> Int -> Color -> IO ()
 drawRectangleLines posX posY width height color =
   withFreeable color (c'drawRectangleLines (fromIntegral posX) (fromIntegral posY) (fromIntegral width) (fromIntegral height))
 
-drawRectangleLinesEx :: Raylib.Types.Rectangle -> Float -> Raylib.Types.Color -> IO ()
+drawRectangleLinesEx :: Rectangle -> Float -> Color -> IO ()
 drawRectangleLinesEx rect thickness color =
   withFreeable color (\c -> withFreeable rect (\r -> c'drawRectangleLinesEx r (realToFrac thickness) c))
 
-drawRectangleRounded :: Raylib.Types.Rectangle -> Float -> Int -> Raylib.Types.Color -> IO ()
+drawRectangleRounded :: Rectangle -> Float -> Int -> Color -> IO ()
 drawRectangleRounded rect roundness segments color =
   withFreeable rect (\r -> withFreeable color $ c'drawRectangleRounded r (realToFrac roundness) (fromIntegral segments))
 
-drawRectangleRoundedLines :: Raylib.Types.Rectangle -> Float -> Int -> Float -> Raylib.Types.Color -> IO ()
+drawRectangleRoundedLines :: Rectangle -> Float -> Int -> Float -> Color -> IO ()
 drawRectangleRoundedLines rect roundness segments thickness color =
   withFreeable rect (\r -> withFreeable color $ c'drawRectangleRoundedLines r (realToFrac roundness) (fromIntegral segments) (realToFrac thickness))
 
-drawTriangle :: Raylib.Types.Vector2 -> Raylib.Types.Vector2 -> Raylib.Types.Vector2 -> Raylib.Types.Color -> IO ()
+drawTriangle :: Vector2 -> Vector2 -> Vector2 -> Color -> IO ()
 drawTriangle v1 v2 v3 color =
   withFreeable
     v1
@@ -271,7 +271,7 @@ drawTriangle v1 v2 v3 color =
           )
     )
 
-drawTriangleLines :: Raylib.Types.Vector2 -> Raylib.Types.Vector2 -> Raylib.Types.Vector2 -> Raylib.Types.Color -> IO ()
+drawTriangleLines :: Vector2 -> Vector2 -> Vector2 -> Color -> IO ()
 drawTriangleLines v1 v2 v3 color =
   withFreeable
     v1
@@ -282,22 +282,22 @@ drawTriangleLines v1 v2 v3 color =
           )
     )
 
-drawTriangleFan :: [Raylib.Types.Vector2] -> Raylib.Types.Color -> IO ()
+drawTriangleFan :: [Vector2] -> Color -> IO ()
 drawTriangleFan points color = withArray points (\p -> withFreeable color $ c'drawTriangleFan p (genericLength points))
 
-drawTriangleStrip :: [Raylib.Types.Vector2] -> Raylib.Types.Color -> IO ()
+drawTriangleStrip :: [Vector2] -> Color -> IO ()
 drawTriangleStrip points color =
   withArray points (\p -> withFreeable color $ c'drawTriangleStrip p (genericLength points))
 
-drawPoly :: Raylib.Types.Vector2 -> Int -> Float -> Float -> Raylib.Types.Color -> IO ()
+drawPoly :: Vector2 -> Int -> Float -> Float -> Color -> IO ()
 drawPoly center sides radius rotation color =
   withFreeable center (\c -> withFreeable color $ c'drawPoly c (fromIntegral sides) (realToFrac radius) (realToFrac rotation))
 
-drawPolyLines :: Raylib.Types.Vector2 -> Int -> Float -> Float -> Raylib.Types.Color -> IO ()
+drawPolyLines :: Vector2 -> Int -> Float -> Float -> Color -> IO ()
 drawPolyLines center sides radius rotation color =
   withFreeable center (\c -> withFreeable color $ c'drawPolyLines c (fromIntegral sides) (realToFrac radius) (realToFrac rotation))
 
-drawPolyLinesEx :: Raylib.Types.Vector2 -> Int -> Float -> Float -> Float -> Raylib.Types.Color -> IO ()
+drawPolyLinesEx :: Vector2 -> Int -> Float -> Float -> Float -> Color -> IO ()
 drawPolyLinesEx center sides radius rotation thickness color =
   withFreeable
     center
@@ -311,44 +311,44 @@ drawPolyLinesEx center sides radius rotation thickness color =
             (realToFrac thickness)
     )
 
-checkCollisionRecs :: Raylib.Types.Rectangle -> Raylib.Types.Rectangle -> Bool
+checkCollisionRecs :: Rectangle -> Rectangle -> Bool
 checkCollisionRecs rec1 rec2 = unsafePerformIO $ toBool <$> withFreeable rec1 (withFreeable rec2 . c'checkCollisionRecs)
 
-checkCollisionCircles :: Raylib.Types.Vector2 -> Float -> Raylib.Types.Vector2 -> Float -> Bool
+checkCollisionCircles :: Vector2 -> Float -> Vector2 -> Float -> Bool
 checkCollisionCircles center1 radius1 center2 radius2 =
   unsafePerformIO $ toBool <$> withFreeable center1 (\c1 -> withFreeable center2 (\c2 -> c'checkCollisionCircles c1 (realToFrac radius1) c2 (realToFrac radius2)))
 
-checkCollisionCircleRec :: Raylib.Types.Vector2 -> Float -> Raylib.Types.Rectangle -> Bool
+checkCollisionCircleRec :: Vector2 -> Float -> Rectangle -> Bool
 checkCollisionCircleRec center radius rect =
   unsafePerformIO $ toBool <$> withFreeable center (\c -> withFreeable rect $ c'checkCollisionCircleRec c (realToFrac radius))
 
-checkCollisionPointRec :: Raylib.Types.Vector2 -> Raylib.Types.Rectangle -> Bool
+checkCollisionPointRec :: Vector2 -> Rectangle -> Bool
 checkCollisionPointRec point rect =
   unsafePerformIO $ toBool <$> withFreeable point (withFreeable rect . c'checkCollisionPointRec)
 
-checkCollisionPointCircle :: Raylib.Types.Vector2 -> Raylib.Types.Vector2 -> Float -> Bool
+checkCollisionPointCircle :: Vector2 -> Vector2 -> Float -> Bool
 checkCollisionPointCircle point center radius =
   unsafePerformIO $ toBool <$> withFreeable point (\p -> withFreeable center (\c -> c'checkCollisionPointCircle p c (realToFrac radius)))
 
-checkCollisionPointTriangle :: Raylib.Types.Vector2 -> Raylib.Types.Vector2 -> Raylib.Types.Vector2 -> Raylib.Types.Vector2 -> Bool
+checkCollisionPointTriangle :: Vector2 -> Vector2 -> Vector2 -> Vector2 -> Bool
 checkCollisionPointTriangle point p1 p2 p3 =
   unsafePerformIO $ toBool <$> withFreeable point (\p -> withFreeable p1 (\ptr1 -> withFreeable p2 (withFreeable p3 . c'checkCollisionPointTriangle p ptr1)))
 
 -- | If a collision is found, returns @Just collisionPoint@, otherwise returns @Nothing@
-checkCollisionLines :: Raylib.Types.Vector2 -> Raylib.Types.Vector2 -> Raylib.Types.Vector2 -> Raylib.Types.Vector2 -> Maybe Raylib.Types.Vector2
+checkCollisionLines :: Vector2 -> Vector2 -> Vector2 -> Vector2 -> Maybe Vector2
 checkCollisionLines start1 end1 start2 end2 =
   unsafePerformIO $
     withFreeable
-      (Raylib.Types.Vector2 0 0)
+      (Vector2 0 0)
       ( \res -> do
           foundCollision <- toBool <$> withFreeable start1 (\s1 -> withFreeable end1 (\e1 -> withFreeable start2 (\s2 -> withFreeable end2 (\e2 -> c'checkCollisionLines s1 e1 s2 e2 res))))
           if foundCollision then Just <$> peek res else return Nothing
       )
 
-checkCollisionPointLine :: Raylib.Types.Vector2 -> Raylib.Types.Vector2 -> Raylib.Types.Vector2 -> Int -> Bool
+checkCollisionPointLine :: Vector2 -> Vector2 -> Vector2 -> Int -> Bool
 checkCollisionPointLine point p1 p2 threshold =
   unsafePerformIO $ toBool <$> withFreeable point (\p -> withFreeable p1 (\ptr1 -> withFreeable p2 (\ptr2 -> c'checkCollisionPointLine p ptr1 ptr2 (fromIntegral threshold))))
 
-getCollisionRec :: Raylib.Types.Rectangle -> Raylib.Types.Rectangle -> Raylib.Types.Rectangle
+getCollisionRec :: Rectangle -> Rectangle -> Rectangle
 getCollisionRec rec1 rec2 =
   unsafePerformIO $ withFreeable rec1 (withFreeable rec2 . c'getCollisionRec) >>= pop

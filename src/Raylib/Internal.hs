@@ -1,10 +1,11 @@
 {-# OPTIONS -Wall #-}
 {-# LANGUAGE ForeignFunctionInterface #-}
 
-module Raylib.Internal (shaderLocations, unloadShaders, unloadTextures, unloadFrameBuffers, unloadVaoIds, unloadVboIds, unloadCtxData, unloadAudioBuffers, addShaderId, addTextureId, addFrameBuffer, addVaoId, addVboIds, addCtxData, addAudioBuffer, c'rlGetShaderIdDefault, getPixelDataSize) where
+module Raylib.Internal (shaderLocations, unloadSingleShader, unloadSingleTexture, unloadSingleFrameBuffer, unloadSingleVaoId, unloadSingleVboIdList, unloadSingleCtxDataPtr, unloadSingleAudioBuffer, unloadShaders, unloadTextures, unloadFrameBuffers, unloadVaoIds, unloadVboIds, unloadCtxData, unloadAudioBuffers, addShaderId, addTextureId, addFrameBuffer, addVaoId, addVboIds, addCtxData, addAudioBuffer, c'rlGetShaderIdDefault, getPixelDataSize) where
 
 import Control.Monad (forM_, unless, when)
 import Data.IORef (IORef, modifyIORef, newIORef, readIORef)
+import Data.List (delete)
 import Data.Map (Map)
 import qualified Data.Map as Map
 import Foreign (Ptr)
@@ -42,6 +43,59 @@ ctxDataPtrs = unsafePerformIO $ newIORef []
 audioBuffers :: IORef [Ptr ()]
 {-# NOINLINE audioBuffers #-}
 audioBuffers = unsafePerformIO $ newIORef []
+
+unloadSingleShader :: (Integral a) => a -> IO ()
+unloadSingleShader sId' = do
+  shaderIdDefault <- c'rlGetShaderIdDefault
+  unless (sId == shaderIdDefault) (c'rlUnloadShaderProgram sId)
+  modifyIORef shaderIds (delete sId)
+  where
+    sId = fromIntegral sId'
+
+unloadSingleTexture :: (Integral a) => a -> IO ()
+unloadSingleTexture tId' = do
+  when (tId > 0) (c'rlUnloadTexture tId)
+  modifyIORef textureIds (delete tId)
+  where
+    tId = fromIntegral tId'
+
+unloadSingleFrameBuffer :: (Integral a) => a -> IO ()
+unloadSingleFrameBuffer fbId' = do
+  when (fbId > 0) (c'rlUnloadFramebuffer fbId)
+  modifyIORef frameBuffers (delete fbId)
+  where
+    fbId = fromIntegral fbId'
+
+unloadSingleVaoId :: (Integral a) => a -> IO ()
+unloadSingleVaoId vaoId' = do
+  c'rlUnloadVertexArray vaoId
+  modifyIORef vaoIds (delete vaoId)
+  where
+    vaoId = fromIntegral vaoId'
+
+unloadSingleVboIdList :: (Integral a) => Maybe [a] -> IO ()
+unloadSingleVboIdList Nothing = return ()
+unloadSingleVboIdList (Just vboIdList') = do
+  forM_
+    vboIdList
+    ( \vboId -> do
+        c'rlUnloadVertexBuffer vboId
+        modifyIORef vboIds (delete vboId)
+    )
+  where
+    vboIdList = map fromIntegral vboIdList'
+
+unloadSingleCtxDataPtr :: (Integral a) => a -> Ptr () -> IO ()
+unloadSingleCtxDataPtr ctxType' ctxData = do
+  c'unloadMusicStreamData ctxType ctxData
+  modifyIORef ctxDataPtrs (delete (ctxType, ctxData))
+  where
+    ctxType = fromIntegral ctxType'
+
+unloadSingleAudioBuffer :: Ptr () -> IO ()
+unloadSingleAudioBuffer buffer = do
+  c'unloadAudioBuffer buffer
+  modifyIORef audioBuffers (delete buffer)
 
 unloadShaders :: IO ()
 unloadShaders = do

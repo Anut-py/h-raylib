@@ -144,9 +144,9 @@ foreign import ccall safe "raylib.h ClearWindowState"
   c'clearWindowState ::
     CUInt -> IO ()
 
-foreign import ccall safe "rl_bindings.h SetWindowIcon_" c'setWindowIcon :: Ptr Raylib.Types.Image -> IO ()
+foreign import ccall safe "rl_bindings.h SetWindowIcon_" c'setWindowIcon :: Ptr Image -> IO ()
 
-foreign import ccall safe "raylib.h SetWindowIcons" c'setWindowIcons :: Ptr Raylib.Types.Image -> CInt -> IO ()
+foreign import ccall safe "raylib.h SetWindowIcons" c'setWindowIcons :: Ptr Image -> CInt -> IO ()
 
 foreign import ccall safe "raylib.h SetWindowTitle"
   c'setWindowTitle ::
@@ -196,7 +196,7 @@ foreign import ccall safe "raylib.h GetCurrentMonitor"
   c'getCurrentMonitor ::
     IO CInt
 
-foreign import ccall safe "rl_bindings.h GetMonitorPosition_" c'getMonitorPosition :: CInt -> IO (Ptr Raylib.Types.Vector2)
+foreign import ccall safe "rl_bindings.h GetMonitorPosition_" c'getMonitorPosition :: CInt -> IO (Ptr Vector2)
 
 foreign import ccall safe "raylib.h GetMonitorWidth"
   c'getMonitorWidth ::
@@ -218,9 +218,9 @@ foreign import ccall safe "raylib.h GetMonitorRefreshRate"
   c'getMonitorRefreshRate ::
     CInt -> IO CInt
 
-foreign import ccall safe "rl_bindings.h GetWindowPosition_" c'getWindowPosition :: IO (Ptr Raylib.Types.Vector2)
+foreign import ccall safe "rl_bindings.h GetWindowPosition_" c'getWindowPosition :: IO (Ptr Vector2)
 
-foreign import ccall safe "rl_bindings.h GetWindowScaleDPI_" c'getWindowScaleDPI :: IO (Ptr Raylib.Types.Vector2)
+foreign import ccall safe "rl_bindings.h GetWindowScaleDPI_" c'getWindowScaleDPI :: IO (Ptr Vector2)
 
 foreign import ccall safe "raylib.h GetMonitorName"
   c'getMonitorName ::
@@ -246,15 +246,15 @@ foreign import ccall safe "raylib.h IsCursorOnScreen"
   c'isCursorOnScreen ::
     IO CBool
 
-foreign import ccall safe "rl_bindings.h ClearBackground_" c'clearBackground :: Ptr Raylib.Types.Color -> IO ()
+foreign import ccall safe "rl_bindings.h ClearBackground_" c'clearBackground :: Ptr Color -> IO ()
 
-foreign import ccall safe "rl_bindings.h BeginMode2D_" c'beginMode2D :: Ptr Raylib.Types.Camera2D -> IO ()
+foreign import ccall safe "rl_bindings.h BeginMode2D_" c'beginMode2D :: Ptr Camera2D -> IO ()
 
-foreign import ccall safe "rl_bindings.h BeginMode3D_" c'beginMode3D :: Ptr Raylib.Types.Camera3D -> IO ()
+foreign import ccall safe "rl_bindings.h BeginMode3D_" c'beginMode3D :: Ptr Camera3D -> IO ()
 
-foreign import ccall safe "rl_bindings.h BeginTextureMode_" c'beginTextureMode :: Ptr Raylib.Types.RenderTexture -> IO ()
+foreign import ccall safe "rl_bindings.h BeginTextureMode_" c'beginTextureMode :: Ptr RenderTexture -> IO ()
 
-foreign import ccall safe "rl_bindings.h BeginShaderMode_" c'beginShaderMode :: Ptr Raylib.Types.Shader -> IO ()
+foreign import ccall safe "rl_bindings.h BeginShaderMode_" c'beginShaderMode :: Ptr Shader -> IO ()
 
 foreign import ccall safe "raylib.h BeginBlendMode"
   c'beginBlendMode ::
@@ -264,45 +264,45 @@ foreign import ccall safe "raylib.h BeginScissorMode"
   c'beginScissorMode ::
     CInt -> CInt -> CInt -> CInt -> IO ()
 
-foreign import ccall safe "rl_bindings.h BeginVrStereoMode_" c'beginVrStereoMode :: Ptr Raylib.Types.VrStereoConfig -> IO ()
+foreign import ccall safe "rl_bindings.h BeginVrStereoMode_" c'beginVrStereoMode :: Ptr VrStereoConfig -> IO ()
 
-foreign import ccall safe "rl_bindings.h LoadVrStereoConfig_" c'loadVrStereoConfig :: Ptr Raylib.Types.VrDeviceInfo -> IO (Ptr Raylib.Types.VrStereoConfig)
+foreign import ccall safe "rl_bindings.h LoadVrStereoConfig_" c'loadVrStereoConfig :: Ptr VrDeviceInfo -> IO (Ptr VrStereoConfig)
 
-foreign import ccall safe "rl_bindings.h UnloadVrStereoConfig_" c'unloadVrStereoConfig :: Ptr Raylib.Types.VrStereoConfig -> IO ()
+foreign import ccall safe "rl_bindings.h UnloadVrStereoConfig_" c'unloadVrStereoConfig :: Ptr VrStereoConfig -> IO ()
 
-foreign import ccall safe "rl_bindings.h LoadShader_" c'loadShader :: CString -> CString -> IO (Ptr Raylib.Types.Shader)
+foreign import ccall safe "rl_bindings.h LoadShader_" c'loadShader :: CString -> CString -> IO (Ptr Shader)
 
-foreign import ccall safe "rl_bindings.h LoadShaderFromMemory_" c'loadShaderFromMemory :: CString -> CString -> IO (Ptr Raylib.Types.Shader)
+foreign import ccall safe "rl_bindings.h LoadShaderFromMemory_" c'loadShaderFromMemory :: CString -> CString -> IO (Ptr Shader)
 
 foreign import ccall safe "rl_bindings.h IsShaderReady_" c'isShaderReady :: Ptr Shader -> IO CBool
 
-foreign import ccall safe "rl_bindings.h GetShaderLocation_" c'getShaderLocation :: Ptr Raylib.Types.Shader -> CString -> IO CInt
+foreign import ccall safe "rl_bindings.h GetShaderLocation_" c'getShaderLocation :: Ptr Shader -> CString -> IO CInt
 
-foreign import ccall safe "rl_bindings.h GetShaderLocationAttrib_" c'getShaderLocationAttrib :: Ptr Raylib.Types.Shader -> CString -> IO CInt
+foreign import ccall safe "rl_bindings.h GetShaderLocationAttrib_" c'getShaderLocationAttrib :: Ptr Shader -> CString -> IO CInt
 
-foreign import ccall safe "rl_bindings.h SetShaderValue_" c'setShaderValue :: Ptr Raylib.Types.Shader -> CInt -> Ptr () -> CInt -> IO ()
+foreign import ccall safe "rl_bindings.h SetShaderValue_" c'setShaderValue :: Ptr Shader -> CInt -> Ptr () -> CInt -> IO ()
 
-foreign import ccall safe "rl_bindings.h SetShaderValueV_" c'setShaderValueV :: Ptr Raylib.Types.Shader -> CInt -> Ptr () -> CInt -> CInt -> IO ()
+foreign import ccall safe "rl_bindings.h SetShaderValueV_" c'setShaderValueV :: Ptr Shader -> CInt -> Ptr () -> CInt -> CInt -> IO ()
 
-foreign import ccall safe "rl_bindings.h SetShaderValueMatrix_" c'setShaderValueMatrix :: Ptr Raylib.Types.Shader -> CInt -> Ptr Raylib.Types.Matrix -> IO ()
+foreign import ccall safe "rl_bindings.h SetShaderValueMatrix_" c'setShaderValueMatrix :: Ptr Shader -> CInt -> Ptr Matrix -> IO ()
 
-foreign import ccall safe "rl_bindings.h SetShaderValueTexture_" c'setShaderValueTexture :: Ptr Raylib.Types.Shader -> CInt -> Ptr Raylib.Types.Texture -> IO ()
+foreign import ccall safe "rl_bindings.h SetShaderValueTexture_" c'setShaderValueTexture :: Ptr Shader -> CInt -> Ptr Texture -> IO ()
 
-foreign import ccall safe "rl_bindings.h UnloadShader_" c'unloadShader :: Ptr Raylib.Types.Shader -> IO ()
+foreign import ccall safe "rl_bindings.h UnloadShader_" c'unloadShader :: Ptr Shader -> IO ()
 
-foreign import ccall safe "rl_bindings.h GetMouseRay_" c'getMouseRay :: Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Camera3D -> IO (Ptr Raylib.Types.Ray)
+foreign import ccall safe "rl_bindings.h GetMouseRay_" c'getMouseRay :: Ptr Vector2 -> Ptr Camera3D -> IO (Ptr Ray)
 
-foreign import ccall safe "rl_bindings.h GetCameraMatrix_" c'getCameraMatrix :: Ptr Raylib.Types.Camera3D -> IO (Ptr Raylib.Types.Matrix)
+foreign import ccall safe "rl_bindings.h GetCameraMatrix_" c'getCameraMatrix :: Ptr Camera3D -> IO (Ptr Matrix)
 
-foreign import ccall safe "rl_bindings.h GetCameraMatrix2D_" c'getCameraMatrix2D :: Ptr Raylib.Types.Camera2D -> IO (Ptr Raylib.Types.Matrix)
+foreign import ccall safe "rl_bindings.h GetCameraMatrix2D_" c'getCameraMatrix2D :: Ptr Camera2D -> IO (Ptr Matrix)
 
-foreign import ccall safe "rl_bindings.h GetWorldToScreen_" c'getWorldToScreen :: Ptr Raylib.Types.Vector3 -> Ptr Raylib.Types.Camera3D -> IO (Ptr Raylib.Types.Vector2)
+foreign import ccall safe "rl_bindings.h GetWorldToScreen_" c'getWorldToScreen :: Ptr Vector3 -> Ptr Camera3D -> IO (Ptr Vector2)
 
-foreign import ccall safe "rl_bindings.h GetScreenToWorld2D_" c'getScreenToWorld2D :: Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Camera2D -> IO (Ptr Raylib.Types.Vector2)
+foreign import ccall safe "rl_bindings.h GetScreenToWorld2D_" c'getScreenToWorld2D :: Ptr Vector2 -> Ptr Camera2D -> IO (Ptr Vector2)
 
-foreign import ccall safe "rl_bindings.h GetWorldToScreenEx_" c'getWorldToScreenEx :: Ptr Raylib.Types.Vector3 -> Ptr Raylib.Types.Camera3D -> CInt -> CInt -> IO (Ptr Raylib.Types.Vector2)
+foreign import ccall safe "rl_bindings.h GetWorldToScreenEx_" c'getWorldToScreenEx :: Ptr Vector3 -> Ptr Camera3D -> CInt -> CInt -> IO (Ptr Vector2)
 
-foreign import ccall safe "rl_bindings.h GetWorldToScreen2D_" c'getWorldToScreen2D :: Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Camera2D -> IO (Ptr Raylib.Types.Vector2)
+foreign import ccall safe "rl_bindings.h GetWorldToScreen2D_" c'getWorldToScreen2D :: Ptr Vector2 -> Ptr Camera2D -> IO (Ptr Vector2)
 
 foreign import ccall safe "raylib.h SetTargetFPS"
   c'setTargetFPS ::
@@ -440,19 +440,19 @@ foreign import ccall safe "raylib.h IsPathFile"
   c'isPathFile ::
     CString -> IO CBool
 
-foreign import ccall safe "rl_bindings.h LoadDirectoryFiles_" c'loadDirectoryFiles :: CString -> IO (Ptr Raylib.Types.FilePathList)
+foreign import ccall safe "rl_bindings.h LoadDirectoryFiles_" c'loadDirectoryFiles :: CString -> IO (Ptr FilePathList)
 
-foreign import ccall safe "rl_bindings.h LoadDirectoryFilesEx_" c'loadDirectoryFilesEx :: CString -> CString -> CInt -> IO (Ptr Raylib.Types.FilePathList)
+foreign import ccall safe "rl_bindings.h LoadDirectoryFilesEx_" c'loadDirectoryFilesEx :: CString -> CString -> CInt -> IO (Ptr FilePathList)
 
-foreign import ccall safe "rl_bindings.h UnloadDirectoryFiles_" c'unloadDirectoryFiles :: Ptr Raylib.Types.FilePathList -> IO ()
+foreign import ccall safe "rl_bindings.h UnloadDirectoryFiles_" c'unloadDirectoryFiles :: Ptr FilePathList -> IO ()
 
 foreign import ccall safe "raylib.h IsFileDropped"
   c'isFileDropped ::
     IO CBool
 
-foreign import ccall safe "rl_bindings.h LoadDroppedFiles_" c'loadDroppedFiles :: IO (Ptr Raylib.Types.FilePathList)
+foreign import ccall safe "rl_bindings.h LoadDroppedFiles_" c'loadDroppedFiles :: IO (Ptr FilePathList)
 
-foreign import ccall safe "rl_bindings.h UnloadDroppedFiles_" c'unloadDroppedFiles :: Ptr Raylib.Types.FilePathList -> IO ()
+foreign import ccall safe "rl_bindings.h UnloadDroppedFiles_" c'unloadDroppedFiles :: Ptr FilePathList -> IO ()
 
 foreign import ccall safe "raylib.h GetFileModTime"
   c'getFileModTime ::
@@ -566,9 +566,9 @@ foreign import ccall safe "raylib.h GetMouseY"
   c'getMouseY ::
     IO CInt
 
-foreign import ccall safe "rl_bindings.h GetMousePosition_" c'getMousePosition :: IO (Ptr Raylib.Types.Vector2)
+foreign import ccall safe "rl_bindings.h GetMousePosition_" c'getMousePosition :: IO (Ptr Vector2)
 
-foreign import ccall safe "rl_bindings.h GetMouseDelta_" c'getMouseDelta :: IO (Ptr Raylib.Types.Vector2)
+foreign import ccall safe "rl_bindings.h GetMouseDelta_" c'getMouseDelta :: IO (Ptr Vector2)
 
 foreign import ccall safe "raylib.h SetMousePosition"
   c'setMousePosition ::
@@ -586,7 +586,7 @@ foreign import ccall safe "raylib.h GetMouseWheelMove"
   c'getMouseWheelMove ::
     IO CFloat
 
-foreign import ccall safe "rl_bindings.h GetMouseWheelMoveV_" c'getMouseWheelMoveV :: IO (Ptr Raylib.Types.Vector2)
+foreign import ccall safe "rl_bindings.h GetMouseWheelMoveV_" c'getMouseWheelMoveV :: IO (Ptr Vector2)
 
 foreign import ccall safe "raylib.h SetMouseCursor"
   c'setMouseCursor ::
@@ -600,7 +600,7 @@ foreign import ccall safe "raylib.h GetTouchY"
   c'getTouchY ::
     IO CInt
 
-foreign import ccall safe "rl_bindings.h GetTouchPosition_" c'getTouchPosition :: CInt -> IO (Ptr Raylib.Types.Vector2)
+foreign import ccall safe "rl_bindings.h GetTouchPosition_" c'getTouchPosition :: CInt -> IO (Ptr Vector2)
 
 foreign import ccall safe "raylib.h GetTouchPointId"
   c'getTouchPointId ::
@@ -626,13 +626,13 @@ foreign import ccall safe "raylib.h GetGestureHoldDuration"
   c'getGestureHoldDuration ::
     IO CFloat
 
-foreign import ccall safe "rl_bindings.h GetGestureDragVector_" c'getGestureDragVector :: IO (Ptr Raylib.Types.Vector2)
+foreign import ccall safe "rl_bindings.h GetGestureDragVector_" c'getGestureDragVector :: IO (Ptr Vector2)
 
 foreign import ccall safe "raylib.h GetGestureDragAngle"
   c'getGestureDragAngle ::
     IO CFloat
 
-foreign import ccall safe "rl_bindings.h GetGesturePinchVector_" c'getGesturePinchVector :: IO (Ptr Raylib.Types.Vector2)
+foreign import ccall safe "rl_bindings.h GetGesturePinchVector_" c'getGesturePinchVector :: IO (Ptr Vector2)
 
 foreign import ccall safe "raylib.h GetGesturePinchAngle"
   c'getGesturePinchAngle ::
@@ -640,385 +640,385 @@ foreign import ccall safe "raylib.h GetGesturePinchAngle"
 
 foreign import ccall safe "raylib.h UpdateCamera"
   c'updateCamera ::
-    Ptr Raylib.Types.Camera3D -> CInt -> IO ()
+    Ptr Camera3D -> CInt -> IO ()
 
-foreign import ccall safe "rl_bindings.h SetShapesTexture_" c'setShapesTexture :: Ptr Raylib.Types.Texture -> Ptr Raylib.Types.Rectangle -> IO ()
+foreign import ccall safe "rl_bindings.h SetShapesTexture_" c'setShapesTexture :: Ptr Texture -> Ptr Rectangle -> IO ()
 
-foreign import ccall safe "rl_bindings.h DrawPixel_" c'drawPixel :: CInt -> CInt -> Ptr Raylib.Types.Color -> IO ()
+foreign import ccall safe "rl_bindings.h DrawPixel_" c'drawPixel :: CInt -> CInt -> Ptr Color -> IO ()
 
-foreign import ccall safe "rl_bindings.h DrawPixelV_" c'drawPixelV :: Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Color -> IO ()
+foreign import ccall safe "rl_bindings.h DrawPixelV_" c'drawPixelV :: Ptr Vector2 -> Ptr Color -> IO ()
 
-foreign import ccall safe "rl_bindings.h DrawLine_" c'drawLine :: CInt -> CInt -> CInt -> CInt -> Ptr Raylib.Types.Color -> IO ()
+foreign import ccall safe "rl_bindings.h DrawLine_" c'drawLine :: CInt -> CInt -> CInt -> CInt -> Ptr Color -> IO ()
 
-foreign import ccall safe "rl_bindings.h DrawLineV_" c'drawLineV :: Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Color -> IO ()
+foreign import ccall safe "rl_bindings.h DrawLineV_" c'drawLineV :: Ptr Vector2 -> Ptr Vector2 -> Ptr Color -> IO ()
 
-foreign import ccall safe "rl_bindings.h DrawLineEx_" c'drawLineEx :: Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Vector2 -> CFloat -> Ptr Raylib.Types.Color -> IO ()
+foreign import ccall safe "rl_bindings.h DrawLineEx_" c'drawLineEx :: Ptr Vector2 -> Ptr Vector2 -> CFloat -> Ptr Color -> IO ()
 
-foreign import ccall safe "rl_bindings.h DrawLineBezier_" c'drawLineBezier :: Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Vector2 -> CFloat -> Ptr Raylib.Types.Color -> IO ()
+foreign import ccall safe "rl_bindings.h DrawLineBezier_" c'drawLineBezier :: Ptr Vector2 -> Ptr Vector2 -> CFloat -> Ptr Color -> IO ()
 
-foreign import ccall safe "rl_bindings.h DrawLineBezierQuad_" c'drawLineBezierQuad :: Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Vector2 -> CFloat -> Ptr Raylib.Types.Color -> IO ()
+foreign import ccall safe "rl_bindings.h DrawLineBezierQuad_" c'drawLineBezierQuad :: Ptr Vector2 -> Ptr Vector2 -> Ptr Vector2 -> CFloat -> Ptr Color -> IO ()
 
-foreign import ccall safe "rl_bindings.h DrawLineBezierCubic_" c'drawLineBezierCubic :: Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Vector2 -> CFloat -> Ptr Raylib.Types.Color -> IO ()
+foreign import ccall safe "rl_bindings.h DrawLineBezierCubic_" c'drawLineBezierCubic :: Ptr Vector2 -> Ptr Vector2 -> Ptr Vector2 -> Ptr Vector2 -> CFloat -> Ptr Color -> IO ()
 
-foreign import ccall safe "rl_bindings.h DrawLineStrip_" c'drawLineStrip :: Ptr Raylib.Types.Vector2 -> CInt -> Ptr Raylib.Types.Color -> IO ()
+foreign import ccall safe "rl_bindings.h DrawLineStrip_" c'drawLineStrip :: Ptr Vector2 -> CInt -> Ptr Color -> IO ()
 
-foreign import ccall safe "rl_bindings.h DrawCircle_" c'drawCircle :: CInt -> CInt -> CFloat -> Ptr Raylib.Types.Color -> IO ()
+foreign import ccall safe "rl_bindings.h DrawCircle_" c'drawCircle :: CInt -> CInt -> CFloat -> Ptr Color -> IO ()
 
-foreign import ccall safe "rl_bindings.h DrawCircleSector_" c'drawCircleSector :: Ptr Raylib.Types.Vector2 -> CFloat -> CFloat -> CFloat -> CInt -> Ptr Raylib.Types.Color -> IO ()
+foreign import ccall safe "rl_bindings.h DrawCircleSector_" c'drawCircleSector :: Ptr Vector2 -> CFloat -> CFloat -> CFloat -> CInt -> Ptr Color -> IO ()
 
-foreign import ccall safe "rl_bindings.h DrawCircleSectorLines_" c'drawCircleSectorLines :: Ptr Raylib.Types.Vector2 -> CFloat -> CFloat -> CFloat -> CInt -> Ptr Raylib.Types.Color -> IO ()
+foreign import ccall safe "rl_bindings.h DrawCircleSectorLines_" c'drawCircleSectorLines :: Ptr Vector2 -> CFloat -> CFloat -> CFloat -> CInt -> Ptr Color -> IO ()
 
-foreign import ccall safe "rl_bindings.h DrawCircleGradient_" c'drawCircleGradient :: CInt -> CInt -> CFloat -> Ptr Raylib.Types.Color -> Ptr Raylib.Types.Color -> IO ()
+foreign import ccall safe "rl_bindings.h DrawCircleGradient_" c'drawCircleGradient :: CInt -> CInt -> CFloat -> Ptr Color -> Ptr Color -> IO ()
 
-foreign import ccall safe "rl_bindings.h DrawCircleV_" c'drawCircleV :: Ptr Raylib.Types.Vector2 -> CFloat -> Ptr Raylib.Types.Color -> IO ()
+foreign import ccall safe "rl_bindings.h DrawCircleV_" c'drawCircleV :: Ptr Vector2 -> CFloat -> Ptr Color -> IO ()
 
-foreign import ccall safe "rl_bindings.h DrawCircleLines_" c'drawCircleLines :: CInt -> CInt -> CFloat -> Ptr Raylib.Types.Color -> IO ()
+foreign import ccall safe "rl_bindings.h DrawCircleLines_" c'drawCircleLines :: CInt -> CInt -> CFloat -> Ptr Color -> IO ()
 
-foreign import ccall safe "rl_bindings.h DrawEllipse_" c'drawEllipse :: CInt -> CInt -> CFloat -> CFloat -> Ptr Raylib.Types.Color -> IO ()
+foreign import ccall safe "rl_bindings.h DrawEllipse_" c'drawEllipse :: CInt -> CInt -> CFloat -> CFloat -> Ptr Color -> IO ()
 
-foreign import ccall safe "rl_bindings.h DrawEllipseLines_" c'drawEllipseLines :: CInt -> CInt -> CFloat -> CFloat -> Ptr Raylib.Types.Color -> IO ()
+foreign import ccall safe "rl_bindings.h DrawEllipseLines_" c'drawEllipseLines :: CInt -> CInt -> CFloat -> CFloat -> Ptr Color -> IO ()
 
-foreign import ccall safe "rl_bindings.h DrawRing_" c'drawRing :: Ptr Raylib.Types.Vector2 -> CFloat -> CFloat -> CFloat -> CFloat -> CInt -> Ptr Raylib.Types.Color -> IO ()
+foreign import ccall safe "rl_bindings.h DrawRing_" c'drawRing :: Ptr Vector2 -> CFloat -> CFloat -> CFloat -> CFloat -> CInt -> Ptr Color -> IO ()
 
-foreign import ccall safe "rl_bindings.h DrawRingLines_" c'drawRingLines :: Ptr Raylib.Types.Vector2 -> CFloat -> CFloat -> CFloat -> CFloat -> CInt -> Ptr Raylib.Types.Color -> IO ()
+foreign import ccall safe "rl_bindings.h DrawRingLines_" c'drawRingLines :: Ptr Vector2 -> CFloat -> CFloat -> CFloat -> CFloat -> CInt -> Ptr Color -> IO ()
 
-foreign import ccall safe "rl_bindings.h DrawRectangle_" c'drawRectangle :: CInt -> CInt -> CInt -> CInt -> Ptr Raylib.Types.Color -> IO ()
+foreign import ccall safe "rl_bindings.h DrawRectangle_" c'drawRectangle :: CInt -> CInt -> CInt -> CInt -> Ptr Color -> IO ()
 
-foreign import ccall safe "rl_bindings.h DrawRectangleV_" c'drawRectangleV :: Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Color -> IO ()
+foreign import ccall safe "rl_bindings.h DrawRectangleV_" c'drawRectangleV :: Ptr Vector2 -> Ptr Vector2 -> Ptr Color -> IO ()
 
-foreign import ccall safe "rl_bindings.h DrawRectangleRec_" c'drawRectangleRec :: Ptr Raylib.Types.Rectangle -> Ptr Raylib.Types.Color -> IO ()
+foreign import ccall safe "rl_bindings.h DrawRectangleRec_" c'drawRectangleRec :: Ptr Rectangle -> Ptr Color -> IO ()
 
-foreign import ccall safe "rl_bindings.h DrawRectanglePro_" c'drawRectanglePro :: Ptr Raylib.Types.Rectangle -> Ptr Raylib.Types.Vector2 -> CFloat -> Ptr Raylib.Types.Color -> IO ()
+foreign import ccall safe "rl_bindings.h DrawRectanglePro_" c'drawRectanglePro :: Ptr Rectangle -> Ptr Vector2 -> CFloat -> Ptr Color -> IO ()
 
-foreign import ccall safe "rl_bindings.h DrawRectangleGradientV_" c'drawRectangleGradientV :: CInt -> CInt -> CInt -> CInt -> Ptr Raylib.Types.Color -> Ptr Raylib.Types.Color -> IO ()
+foreign import ccall safe "rl_bindings.h DrawRectangleGradientV_" c'drawRectangleGradientV :: CInt -> CInt -> CInt -> CInt -> Ptr Color -> Ptr Color -> IO ()
 
-foreign import ccall safe "rl_bindings.h DrawRectangleGradientH_" c'drawRectangleGradientH :: CInt -> CInt -> CInt -> CInt -> Ptr Raylib.Types.Color -> Ptr Raylib.Types.Color -> IO ()
+foreign import ccall safe "rl_bindings.h DrawRectangleGradientH_" c'drawRectangleGradientH :: CInt -> CInt -> CInt -> CInt -> Ptr Color -> Ptr Color -> IO ()
 
-foreign import ccall safe "rl_bindings.h DrawRectangleGradientEx_" c'drawRectangleGradientEx :: Ptr Raylib.Types.Rectangle -> Ptr Raylib.Types.Color -> Ptr Raylib.Types.Color -> Ptr Raylib.Types.Color -> Ptr Raylib.Types.Color -> IO ()
+foreign import ccall safe "rl_bindings.h DrawRectangleGradientEx_" c'drawRectangleGradientEx :: Ptr Rectangle -> Ptr Color -> Ptr Color -> Ptr Color -> Ptr Color -> IO ()
 
-foreign import ccall safe "rl_bindings.h DrawRectangleLines_" c'drawRectangleLines :: CInt -> CInt -> CInt -> CInt -> Ptr Raylib.Types.Color -> IO ()
+foreign import ccall safe "rl_bindings.h DrawRectangleLines_" c'drawRectangleLines :: CInt -> CInt -> CInt -> CInt -> Ptr Color -> IO ()
 
-foreign import ccall safe "rl_bindings.h DrawRectangleLinesEx_" c'drawRectangleLinesEx :: Ptr Raylib.Types.Rectangle -> CFloat -> Ptr Raylib.Types.Color -> IO ()
+foreign import ccall safe "rl_bindings.h DrawRectangleLinesEx_" c'drawRectangleLinesEx :: Ptr Rectangle -> CFloat -> Ptr Color -> IO ()
 
-foreign import ccall safe "rl_bindings.h DrawRectangleRounded_" c'drawRectangleRounded :: Ptr Raylib.Types.Rectangle -> CFloat -> CInt -> Ptr Raylib.Types.Color -> IO ()
+foreign import ccall safe "rl_bindings.h DrawRectangleRounded_" c'drawRectangleRounded :: Ptr Rectangle -> CFloat -> CInt -> Ptr Color -> IO ()
 
-foreign import ccall safe "rl_bindings.h DrawRectangleRoundedLines_" c'drawRectangleRoundedLines :: Ptr Raylib.Types.Rectangle -> CFloat -> CInt -> CFloat -> Ptr Raylib.Types.Color -> IO ()
+foreign import ccall safe "rl_bindings.h DrawRectangleRoundedLines_" c'drawRectangleRoundedLines :: Ptr Rectangle -> CFloat -> CInt -> CFloat -> Ptr Color -> IO ()
 
-foreign import ccall safe "rl_bindings.h DrawTriangle_" c'drawTriangle :: Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Color -> IO ()
+foreign import ccall safe "rl_bindings.h DrawTriangle_" c'drawTriangle :: Ptr Vector2 -> Ptr Vector2 -> Ptr Vector2 -> Ptr Color -> IO ()
 
-foreign import ccall safe "rl_bindings.h DrawTriangleLines_" c'drawTriangleLines :: Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Color -> IO ()
+foreign import ccall safe "rl_bindings.h DrawTriangleLines_" c'drawTriangleLines :: Ptr Vector2 -> Ptr Vector2 -> Ptr Vector2 -> Ptr Color -> IO ()
 
-foreign import ccall safe "rl_bindings.h DrawTriangleFan_" c'drawTriangleFan :: Ptr Raylib.Types.Vector2 -> CInt -> Ptr Raylib.Types.Color -> IO ()
+foreign import ccall safe "rl_bindings.h DrawTriangleFan_" c'drawTriangleFan :: Ptr Vector2 -> CInt -> Ptr Color -> IO ()
 
-foreign import ccall safe "rl_bindings.h DrawTriangleStrip_" c'drawTriangleStrip :: Ptr Raylib.Types.Vector2 -> CInt -> Ptr Raylib.Types.Color -> IO ()
+foreign import ccall safe "rl_bindings.h DrawTriangleStrip_" c'drawTriangleStrip :: Ptr Vector2 -> CInt -> Ptr Color -> IO ()
 
-foreign import ccall safe "rl_bindings.h DrawPoly_" c'drawPoly :: Ptr Raylib.Types.Vector2 -> CInt -> CFloat -> CFloat -> Ptr Raylib.Types.Color -> IO ()
+foreign import ccall safe "rl_bindings.h DrawPoly_" c'drawPoly :: Ptr Vector2 -> CInt -> CFloat -> CFloat -> Ptr Color -> IO ()
 
-foreign import ccall safe "rl_bindings.h DrawPolyLines_" c'drawPolyLines :: Ptr Raylib.Types.Vector2 -> CInt -> CFloat -> CFloat -> Ptr Raylib.Types.Color -> IO ()
+foreign import ccall safe "rl_bindings.h DrawPolyLines_" c'drawPolyLines :: Ptr Vector2 -> CInt -> CFloat -> CFloat -> Ptr Color -> IO ()
 
-foreign import ccall safe "rl_bindings.h DrawPolyLinesEx_" c'drawPolyLinesEx :: Ptr Raylib.Types.Vector2 -> CInt -> CFloat -> CFloat -> CFloat -> Ptr Raylib.Types.Color -> IO ()
+foreign import ccall safe "rl_bindings.h DrawPolyLinesEx_" c'drawPolyLinesEx :: Ptr Vector2 -> CInt -> CFloat -> CFloat -> CFloat -> Ptr Color -> IO ()
 
-foreign import ccall safe "rl_bindings.h CheckCollisionRecs_" c'checkCollisionRecs :: Ptr Raylib.Types.Rectangle -> Ptr Raylib.Types.Rectangle -> IO CBool
+foreign import ccall safe "rl_bindings.h CheckCollisionRecs_" c'checkCollisionRecs :: Ptr Rectangle -> Ptr Rectangle -> IO CBool
 
-foreign import ccall safe "rl_bindings.h CheckCollisionCircles_" c'checkCollisionCircles :: Ptr Raylib.Types.Vector2 -> CFloat -> Ptr Raylib.Types.Vector2 -> CFloat -> IO CBool
+foreign import ccall safe "rl_bindings.h CheckCollisionCircles_" c'checkCollisionCircles :: Ptr Vector2 -> CFloat -> Ptr Vector2 -> CFloat -> IO CBool
 
-foreign import ccall safe "rl_bindings.h CheckCollisionCircleRec_" c'checkCollisionCircleRec :: Ptr Raylib.Types.Vector2 -> CFloat -> Ptr Raylib.Types.Rectangle -> IO CBool
+foreign import ccall safe "rl_bindings.h CheckCollisionCircleRec_" c'checkCollisionCircleRec :: Ptr Vector2 -> CFloat -> Ptr Rectangle -> IO CBool
 
-foreign import ccall safe "rl_bindings.h CheckCollisionPointRec_" c'checkCollisionPointRec :: Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Rectangle -> IO CBool
+foreign import ccall safe "rl_bindings.h CheckCollisionPointRec_" c'checkCollisionPointRec :: Ptr Vector2 -> Ptr Rectangle -> IO CBool
 
-foreign import ccall safe "rl_bindings.h CheckCollisionPointCircle_" c'checkCollisionPointCircle :: Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Vector2 -> CFloat -> IO CBool
+foreign import ccall safe "rl_bindings.h CheckCollisionPointCircle_" c'checkCollisionPointCircle :: Ptr Vector2 -> Ptr Vector2 -> CFloat -> IO CBool
 
-foreign import ccall safe "rl_bindings.h CheckCollisionPointTriangle_" c'checkCollisionPointTriangle :: Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Vector2 -> IO CBool
+foreign import ccall safe "rl_bindings.h CheckCollisionPointTriangle_" c'checkCollisionPointTriangle :: Ptr Vector2 -> Ptr Vector2 -> Ptr Vector2 -> Ptr Vector2 -> IO CBool
 
-foreign import ccall safe "rl_bindings.h CheckCollisionLines_" c'checkCollisionLines :: Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Vector2 -> IO CBool
+foreign import ccall safe "rl_bindings.h CheckCollisionLines_" c'checkCollisionLines :: Ptr Vector2 -> Ptr Vector2 -> Ptr Vector2 -> Ptr Vector2 -> Ptr Vector2 -> IO CBool
 
-foreign import ccall safe "rl_bindings.h CheckCollisionPointLine_" c'checkCollisionPointLine :: Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Vector2 -> CInt -> IO CBool
+foreign import ccall safe "rl_bindings.h CheckCollisionPointLine_" c'checkCollisionPointLine :: Ptr Vector2 -> Ptr Vector2 -> Ptr Vector2 -> CInt -> IO CBool
 
-foreign import ccall safe "rl_bindings.h GetCollisionRec_" c'getCollisionRec :: Ptr Raylib.Types.Rectangle -> Ptr Raylib.Types.Rectangle -> IO (Ptr Raylib.Types.Rectangle)
+foreign import ccall safe "rl_bindings.h GetCollisionRec_" c'getCollisionRec :: Ptr Rectangle -> Ptr Rectangle -> IO (Ptr Rectangle)
 
-foreign import ccall safe "rl_bindings.h LoadImage_" c'loadImage :: CString -> IO (Ptr Raylib.Types.Image)
+foreign import ccall safe "rl_bindings.h LoadImage_" c'loadImage :: CString -> IO (Ptr Image)
 
-foreign import ccall safe "rl_bindings.h LoadImageRaw_" c'loadImageRaw :: CString -> CInt -> CInt -> CInt -> CInt -> IO (Ptr Raylib.Types.Image)
+foreign import ccall safe "rl_bindings.h LoadImageRaw_" c'loadImageRaw :: CString -> CInt -> CInt -> CInt -> CInt -> IO (Ptr Image)
 
-foreign import ccall safe "rl_bindings.h LoadImageAnim_" c'loadImageAnim :: CString -> Ptr CInt -> IO (Ptr Raylib.Types.Image)
+foreign import ccall safe "rl_bindings.h LoadImageAnim_" c'loadImageAnim :: CString -> Ptr CInt -> IO (Ptr Image)
 
-foreign import ccall safe "rl_bindings.h LoadImageFromMemory_" c'loadImageFromMemory :: CString -> Ptr CUChar -> CInt -> IO (Ptr Raylib.Types.Image)
+foreign import ccall safe "rl_bindings.h LoadImageFromMemory_" c'loadImageFromMemory :: CString -> Ptr CUChar -> CInt -> IO (Ptr Image)
 
-foreign import ccall safe "rl_bindings.h LoadImageFromTexture_" c'loadImageFromTexture :: Ptr Raylib.Types.Texture -> IO (Ptr Raylib.Types.Image)
+foreign import ccall safe "rl_bindings.h LoadImageFromTexture_" c'loadImageFromTexture :: Ptr Texture -> IO (Ptr Image)
 
-foreign import ccall safe "rl_bindings.h LoadImageFromScreen_" c'loadImageFromScreen :: IO (Ptr Raylib.Types.Image)
+foreign import ccall safe "rl_bindings.h LoadImageFromScreen_" c'loadImageFromScreen :: IO (Ptr Image)
 
 foreign import ccall safe "rl_bindings.h IsImageReady_" c'isImageReady :: Ptr Image -> IO CBool
 
-foreign import ccall safe "rl_bindings.h UnloadImage_" c'unloadImage :: Ptr Raylib.Types.Image -> IO ()
+foreign import ccall safe "rl_bindings.h UnloadImage_" c'unloadImage :: Ptr Image -> IO ()
 
-foreign import ccall safe "rl_bindings.h ExportImage_" c'exportImage :: Ptr Raylib.Types.Image -> CString -> IO CBool
+foreign import ccall safe "rl_bindings.h ExportImage_" c'exportImage :: Ptr Image -> CString -> IO CBool
 
-foreign import ccall safe "rl_bindings.h ExportImageAsCode_" c'exportImageAsCode :: Ptr Raylib.Types.Image -> CString -> IO CBool
+foreign import ccall safe "rl_bindings.h ExportImageAsCode_" c'exportImageAsCode :: Ptr Image -> CString -> IO CBool
 
-foreign import ccall safe "rl_bindings.h GenImageColor_" c'genImageColor :: CInt -> CInt -> Ptr Raylib.Types.Color -> IO (Ptr Raylib.Types.Image)
+foreign import ccall safe "rl_bindings.h GenImageColor_" c'genImageColor :: CInt -> CInt -> Ptr Color -> IO (Ptr Image)
 
-foreign import ccall safe "rl_bindings.h GenImageGradientV_" c'genImageGradientV :: CInt -> CInt -> Ptr Raylib.Types.Color -> Ptr Raylib.Types.Color -> IO (Ptr Raylib.Types.Image)
+foreign import ccall safe "rl_bindings.h GenImageGradientV_" c'genImageGradientV :: CInt -> CInt -> Ptr Color -> Ptr Color -> IO (Ptr Image)
 
-foreign import ccall safe "rl_bindings.h GenImageGradientH_" c'genImageGradientH :: CInt -> CInt -> Ptr Raylib.Types.Color -> Ptr Raylib.Types.Color -> IO (Ptr Raylib.Types.Image)
+foreign import ccall safe "rl_bindings.h GenImageGradientH_" c'genImageGradientH :: CInt -> CInt -> Ptr Color -> Ptr Color -> IO (Ptr Image)
 
-foreign import ccall safe "rl_bindings.h GenImageGradientRadial_" c'genImageGradientRadial :: CInt -> CInt -> CFloat -> Ptr Raylib.Types.Color -> Ptr Raylib.Types.Color -> IO (Ptr Raylib.Types.Image)
+foreign import ccall safe "rl_bindings.h GenImageGradientRadial_" c'genImageGradientRadial :: CInt -> CInt -> CFloat -> Ptr Color -> Ptr Color -> IO (Ptr Image)
 
-foreign import ccall safe "rl_bindings.h GenImageChecked_" c'genImageChecked :: CInt -> CInt -> CInt -> CInt -> Ptr Raylib.Types.Color -> Ptr Raylib.Types.Color -> IO (Ptr Raylib.Types.Image)
+foreign import ccall safe "rl_bindings.h GenImageChecked_" c'genImageChecked :: CInt -> CInt -> CInt -> CInt -> Ptr Color -> Ptr Color -> IO (Ptr Image)
 
-foreign import ccall safe "rl_bindings.h GenImageWhiteNoise_" c'genImageWhiteNoise :: CInt -> CInt -> CFloat -> IO (Ptr Raylib.Types.Image)
+foreign import ccall safe "rl_bindings.h GenImageWhiteNoise_" c'genImageWhiteNoise :: CInt -> CInt -> CFloat -> IO (Ptr Image)
 
-foreign import ccall safe "rl_bindings.h GenImagePerlinNoise_" c'genImagePerlinNoise :: CInt -> CInt -> CInt -> CInt -> CFloat -> IO (Ptr Raylib.Types.Image)
+foreign import ccall safe "rl_bindings.h GenImagePerlinNoise_" c'genImagePerlinNoise :: CInt -> CInt -> CInt -> CInt -> CFloat -> IO (Ptr Image)
 
-foreign import ccall safe "rl_bindings.h GenImageCellular_" c'genImageCellular :: CInt -> CInt -> CInt -> IO (Ptr Raylib.Types.Image)
+foreign import ccall safe "rl_bindings.h GenImageCellular_" c'genImageCellular :: CInt -> CInt -> CInt -> IO (Ptr Image)
 
-foreign import ccall safe "rl_bindings.h GenImageText_" c'genImageText :: CInt -> CInt -> CString -> IO (Ptr Raylib.Types.Image)
+foreign import ccall safe "rl_bindings.h GenImageText_" c'genImageText :: CInt -> CInt -> CString -> IO (Ptr Image)
 
-foreign import ccall safe "rl_bindings.h ImageCopy_" c'imageCopy :: Ptr Raylib.Types.Image -> IO (Ptr Raylib.Types.Image)
+foreign import ccall safe "rl_bindings.h ImageCopy_" c'imageCopy :: Ptr Image -> IO (Ptr Image)
 
-foreign import ccall safe "rl_bindings.h ImageFromImage_" c'imageFromImage :: Ptr Raylib.Types.Image -> Ptr Raylib.Types.Rectangle -> IO (Ptr Raylib.Types.Image)
+foreign import ccall safe "rl_bindings.h ImageFromImage_" c'imageFromImage :: Ptr Image -> Ptr Rectangle -> IO (Ptr Image)
 
-foreign import ccall safe "rl_bindings.h ImageText_" c'imageText :: CString -> CInt -> Ptr Raylib.Types.Color -> IO (Ptr Raylib.Types.Image)
+foreign import ccall safe "rl_bindings.h ImageText_" c'imageText :: CString -> CInt -> Ptr Color -> IO (Ptr Image)
 
-foreign import ccall safe "rl_bindings.h ImageTextEx_" c'imageTextEx :: Ptr Raylib.Types.Font -> CString -> CFloat -> CFloat -> Ptr Raylib.Types.Color -> IO (Ptr Raylib.Types.Image)
+foreign import ccall safe "rl_bindings.h ImageTextEx_" c'imageTextEx :: Ptr Font -> CString -> CFloat -> CFloat -> Ptr Color -> IO (Ptr Image)
 
 foreign import ccall safe "raylib.h ImageFormat"
   c'imageFormat ::
-    Ptr Raylib.Types.Image -> CInt -> IO ()
+    Ptr Image -> CInt -> IO ()
 
-foreign import ccall safe "rl_bindings.h ImageToPOT_" c'imageToPOT :: Ptr Raylib.Types.Image -> Ptr Raylib.Types.Color -> IO ()
+foreign import ccall safe "rl_bindings.h ImageToPOT_" c'imageToPOT :: Ptr Image -> Ptr Color -> IO ()
 
-foreign import ccall safe "rl_bindings.h ImageCrop_" c'imageCrop :: Ptr Raylib.Types.Image -> Ptr Raylib.Types.Rectangle -> IO ()
+foreign import ccall safe "rl_bindings.h ImageCrop_" c'imageCrop :: Ptr Image -> Ptr Rectangle -> IO ()
 
 foreign import ccall safe "raylib.h ImageAlphaCrop"
   c'imageAlphaCrop ::
-    Ptr Raylib.Types.Image -> CFloat -> IO ()
+    Ptr Image -> CFloat -> IO ()
 
-foreign import ccall safe "rl_bindings.h ImageAlphaClear_" c'imageAlphaClear :: Ptr Raylib.Types.Image -> Ptr Raylib.Types.Color -> CFloat -> IO ()
+foreign import ccall safe "rl_bindings.h ImageAlphaClear_" c'imageAlphaClear :: Ptr Image -> Ptr Color -> CFloat -> IO ()
 
-foreign import ccall safe "rl_bindings.h ImageAlphaMask_" c'imageAlphaMask :: Ptr Raylib.Types.Image -> Ptr Raylib.Types.Image -> IO ()
+foreign import ccall safe "rl_bindings.h ImageAlphaMask_" c'imageAlphaMask :: Ptr Image -> Ptr Image -> IO ()
 
 foreign import ccall safe "raylib.h ImageAlphaPremultiply"
   c'imageAlphaPremultiply ::
-    Ptr Raylib.Types.Image -> IO ()
+    Ptr Image -> IO ()
 
 foreign import ccall safe "raylib.h ImageBlurGaussian"
   c'imageBlurGaussian ::
-    Ptr Raylib.Types.Image -> CInt -> IO ()
+    Ptr Image -> CInt -> IO ()
 
 foreign import ccall safe "raylib.h ImageResize"
   c'imageResize ::
-    Ptr Raylib.Types.Image -> CInt -> CInt -> IO ()
+    Ptr Image -> CInt -> CInt -> IO ()
 
 foreign import ccall safe "raylib.h ImageResizeNN"
   c'imageResizeNN ::
-    Ptr Raylib.Types.Image -> CInt -> CInt -> IO ()
+    Ptr Image -> CInt -> CInt -> IO ()
 
-foreign import ccall safe "rl_bindings.h ImageResizeCanvas_" c'imageResizeCanvas :: Ptr Raylib.Types.Image -> CInt -> CInt -> CInt -> CInt -> Ptr Raylib.Types.Color -> IO ()
+foreign import ccall safe "rl_bindings.h ImageResizeCanvas_" c'imageResizeCanvas :: Ptr Image -> CInt -> CInt -> CInt -> CInt -> Ptr Color -> IO ()
 
 foreign import ccall safe "raylib.h ImageMipmaps"
   c'imageMipmaps ::
-    Ptr Raylib.Types.Image -> IO ()
+    Ptr Image -> IO ()
 
 foreign import ccall safe "raylib.h ImageDither"
   c'imageDither ::
-    Ptr Raylib.Types.Image -> CInt -> CInt -> CInt -> CInt -> IO ()
+    Ptr Image -> CInt -> CInt -> CInt -> CInt -> IO ()
 
 foreign import ccall safe "raylib.h ImageFlipVertical"
   c'imageFlipVertical ::
-    Ptr Raylib.Types.Image -> IO ()
+    Ptr Image -> IO ()
 
 foreign import ccall safe "raylib.h ImageFlipHorizontal"
   c'imageFlipHorizontal ::
-    Ptr Raylib.Types.Image -> IO ()
+    Ptr Image -> IO ()
 
 foreign import ccall safe "raylib.h ImageRotateCW"
   c'imageRotateCW ::
-    Ptr Raylib.Types.Image -> IO ()
+    Ptr Image -> IO ()
 
 foreign import ccall safe "raylib.h ImageRotateCCW"
   c'imageRotateCCW ::
-    Ptr Raylib.Types.Image -> IO ()
+    Ptr Image -> IO ()
 
-foreign import ccall safe "rl_bindings.h ImageColorTint_" c'imageColorTint :: Ptr Raylib.Types.Image -> Ptr Raylib.Types.Color -> IO ()
+foreign import ccall safe "rl_bindings.h ImageColorTint_" c'imageColorTint :: Ptr Image -> Ptr Color -> IO ()
 
 foreign import ccall safe "raylib.h ImageColorInvert"
   c'imageColorInvert ::
-    Ptr Raylib.Types.Image -> IO ()
+    Ptr Image -> IO ()
 
 foreign import ccall safe "raylib.h ImageColorGrayscale"
   c'imageColorGrayscale ::
-    Ptr Raylib.Types.Image -> IO ()
+    Ptr Image -> IO ()
 
 foreign import ccall safe "raylib.h ImageColorContrast"
   c'imageColorContrast ::
-    Ptr Raylib.Types.Image -> CFloat -> IO ()
+    Ptr Image -> CFloat -> IO ()
 
 foreign import ccall safe "raylib.h ImageColorBrightness"
   c'imageColorBrightness ::
-    Ptr Raylib.Types.Image -> CInt -> IO ()
+    Ptr Image -> CInt -> IO ()
 
-foreign import ccall safe "rl_bindings.h ImageColorReplace_" c'imageColorReplace :: Ptr Raylib.Types.Image -> Ptr Raylib.Types.Color -> Ptr Raylib.Types.Color -> IO ()
+foreign import ccall safe "rl_bindings.h ImageColorReplace_" c'imageColorReplace :: Ptr Image -> Ptr Color -> Ptr Color -> IO ()
 
-foreign import ccall safe "rl_bindings.h LoadImageColors_" c'loadImageColors :: Ptr Raylib.Types.Image -> IO (Ptr Raylib.Types.Color)
+foreign import ccall safe "rl_bindings.h LoadImageColors_" c'loadImageColors :: Ptr Image -> IO (Ptr Color)
 
-foreign import ccall safe "rl_bindings.h LoadImagePalette_" c'loadImagePalette :: Ptr Raylib.Types.Image -> CInt -> Ptr CInt -> IO (Ptr Raylib.Types.Color)
+foreign import ccall safe "rl_bindings.h LoadImagePalette_" c'loadImagePalette :: Ptr Image -> CInt -> Ptr CInt -> IO (Ptr Color)
 
-foreign import ccall safe "rl_bindings.h GetImageAlphaBorder_" c'getImageAlphaBorder :: Ptr Raylib.Types.Image -> CFloat -> IO (Ptr Raylib.Types.Rectangle)
+foreign import ccall safe "rl_bindings.h GetImageAlphaBorder_" c'getImageAlphaBorder :: Ptr Image -> CFloat -> IO (Ptr Rectangle)
 
-foreign import ccall safe "rl_bindings.h GetImageColor_" c'getImageColor :: Ptr Raylib.Types.Image -> CInt -> CInt -> IO (Ptr Raylib.Types.Color)
+foreign import ccall safe "rl_bindings.h GetImageColor_" c'getImageColor :: Ptr Image -> CInt -> CInt -> IO (Ptr Color)
 
-foreign import ccall safe "rl_bindings.h ImageClearBackground_" c'imageClearBackground :: Ptr Raylib.Types.Image -> Ptr Raylib.Types.Color -> IO ()
+foreign import ccall safe "rl_bindings.h ImageClearBackground_" c'imageClearBackground :: Ptr Image -> Ptr Color -> IO ()
 
-foreign import ccall safe "rl_bindings.h ImageDrawPixel_" c'imageDrawPixel :: Ptr Raylib.Types.Image -> CInt -> CInt -> Ptr Raylib.Types.Color -> IO ()
+foreign import ccall safe "rl_bindings.h ImageDrawPixel_" c'imageDrawPixel :: Ptr Image -> CInt -> CInt -> Ptr Color -> IO ()
 
-foreign import ccall safe "rl_bindings.h ImageDrawPixelV_" c'imageDrawPixelV :: Ptr Raylib.Types.Image -> Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Color -> IO ()
+foreign import ccall safe "rl_bindings.h ImageDrawPixelV_" c'imageDrawPixelV :: Ptr Image -> Ptr Vector2 -> Ptr Color -> IO ()
 
-foreign import ccall safe "rl_bindings.h ImageDrawLine_" c'imageDrawLine :: Ptr Raylib.Types.Image -> CInt -> CInt -> CInt -> CInt -> Ptr Raylib.Types.Color -> IO ()
+foreign import ccall safe "rl_bindings.h ImageDrawLine_" c'imageDrawLine :: Ptr Image -> CInt -> CInt -> CInt -> CInt -> Ptr Color -> IO ()
 
-foreign import ccall safe "rl_bindings.h ImageDrawLineV_" c'imageDrawLineV :: Ptr Raylib.Types.Image -> Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Color -> IO ()
+foreign import ccall safe "rl_bindings.h ImageDrawLineV_" c'imageDrawLineV :: Ptr Image -> Ptr Vector2 -> Ptr Vector2 -> Ptr Color -> IO ()
 
-foreign import ccall safe "rl_bindings.h ImageDrawCircle_" c'imageDrawCircle :: Ptr Raylib.Types.Image -> CInt -> CInt -> CInt -> Ptr Raylib.Types.Color -> IO ()
+foreign import ccall safe "rl_bindings.h ImageDrawCircle_" c'imageDrawCircle :: Ptr Image -> CInt -> CInt -> CInt -> Ptr Color -> IO ()
 
-foreign import ccall safe "rl_bindings.h ImageDrawCircleV_" c'imageDrawCircleV :: Ptr Raylib.Types.Image -> Ptr Raylib.Types.Vector2 -> CInt -> Ptr Raylib.Types.Color -> IO ()
+foreign import ccall safe "rl_bindings.h ImageDrawCircleV_" c'imageDrawCircleV :: Ptr Image -> Ptr Vector2 -> CInt -> Ptr Color -> IO ()
 
-foreign import ccall safe "rl_bindings.h ImageDrawCircleLines_" c'imageDrawCircleLines :: Ptr Raylib.Types.Image -> CInt -> CInt -> CInt -> Ptr Raylib.Types.Color -> IO ()
+foreign import ccall safe "rl_bindings.h ImageDrawCircleLines_" c'imageDrawCircleLines :: Ptr Image -> CInt -> CInt -> CInt -> Ptr Color -> IO ()
 
-foreign import ccall safe "rl_bindings.h ImageDrawCircleLinesV_" c'imageDrawCircleLinesV :: Ptr Raylib.Types.Image -> Ptr Raylib.Types.Vector2 -> CInt -> Ptr Raylib.Types.Color -> IO ()
+foreign import ccall safe "rl_bindings.h ImageDrawCircleLinesV_" c'imageDrawCircleLinesV :: Ptr Image -> Ptr Vector2 -> CInt -> Ptr Color -> IO ()
 
-foreign import ccall safe "rl_bindings.h ImageDrawRectangle_" c'imageDrawRectangle :: Ptr Raylib.Types.Image -> CInt -> CInt -> CInt -> CInt -> Ptr Raylib.Types.Color -> IO ()
+foreign import ccall safe "rl_bindings.h ImageDrawRectangle_" c'imageDrawRectangle :: Ptr Image -> CInt -> CInt -> CInt -> CInt -> Ptr Color -> IO ()
 
-foreign import ccall safe "rl_bindings.h ImageDrawRectangleV_" c'imageDrawRectangleV :: Ptr Raylib.Types.Image -> Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Color -> IO ()
+foreign import ccall safe "rl_bindings.h ImageDrawRectangleV_" c'imageDrawRectangleV :: Ptr Image -> Ptr Vector2 -> Ptr Vector2 -> Ptr Color -> IO ()
 
-foreign import ccall safe "rl_bindings.h ImageDrawRectangleRec_" c'imageDrawRectangleRec :: Ptr Raylib.Types.Image -> Ptr Raylib.Types.Rectangle -> Ptr Raylib.Types.Color -> IO ()
+foreign import ccall safe "rl_bindings.h ImageDrawRectangleRec_" c'imageDrawRectangleRec :: Ptr Image -> Ptr Rectangle -> Ptr Color -> IO ()
 
-foreign import ccall safe "rl_bindings.h ImageDrawRectangleLines_" c'imageDrawRectangleLines :: Ptr Raylib.Types.Image -> Ptr Raylib.Types.Rectangle -> CInt -> Ptr Raylib.Types.Color -> IO ()
+foreign import ccall safe "rl_bindings.h ImageDrawRectangleLines_" c'imageDrawRectangleLines :: Ptr Image -> Ptr Rectangle -> CInt -> Ptr Color -> IO ()
 
-foreign import ccall safe "rl_bindings.h ImageDraw_" c'imageDraw :: Ptr Raylib.Types.Image -> Ptr Raylib.Types.Image -> Ptr Raylib.Types.Rectangle -> Ptr Raylib.Types.Rectangle -> Ptr Raylib.Types.Color -> IO ()
+foreign import ccall safe "rl_bindings.h ImageDraw_" c'imageDraw :: Ptr Image -> Ptr Image -> Ptr Rectangle -> Ptr Rectangle -> Ptr Color -> IO ()
 
-foreign import ccall safe "rl_bindings.h ImageDrawText_" c'imageDrawText :: Ptr Raylib.Types.Image -> CString -> CInt -> CInt -> CInt -> Ptr Raylib.Types.Color -> IO ()
+foreign import ccall safe "rl_bindings.h ImageDrawText_" c'imageDrawText :: Ptr Image -> CString -> CInt -> CInt -> CInt -> Ptr Color -> IO ()
 
-foreign import ccall safe "rl_bindings.h ImageDrawTextEx_" c'imageDrawTextEx :: Ptr Raylib.Types.Image -> Ptr Raylib.Types.Font -> CString -> Ptr Raylib.Types.Vector2 -> CFloat -> CFloat -> Ptr Raylib.Types.Color -> IO ()
+foreign import ccall safe "rl_bindings.h ImageDrawTextEx_" c'imageDrawTextEx :: Ptr Image -> Ptr Font -> CString -> Ptr Vector2 -> CFloat -> CFloat -> Ptr Color -> IO ()
 
-foreign import ccall safe "rl_bindings.h LoadTexture_" c'loadTexture :: CString -> IO (Ptr Raylib.Types.Texture)
+foreign import ccall safe "rl_bindings.h LoadTexture_" c'loadTexture :: CString -> IO (Ptr Texture)
 
-foreign import ccall safe "rl_bindings.h LoadTextureFromImage_" c'loadTextureFromImage :: Ptr Raylib.Types.Image -> IO (Ptr Raylib.Types.Texture)
+foreign import ccall safe "rl_bindings.h LoadTextureFromImage_" c'loadTextureFromImage :: Ptr Image -> IO (Ptr Texture)
 
-foreign import ccall safe "rl_bindings.h LoadTextureCubemap_" c'loadTextureCubemap :: Ptr Raylib.Types.Image -> CInt -> IO (Ptr Raylib.Types.Texture)
+foreign import ccall safe "rl_bindings.h LoadTextureCubemap_" c'loadTextureCubemap :: Ptr Image -> CInt -> IO (Ptr Texture)
 
-foreign import ccall safe "rl_bindings.h LoadRenderTexture_" c'loadRenderTexture :: CInt -> CInt -> IO (Ptr Raylib.Types.RenderTexture)
+foreign import ccall safe "rl_bindings.h LoadRenderTexture_" c'loadRenderTexture :: CInt -> CInt -> IO (Ptr RenderTexture)
 
 foreign import ccall safe "rl_bindings.h IsTextureReady_" c'isTextureReady :: Ptr Texture -> IO CBool
 
-foreign import ccall safe "rl_bindings.h UnloadTexture_" c'unloadTexture :: Ptr Raylib.Types.Texture -> IO ()
+foreign import ccall safe "rl_bindings.h UnloadTexture_" c'unloadTexture :: Ptr Texture -> IO ()
 
 foreign import ccall safe "rl_bindings.h IsRenderTextureReady_" c'isRenderTextureReady :: Ptr RenderTexture -> IO CBool
 
-foreign import ccall safe "rl_bindings.h UnloadRenderTexture_" c'unloadRenderTexture :: Ptr Raylib.Types.RenderTexture -> IO ()
+foreign import ccall safe "rl_bindings.h UnloadRenderTexture_" c'unloadRenderTexture :: Ptr RenderTexture -> IO ()
 
-foreign import ccall safe "rl_bindings.h UpdateTexture_" c'updateTexture :: Ptr Raylib.Types.Texture -> Ptr () -> IO ()
+foreign import ccall safe "rl_bindings.h UpdateTexture_" c'updateTexture :: Ptr Texture -> Ptr () -> IO ()
 
-foreign import ccall safe "rl_bindings.h UpdateTextureRec_" c'updateTextureRec :: Ptr Raylib.Types.Texture -> Ptr Raylib.Types.Rectangle -> Ptr () -> IO ()
+foreign import ccall safe "rl_bindings.h UpdateTextureRec_" c'updateTextureRec :: Ptr Texture -> Ptr Rectangle -> Ptr () -> IO ()
 
 foreign import ccall safe "raylib.h GenTextureMipmaps"
   c'genTextureMipmaps ::
-    Ptr Raylib.Types.Texture -> IO ()
+    Ptr Texture -> IO ()
 
-foreign import ccall safe "rl_bindings.h SetTextureFilter_" c'setTextureFilter :: Ptr Raylib.Types.Texture -> CInt -> IO ()
+foreign import ccall safe "rl_bindings.h SetTextureFilter_" c'setTextureFilter :: Ptr Texture -> CInt -> IO ()
 
-foreign import ccall safe "rl_bindings.h SetTextureWrap_" c'setTextureWrap :: Ptr Raylib.Types.Texture -> CInt -> IO ()
+foreign import ccall safe "rl_bindings.h SetTextureWrap_" c'setTextureWrap :: Ptr Texture -> CInt -> IO ()
 
-foreign import ccall safe "rl_bindings.h DrawTexture_" c'drawTexture :: Ptr Raylib.Types.Texture -> CInt -> CInt -> Ptr Raylib.Types.Color -> IO ()
+foreign import ccall safe "rl_bindings.h DrawTexture_" c'drawTexture :: Ptr Texture -> CInt -> CInt -> Ptr Color -> IO ()
 
-foreign import ccall safe "rl_bindings.h DrawTextureV_" c'drawTextureV :: Ptr Raylib.Types.Texture -> Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Color -> IO ()
+foreign import ccall safe "rl_bindings.h DrawTextureV_" c'drawTextureV :: Ptr Texture -> Ptr Vector2 -> Ptr Color -> IO ()
 
-foreign import ccall safe "rl_bindings.h DrawTextureEx_" c'drawTextureEx :: Ptr Raylib.Types.Texture -> Ptr Raylib.Types.Vector2 -> CFloat -> CFloat -> Ptr Raylib.Types.Color -> IO ()
+foreign import ccall safe "rl_bindings.h DrawTextureEx_" c'drawTextureEx :: Ptr Texture -> Ptr Vector2 -> CFloat -> CFloat -> Ptr Color -> IO ()
 
-foreign import ccall safe "rl_bindings.h DrawTextureRec_" c'drawTextureRec :: Ptr Raylib.Types.Texture -> Ptr Raylib.Types.Rectangle -> Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Color -> IO ()
+foreign import ccall safe "rl_bindings.h DrawTextureRec_" c'drawTextureRec :: Ptr Texture -> Ptr Rectangle -> Ptr Vector2 -> Ptr Color -> IO ()
 
-foreign import ccall safe "rl_bindings.h DrawTexturePro_" c'drawTexturePro :: Ptr Raylib.Types.Texture -> Ptr Raylib.Types.Rectangle -> Ptr Raylib.Types.Rectangle -> Ptr Raylib.Types.Vector2 -> CFloat -> Ptr Raylib.Types.Color -> IO ()
+foreign import ccall safe "rl_bindings.h DrawTexturePro_" c'drawTexturePro :: Ptr Texture -> Ptr Rectangle -> Ptr Rectangle -> Ptr Vector2 -> CFloat -> Ptr Color -> IO ()
 
-foreign import ccall safe "rl_bindings.h DrawTextureNPatch_" c'drawTextureNPatch :: Ptr Raylib.Types.Texture -> Ptr Raylib.Types.NPatchInfo -> Ptr Raylib.Types.Rectangle -> Ptr Raylib.Types.Vector2 -> CFloat -> Ptr Raylib.Types.Color -> IO ()
+foreign import ccall safe "rl_bindings.h DrawTextureNPatch_" c'drawTextureNPatch :: Ptr Texture -> Ptr NPatchInfo -> Ptr Rectangle -> Ptr Vector2 -> CFloat -> Ptr Color -> IO ()
 
-foreign import ccall safe "rl_bindings.h Fade_" c'fade :: Ptr Raylib.Types.Color -> CFloat -> IO (Ptr Raylib.Types.Color)
+foreign import ccall safe "rl_bindings.h Fade_" c'fade :: Ptr Color -> CFloat -> IO (Ptr Color)
 
-foreign import ccall safe "rl_bindings.h ColorToInt_" c'colorToInt :: Ptr Raylib.Types.Color -> IO CInt
+foreign import ccall safe "rl_bindings.h ColorToInt_" c'colorToInt :: Ptr Color -> IO CInt
 
-foreign import ccall safe "rl_bindings.h ColorNormalize_" c'colorNormalize :: Ptr Raylib.Types.Color -> IO (Ptr Raylib.Types.Vector4)
+foreign import ccall safe "rl_bindings.h ColorNormalize_" c'colorNormalize :: Ptr Color -> IO (Ptr Vector4)
 
-foreign import ccall safe "rl_bindings.h ColorFromNormalized_" c'colorFromNormalized :: Ptr Raylib.Types.Vector4 -> IO (Ptr Raylib.Types.Color)
+foreign import ccall safe "rl_bindings.h ColorFromNormalized_" c'colorFromNormalized :: Ptr Vector4 -> IO (Ptr Color)
 
-foreign import ccall safe "rl_bindings.h ColorToHSV_" c'colorToHSV :: Ptr Raylib.Types.Color -> IO (Ptr Raylib.Types.Vector3)
+foreign import ccall safe "rl_bindings.h ColorToHSV_" c'colorToHSV :: Ptr Color -> IO (Ptr Vector3)
 
-foreign import ccall safe "rl_bindings.h ColorFromHSV_" c'colorFromHSV :: CFloat -> CFloat -> CFloat -> IO (Ptr Raylib.Types.Color)
+foreign import ccall safe "rl_bindings.h ColorFromHSV_" c'colorFromHSV :: CFloat -> CFloat -> CFloat -> IO (Ptr Color)
 
-foreign import ccall safe "rl_bindings.h ColorTint_" c'colorTint :: Ptr Color -> Ptr Color -> IO (Ptr Raylib.Types.Color)
+foreign import ccall safe "rl_bindings.h ColorTint_" c'colorTint :: Ptr Color -> Ptr Color -> IO (Ptr Color)
 
-foreign import ccall safe "rl_bindings.h ColorBrightness_" c'colorBrightness :: Ptr Color -> CFloat -> IO (Ptr Raylib.Types.Color)
+foreign import ccall safe "rl_bindings.h ColorBrightness_" c'colorBrightness :: Ptr Color -> CFloat -> IO (Ptr Color)
 
-foreign import ccall safe "rl_bindings.h ColorContrast_" c'colorContrast :: Ptr Color -> CFloat -> IO (Ptr Raylib.Types.Color)
+foreign import ccall safe "rl_bindings.h ColorContrast_" c'colorContrast :: Ptr Color -> CFloat -> IO (Ptr Color)
 
-foreign import ccall safe "rl_bindings.h ColorAlpha_" c'colorAlpha :: Ptr Raylib.Types.Color -> CFloat -> IO (Ptr Raylib.Types.Color)
+foreign import ccall safe "rl_bindings.h ColorAlpha_" c'colorAlpha :: Ptr Color -> CFloat -> IO (Ptr Color)
 
-foreign import ccall safe "rl_bindings.h ColorAlphaBlend_" c'colorAlphaBlend :: Ptr Raylib.Types.Color -> Ptr Raylib.Types.Color -> Ptr Raylib.Types.Color -> IO (Ptr Raylib.Types.Color)
+foreign import ccall safe "rl_bindings.h ColorAlphaBlend_" c'colorAlphaBlend :: Ptr Color -> Ptr Color -> Ptr Color -> IO (Ptr Color)
 
-foreign import ccall safe "rl_bindings.h GetColor_" c'getColor :: CUInt -> IO (Ptr Raylib.Types.Color)
+foreign import ccall safe "rl_bindings.h GetColor_" c'getColor :: CUInt -> IO (Ptr Color)
 
-foreign import ccall safe "rl_bindings.h GetPixelColor_" c'getPixelColor :: Ptr () -> CInt -> IO (Ptr Raylib.Types.Color)
+foreign import ccall safe "rl_bindings.h GetPixelColor_" c'getPixelColor :: Ptr () -> CInt -> IO (Ptr Color)
 
-foreign import ccall safe "rl_bindings.h SetPixelColor_" c'setPixelColor :: Ptr () -> Ptr Raylib.Types.Color -> CInt -> IO ()
+foreign import ccall safe "rl_bindings.h SetPixelColor_" c'setPixelColor :: Ptr () -> Ptr Color -> CInt -> IO ()
 
-foreign import ccall safe "rl_bindings.h GetFontDefault_" c'getFontDefault :: IO (Ptr Raylib.Types.Font)
+foreign import ccall safe "rl_bindings.h GetFontDefault_" c'getFontDefault :: IO (Ptr Font)
 
-foreign import ccall safe "rl_bindings.h LoadFont_" c'loadFont :: CString -> IO (Ptr Raylib.Types.Font)
+foreign import ccall safe "rl_bindings.h LoadFont_" c'loadFont :: CString -> IO (Ptr Font)
 
-foreign import ccall safe "rl_bindings.h LoadFontEx_" c'loadFontEx :: CString -> CInt -> Ptr CInt -> CInt -> IO (Ptr Raylib.Types.Font)
+foreign import ccall safe "rl_bindings.h LoadFontEx_" c'loadFontEx :: CString -> CInt -> Ptr CInt -> CInt -> IO (Ptr Font)
 
-foreign import ccall safe "rl_bindings.h LoadFontFromImage_" c'loadFontFromImage :: Ptr Raylib.Types.Image -> Ptr Raylib.Types.Color -> CInt -> IO (Ptr Raylib.Types.Font)
+foreign import ccall safe "rl_bindings.h LoadFontFromImage_" c'loadFontFromImage :: Ptr Image -> Ptr Color -> CInt -> IO (Ptr Font)
 
-foreign import ccall safe "rl_bindings.h LoadFontFromMemory_" c'loadFontFromMemory :: CString -> Ptr CUChar -> CInt -> CInt -> Ptr CInt -> CInt -> IO (Ptr Raylib.Types.Font)
+foreign import ccall safe "rl_bindings.h LoadFontFromMemory_" c'loadFontFromMemory :: CString -> Ptr CUChar -> CInt -> CInt -> Ptr CInt -> CInt -> IO (Ptr Font)
 
 foreign import ccall safe "raylib.h LoadFontData"
   c'loadFontData ::
-    Ptr CUChar -> CInt -> CInt -> Ptr CInt -> CInt -> CInt -> IO (Ptr Raylib.Types.GlyphInfo)
+    Ptr CUChar -> CInt -> CInt -> Ptr CInt -> CInt -> CInt -> IO (Ptr GlyphInfo)
 
-foreign import ccall safe "rl_bindings.h GenImageFontAtlas_" c'genImageFontAtlas :: Ptr Raylib.Types.GlyphInfo -> Ptr (Ptr Raylib.Types.Rectangle) -> CInt -> CInt -> CInt -> CInt -> IO (Ptr Raylib.Types.Image)
+foreign import ccall safe "rl_bindings.h GenImageFontAtlas_" c'genImageFontAtlas :: Ptr GlyphInfo -> Ptr (Ptr Rectangle) -> CInt -> CInt -> CInt -> CInt -> IO (Ptr Image)
 
 foreign import ccall safe "raylib.h UnloadFontData"
   c'unloadFontData ::
-    Ptr Raylib.Types.GlyphInfo -> CInt -> IO ()
+    Ptr GlyphInfo -> CInt -> IO ()
 
-foreign import ccall safe "rl_bindings.h IsFontReady_" c'isFontReady :: Ptr Raylib.Types.Font -> IO CBool
+foreign import ccall safe "rl_bindings.h IsFontReady_" c'isFontReady :: Ptr Font -> IO CBool
 
-foreign import ccall safe "rl_bindings.h UnloadFont_" c'unloadFont :: Ptr Raylib.Types.Font -> IO ()
+foreign import ccall safe "rl_bindings.h UnloadFont_" c'unloadFont :: Ptr Font -> IO ()
 
-foreign import ccall safe "rl_bindings.h ExportFontAsCode_" c'exportFontAsCode :: Ptr Raylib.Types.Font -> CString -> IO CBool
+foreign import ccall safe "rl_bindings.h ExportFontAsCode_" c'exportFontAsCode :: Ptr Font -> CString -> IO CBool
 
 foreign import ccall safe "raylib.h DrawFPS"
   c'drawFPS ::
     CInt -> CInt -> IO ()
 
-foreign import ccall safe "rl_bindings.h DrawText_" c'drawText :: CString -> CInt -> CInt -> CInt -> Ptr Raylib.Types.Color -> IO ()
+foreign import ccall safe "rl_bindings.h DrawText_" c'drawText :: CString -> CInt -> CInt -> CInt -> Ptr Color -> IO ()
 
-foreign import ccall safe "rl_bindings.h DrawTextEx_" c'drawTextEx :: Ptr Raylib.Types.Font -> CString -> Ptr Raylib.Types.Vector2 -> CFloat -> CFloat -> Ptr Raylib.Types.Color -> IO ()
+foreign import ccall safe "rl_bindings.h DrawTextEx_" c'drawTextEx :: Ptr Font -> CString -> Ptr Vector2 -> CFloat -> CFloat -> Ptr Color -> IO ()
 
-foreign import ccall safe "rl_bindings.h DrawTextPro_" c'drawTextPro :: Ptr Raylib.Types.Font -> CString -> Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Vector2 -> CFloat -> CFloat -> CFloat -> Ptr Raylib.Types.Color -> IO ()
+foreign import ccall safe "rl_bindings.h DrawTextPro_" c'drawTextPro :: Ptr Font -> CString -> Ptr Vector2 -> Ptr Vector2 -> CFloat -> CFloat -> CFloat -> Ptr Color -> IO ()
 
-foreign import ccall safe "rl_bindings.h DrawTextCodepoint_" c'drawTextCodepoint :: Ptr Raylib.Types.Font -> CInt -> Ptr Raylib.Types.Vector2 -> CFloat -> Ptr Raylib.Types.Color -> IO ()
+foreign import ccall safe "rl_bindings.h DrawTextCodepoint_" c'drawTextCodepoint :: Ptr Font -> CInt -> Ptr Vector2 -> CFloat -> Ptr Color -> IO ()
 
-foreign import ccall safe "rl_bindings.h DrawTextCodepoints_" c'drawTextCodepoints :: Ptr Raylib.Types.Font -> Ptr CInt -> CInt -> Ptr Raylib.Types.Vector2 -> CFloat -> CFloat -> Ptr Raylib.Types.Color -> IO ()
+foreign import ccall safe "rl_bindings.h DrawTextCodepoints_" c'drawTextCodepoints :: Ptr Font -> Ptr CInt -> CInt -> Ptr Vector2 -> CFloat -> CFloat -> Ptr Color -> IO ()
 
 foreign import ccall safe "raylib.h MeasureText"
   c'measureText ::
     CString -> CInt -> IO CInt
 
-foreign import ccall safe "rl_bindings.h MeasureTextEx_" c'measureTextEx :: Ptr Raylib.Types.Font -> CString -> CFloat -> CFloat -> IO (Ptr Raylib.Types.Vector2)
+foreign import ccall safe "rl_bindings.h MeasureTextEx_" c'measureTextEx :: Ptr Font -> CString -> CFloat -> CFloat -> IO (Ptr Vector2)
 
-foreign import ccall safe "rl_bindings.h GetGlyphIndex_" c'getGlyphIndex :: Ptr Raylib.Types.Font -> CInt -> IO CInt
+foreign import ccall safe "rl_bindings.h GetGlyphIndex_" c'getGlyphIndex :: Ptr Font -> CInt -> IO CInt
 
-foreign import ccall safe "rl_bindings.h GetGlyphInfo_" c'getGlyphInfo :: Ptr Raylib.Types.Font -> CInt -> IO (Ptr Raylib.Types.GlyphInfo)
+foreign import ccall safe "rl_bindings.h GetGlyphInfo_" c'getGlyphInfo :: Ptr Font -> CInt -> IO (Ptr GlyphInfo)
 
-foreign import ccall safe "rl_bindings.h GetGlyphAtlasRec_" c'getGlyphAtlasRec :: Ptr Raylib.Types.Font -> CInt -> IO (Ptr Raylib.Types.Rectangle)
+foreign import ccall safe "rl_bindings.h GetGlyphAtlasRec_" c'getGlyphAtlasRec :: Ptr Font -> CInt -> IO (Ptr Rectangle)
 
 foreign import ccall safe "raylib.h LoadUTF8"
   c'loadUTF8 ::
@@ -1032,10 +1032,6 @@ foreign import ccall safe "raylib.h GetCodepointCount"
   c'getCodepointCount ::
     CString -> IO CInt
 
--- | Deprecated, use `getCodepointNext`
--- foreign import ccall safe "raylib.h GetCodepoint"
---   getCodepoint ::
---     CString -> Ptr CInt -> IO CInt
 foreign import ccall safe "raylib.h GetCodepointNext"
   c'getCodepointNext ::
     CString -> Ptr CInt -> IO CInt
@@ -1122,165 +1118,165 @@ foreign import ccall safe "raylib.h CodepointToUTF8"
 -- foreign import ccall safe "raylib.h TextToInteger"
 --   textToInteger ::
 --     CString -> IO CInt
-foreign import ccall safe "rl_bindings.h DrawLine3D_" c'drawLine3D :: Ptr Raylib.Types.Vector3 -> Ptr Raylib.Types.Vector3 -> Ptr Raylib.Types.Color -> IO ()
+foreign import ccall safe "rl_bindings.h DrawLine3D_" c'drawLine3D :: Ptr Vector3 -> Ptr Vector3 -> Ptr Color -> IO ()
 
-foreign import ccall safe "rl_bindings.h DrawPoint3D_" c'drawPoint3D :: Ptr Raylib.Types.Vector3 -> Ptr Raylib.Types.Color -> IO ()
+foreign import ccall safe "rl_bindings.h DrawPoint3D_" c'drawPoint3D :: Ptr Vector3 -> Ptr Color -> IO ()
 
-foreign import ccall safe "rl_bindings.h DrawCircle3D_" c'drawCircle3D :: Ptr Raylib.Types.Vector3 -> CFloat -> Ptr Raylib.Types.Vector3 -> CFloat -> Ptr Raylib.Types.Color -> IO ()
+foreign import ccall safe "rl_bindings.h DrawCircle3D_" c'drawCircle3D :: Ptr Vector3 -> CFloat -> Ptr Vector3 -> CFloat -> Ptr Color -> IO ()
 
-foreign import ccall safe "rl_bindings.h DrawTriangle3D_" c'drawTriangle3D :: Ptr Raylib.Types.Vector3 -> Ptr Raylib.Types.Vector3 -> Ptr Raylib.Types.Vector3 -> Ptr Raylib.Types.Color -> IO ()
+foreign import ccall safe "rl_bindings.h DrawTriangle3D_" c'drawTriangle3D :: Ptr Vector3 -> Ptr Vector3 -> Ptr Vector3 -> Ptr Color -> IO ()
 
-foreign import ccall safe "rl_bindings.h DrawTriangleStrip3D_" c'drawTriangleStrip3D :: Ptr Raylib.Types.Vector3 -> CInt -> Ptr Raylib.Types.Color -> IO ()
+foreign import ccall safe "rl_bindings.h DrawTriangleStrip3D_" c'drawTriangleStrip3D :: Ptr Vector3 -> CInt -> Ptr Color -> IO ()
 
-foreign import ccall safe "rl_bindings.h DrawCube_" c'drawCube :: Ptr Raylib.Types.Vector3 -> CFloat -> CFloat -> CFloat -> Ptr Raylib.Types.Color -> IO ()
+foreign import ccall safe "rl_bindings.h DrawCube_" c'drawCube :: Ptr Vector3 -> CFloat -> CFloat -> CFloat -> Ptr Color -> IO ()
 
-foreign import ccall safe "rl_bindings.h DrawCubeV_" c'drawCubeV :: Ptr Raylib.Types.Vector3 -> Ptr Raylib.Types.Vector3 -> Ptr Raylib.Types.Color -> IO ()
+foreign import ccall safe "rl_bindings.h DrawCubeV_" c'drawCubeV :: Ptr Vector3 -> Ptr Vector3 -> Ptr Color -> IO ()
 
-foreign import ccall safe "rl_bindings.h DrawCubeWires_" c'drawCubeWires :: Ptr Raylib.Types.Vector3 -> CFloat -> CFloat -> CFloat -> Ptr Raylib.Types.Color -> IO ()
+foreign import ccall safe "rl_bindings.h DrawCubeWires_" c'drawCubeWires :: Ptr Vector3 -> CFloat -> CFloat -> CFloat -> Ptr Color -> IO ()
 
-foreign import ccall safe "rl_bindings.h DrawCubeWiresV_" c'drawCubeWiresV :: Ptr Raylib.Types.Vector3 -> Ptr Raylib.Types.Vector3 -> Ptr Raylib.Types.Color -> IO ()
+foreign import ccall safe "rl_bindings.h DrawCubeWiresV_" c'drawCubeWiresV :: Ptr Vector3 -> Ptr Vector3 -> Ptr Color -> IO ()
 
-foreign import ccall safe "rl_bindings.h DrawSphere_" c'drawSphere :: Ptr Raylib.Types.Vector3 -> CFloat -> Ptr Raylib.Types.Color -> IO ()
+foreign import ccall safe "rl_bindings.h DrawSphere_" c'drawSphere :: Ptr Vector3 -> CFloat -> Ptr Color -> IO ()
 
-foreign import ccall safe "rl_bindings.h DrawSphereEx_" c'drawSphereEx :: Ptr Raylib.Types.Vector3 -> CFloat -> CInt -> CInt -> Ptr Raylib.Types.Color -> IO ()
+foreign import ccall safe "rl_bindings.h DrawSphereEx_" c'drawSphereEx :: Ptr Vector3 -> CFloat -> CInt -> CInt -> Ptr Color -> IO ()
 
-foreign import ccall safe "rl_bindings.h DrawSphereWires_" c'drawSphereWires :: Ptr Raylib.Types.Vector3 -> CFloat -> CInt -> CInt -> Ptr Raylib.Types.Color -> IO ()
+foreign import ccall safe "rl_bindings.h DrawSphereWires_" c'drawSphereWires :: Ptr Vector3 -> CFloat -> CInt -> CInt -> Ptr Color -> IO ()
 
-foreign import ccall safe "rl_bindings.h DrawCylinder_" c'drawCylinder :: Ptr Raylib.Types.Vector3 -> CFloat -> CFloat -> CFloat -> CInt -> Ptr Raylib.Types.Color -> IO ()
+foreign import ccall safe "rl_bindings.h DrawCylinder_" c'drawCylinder :: Ptr Vector3 -> CFloat -> CFloat -> CFloat -> CInt -> Ptr Color -> IO ()
 
-foreign import ccall safe "rl_bindings.h DrawCylinderEx_" c'drawCylinderEx :: Ptr Raylib.Types.Vector3 -> Ptr Raylib.Types.Vector3 -> CFloat -> CFloat -> CInt -> Ptr Raylib.Types.Color -> IO ()
+foreign import ccall safe "rl_bindings.h DrawCylinderEx_" c'drawCylinderEx :: Ptr Vector3 -> Ptr Vector3 -> CFloat -> CFloat -> CInt -> Ptr Color -> IO ()
 
-foreign import ccall safe "rl_bindings.h DrawCylinderWires_" c'drawCylinderWires :: Ptr Raylib.Types.Vector3 -> CFloat -> CFloat -> CFloat -> CInt -> Ptr Raylib.Types.Color -> IO ()
+foreign import ccall safe "rl_bindings.h DrawCylinderWires_" c'drawCylinderWires :: Ptr Vector3 -> CFloat -> CFloat -> CFloat -> CInt -> Ptr Color -> IO ()
 
-foreign import ccall safe "rl_bindings.h DrawCylinderWiresEx_" c'drawCylinderWiresEx :: Ptr Raylib.Types.Vector3 -> Ptr Raylib.Types.Vector3 -> CFloat -> CFloat -> CInt -> Ptr Raylib.Types.Color -> IO ()
+foreign import ccall safe "rl_bindings.h DrawCylinderWiresEx_" c'drawCylinderWiresEx :: Ptr Vector3 -> Ptr Vector3 -> CFloat -> CFloat -> CInt -> Ptr Color -> IO ()
 
 foreign import ccall safe "rl_bindings.h DrawCapsule_" c'drawCapsule :: Ptr Vector3 -> Ptr Vector3 -> CFloat -> CInt -> CInt -> Ptr Color -> IO ()
 
 foreign import ccall safe "rl_bindings.h DrawCapsuleWires_" c'drawCapsuleWires :: Ptr Vector3 -> Ptr Vector3 -> CFloat -> CInt -> CInt -> Ptr Color -> IO ()
 
-foreign import ccall safe "rl_bindings.h DrawPlane_" c'drawPlane :: Ptr Raylib.Types.Vector3 -> Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Color -> IO ()
+foreign import ccall safe "rl_bindings.h DrawPlane_" c'drawPlane :: Ptr Vector3 -> Ptr Vector2 -> Ptr Color -> IO ()
 
-foreign import ccall safe "rl_bindings.h DrawRay_" c'drawRay :: Ptr Raylib.Types.Ray -> Ptr Raylib.Types.Color -> IO ()
+foreign import ccall safe "rl_bindings.h DrawRay_" c'drawRay :: Ptr Ray -> Ptr Color -> IO ()
 
 foreign import ccall safe "raylib.h DrawGrid"
   c'drawGrid ::
     CInt -> CFloat -> IO ()
 
-foreign import ccall safe "rl_bindings.h LoadModel_" c'loadModel :: CString -> IO (Ptr Raylib.Types.Model)
+foreign import ccall safe "rl_bindings.h LoadModel_" c'loadModel :: CString -> IO (Ptr Model)
 
-foreign import ccall safe "rl_bindings.h LoadModelFromMesh_" c'loadModelFromMesh :: Ptr Raylib.Types.Mesh -> IO (Ptr Raylib.Types.Model)
+foreign import ccall safe "rl_bindings.h LoadModelFromMesh_" c'loadModelFromMesh :: Ptr Mesh -> IO (Ptr Model)
 
-foreign import ccall safe "rl_bindings.h IsModelReady_" c'isModelReady :: Ptr Raylib.Types.Model -> IO CBool
+foreign import ccall safe "rl_bindings.h IsModelReady_" c'isModelReady :: Ptr Model -> IO CBool
 
-foreign import ccall safe "rl_bindings.h UnloadModel_" c'unloadModel :: Ptr Raylib.Types.Model -> IO ()
+foreign import ccall safe "rl_bindings.h UnloadModel_" c'unloadModel :: Ptr Model -> IO ()
 
-foreign import ccall safe "rl_bindings.h UnloadModelKeepMeshes_" c'unloadModelKeepMeshes :: Ptr Raylib.Types.Model -> IO ()
+foreign import ccall safe "rl_bindings.h UnloadModelKeepMeshes_" c'unloadModelKeepMeshes :: Ptr Model -> IO ()
 
-foreign import ccall safe "rl_bindings.h GetModelBoundingBox_" c'getModelBoundingBox :: Ptr Raylib.Types.Model -> IO (Ptr Raylib.Types.BoundingBox)
+foreign import ccall safe "rl_bindings.h GetModelBoundingBox_" c'getModelBoundingBox :: Ptr Model -> IO (Ptr BoundingBox)
 
-foreign import ccall safe "rl_bindings.h DrawModel_" c'drawModel :: Ptr Raylib.Types.Model -> Ptr Raylib.Types.Vector3 -> CFloat -> Ptr Raylib.Types.Color -> IO ()
+foreign import ccall safe "rl_bindings.h DrawModel_" c'drawModel :: Ptr Model -> Ptr Vector3 -> CFloat -> Ptr Color -> IO ()
 
-foreign import ccall safe "rl_bindings.h DrawModelEx_" c'drawModelEx :: Ptr Raylib.Types.Model -> Ptr Raylib.Types.Vector3 -> Ptr Raylib.Types.Vector3 -> CFloat -> Ptr Raylib.Types.Vector3 -> Ptr Raylib.Types.Color -> IO ()
+foreign import ccall safe "rl_bindings.h DrawModelEx_" c'drawModelEx :: Ptr Model -> Ptr Vector3 -> Ptr Vector3 -> CFloat -> Ptr Vector3 -> Ptr Color -> IO ()
 
-foreign import ccall safe "rl_bindings.h DrawModelWires_" c'drawModelWires :: Ptr Raylib.Types.Model -> Ptr Raylib.Types.Vector3 -> CFloat -> Ptr Raylib.Types.Color -> IO ()
+foreign import ccall safe "rl_bindings.h DrawModelWires_" c'drawModelWires :: Ptr Model -> Ptr Vector3 -> CFloat -> Ptr Color -> IO ()
 
-foreign import ccall safe "rl_bindings.h DrawModelWiresEx_" c'drawModelWiresEx :: Ptr Raylib.Types.Model -> Ptr Raylib.Types.Vector3 -> Ptr Raylib.Types.Vector3 -> CFloat -> Ptr Raylib.Types.Vector3 -> Ptr Raylib.Types.Color -> IO ()
+foreign import ccall safe "rl_bindings.h DrawModelWiresEx_" c'drawModelWiresEx :: Ptr Model -> Ptr Vector3 -> Ptr Vector3 -> CFloat -> Ptr Vector3 -> Ptr Color -> IO ()
 
-foreign import ccall safe "rl_bindings.h DrawBoundingBox_" c'drawBoundingBox :: Ptr Raylib.Types.BoundingBox -> Ptr Raylib.Types.Color -> IO ()
+foreign import ccall safe "rl_bindings.h DrawBoundingBox_" c'drawBoundingBox :: Ptr BoundingBox -> Ptr Color -> IO ()
 
-foreign import ccall safe "rl_bindings.h DrawBillboard_" c'drawBillboard :: Ptr Raylib.Types.Camera3D -> Ptr Raylib.Types.Texture -> Ptr Raylib.Types.Vector3 -> CFloat -> Ptr Raylib.Types.Color -> IO ()
+foreign import ccall safe "rl_bindings.h DrawBillboard_" c'drawBillboard :: Ptr Camera3D -> Ptr Texture -> Ptr Vector3 -> CFloat -> Ptr Color -> IO ()
 
-foreign import ccall safe "rl_bindings.h DrawBillboardRec_" c'drawBillboardRec :: Ptr Raylib.Types.Camera3D -> Ptr Raylib.Types.Texture -> Ptr Raylib.Types.Rectangle -> Ptr Raylib.Types.Vector3 -> Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Color -> IO ()
+foreign import ccall safe "rl_bindings.h DrawBillboardRec_" c'drawBillboardRec :: Ptr Camera3D -> Ptr Texture -> Ptr Rectangle -> Ptr Vector3 -> Ptr Vector2 -> Ptr Color -> IO ()
 
-foreign import ccall safe "rl_bindings.h DrawBillboardPro_" c'drawBillboardPro :: Ptr Raylib.Types.Camera3D -> Ptr Raylib.Types.Texture -> Ptr Raylib.Types.Rectangle -> Ptr Raylib.Types.Vector3 -> Ptr Raylib.Types.Vector3 -> Ptr Raylib.Types.Vector2 -> Ptr Raylib.Types.Vector2 -> CFloat -> Ptr Raylib.Types.Color -> IO ()
+foreign import ccall safe "rl_bindings.h DrawBillboardPro_" c'drawBillboardPro :: Ptr Camera3D -> Ptr Texture -> Ptr Rectangle -> Ptr Vector3 -> Ptr Vector3 -> Ptr Vector2 -> Ptr Vector2 -> CFloat -> Ptr Color -> IO ()
 
 foreign import ccall safe "raylib.h UploadMesh"
   c'uploadMesh ::
-    Ptr Raylib.Types.Mesh -> CInt -> IO ()
+    Ptr Mesh -> CInt -> IO ()
 
-foreign import ccall safe "rl_bindings.h UpdateMeshBuffer_" c'updateMeshBuffer :: Ptr Raylib.Types.Mesh -> CInt -> Ptr () -> CInt -> CInt -> IO ()
+foreign import ccall safe "rl_bindings.h UpdateMeshBuffer_" c'updateMeshBuffer :: Ptr Mesh -> CInt -> Ptr () -> CInt -> CInt -> IO ()
 
-foreign import ccall safe "rl_bindings.h UnloadMesh_" c'unloadMesh :: Ptr Raylib.Types.Mesh -> IO ()
+foreign import ccall safe "rl_bindings.h UnloadMesh_" c'unloadMesh :: Ptr Mesh -> IO ()
 
-foreign import ccall safe "rl_bindings.h DrawMesh_" c'drawMesh :: Ptr Raylib.Types.Mesh -> Ptr Raylib.Types.Material -> Ptr Raylib.Types.Matrix -> IO ()
+foreign import ccall safe "rl_bindings.h DrawMesh_" c'drawMesh :: Ptr Mesh -> Ptr Material -> Ptr Matrix -> IO ()
 
-foreign import ccall safe "rl_bindings.h DrawMeshInstanced_" c'drawMeshInstanced :: Ptr Raylib.Types.Mesh -> Ptr Raylib.Types.Material -> Ptr Raylib.Types.Matrix -> CInt -> IO ()
+foreign import ccall safe "rl_bindings.h DrawMeshInstanced_" c'drawMeshInstanced :: Ptr Mesh -> Ptr Material -> Ptr Matrix -> CInt -> IO ()
 
-foreign import ccall safe "rl_bindings.h ExportMesh_" c'exportMesh :: Ptr Raylib.Types.Mesh -> CString -> IO CBool
+foreign import ccall safe "rl_bindings.h ExportMesh_" c'exportMesh :: Ptr Mesh -> CString -> IO CBool
 
-foreign import ccall safe "rl_bindings.h GetMeshBoundingBox_" c'getMeshBoundingBox :: Ptr Raylib.Types.Mesh -> IO (Ptr Raylib.Types.BoundingBox)
+foreign import ccall safe "rl_bindings.h GetMeshBoundingBox_" c'getMeshBoundingBox :: Ptr Mesh -> IO (Ptr BoundingBox)
 
 foreign import ccall safe "raylib.h GenMeshTangents"
   c'genMeshTangents ::
-    Ptr Raylib.Types.Mesh -> IO ()
+    Ptr Mesh -> IO ()
 
-foreign import ccall safe "rl_bindings.h GenMeshPoly_" c'genMeshPoly :: CInt -> CFloat -> IO (Ptr Raylib.Types.Mesh)
+foreign import ccall safe "rl_bindings.h GenMeshPoly_" c'genMeshPoly :: CInt -> CFloat -> IO (Ptr Mesh)
 
-foreign import ccall safe "rl_bindings.h GenMeshPlane_" c'genMeshPlane :: CFloat -> CFloat -> CInt -> CInt -> IO (Ptr Raylib.Types.Mesh)
+foreign import ccall safe "rl_bindings.h GenMeshPlane_" c'genMeshPlane :: CFloat -> CFloat -> CInt -> CInt -> IO (Ptr Mesh)
 
-foreign import ccall safe "rl_bindings.h GenMeshCube_" c'genMeshCube :: CFloat -> CFloat -> CFloat -> IO (Ptr Raylib.Types.Mesh)
+foreign import ccall safe "rl_bindings.h GenMeshCube_" c'genMeshCube :: CFloat -> CFloat -> CFloat -> IO (Ptr Mesh)
 
-foreign import ccall safe "rl_bindings.h GenMeshSphere_" c'genMeshSphere :: CFloat -> CInt -> CInt -> IO (Ptr Raylib.Types.Mesh)
+foreign import ccall safe "rl_bindings.h GenMeshSphere_" c'genMeshSphere :: CFloat -> CInt -> CInt -> IO (Ptr Mesh)
 
-foreign import ccall safe "rl_bindings.h GenMeshHemiSphere_" c'genMeshHemiSphere :: CFloat -> CInt -> CInt -> IO (Ptr Raylib.Types.Mesh)
+foreign import ccall safe "rl_bindings.h GenMeshHemiSphere_" c'genMeshHemiSphere :: CFloat -> CInt -> CInt -> IO (Ptr Mesh)
 
-foreign import ccall safe "rl_bindings.h GenMeshCylinder_" c'genMeshCylinder :: CFloat -> CFloat -> CInt -> IO (Ptr Raylib.Types.Mesh)
+foreign import ccall safe "rl_bindings.h GenMeshCylinder_" c'genMeshCylinder :: CFloat -> CFloat -> CInt -> IO (Ptr Mesh)
 
-foreign import ccall safe "rl_bindings.h GenMeshCone_" c'genMeshCone :: CFloat -> CFloat -> CInt -> IO (Ptr Raylib.Types.Mesh)
+foreign import ccall safe "rl_bindings.h GenMeshCone_" c'genMeshCone :: CFloat -> CFloat -> CInt -> IO (Ptr Mesh)
 
-foreign import ccall safe "rl_bindings.h GenMeshTorus_" c'genMeshTorus :: CFloat -> CFloat -> CInt -> CInt -> IO (Ptr Raylib.Types.Mesh)
+foreign import ccall safe "rl_bindings.h GenMeshTorus_" c'genMeshTorus :: CFloat -> CFloat -> CInt -> CInt -> IO (Ptr Mesh)
 
-foreign import ccall safe "rl_bindings.h GenMeshKnot_" c'genMeshKnot :: CFloat -> CFloat -> CInt -> CInt -> IO (Ptr Raylib.Types.Mesh)
+foreign import ccall safe "rl_bindings.h GenMeshKnot_" c'genMeshKnot :: CFloat -> CFloat -> CInt -> CInt -> IO (Ptr Mesh)
 
-foreign import ccall safe "rl_bindings.h GenMeshHeightmap_" c'genMeshHeightmap :: Ptr Raylib.Types.Image -> Ptr Raylib.Types.Vector3 -> IO (Ptr Raylib.Types.Mesh)
+foreign import ccall safe "rl_bindings.h GenMeshHeightmap_" c'genMeshHeightmap :: Ptr Image -> Ptr Vector3 -> IO (Ptr Mesh)
 
-foreign import ccall safe "rl_bindings.h GenMeshCubicmap_" c'genMeshCubicmap :: Ptr Raylib.Types.Image -> Ptr Raylib.Types.Vector3 -> IO (Ptr Raylib.Types.Mesh)
+foreign import ccall safe "rl_bindings.h GenMeshCubicmap_" c'genMeshCubicmap :: Ptr Image -> Ptr Vector3 -> IO (Ptr Mesh)
 
 foreign import ccall safe "raylib.h LoadMaterials"
   c'loadMaterials ::
-    CString -> Ptr CInt -> IO (Ptr Raylib.Types.Material)
+    CString -> Ptr CInt -> IO (Ptr Material)
 
-foreign import ccall safe "rl_bindings.h LoadMaterialDefault_" c'loadMaterialDefault :: IO (Ptr Raylib.Types.Material)
+foreign import ccall safe "rl_bindings.h LoadMaterialDefault_" c'loadMaterialDefault :: IO (Ptr Material)
 
-foreign import ccall safe "rl_bindings.h IsMaterialReady_" c'isMaterialReady :: Ptr Raylib.Types.Material -> IO CBool
+foreign import ccall safe "rl_bindings.h IsMaterialReady_" c'isMaterialReady :: Ptr Material -> IO CBool
 
-foreign import ccall safe "rl_bindings.h UnloadMaterial_" c'unloadMaterial :: Ptr Raylib.Types.Material -> IO ()
+foreign import ccall safe "rl_bindings.h UnloadMaterial_" c'unloadMaterial :: Ptr Material -> IO ()
 
-foreign import ccall safe "rl_bindings.h SetMaterialTexture_" c'setMaterialTexture :: Ptr Raylib.Types.Material -> CInt -> Ptr Raylib.Types.Texture -> IO ()
+foreign import ccall safe "rl_bindings.h SetMaterialTexture_" c'setMaterialTexture :: Ptr Material -> CInt -> Ptr Texture -> IO ()
 
 foreign import ccall safe "raylib.h SetModelMeshMaterial"
   c'setModelMeshMaterial ::
-    Ptr Raylib.Types.Model -> CInt -> CInt -> IO ()
+    Ptr Model -> CInt -> CInt -> IO ()
 
 foreign import ccall safe "raylib.h LoadModelAnimations"
   c'loadModelAnimations ::
-    CString -> Ptr CUInt -> IO (Ptr Raylib.Types.ModelAnimation)
+    CString -> Ptr CUInt -> IO (Ptr ModelAnimation)
 
-foreign import ccall safe "rl_bindings.h UpdateModelAnimation_" c'updateModelAnimation :: Ptr Raylib.Types.Model -> Ptr Raylib.Types.ModelAnimation -> CInt -> IO ()
+foreign import ccall safe "rl_bindings.h UpdateModelAnimation_" c'updateModelAnimation :: Ptr Model -> Ptr ModelAnimation -> CInt -> IO ()
 
-foreign import ccall safe "rl_bindings.h UnloadModelAnimation_" c'unloadModelAnimation :: Ptr Raylib.Types.ModelAnimation -> IO ()
+foreign import ccall safe "rl_bindings.h UnloadModelAnimation_" c'unloadModelAnimation :: Ptr ModelAnimation -> IO ()
 
 foreign import ccall safe "raylib.h UnloadModelAnimations"
   c'unloadModelAnimations ::
-    Ptr Raylib.Types.ModelAnimation -> CUInt -> IO ()
+    Ptr ModelAnimation -> CUInt -> IO ()
 
-foreign import ccall safe "rl_bindings.h IsModelAnimationValid_" c'isModelAnimationValid :: Ptr Raylib.Types.Model -> Ptr Raylib.Types.ModelAnimation -> IO CBool
+foreign import ccall safe "rl_bindings.h IsModelAnimationValid_" c'isModelAnimationValid :: Ptr Model -> Ptr ModelAnimation -> IO CBool
 
-foreign import ccall safe "rl_bindings.h CheckCollisionSpheres_" c'checkCollisionSpheres :: Ptr Raylib.Types.Vector3 -> CFloat -> Ptr Raylib.Types.Vector3 -> CFloat -> IO CBool
+foreign import ccall safe "rl_bindings.h CheckCollisionSpheres_" c'checkCollisionSpheres :: Ptr Vector3 -> CFloat -> Ptr Vector3 -> CFloat -> IO CBool
 
-foreign import ccall safe "rl_bindings.h CheckCollisionBoxes_" c'checkCollisionBoxes :: Ptr Raylib.Types.BoundingBox -> Ptr Raylib.Types.BoundingBox -> IO CBool
+foreign import ccall safe "rl_bindings.h CheckCollisionBoxes_" c'checkCollisionBoxes :: Ptr BoundingBox -> Ptr BoundingBox -> IO CBool
 
-foreign import ccall safe "rl_bindings.h CheckCollisionBoxSphere_" c'checkCollisionBoxSphere :: Ptr Raylib.Types.BoundingBox -> Ptr Raylib.Types.Vector3 -> CFloat -> IO CBool
+foreign import ccall safe "rl_bindings.h CheckCollisionBoxSphere_" c'checkCollisionBoxSphere :: Ptr BoundingBox -> Ptr Vector3 -> CFloat -> IO CBool
 
-foreign import ccall safe "rl_bindings.h GetRayCollisionSphere_" c'getRayCollisionSphere :: Ptr Raylib.Types.Ray -> Ptr Raylib.Types.Vector3 -> CFloat -> IO (Ptr Raylib.Types.RayCollision)
+foreign import ccall safe "rl_bindings.h GetRayCollisionSphere_" c'getRayCollisionSphere :: Ptr Ray -> Ptr Vector3 -> CFloat -> IO (Ptr RayCollision)
 
-foreign import ccall safe "rl_bindings.h GetRayCollisionBox_" c'getRayCollisionBox :: Ptr Raylib.Types.Ray -> Ptr Raylib.Types.BoundingBox -> IO (Ptr Raylib.Types.RayCollision)
+foreign import ccall safe "rl_bindings.h GetRayCollisionBox_" c'getRayCollisionBox :: Ptr Ray -> Ptr BoundingBox -> IO (Ptr RayCollision)
 
-foreign import ccall safe "rl_bindings.h GetRayCollisionMesh_" c'getRayCollisionMesh :: Ptr Raylib.Types.Ray -> Ptr Raylib.Types.Mesh -> Ptr Raylib.Types.Matrix -> IO (Ptr Raylib.Types.RayCollision)
+foreign import ccall safe "rl_bindings.h GetRayCollisionMesh_" c'getRayCollisionMesh :: Ptr Ray -> Ptr Mesh -> Ptr Matrix -> IO (Ptr RayCollision)
 
-foreign import ccall safe "rl_bindings.h GetRayCollisionTriangle_" c'getRayCollisionTriangle :: Ptr Raylib.Types.Ray -> Ptr Raylib.Types.Vector3 -> Ptr Raylib.Types.Vector3 -> Ptr Raylib.Types.Vector3 -> IO (Ptr Raylib.Types.RayCollision)
+foreign import ccall safe "rl_bindings.h GetRayCollisionTriangle_" c'getRayCollisionTriangle :: Ptr Ray -> Ptr Vector3 -> Ptr Vector3 -> Ptr Vector3 -> IO (Ptr RayCollision)
 
-foreign import ccall safe "rl_bindings.h GetRayCollisionQuad_" c'getRayCollisionQuad :: Ptr Raylib.Types.Ray -> Ptr Raylib.Types.Vector3 -> Ptr Raylib.Types.Vector3 -> Ptr Raylib.Types.Vector3 -> Ptr Raylib.Types.Vector3 -> IO (Ptr Raylib.Types.RayCollision)
+foreign import ccall safe "rl_bindings.h GetRayCollisionQuad_" c'getRayCollisionQuad :: Ptr Ray -> Ptr Vector3 -> Ptr Vector3 -> Ptr Vector3 -> Ptr Vector3 -> IO (Ptr RayCollision)
 
 -- TODO: redesign this
 foreign import ccall safe "wrapper"
@@ -1303,133 +1299,133 @@ foreign import ccall safe "raylib.h SetMasterVolume"
   c'setMasterVolume ::
     CFloat -> IO ()
 
-foreign import ccall safe "rl_bindings.h LoadWave_" c'loadWave :: CString -> IO (Ptr Raylib.Types.Wave)
+foreign import ccall safe "rl_bindings.h LoadWave_" c'loadWave :: CString -> IO (Ptr Wave)
 
-foreign import ccall safe "rl_bindings.h LoadWaveFromMemory_" c'loadWaveFromMemory :: CString -> Ptr CUChar -> CInt -> IO (Ptr Raylib.Types.Wave)
+foreign import ccall safe "rl_bindings.h LoadWaveFromMemory_" c'loadWaveFromMemory :: CString -> Ptr CUChar -> CInt -> IO (Ptr Wave)
 
-foreign import ccall safe "rl_bindings.h LoadSound_" c'loadSound :: CString -> IO (Ptr Raylib.Types.Sound)
+foreign import ccall safe "rl_bindings.h LoadSound_" c'loadSound :: CString -> IO (Ptr Sound)
 
-foreign import ccall safe "rl_bindings.h LoadSoundFromWave_" c'loadSoundFromWave :: Ptr Raylib.Types.Wave -> IO (Ptr Raylib.Types.Sound)
+foreign import ccall safe "rl_bindings.h LoadSoundFromWave_" c'loadSoundFromWave :: Ptr Wave -> IO (Ptr Sound)
 
-foreign import ccall safe "rl_bindings.h UpdateSound_" c'updateSound :: Ptr Raylib.Types.Sound -> Ptr () -> CInt -> IO ()
+foreign import ccall safe "rl_bindings.h UpdateSound_" c'updateSound :: Ptr Sound -> Ptr () -> CInt -> IO ()
 
-foreign import ccall safe "rl_bindings.h IsWaveReady_" c'isWaveReady :: Ptr Raylib.Types.Wave -> IO CBool
+foreign import ccall safe "rl_bindings.h IsWaveReady_" c'isWaveReady :: Ptr Wave -> IO CBool
 
-foreign import ccall safe "rl_bindings.h UnloadWave_" c'unloadWave :: Ptr Raylib.Types.Wave -> IO ()
+foreign import ccall safe "rl_bindings.h UnloadWave_" c'unloadWave :: Ptr Wave -> IO ()
 
-foreign import ccall safe "rl_bindings.h IsSoundReady_" c'isSoundReady :: Ptr Raylib.Types.Sound -> IO CBool
+foreign import ccall safe "rl_bindings.h IsSoundReady_" c'isSoundReady :: Ptr Sound -> IO CBool
 
-foreign import ccall safe "rl_bindings.h UnloadSound_" c'unloadSound :: Ptr Raylib.Types.Sound -> IO ()
+foreign import ccall safe "rl_bindings.h UnloadSound_" c'unloadSound :: Ptr Sound -> IO ()
 
-foreign import ccall safe "rl_bindings.h ExportWave_" c'exportWave :: Ptr Raylib.Types.Wave -> CString -> IO CBool
+foreign import ccall safe "rl_bindings.h ExportWave_" c'exportWave :: Ptr Wave -> CString -> IO CBool
 
-foreign import ccall safe "rl_bindings.h ExportWaveAsCode_" c'exportWaveAsCode :: Ptr Raylib.Types.Wave -> CString -> IO CBool
+foreign import ccall safe "rl_bindings.h ExportWaveAsCode_" c'exportWaveAsCode :: Ptr Wave -> CString -> IO CBool
 
-foreign import ccall safe "rl_bindings.h PlaySound_" c'playSound :: Ptr Raylib.Types.Sound -> IO ()
+foreign import ccall safe "rl_bindings.h PlaySound_" c'playSound :: Ptr Sound -> IO ()
 
-foreign import ccall safe "rl_bindings.h StopSound_" c'stopSound :: Ptr Raylib.Types.Sound -> IO ()
+foreign import ccall safe "rl_bindings.h StopSound_" c'stopSound :: Ptr Sound -> IO ()
 
-foreign import ccall safe "rl_bindings.h PauseSound_" c'pauseSound :: Ptr Raylib.Types.Sound -> IO ()
+foreign import ccall safe "rl_bindings.h PauseSound_" c'pauseSound :: Ptr Sound -> IO ()
 
-foreign import ccall safe "rl_bindings.h ResumeSound_" c'resumeSound :: Ptr Raylib.Types.Sound -> IO ()
+foreign import ccall safe "rl_bindings.h ResumeSound_" c'resumeSound :: Ptr Sound -> IO ()
 
-foreign import ccall safe "rl_bindings.h PlaySoundMulti_" c'playSoundMulti :: Ptr Raylib.Types.Sound -> IO ()
+foreign import ccall safe "rl_bindings.h PlaySoundMulti_" c'playSoundMulti :: Ptr Sound -> IO ()
 
 foreign import ccall safe "raylib.h GetSoundsPlaying"
   c'getSoundsPlaying ::
     IO CInt
 
-foreign import ccall safe "rl_bindings.h IsSoundPlaying_" c'isSoundPlaying :: Ptr Raylib.Types.Sound -> IO CBool
+foreign import ccall safe "rl_bindings.h IsSoundPlaying_" c'isSoundPlaying :: Ptr Sound -> IO CBool
 
-foreign import ccall safe "rl_bindings.h SetSoundVolume_" c'setSoundVolume :: Ptr Raylib.Types.Sound -> CFloat -> IO ()
+foreign import ccall safe "rl_bindings.h SetSoundVolume_" c'setSoundVolume :: Ptr Sound -> CFloat -> IO ()
 
-foreign import ccall safe "rl_bindings.h SetSoundPitch_" c'setSoundPitch :: Ptr Raylib.Types.Sound -> CFloat -> IO ()
+foreign import ccall safe "rl_bindings.h SetSoundPitch_" c'setSoundPitch :: Ptr Sound -> CFloat -> IO ()
 
-foreign import ccall safe "rl_bindings.h SetSoundPan_" c'setSoundPan :: Ptr Raylib.Types.Sound -> CFloat -> IO ()
+foreign import ccall safe "rl_bindings.h SetSoundPan_" c'setSoundPan :: Ptr Sound -> CFloat -> IO ()
 
-foreign import ccall safe "rl_bindings.h WaveCopy_" c'waveCopy :: Ptr Raylib.Types.Wave -> IO (Ptr Raylib.Types.Wave)
+foreign import ccall safe "rl_bindings.h WaveCopy_" c'waveCopy :: Ptr Wave -> IO (Ptr Wave)
 
 foreign import ccall safe "raylib.h WaveCrop"
   c'waveCrop ::
-    Ptr Raylib.Types.Wave -> CInt -> CInt -> IO ()
+    Ptr Wave -> CInt -> CInt -> IO ()
 
 foreign import ccall safe "raylib.h WaveFormat"
   c'waveFormat ::
-    Ptr Raylib.Types.Wave -> CInt -> CInt -> CInt -> IO ()
+    Ptr Wave -> CInt -> CInt -> CInt -> IO ()
 
-foreign import ccall safe "rl_bindings.h LoadWaveSamples_" c'loadWaveSamples :: Ptr Raylib.Types.Wave -> IO (Ptr CFloat)
+foreign import ccall safe "rl_bindings.h LoadWaveSamples_" c'loadWaveSamples :: Ptr Wave -> IO (Ptr CFloat)
 
 foreign import ccall safe "raylib.h UnloadWaveSamples"
   c'unloadWaveSamples ::
     Ptr CFloat -> IO ()
 
-foreign import ccall safe "rl_bindings.h LoadMusicStream_" c'loadMusicStream :: CString -> IO (Ptr Raylib.Types.Music)
+foreign import ccall safe "rl_bindings.h LoadMusicStream_" c'loadMusicStream :: CString -> IO (Ptr Music)
 
-foreign import ccall safe "rl_bindings.h LoadMusicStreamFromMemory_" c'loadMusicStreamFromMemory :: CString -> Ptr CUChar -> CInt -> IO (Ptr Raylib.Types.Music)
+foreign import ccall safe "rl_bindings.h LoadMusicStreamFromMemory_" c'loadMusicStreamFromMemory :: CString -> Ptr CUChar -> CInt -> IO (Ptr Music)
 
-foreign import ccall safe "rl_bindings.h IsMusicReady_" c'isMusicReady :: Ptr Raylib.Types.Music -> IO CBool
+foreign import ccall safe "rl_bindings.h IsMusicReady_" c'isMusicReady :: Ptr Music -> IO CBool
 
-foreign import ccall safe "rl_bindings.h UnloadMusicStream_" c'unloadMusicStream :: Ptr Raylib.Types.Music -> IO ()
+foreign import ccall safe "rl_bindings.h UnloadMusicStream_" c'unloadMusicStream :: Ptr Music -> IO ()
 
-foreign import ccall safe "rl_bindings.h PlayMusicStream_" c'playMusicStream :: Ptr Raylib.Types.Music -> IO ()
+foreign import ccall safe "rl_bindings.h PlayMusicStream_" c'playMusicStream :: Ptr Music -> IO ()
 
-foreign import ccall safe "rl_bindings.h IsMusicStreamPlaying_" c'isMusicStreamPlaying :: Ptr Raylib.Types.Music -> IO CBool
+foreign import ccall safe "rl_bindings.h IsMusicStreamPlaying_" c'isMusicStreamPlaying :: Ptr Music -> IO CBool
 
-foreign import ccall safe "rl_bindings.h UpdateMusicStream_" c'updateMusicStream :: Ptr Raylib.Types.Music -> IO ()
+foreign import ccall safe "rl_bindings.h UpdateMusicStream_" c'updateMusicStream :: Ptr Music -> IO ()
 
-foreign import ccall safe "rl_bindings.h StopMusicStream_" c'stopMusicStream :: Ptr Raylib.Types.Music -> IO ()
+foreign import ccall safe "rl_bindings.h StopMusicStream_" c'stopMusicStream :: Ptr Music -> IO ()
 
-foreign import ccall safe "rl_bindings.h PauseMusicStream_" c'pauseMusicStream :: Ptr Raylib.Types.Music -> IO ()
+foreign import ccall safe "rl_bindings.h PauseMusicStream_" c'pauseMusicStream :: Ptr Music -> IO ()
 
-foreign import ccall safe "rl_bindings.h ResumeMusicStream_" c'resumeMusicStream :: Ptr Raylib.Types.Music -> IO ()
+foreign import ccall safe "rl_bindings.h ResumeMusicStream_" c'resumeMusicStream :: Ptr Music -> IO ()
 
-foreign import ccall safe "rl_bindings.h SeekMusicStream_" c'seekMusicStream :: Ptr Raylib.Types.Music -> CFloat -> IO ()
+foreign import ccall safe "rl_bindings.h SeekMusicStream_" c'seekMusicStream :: Ptr Music -> CFloat -> IO ()
 
-foreign import ccall safe "rl_bindings.h SetMusicVolume_" c'setMusicVolume :: Ptr Raylib.Types.Music -> CFloat -> IO ()
+foreign import ccall safe "rl_bindings.h SetMusicVolume_" c'setMusicVolume :: Ptr Music -> CFloat -> IO ()
 
-foreign import ccall safe "rl_bindings.h SetMusicPitch_" c'setMusicPitch :: Ptr Raylib.Types.Music -> CFloat -> IO ()
+foreign import ccall safe "rl_bindings.h SetMusicPitch_" c'setMusicPitch :: Ptr Music -> CFloat -> IO ()
 
-foreign import ccall safe "rl_bindings.h SetMusicPan_" c'setMusicPan :: Ptr Raylib.Types.Music -> CFloat -> IO ()
+foreign import ccall safe "rl_bindings.h SetMusicPan_" c'setMusicPan :: Ptr Music -> CFloat -> IO ()
 
-foreign import ccall safe "rl_bindings.h GetMusicTimeLength_" c'getMusicTimeLength :: Ptr Raylib.Types.Music -> IO CFloat
+foreign import ccall safe "rl_bindings.h GetMusicTimeLength_" c'getMusicTimeLength :: Ptr Music -> IO CFloat
 
-foreign import ccall safe "rl_bindings.h GetMusicTimePlayed_" c'getMusicTimePlayed :: Ptr Raylib.Types.Music -> IO CFloat
+foreign import ccall safe "rl_bindings.h GetMusicTimePlayed_" c'getMusicTimePlayed :: Ptr Music -> IO CFloat
 
-foreign import ccall safe "rl_bindings.h LoadAudioStream_" c'loadAudioStream :: CUInt -> CUInt -> CUInt -> IO (Ptr Raylib.Types.AudioStream)
+foreign import ccall safe "rl_bindings.h LoadAudioStream_" c'loadAudioStream :: CUInt -> CUInt -> CUInt -> IO (Ptr AudioStream)
 
-foreign import ccall safe "rl_bindings.h IsAudioStreamReady_" c'isAudioStreamReady :: Ptr Raylib.Types.AudioStream -> IO CBool
+foreign import ccall safe "rl_bindings.h IsAudioStreamReady_" c'isAudioStreamReady :: Ptr AudioStream -> IO CBool
 
-foreign import ccall safe "rl_bindings.h UnloadAudioStream_" c'unloadAudioStream :: Ptr Raylib.Types.AudioStream -> IO ()
+foreign import ccall safe "rl_bindings.h UnloadAudioStream_" c'unloadAudioStream :: Ptr AudioStream -> IO ()
 
-foreign import ccall safe "rl_bindings.h UpdateAudioStream_" c'updateAudioStream :: Ptr Raylib.Types.AudioStream -> Ptr () -> CInt -> IO ()
+foreign import ccall safe "rl_bindings.h UpdateAudioStream_" c'updateAudioStream :: Ptr AudioStream -> Ptr () -> CInt -> IO ()
 
-foreign import ccall safe "rl_bindings.h IsAudioStreamProcessed_" c'isAudioStreamProcessed :: Ptr Raylib.Types.AudioStream -> IO CBool
+foreign import ccall safe "rl_bindings.h IsAudioStreamProcessed_" c'isAudioStreamProcessed :: Ptr AudioStream -> IO CBool
 
-foreign import ccall safe "rl_bindings.h PlayAudioStream_" c'playAudioStream :: Ptr Raylib.Types.AudioStream -> IO ()
+foreign import ccall safe "rl_bindings.h PlayAudioStream_" c'playAudioStream :: Ptr AudioStream -> IO ()
 
-foreign import ccall safe "rl_bindings.h PauseAudioStream_" c'pauseAudioStream :: Ptr Raylib.Types.AudioStream -> IO ()
+foreign import ccall safe "rl_bindings.h PauseAudioStream_" c'pauseAudioStream :: Ptr AudioStream -> IO ()
 
-foreign import ccall safe "rl_bindings.h ResumeAudioStream_" c'resumeAudioStream :: Ptr Raylib.Types.AudioStream -> IO ()
+foreign import ccall safe "rl_bindings.h ResumeAudioStream_" c'resumeAudioStream :: Ptr AudioStream -> IO ()
 
-foreign import ccall safe "rl_bindings.h IsAudioStreamPlaying_" c'isAudioStreamPlaying :: Ptr Raylib.Types.AudioStream -> IO CBool
+foreign import ccall safe "rl_bindings.h IsAudioStreamPlaying_" c'isAudioStreamPlaying :: Ptr AudioStream -> IO CBool
 
-foreign import ccall safe "rl_bindings.h StopAudioStream_" c'stopAudioStream :: Ptr Raylib.Types.AudioStream -> IO ()
+foreign import ccall safe "rl_bindings.h StopAudioStream_" c'stopAudioStream :: Ptr AudioStream -> IO ()
 
-foreign import ccall safe "rl_bindings.h SetAudioStreamVolume_" c'setAudioStreamVolume :: Ptr Raylib.Types.AudioStream -> CFloat -> IO ()
+foreign import ccall safe "rl_bindings.h SetAudioStreamVolume_" c'setAudioStreamVolume :: Ptr AudioStream -> CFloat -> IO ()
 
-foreign import ccall safe "rl_bindings.h SetAudioStreamPitch_" c'setAudioStreamPitch :: Ptr Raylib.Types.AudioStream -> CFloat -> IO ()
+foreign import ccall safe "rl_bindings.h SetAudioStreamPitch_" c'setAudioStreamPitch :: Ptr AudioStream -> CFloat -> IO ()
 
-foreign import ccall safe "rl_bindings.h SetAudioStreamPan_" c'setAudioStreamPan :: Ptr Raylib.Types.AudioStream -> CFloat -> IO ()
+foreign import ccall safe "rl_bindings.h SetAudioStreamPan_" c'setAudioStreamPan :: Ptr AudioStream -> CFloat -> IO ()
 
 foreign import ccall safe "raylib.h SetAudioStreamBufferSizeDefault"
   c'setAudioStreamBufferSizeDefault ::
     CInt -> IO ()
 
-foreign import ccall safe "rl_bindings.h SetAudioStreamCallback_" c'setAudioStreamCallback :: Ptr Raylib.Types.AudioStream -> Ptr AudioCallback -> IO ()
+foreign import ccall safe "rl_bindings.h SetAudioStreamCallback_" c'setAudioStreamCallback :: Ptr AudioStream -> Ptr AudioCallback -> IO ()
 
-foreign import ccall safe "rl_bindings.h AttachAudioStreamProcessor_" c'attachAudioStreamProcessor :: Ptr Raylib.Types.AudioStream -> Ptr AudioCallback -> IO ()
+foreign import ccall safe "rl_bindings.h AttachAudioStreamProcessor_" c'attachAudioStreamProcessor :: Ptr AudioStream -> Ptr AudioCallback -> IO ()
 
-foreign import ccall safe "rl_bindings.h DetachAudioStreamProcessor_" c'detachAudioStreamProcessor :: Ptr Raylib.Types.AudioStream -> Ptr AudioCallback -> IO ()
+foreign import ccall safe "rl_bindings.h DetachAudioStreamProcessor_" c'detachAudioStreamProcessor :: Ptr AudioStream -> Ptr AudioCallback -> IO ()
 
 foreign import ccall safe "rl_bindings.h AttachAudioMixedProcessor_" c'attachAudioMixedProcessor :: Ptr AudioCallback -> IO ()
 

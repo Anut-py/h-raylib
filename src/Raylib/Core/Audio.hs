@@ -11,7 +11,7 @@ import Foreign
     withArrayLen,
   )
 import Foreign.C (CUChar, withCString)
-import Raylib.Internal (addAudioBuffer, addCtxData, unloadAudioBuffers, unloadCtxData)
+import Raylib.Internal (addAudioBuffer, addCtxData, unloadAudioBuffers, unloadCtxData, unloadSingleAudioBuffer, unloadSingleCtxDataPtr)
 import Raylib.Native
   ( c'closeAudioDevice,
     c'exportWave,
@@ -70,7 +70,7 @@ import Raylib.Native
 import Raylib.Types
   ( AudioStream (audioStream'buffer),
     Music (music'ctxData, music'ctxType, music'stream),
-    Sound,
+    Sound (sound'stream),
     Wave (wave'channels, wave'frameCount),
   )
 import Raylib.ForeignUtil
@@ -106,6 +106,13 @@ loadSoundFromWave wave = withFreeable wave c'loadSoundFromWave >>= pop
 
 updateSound :: Sound -> Ptr () -> Int -> IO ()
 updateSound sound dataValue sampleCount = withFreeable sound (\s -> c'updateSound s dataValue (fromIntegral sampleCount))
+
+-- | Unloads an sound from RAM. Sounds are automatically unloaded
+-- when `closeAudioDevice` is called, so manually unloading sounds is
+-- not required. In larger projects, you may want to manually unload
+-- sounds to avoid having them in RAM for too long.
+unloadSound :: Sound -> IO ()
+unloadSound sound = unloadAudioStream (sound'stream sound)
 
 isWaveReady :: Wave -> IO Bool
 isWaveReady wave = toBool <$> withFreeable wave c'isWaveReady
@@ -186,6 +193,13 @@ loadMusicStreamFromMemory fileType streamData = do
   addCtxData (fromEnum $ music'ctxType music) (music'ctxData music)
   return music
 
+-- | Unloads a music stream from RAM. Music streams are automatically unloaded
+-- when `closeAudioDevice` is called, so manually unloading music streams is
+-- not required. In larger projects, you may want to manually unload music
+-- streams to avoid having them in RAM for too long.
+unloadMusicStream :: Music -> IO ()
+unloadMusicStream music = unloadSingleCtxDataPtr (fromEnum $ music'ctxType music) (music'ctxData music)
+
 isMusicReady :: Music -> IO Bool
 isMusicReady music = toBool <$> withFreeable music c'isMusicReady
 
@@ -230,6 +244,13 @@ loadAudioStream sampleRate sampleSize channels = do
   stream <- c'loadAudioStream (fromIntegral sampleRate) (fromIntegral sampleSize) (fromIntegral channels) >>= pop
   addAudioBuffer $ castPtr (audioStream'buffer stream)
   return stream
+
+-- | Unloads an audio stream from RAM. Audio streams are automatically unloaded
+-- when `closeAudioDevice` is called, so manually unloading audio streams is
+-- not required. In larger projects, you may want to manually unload audio
+-- streams to avoid having them in RAM for too long.
+unloadAudioStream :: AudioStream -> IO ()
+unloadAudioStream stream = unloadSingleAudioBuffer (castPtr $ audioStream'buffer stream)
 
 isAudioStreamReady :: AudioStream -> IO Bool
 isAudioStreamReady stream = toBool <$> withFreeable stream c'isAudioStreamReady
