@@ -18,6 +18,7 @@ cabal run basic-models
 
 # shaders
 cabal run basic-shaders
+cabal run postprocessing-effects
 
 # audio
 cabal run basic-audio

@@ -79,34 +79,11 @@ common example-options
       , base
       , h-raylib
 
+-- core
+
 executable basic-window
   import:         example-options
   hs-source-dirs: examples/basic-window/src
-  main-is:        Main.hs
-
-executable basic-images
-  import:         example-options
-  hs-source-dirs: examples/basic-images/src
-  main-is:        Main.hs
-
-executable basic-shaders
-  import:         example-options
-  hs-source-dirs: examples/basic-shaders/src
-  main-is:        Main.hs
-
-executable basic-models
-  import:         example-options
-  hs-source-dirs: examples/basic-models/src
-  main-is:        Main.hs
-
-executable basic-audio
-  import:         example-options
-  hs-source-dirs: examples/basic-audio/src
-  main-is:        Main.hs
-
-executable custom-font-text
-  import:         example-options
-  hs-source-dirs: examples/custom-font-text/src
   main-is:        Main.hs
 
 executable first-person-camera
@@ -117,6 +94,46 @@ executable first-person-camera
 executable camera-ray-collision
   import:         example-options
   hs-source-dirs: examples/camera-ray-collision/src
+  main-is:        Main.hs
+
+-- textures
+
+executable basic-images
+  import:         example-options
+  hs-source-dirs: examples/basic-images/src
+  main-is:        Main.hs
+
+-- text
+
+executable custom-font-text
+  import:         example-options
+  hs-source-dirs: examples/custom-font-text/src
+  main-is:        Main.hs
+
+-- models
+
+executable basic-models
+  import:         example-options
+  hs-source-dirs: examples/basic-models/src
+  main-is:        Main.hs
+
+-- shaders
+
+executable basic-shaders
+  import:         example-options
+  hs-source-dirs: examples/basic-shaders/src
+  main-is:        Main.hs
+
+executable postprocessing-effects
+  import:         example-options
+  hs-source-dirs: examples/postprocessing-effects/src
+  main-is:        Main.hs
+
+-- audio
+
+executable basic-audio
+  import:         example-options
+  hs-source-dirs: examples/basic-audio/src
   main-is:        Main.hs
 
 library
