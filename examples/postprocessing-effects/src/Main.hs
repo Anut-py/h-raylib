@@ -2,7 +2,7 @@
 
 module Main where
 
-import Raylib.Core (beginDrawing, beginMode3D, beginShaderMode, beginTextureMode, changeDirectory, clearBackground, endDrawing, endMode3D, endShaderMode, endTextureMode, getApplicationDirectory, initWindow, isKeyPressed, loadShader, setShaderValue, setTargetFPS, updateCamera)
+import Raylib.Core (beginDrawing, beginMode3D, beginShaderMode, beginTextureMode, changeDirectory, clearBackground, endDrawing, endMode3D, endShaderMode, endTextureMode, getApplicationDirectory, initWindow, isKeyPressed, loadShader, setShaderValue, setTargetFPS, updateCamera, closeWindow)
 import Raylib.Core.Models (drawCube, drawGrid, drawSphere)
 import Raylib.Core.Textures (drawTextureRec, loadRenderTexture)
 import Raylib.Types (Camera3D (Camera3D), CameraMode (CameraModeOrbital), CameraProjection (CameraPerspective), KeyboardKey (KeyLeft, KeyRight), Rectangle (Rectangle), RenderTexture (renderTexture'texture), ShaderUniformData (ShaderUniformVec2), Vector2 (Vector2), Vector3 (Vector3))
@@ -95,3 +95,5 @@ main = do
         return (newCam, newShaderIdx)
     )
     (camera, 0)
+
+  closeWindow
