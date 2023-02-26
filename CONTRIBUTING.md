@@ -40,7 +40,9 @@ The callbacks section contains `FunPtr` types that are passed to some functions.
 
 ### The other 6 modules
 
-These modules contain only functions. Each of these functions corresponds to a C function. The `unload*` functions were removed to make memory management automatic (this may be revised in the future, see `ROADMAP.md`). Functions that took a pointer as an argument in C were changed to take a regular type as an argument and return an updated version of the argument.
+These modules contain only functions. Each of these functions corresponds to a C function. The `unload*` functions are optional; even if you do not call them, all assets used by a program will be automatically be unloaded when it terminates (see the "Memory management" section). For some types (e.g. `Image`), there is no unloading function because the memory used by the type can be unloaded in function calls.
+
+Functions that took a pointer as an argument in C were changed to take a regular type as an argument and return an updated version of the argument.
 
 ### Private modules
 
@@ -72,4 +74,4 @@ The automatic memory management flow is as follows:
 
 Keep in mind that this is all automatic; no extra action in the code is necessary for this to happen. Take a look at `Raylib.Internal` to see the functions used for this.
 
-Unfortunately, this could lead to performance problems in larger projects, as large assets such as models must stay in memory for the duration of the program. This is why manual unloading is in the roadmap.
+In some cases, models and other data used by a program are extremely large and thus expensive to keep in memory for the entire duration of the program. For this reason, the `unload*` functions are available to manually unload data on the fly.
