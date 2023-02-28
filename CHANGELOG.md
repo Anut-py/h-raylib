@@ -1,5 +1,15 @@
 # h-raylib changelog
 
+## Version 4.5.3.1
+_27 February, 2023_
+
+- Added manual asset unloading functions
+- Updated raylib to the master branch
+
+\[[#11](https://github.com/Anut-py/h-raylib/pull/11)\]
+
+- Fixed a build issue on MacOS
+
 ## Version 4.5.3.0
 _24 February, 2023_
 
