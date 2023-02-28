@@ -10,4 +10,4 @@ Items higher on the list have higher priority.
 
 ## Completed
 - Make it easier to pass shader parameters (Added in `4.5.3.0`)
-- Allow manual unloading of assets for larger projects (Not published to hackage)
+- Allow manual unloading of assets for larger projects (Added in `4.5.3.1`)
