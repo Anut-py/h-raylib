@@ -1,5 +1,12 @@
 # h-raylib changelog
 
+## Version 4.5.3.2
+_1 March, 2023_
+
+\[[#12](https://github.com/Anut-py/h-raylib/pull/12)\]
+
+- Added rlgl bindings (`Raylib.Util.RLGL`)
+
 ## Version 4.5.3.1
 _27 February, 2023_
 
