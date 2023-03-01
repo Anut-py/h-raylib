@@ -12,7 +12,7 @@ import Foreign.C
     CInt (..),
     CLong (..),
     CString,
-    CUChar,
+    CUChar (..),
     CUInt (..),
   )
 import Raylib.Types
@@ -49,9 +49,11 @@ import Raylib.Types
     Vector4,
     VrDeviceInfo,
     VrStereoConfig,
-    Wave,
+    Wave, RLRenderBatch
   )
 import Prelude hiding (length)
+
+---- raylib.h
 
 -- foreign import ccall safe "wrapper"
 --   mk'TraceLogCallback ::
@@ -1044,80 +1046,6 @@ foreign import ccall safe "raylib.h CodepointToUTF8"
   c'codepointToUTF8 ::
     CInt -> Ptr CInt -> IO CString
 
--- | Not required in Haskell
--- foreign import ccall safe "raylib.h TextCopy"
---   textCopy ::
---     CString -> CString -> IO CInt
-
--- | Not required in Haskell
--- foreign import ccall safe "raylib.h TextIsEqual"
---   textIsEqual ::
---     CString -> CString -> IO CInt
-
--- | Not required in Haskell
--- foreign import ccall safe "raylib.h TextLength"
---   textLength ::
---     CString -> IO CUInt
-
--- | Not required in Haskell
--- foreign import ccall safe "raylib.h TextFormat"
---   textFormat ::
---     CString -> IO CString
-
--- | Not required in Haskell
--- foreign import ccall safe "raylib.h TextSubtext"
---   textSubtext ::
---     CString -> CInt -> CInt -> IO CString
-
--- | Not required in Haskell
--- foreign import ccall safe "raylib.h TextReplace"
---   textReplace ::
---     CString -> CString -> CString -> IO CString
-
--- | Not required in Haskell
--- foreign import ccall safe "raylib.h TextInsert"
---   textInsert ::
---     CString -> CString -> CInt -> IO CString
-
--- | Not required in Haskell
--- foreign import ccall safe "raylib.h TextJoin"
---   textJoin ::
---     Ptr CString -> CInt -> CString -> IO CString
-
--- | Not required in Haskell
--- foreign import ccall safe "raylib.h TextSplit"
---   textSplit ::
---     CString -> CChar -> Ptr CInt -> IO (Ptr CString)
-
--- | Not required in Haskell
--- foreign import ccall safe "raylib.h TextAppend"
---   textAppend ::
---     CString -> CString -> Ptr CInt -> IO ()
-
--- | Not required in Haskell
--- foreign import ccall safe "raylib.h TextFindIndex"
---   textFindIndex ::
---     CString -> CString -> IO CInt
-
--- | Not required in Haskell
--- foreign import ccall safe "raylib.h TextToUpper"
---   textToUpper ::
---     CString -> IO CString
-
--- | Not required in Haskell
--- foreign import ccall safe "raylib.h TextToLower"
---   textToLower ::
---     CString -> IO CString
-
--- | Not required in Haskell
--- foreign import ccall safe "raylib.h TextToPascal"
---   textToPascal ::
---     CString -> IO CString
-
--- | Not required in Haskell
--- foreign import ccall safe "raylib.h TextToInteger"
---   textToInteger ::
---     CString -> IO CInt
 foreign import ccall safe "rl_bindings.h DrawLine3D_" c'drawLine3D :: Ptr Vector3 -> Ptr Vector3 -> Ptr Color -> IO ()
 
 foreign import ccall safe "rl_bindings.h DrawPoint3D_" c'drawPoint3D :: Ptr Vector3 -> Ptr Color -> IO ()
@@ -1430,3 +1358,231 @@ foreign import ccall safe "rl_bindings.h DetachAudioStreamProcessor_" c'detachAu
 foreign import ccall safe "rl_bindings.h AttachAudioMixedProcessor_" c'attachAudioMixedProcessor :: Ptr AudioCallback -> IO ()
 
 foreign import ccall safe "rl_bindings.h DetachAudioMixedProcessor_" c'detachAudioMixedProcessor :: Ptr AudioCallback -> IO ()
+
+---- rlgl.h
+
+foreign import ccall safe "rlgl.h rlMatrixMode" c'rlMatrixMode :: CInt -> IO ()
+
+foreign import ccall safe "rlgl.h rlTranslatef" c'rlTranslatef :: CFloat -> CFloat -> CFloat -> IO ()
+
+foreign import ccall safe "rlgl.h rlRotatef" c'rlRotatef :: CFloat -> CFloat -> CFloat -> CFloat -> IO ()
+
+foreign import ccall safe "rlgl.h rlScalef" c'rlScalef :: CFloat -> CFloat -> CFloat -> IO ()
+
+foreign import ccall safe "rlgl.h rlMultMatrixf" c'rlMultMatrixf :: Ptr CFloat -> IO ()
+
+foreign import ccall safe "rlgl.h rlFrustum" c'rlFrustum :: CDouble -> CDouble -> CDouble -> CDouble -> CDouble -> CDouble -> IO ()
+
+foreign import ccall safe "rlgl.h rlOrtho" c'rlOrtho :: CDouble -> CDouble -> CDouble -> CDouble -> CDouble -> CDouble -> IO ()
+
+foreign import ccall safe "rlgl.h rlViewport" c'rlViewport :: CInt -> CInt -> CInt -> CInt -> IO ()
+
+foreign import ccall safe "rlgl.h rlBegin" c'rlBegin :: CInt -> IO ()
+
+foreign import ccall safe "rlgl.h rlVertex2i" c'rlVertex2i :: CInt -> CInt -> IO ()
+
+foreign import ccall safe "rlgl.h rlVertex2f" c'rlVertex2f :: CFloat -> CFloat -> IO ()
+
+foreign import ccall safe "rlgl.h rlVertex3f" c'rlVertex3f :: CFloat -> CFloat -> CFloat -> IO ()
+
+foreign import ccall safe "rlgl.h rlTexCoord2f" c'rlTexCoord2f :: CFloat -> CFloat -> IO ()
+
+foreign import ccall safe "rlgl.h rlNormal3f" c'rlNormal3f :: CFloat -> CFloat -> CFloat -> IO ()
+
+foreign import ccall safe "rlgl.h rlColor4ub" c'rlColor4ub :: CUChar -> CUChar -> CUChar -> CUChar -> IO ()
+
+foreign import ccall safe "rlgl.h rlColor3f" c'rlColor3f :: CFloat -> CFloat -> CFloat -> IO ()
+
+foreign import ccall safe "rlgl.h rlColor4f" c'rlColor4f :: CFloat -> CFloat -> CFloat -> CFloat -> IO ()
+
+foreign import ccall safe "rlgl.h rlEnableVertexArray" c'rlEnableVertexArray :: CUInt -> IO CBool
+
+foreign import ccall safe "rlgl.h rlEnableVertexBuffer" c'rlEnableVertexBuffer :: CUInt -> IO ()
+
+foreign import ccall safe "rlgl.h rlEnableVertexBufferElement" c'rlEnableVertexBufferElement :: CUInt -> IO ()
+
+foreign import ccall safe "rlgl.h rlEnableVertexAttribute" c'rlEnableVertexAttribute :: CUInt -> IO ()
+
+foreign import ccall safe "rlgl.h rlDisableVertexAttribute" c'rlDisableVertexAttribute :: CUInt -> IO ()
+
+foreign import ccall safe "rlgl.h rlActiveTextureSlot" c'rlActiveTextureSlot :: CInt -> IO ()
+
+foreign import ccall safe "rlgl.h rlEnableTexture" c'rlEnableTexture :: CUInt -> IO ()
+
+foreign import ccall safe "rlgl.h rlEnableTextureCubemap" c'rlEnableTextureCubemap :: CUInt -> IO ()
+
+foreign import ccall safe "rlgl.h rlTextureParameters" c'rlTextureParameters :: CUInt -> CInt -> CInt -> IO ()
+
+foreign import ccall safe "rlgl.h rlCubemapParameters" c'rlCubemapParameters :: CUInt -> CInt -> CInt -> IO ()
+
+foreign import ccall safe "rlgl.h rlEnableShader" c'rlEnableShader :: CUInt -> IO ()
+
+foreign import ccall safe "rlgl.h rlEnableFramebuffer" c'rlEnableFramebuffer :: CUInt -> IO ()
+
+foreign import ccall safe "rlgl.h rlActiveDrawBuffers" c'rlActiveDrawBuffers :: CInt -> IO ()
+
+foreign import ccall safe "rlgl.h rlSetCullFace" c'rlSetCullFace :: CInt -> IO ()
+
+foreign import ccall safe "rlgl.h rlScissor" c'rlScissor :: CInt -> CInt -> CInt -> CInt -> IO ()
+
+foreign import ccall safe "rlgl.h rlSetLineWidth" c'rlSetLineWidth :: CFloat -> IO ()
+
+foreign import ccall safe "rlgl.h rlGetLineWidth" c'rlGetLineWidth :: IO CFloat
+
+foreign import ccall safe "rlgl.h rlIsStereoRenderEnabled" c'rlIsStereoRenderEnabled :: IO CBool
+
+foreign import ccall safe "rlgl.h rlClearColor" c'rlClearColor :: CUChar -> CUChar -> CUChar -> CUChar -> IO ()
+
+foreign import ccall safe "rlgl.h rlSetBlendMode" c'rlSetBlendMode :: CInt -> IO ()
+
+foreign import ccall safe "rlgl.h rlSetBlendFactors" c'rlSetBlendFactors :: CInt -> CInt -> CInt -> IO ()
+
+foreign import ccall safe "rlgl.h rlSetBlendFactorsSeparate" c'rlSetBlendFactorsSeparate :: CInt -> CInt -> CInt -> CInt -> CInt -> CInt -> IO ()
+
+foreign import ccall safe "rlgl.h rlglInit" c'rlglInit :: CInt -> CInt -> IO ()
+
+foreign import ccall safe "rlgl.h rlLoadExtensions" c'rlLoadExtensions :: Ptr () -> IO ()
+
+foreign import ccall safe "rlgl.h rlGetVersion" c'rlGetVersion :: IO CInt
+
+foreign import ccall safe "rlgl.h rlSetFramebufferWidth" c'rlSetFramebufferWidth :: CInt -> IO ()
+
+foreign import ccall safe "rlgl.h rlGetFramebufferWidth" c'rlGetFramebufferWidth :: IO CInt
+
+foreign import ccall safe "rlgl.h rlSetFramebufferHeight" c'rlSetFramebufferHeight :: CInt -> IO ()
+
+foreign import ccall safe "rlgl.h rlGetFramebufferHeight" c'rlGetFramebufferHeight :: IO CInt
+
+foreign import ccall safe "rlgl.h rlGetTextureIdDefault" c'rlGetTextureIdDefault :: IO CUInt
+
+foreign import ccall safe "rlgl.h rlGetShaderIdDefault" c'rlGetShaderIdDefault :: IO CUInt
+
+foreign import ccall safe "rlgl.h rlGetShaderLocsDefault" c'rlGetShaderLocsDefault :: IO (Ptr CInt)
+
+foreign import ccall safe "rlgl_bindings.h rlLoadRenderBatch_" c'rlLoadRenderBatch :: CInt -> CInt -> IO (Ptr RLRenderBatch)
+
+foreign import ccall safe "rlgl_bindings.h rlUnloadRenderBatch_" c'rlUnloadRenderBatch :: Ptr RLRenderBatch -> IO ()
+
+foreign import ccall safe "rlgl.h rlDrawRenderBatch" c'rlDrawRenderBatch :: Ptr RLRenderBatch -> IO ()
+
+foreign import ccall safe "rlgl.h rlSetRenderBatchActive" c'rlSetRenderBatchActive :: Ptr RLRenderBatch -> IO ()
+
+foreign import ccall safe "rlgl.h rlCheckRenderBatchLimit" c'rlCheckRenderBatchLimit :: CInt -> IO CBool
+
+foreign import ccall safe "rlgl.h rlSetTexture" c'rlSetTexture :: CUInt -> IO ()
+
+foreign import ccall safe "rlgl.h rlLoadVertexArray" c'rlLoadVertexArray :: IO CUInt
+
+foreign import ccall safe "rlgl.h rlLoadVertexBuffer" c'rlLoadVertexBuffer :: Ptr () -> CInt -> CBool -> IO CUInt
+
+foreign import ccall safe "rlgl.h rlLoadVertexBufferElement" c'rlLoadVertexBufferElement :: Ptr () -> CInt -> CBool -> IO CUInt
+
+foreign import ccall safe "rlgl.h rlUpdateVertexBuffer" c'rlUpdateVertexBuffer :: CUInt -> Ptr () -> CInt -> CInt -> IO ()
+
+foreign import ccall safe "rlgl.h rlUpdateVertexBufferElements" c'rlUpdateVertexBufferElements :: CUInt -> Ptr () -> CInt -> CInt -> IO ()
+
+foreign import ccall safe "rlgl.h rlUnloadVertexArray" c'rlUnloadVertexArray :: CUInt -> IO ()
+
+foreign import ccall safe "rlgl.h rlUnloadVertexBuffer" c'rlUnloadVertexBuffer :: CUInt -> IO ()
+
+foreign import ccall safe "rlgl.h rlSetVertexAttribute" c'rlSetVertexAttribute :: CUInt -> CInt -> CInt -> CBool -> CInt -> Ptr () -> IO ()
+
+foreign import ccall safe "rlgl.h rlSetVertexAttributeDivisor" c'rlSetVertexAttributeDivisor :: CUInt -> CInt -> IO ()
+
+foreign import ccall safe "rlgl.h rlSetVertexAttributeDefault" c'rlSetVertexAttributeDefault :: CInt -> Ptr () -> CInt -> CInt -> IO ()
+
+foreign import ccall safe "rlgl.h rlDrawVertexArray" c'rlDrawVertexArray :: CInt -> CInt -> IO ()
+
+foreign import ccall safe "rlgl.h rlDrawVertexArrayElements" c'rlDrawVertexArrayElements :: CInt -> CInt -> Ptr () -> IO ()
+
+foreign import ccall safe "rlgl.h rlDrawVertexArrayInstanced" c'rlDrawVertexArrayInstanced :: CInt -> CInt -> CInt -> IO ()
+
+foreign import ccall safe "rlgl.h rlDrawVertexArrayElementsInstanced" c'rlDrawVertexArrayElementsInstanced :: CInt -> CInt -> Ptr () -> CInt -> IO ()
+
+foreign import ccall safe "rlgl.h rlLoadTexture" c'rlLoadTexture :: Ptr () -> CInt -> CInt -> CInt -> CInt -> IO CUInt
+
+foreign import ccall safe "rlgl.h rlLoadTextureDepth" c'rlLoadTextureDepth :: CInt -> CInt -> CBool -> IO CUInt
+
+foreign import ccall safe "rlgl.h rlLoadTextureCubemap" c'rlLoadTextureCubemap :: Ptr () -> CInt -> CInt -> IO CUInt
+
+foreign import ccall safe "rlgl.h rlUpdateTexture" c'rlUpdateTexture :: CUInt -> CInt -> CInt -> CInt -> CInt -> CInt -> Ptr () -> IO ()
+
+foreign import ccall safe "rlgl.h rlGetGlTextureFormats" c'rlGetGlTextureFormats :: CInt -> Ptr CUInt -> Ptr CUInt -> Ptr CUInt -> IO ()
+
+foreign import ccall safe "rlgl.h rlGetPixelFormatName" c'rlGetPixelFormatName :: CUInt -> IO CString
+
+foreign import ccall safe "rlgl.h rlUnloadTexture" c'rlUnloadTexture :: CUInt -> IO ()
+
+foreign import ccall safe "rlgl.h rlGenTextureMipmaps" c'rlGenTextureMipmaps :: CUInt -> CInt -> CInt -> CInt -> Ptr CInt -> IO ()
+
+foreign import ccall safe "rlgl.h rlReadTexturePixels" c'rlReadTexturePixels :: CUInt -> CInt -> CInt -> CInt -> IO (Ptr ())
+
+foreign import ccall safe "rlgl.h rlReadScreenPixels" c'rlReadScreenPixels :: CInt -> CInt -> IO (Ptr CUChar)
+
+foreign import ccall safe "rlgl.h rlLoadFramebuffer" c'rlLoadFramebuffer :: CInt -> CInt -> IO CUInt
+
+foreign import ccall safe "rlgl.h rlFramebufferAttach" c'rlFramebufferAttach :: CUInt -> CUInt -> CInt -> CInt -> CInt -> IO ()
+
+foreign import ccall safe "rlgl.h rlFramebufferComplete" c'rlFramebufferComplete :: CUInt -> IO CBool
+
+foreign import ccall safe "rlgl.h rlUnloadFramebuffer" c'rlUnloadFramebuffer :: CUInt -> IO ()
+
+foreign import ccall safe "rlgl.h rlLoadShaderCode" c'rlLoadShaderCode :: CString -> CString -> IO CUInt
+
+foreign import ccall safe "rlgl.h rlCompileShader" c'rlCompileShader :: CString -> CInt -> IO CUInt
+
+foreign import ccall safe "rlgl.h rlLoadShaderProgram" c'rlLoadShaderProgram :: CUInt -> CUInt -> IO CUInt
+
+foreign import ccall safe "rlgl.h rlUnloadShaderProgram" c'rlUnloadShaderProgram :: CUInt -> IO ()
+
+foreign import ccall safe "rlgl.h rlGetLocationUniform" c'rlGetLocationUniform :: CUInt -> CString -> IO CInt
+
+foreign import ccall safe "rlgl.h rlGetLocationAttrib" c'rlGetLocationAttrib :: CUInt -> CString -> IO CInt
+
+foreign import ccall safe "rlgl.h rlSetUniform" c'rlSetUniform :: CInt -> Ptr () -> CInt -> CInt -> IO ()
+
+foreign import ccall safe "rlgl_bindings.h rlSetUniformMatrix_" c'rlSetUniformMatrix :: CInt -> Ptr Matrix -> IO ()
+
+foreign import ccall safe "rlgl.h rlSetUniformSampler" c'rlSetUniformSampler :: CInt -> CUInt -> IO ()
+
+foreign import ccall safe "rlgl.h rlSetShader" c'rlSetShader :: CUInt -> Ptr CInt -> IO ()
+
+foreign import ccall safe "rlgl.h rlLoadComputeShaderProgram" c'rlLoadComputeShaderProgram :: CUInt -> IO CUInt
+
+foreign import ccall safe "rlgl.h rlComputeShaderDispatch" c'rlComputeShaderDispatch :: CUInt -> CUInt -> CUInt -> IO ()
+
+foreign import ccall safe "rlgl.h rlLoadShaderBuffer" c'rlLoadShaderBuffer :: CUInt -> Ptr () -> CInt -> IO CUInt
+
+foreign import ccall safe "rlgl.h rlUnloadShaderBuffer" c'rlUnloadShaderBuffer :: CUInt -> IO ()
+
+foreign import ccall safe "rlgl.h rlUpdateShaderBuffer" c'rlUpdateShaderBuffer :: CUInt -> Ptr () -> CUInt -> CUInt -> IO ()
+
+foreign import ccall safe "rlgl.h rlBindShaderBuffer" c'rlBindShaderBuffer :: CUInt -> CUInt -> IO ()
+
+foreign import ccall safe "rlgl.h rlReadShaderBuffer" c'rlReadShaderBuffer :: CUInt -> Ptr () -> CUInt -> CUInt -> IO ()
+
+foreign import ccall safe "rlgl.h rlCopyShaderBuffer" c'rlCopyShaderBuffer :: CUInt -> CUInt -> CUInt -> CUInt -> CUInt -> IO ()
+
+foreign import ccall safe "rlgl.h rlGetShaderBufferSize" c'rlGetShaderBufferSize :: CUInt -> IO CUInt
+
+foreign import ccall safe "rlgl.h rlBindImageTexture" c'rlBindImageTexture :: CUInt -> CUInt -> CInt -> CBool -> IO ()
+
+foreign import ccall safe "rlgl.h rlGetMatrixModelview" c'rlGetMatrixModelview :: IO (Ptr Matrix)
+
+foreign import ccall safe "rlgl.h rlGetMatrixProjection" c'rlGetMatrixProjection :: IO (Ptr Matrix)
+
+foreign import ccall safe "rlgl.h rlGetMatrixTransform" c'rlGetMatrixTransform :: IO (Ptr Matrix)
+
+foreign import ccall safe "rlgl_bindings.h rlGetMatrixProjectionStereo_" c'rlGetMatrixProjectionStereo :: CInt -> IO (Ptr Matrix)
+
+foreign import ccall safe "rlgl_bindings.h rlGetMatrixViewOffsetStereo_" c'rlGetMatrixViewOffsetStereo :: CInt -> IO (Ptr Matrix)
+
+foreign import ccall safe "rlgl_bindings.h rlSetMatrixProjection_" c'rlSetMatrixProjection :: Ptr Matrix -> IO ()
+
+foreign import ccall safe "rlgl_bindings.h rlSetMatrixModelview_" c'rlSetMatrixModelview :: Ptr Matrix -> IO ()
+
+foreign import ccall safe "rlgl_bindings.h rlSetMatrixProjectionStereo_" c'rlSetMatrixProjectionStereo :: Ptr Matrix -> Ptr Matrix -> IO ()
+
+foreign import ccall safe "rlgl_bindings.h rlSetMatrixViewOffsetStereo_" c'rlSetMatrixViewOffsetStereo :: Ptr Matrix -> Ptr Matrix -> IO ()
+
+foreign import ccall safe "rl_internal.h rlGetPixelDataSize" c'rlGetPixelDataSize :: CInt -> CInt -> CInt -> IO CInt

@@ -5,13 +5,20 @@ module Raylib.Core.Text where
 import Foreign
   ( Storable (peek, sizeOf),
     toBool,
-    withArray,
-    withArrayLen,
   )
 import Foreign.C
   ( CUChar,
     peekCString,
     withCString,
+  )
+import Raylib.ForeignUtil
+  ( pop,
+    popCArray,
+    popCString,
+    withFreeableArray2D,
+    withFreeable,
+    withFreeableArray,
+    withFreeableArrayLen,
   )
 import Raylib.Internal (addTextureId, unloadSingleTexture)
 import Raylib.Native
@@ -52,13 +59,6 @@ import Raylib.Types
     Texture (texture'id),
     Vector2,
   )
-import Raylib.ForeignUtil
-  ( pop,
-    popCArray,
-    popCString,
-    withArray2D,
-    withFreeable,
-  )
 
 getFontDefault :: IO Font
 getFontDefault = c'getFontDefault >>= pop
@@ -71,7 +71,7 @@ loadFont fileName = do
 
 loadFontEx :: String -> Int -> [Int] -> Int -> IO Font
 loadFontEx fileName fontSize fontChars glyphCount = do
-  font <- withCString fileName (\f -> withArray (map fromIntegral fontChars) (\c -> c'loadFontEx f (fromIntegral fontSize) c (fromIntegral glyphCount))) >>= pop
+  font <- withCString fileName (\f -> withFreeableArray (map fromIntegral fontChars) (\c -> c'loadFontEx f (fromIntegral fontSize) c (fromIntegral glyphCount))) >>= pop
   addTextureId $ texture'id $ font'texture font
   return font
 
@@ -83,15 +83,15 @@ loadFontFromImage image key firstChar = do
 
 loadFontFromMemory :: String -> [Integer] -> Int -> [Int] -> Int -> IO Font
 loadFontFromMemory fileType fileData fontSize fontChars glyphCount = do
-  font <- withCString fileType (\t -> withArrayLen (map fromIntegral fileData) (\size d -> withArray (map fromIntegral fontChars) (\c -> c'loadFontFromMemory t d (fromIntegral $ size * sizeOf (0 :: CUChar)) (fromIntegral fontSize) c (fromIntegral glyphCount)))) >>= pop
+  font <- withCString fileType (\t -> withFreeableArrayLen (map fromIntegral fileData) (\size d -> withFreeableArray (map fromIntegral fontChars) (\c -> c'loadFontFromMemory t d (fromIntegral $ size * sizeOf (0 :: CUChar)) (fromIntegral fontSize) c (fromIntegral glyphCount)))) >>= pop
   addTextureId $ texture'id $ font'texture font
   return font
 
 loadFontData :: [Integer] -> Int -> [Int] -> Int -> FontType -> IO GlyphInfo
-loadFontData fileData fontSize fontChars glyphCount fontType = withArrayLen (map fromIntegral fileData) (\size d -> withArray (map fromIntegral fontChars) (\c -> c'loadFontData d (fromIntegral $ size * sizeOf (0 :: CUChar)) (fromIntegral fontSize) c (fromIntegral glyphCount) (fromIntegral $ fromEnum fontType))) >>= pop
+loadFontData fileData fontSize fontChars glyphCount fontType = withFreeableArrayLen (map fromIntegral fileData) (\size d -> withFreeableArray (map fromIntegral fontChars) (\c -> c'loadFontData d (fromIntegral $ size * sizeOf (0 :: CUChar)) (fromIntegral fontSize) c (fromIntegral glyphCount) (fromIntegral $ fromEnum fontType))) >>= pop
 
 genImageFontAtlas :: [GlyphInfo] -> [[Rectangle]] -> Int -> Int -> Int -> Int -> IO Image
-genImageFontAtlas chars recs glyphCount fontSize padding packMethod = withArray chars (\c -> withArray2D recs (\r -> c'genImageFontAtlas c r (fromIntegral glyphCount) (fromIntegral fontSize) (fromIntegral padding) (fromIntegral packMethod))) >>= pop
+genImageFontAtlas chars recs glyphCount fontSize padding packMethod = withFreeableArray chars (\c -> withFreeableArray2D recs (\r -> c'genImageFontAtlas c r (fromIntegral glyphCount) (fromIntegral fontSize) (fromIntegral padding) (fromIntegral packMethod))) >>= pop
 
 -- | Unloads a font from GPU memory (VRAM). Fonts are automatically unloaded
 -- when `closeWindow` is called, so manually unloading fonts is not required.
@@ -122,7 +122,7 @@ drawTextCodepoint :: Font -> Int -> Vector2 -> Float -> Color -> IO ()
 drawTextCodepoint font codepoint position fontSize tint = withFreeable font (\f -> withFreeable position (\p -> withFreeable tint (c'drawTextCodepoint f (fromIntegral codepoint) p (realToFrac fontSize))))
 
 drawTextCodepoints :: Font -> [Int] -> Vector2 -> Float -> Float -> Color -> IO ()
-drawTextCodepoints font codepoints position fontSize spacing tint = withFreeable font (\f -> withArrayLen (map fromIntegral codepoints) (\count cp -> withFreeable position (\p -> withFreeable tint (c'drawTextCodepoints f cp (fromIntegral count) p (realToFrac fontSize) (realToFrac spacing)))))
+drawTextCodepoints font codepoints position fontSize spacing tint = withFreeable font (\f -> withFreeableArrayLen (map fromIntegral codepoints) (\count cp -> withFreeable position (\p -> withFreeable tint (c'drawTextCodepoints f cp (fromIntegral count) p (realToFrac fontSize) (realToFrac spacing)))))
 
 measureText :: String -> Int -> IO Int
 measureText text fontSize = fromIntegral <$> withCString text (\t -> c'measureText t (fromIntegral fontSize))
@@ -141,7 +141,7 @@ getGlyphAtlasRec font codepoint = withFreeable font (\f -> c'getGlyphAtlasRec f 
 
 loadUTF8 :: [Integer] -> IO String
 loadUTF8 codepoints =
-  withArrayLen
+  withFreeableArrayLen
     (map fromIntegral codepoints)
     ( \size c ->
         c'loadUTF8 c (fromIntegral size)

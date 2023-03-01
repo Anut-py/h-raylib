@@ -12,8 +12,6 @@ import Foreign
     fromBool,
     peekArray,
     toBool,
-    withArray,
-    withArrayLen,
   )
 import Foreign.C
   ( CInt (CInt),
@@ -22,7 +20,7 @@ import Foreign.C
     peekCString,
     withCString,
   )
-import Raylib.ForeignUtil (c'free, configsToBitflag, pop, popCArray, popCString, withFreeable, withMaybeCString)
+import Raylib.ForeignUtil (c'free, configsToBitflag, pop, popCArray, popCString, withFreeable, withFreeableArray, withFreeableArrayLen, withMaybeCString)
 import Raylib.Internal (addShaderId, shaderLocations, unloadFrameBuffers, unloadShaders, unloadSingleShader, unloadTextures, unloadVaoIds, unloadVboIds)
 import Raylib.Native
   ( c'beginBlendMode,
@@ -275,7 +273,7 @@ setWindowIcon :: Image -> IO ()
 setWindowIcon image = withFreeable image c'setWindowIcon
 
 setWindowIcons :: [Image] -> IO ()
-setWindowIcons images = withArrayLen images (\l ptr -> c'setWindowIcons ptr (fromIntegral l))
+setWindowIcons images = withFreeableArrayLen images (\l ptr -> c'setWindowIcons ptr (fromIntegral l))
 
 setWindowTitle :: String -> IO ()
 setWindowTitle title = withCString title c'setWindowTitle
@@ -618,7 +616,7 @@ saveFileData fileName contents bytesToWrite =
 
 exportDataAsCode :: [Integer] -> Integer -> String -> IO Bool
 exportDataAsCode contents size fileName =
-  toBool <$> withArray (map fromInteger contents) (\c -> withCString fileName (c'exportDataAsCode c (fromIntegral size)))
+  toBool <$> withFreeableArray (map fromInteger contents) (\c -> withCString fileName (c'exportDataAsCode c (fromIntegral size)))
 
 loadFileText :: String -> IO String
 loadFileText fileName = withCString fileName c'loadFileText >>= popCString
@@ -683,7 +681,7 @@ getFileModTime fileName = fromIntegral <$> withCString fileName c'getFileModTime
 
 compressData :: [Integer] -> IO [Integer]
 compressData contents = do
-  withArrayLen
+  withFreeableArrayLen
     (map fromIntegral contents)
     ( \size c -> do
         withFreeable
@@ -698,7 +696,7 @@ compressData contents = do
 
 decompressData :: [Integer] -> IO [Integer]
 decompressData compressedData = do
-  withArrayLen
+  withFreeableArrayLen
     (map fromIntegral compressedData)
     ( \size c -> do
         withFreeable
@@ -713,7 +711,7 @@ decompressData compressedData = do
 
 encodeDataBase64 :: [Integer] -> IO [Integer]
 encodeDataBase64 contents = do
-  withArrayLen
+  withFreeableArrayLen
     (map fromIntegral contents)
     ( \size c -> do
         withFreeable
@@ -728,7 +726,7 @@ encodeDataBase64 contents = do
 
 decodeDataBase64 :: [Integer] -> IO [Integer]
 decodeDataBase64 encodedData = do
-  withArray
+  withFreeableArray
     (map fromIntegral encodedData)
     ( \c -> do
         withFreeable

@@ -11,8 +11,6 @@ import Foreign
     malloc,
     peekArray,
     toBool,
-    withArray,
-    withArrayLen,
   )
 import Foreign.C (CFloat, withCString)
 import GHC.IO (unsafePerformIO)
@@ -20,7 +18,7 @@ import Raylib.ForeignUtil
   ( c'free,
     pop,
     popCArray,
-    withFreeable,
+    withFreeable, withFreeableArray, withFreeableArrayLen
   )
 import Raylib.Internal (addShaderId, addTextureId, addVaoId, addVboIds, unloadSingleShader, unloadSingleTexture, unloadSingleVaoId, unloadSingleVboIdList)
 import Raylib.Native
@@ -126,7 +124,7 @@ drawTriangle3D :: Vector3 -> Vector3 -> Vector3 -> Color -> IO ()
 drawTriangle3D v1 v2 v3 color = withFreeable v1 (\p1 -> withFreeable v2 (\p2 -> withFreeable v3 (withFreeable color . c'drawTriangle3D p1 p2)))
 
 drawTriangleStrip3D :: [Vector3] -> Int -> Color -> IO ()
-drawTriangleStrip3D points pointCount color = withArray points (\p -> withFreeable color (c'drawTriangleStrip3D p (fromIntegral pointCount)))
+drawTriangleStrip3D points pointCount color = withFreeableArray points (\p -> withFreeable color (c'drawTriangleStrip3D p (fromIntegral pointCount)))
 
 drawCube :: Vector3 -> Float -> Float -> Float -> Color -> IO ()
 drawCube position width height length color = withFreeable position (\p -> withFreeable color (c'drawCube p (realToFrac width) (realToFrac height) (realToFrac length)))
@@ -266,7 +264,7 @@ drawMesh :: Mesh -> Material -> Matrix -> IO ()
 drawMesh mesh material transform = withFreeable mesh (\m -> withFreeable material (withFreeable transform . c'drawMesh m))
 
 drawMeshInstanced :: Mesh -> Material -> [Matrix] -> IO ()
-drawMeshInstanced mesh material transforms = withFreeable mesh (\m -> withFreeable material (\mat -> withArrayLen transforms (\size t -> c'drawMeshInstanced m mat t (fromIntegral size))))
+drawMeshInstanced mesh material transforms = withFreeable mesh (\m -> withFreeable material (\mat -> withFreeableArrayLen transforms (\size t -> c'drawMeshInstanced m mat t (fromIntegral size))))
 
 exportMesh :: Mesh -> String -> IO Bool
 exportMesh mesh fileName = toBool <$> withFreeable mesh (withCString fileName . c'exportMesh)
