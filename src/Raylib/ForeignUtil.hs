@@ -1,11 +1,12 @@
 {-# OPTIONS -Wall #-}
 
-module Raylib.ForeignUtil (c'free, p'free, freeMaybePtr, Freeable (..), rlFreeArray, rlFreeMaybeArray, pop, popCArray, popCString, withFreeable, withArray2D, configsToBitflag, withMaybe, withMaybeCString, peekMaybe, peekMaybeOff, pokeMaybe, pokeMaybeOff, peekMaybeArray, newMaybeArray, peekStaticArray, peekStaticArrayOff, pokeStaticArray, pokeStaticArrayOff, rightPad) where
+module Raylib.ForeignUtil (c'free, p'free, freeMaybePtr, Freeable (..), rlFreeArray, rlFreeMaybeArray, pop, popCArray, popCString, withFreeable, withFreeableArray, withFreeableArrayLen, withFreeableArray2D, configsToBitflag, withMaybe, withMaybeCString, peekMaybe, peekMaybeOff, pokeMaybe, pokeMaybeOff, peekMaybeArray, newMaybeArray, peekStaticArray, peekStaticArrayOff, pokeStaticArray, pokeStaticArrayOff, rightPad) where
 
 import Control.Monad (forM_, unless)
 import Data.Bits ((.|.))
-import Foreign (FunPtr, Ptr, Storable (peek, peekByteOff, poke, sizeOf), castPtr, free, malloc, newArray, nullPtr, peekArray, plusPtr, with)
+import Foreign (FunPtr, Ptr, Storable (peek, peekByteOff, poke, sizeOf), castPtr, malloc, newArray, nullPtr, peekArray, plusPtr, with)
 import Foreign.C (CFloat, CInt, CString, CUChar, CUInt, peekCString, withCString)
+import Foreign.C.Types (CBool, CChar, CShort, CUShort)
 
 -- Internal utility functions
 
@@ -23,22 +24,32 @@ class Freeable a where
   rlFree :: a -> Ptr a -> IO ()
   rlFree val ptr = rlFreeDependents val ptr >> c'free (castPtr ptr)
 
-instance Freeable CInt
+instance Freeable CBool
 
-instance Freeable CUInt
-
-instance Freeable CUChar
+instance Freeable CChar
 
 instance Freeable CFloat
 
+instance Freeable CInt
+
+instance Freeable CShort
+
+instance Freeable CUChar
+
+instance Freeable CUInt
+
+instance Freeable CUShort
+
+instance (Freeable a, Storable a) => Freeable [a] where
+  rlFreeDependents arr ptr =
+    forM_
+      [0 .. length arr - 1]
+      ( \i -> do
+          let val = arr !! i in rlFreeDependents val (plusPtr ptr (i * sizeOf val))
+      )
+
 rlFreeArray :: (Freeable a, Storable a) => [a] -> Ptr a -> IO ()
-rlFreeArray arr ptr = do
-  forM_
-    [0 .. length arr - 1]
-    ( \i -> do
-        let val = arr !! i in rlFreeDependents val (plusPtr ptr (i * sizeOf val))
-    )
-  c'free $ castPtr ptr
+rlFreeArray arr ptr = rlFree arr (castPtr ptr)
 
 rlFreeMaybeArray :: (Freeable a, Storable a) => Maybe [a] -> Ptr a -> IO ()
 rlFreeMaybeArray Nothing _ = return ()
@@ -70,13 +81,27 @@ withFreeable val f = do
   rlFree val ptr
   return result
 
-withArray2D :: (Storable a) => [[a]] -> (Ptr (Ptr a) -> IO b) -> IO b
-withArray2D arr func = do
+withFreeableArray :: (Freeable a, Storable a) => [a] -> (Ptr a -> IO b) -> IO b
+withFreeableArray arr f = do
+  ptr <- newArray arr
+  result <- f ptr
+  rlFreeArray arr ptr
+  return result
+
+withFreeableArrayLen :: (Freeable a, Storable a) => [a] -> (Int -> Ptr a -> IO b) -> IO b
+withFreeableArrayLen arr f = do
+  ptr <- newArray arr
+  result <- f (length arr) ptr
+  rlFreeArray arr ptr
+  return result
+
+withFreeableArray2D :: (Freeable a, Storable a) => [[a]] -> (Ptr (Ptr a) -> IO b) -> IO b
+withFreeableArray2D arr func = do
   arrays <- mapM newArray arr
   ptr <- newArray arrays
   res <- func ptr
-  forM_ arrays free
-  free ptr
+  forM_ (zip [0..] arrays) (\(i, a) -> rlFreeArray (arr !! i) a)
+  c'free $ castPtr ptr
   return res
 
 configsToBitflag :: (Enum a) => [a] -> Integer

@@ -7,7 +7,6 @@ import Foreign
   ( Ptr,
     Storable (peek, sizeOf),
     toBool,
-    withArrayLen,
   )
 import Foreign.C (CUChar, withCString)
 import GHC.IO (unsafePerformIO)
@@ -15,6 +14,7 @@ import Raylib.ForeignUtil
   ( pop,
     popCArray,
     withFreeable,
+    withFreeableArrayLen,
   )
 import Raylib.Internal (addFrameBuffer, addTextureId, unloadSingleFrameBuffer, unloadSingleTexture)
 import Raylib.Native
@@ -156,7 +156,7 @@ loadImageAnim fileName =
 
 loadImageFromMemory :: String -> [Integer] -> IO Image
 loadImageFromMemory fileType fileData =
-  withCString fileType (\ft -> withArrayLen (map fromIntegral fileData) (\size fd -> c'loadImageFromMemory ft fd (fromIntegral $ size * sizeOf (0 :: CUChar)))) >>= pop
+  withCString fileType (\ft -> withFreeableArrayLen (map fromIntegral fileData) (\size fd -> c'loadImageFromMemory ft fd (fromIntegral $ size * sizeOf (0 :: CUChar)))) >>= pop
 
 loadImageFromTexture :: Texture -> IO Image
 loadImageFromTexture tex = withFreeable tex c'loadImageFromTexture >>= pop

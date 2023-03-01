@@ -8,9 +8,14 @@ import Foreign
     Storable (peek, sizeOf),
     castPtr,
     toBool,
-    withArrayLen,
   )
 import Foreign.C (CUChar, withCString)
+import Raylib.ForeignUtil
+  ( pop,
+    popCArray,
+    withFreeable,
+    withFreeableArrayLen,
+  )
 import Raylib.Internal (addAudioBuffer, addCtxData, unloadAudioBuffers, unloadCtxData, unloadSingleAudioBuffer, unloadSingleCtxDataPtr)
 import Raylib.Native
   ( c'closeAudioDevice,
@@ -73,11 +78,6 @@ import Raylib.Types
     Sound (sound'stream),
     Wave (wave'channels, wave'frameCount),
   )
-import Raylib.ForeignUtil
-  ( pop,
-    popCArray,
-    withFreeable,
-  )
 
 foreign import ccall safe "raylib.h InitAudioDevice"
   initAudioDevice ::
@@ -96,7 +96,7 @@ loadWave :: String -> IO Wave
 loadWave fileName = withCString fileName c'loadWave >>= pop
 
 loadWaveFromMemory :: String -> [Integer] -> IO Wave
-loadWaveFromMemory fileType fileData = withCString fileType (\f -> withArrayLen (map fromIntegral fileData) (\size d -> c'loadWaveFromMemory f d (fromIntegral $ size * sizeOf (0 :: CUChar)))) >>= pop
+loadWaveFromMemory fileType fileData = withCString fileType (\f -> withFreeableArrayLen (map fromIntegral fileData) (\size d -> c'loadWaveFromMemory f d (fromIntegral $ size * sizeOf (0 :: CUChar)))) >>= pop
 
 loadSound :: String -> IO Sound
 loadSound fileName = withCString fileName c'loadSound >>= pop
@@ -188,7 +188,7 @@ loadMusicStream fileName = do
 
 loadMusicStreamFromMemory :: String -> [Integer] -> IO Music
 loadMusicStreamFromMemory fileType streamData = do
-  music <- withCString fileType (\t -> withArrayLen (map fromIntegral streamData) (\size d -> c'loadMusicStreamFromMemory t d (fromIntegral $ size * sizeOf (0 :: CUChar)))) >>= pop
+  music <- withCString fileType (\t -> withFreeableArrayLen (map fromIntegral streamData) (\size d -> c'loadMusicStreamFromMemory t d (fromIntegral $ size * sizeOf (0 :: CUChar)))) >>= pop
   addAudioBuffer $ castPtr (audioStream'buffer $ music'stream music)
   addCtxData (fromEnum $ music'ctxType music) (music'ctxData music)
   return music

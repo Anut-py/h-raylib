@@ -806,7 +806,8 @@ RenderTexture *LoadRenderTexture_(int a, int b)
     return ptr;
 }
 
-bool IsTextureReady_(Texture* a) {
+bool IsTextureReady_(Texture *a)
+{
     return IsTextureReady(*a);
 }
 
@@ -815,7 +816,8 @@ void UnloadTexture_(Texture *a)
     UnloadTexture(*a);
 }
 
-bool IsRenderTextureReady_(RenderTexture* a) {
+bool IsRenderTextureReady_(RenderTexture *a)
+{
     return IsRenderTextureReady(*a);
 }
 
@@ -914,21 +916,21 @@ Color *ColorFromHSV_(float a, float b, float c)
     return ptr;
 }
 
-Color *ColorTint_(Color* a, Color* b)
+Color *ColorTint_(Color *a, Color *b)
 {
     Color *ptr = (Color *)malloc(sizeof(Color));
     *ptr = ColorTint(*a, *b);
     return ptr;
 }
 
-Color *ColorBrightness_(Color* a, float b)
+Color *ColorBrightness_(Color *a, float b)
 {
     Color *ptr = (Color *)malloc(sizeof(Color));
     *ptr = ColorBrightness(*a, b);
     return ptr;
 }
 
-Color *ColorContrast_(Color* a, float b)
+Color *ColorContrast_(Color *a, float b)
 {
     Color *ptr = (Color *)malloc(sizeof(Color));
     *ptr = ColorContrast(*a, b);
@@ -1481,7 +1483,8 @@ void UpdateSound_(Sound *a, const void *b, int c)
     UpdateSound(*a, b, c);
 }
 
-bool IsWaveReady_(Wave *a) {
+bool IsWaveReady_(Wave *a)
+{
     return IsWaveReady(*a);
 }
 
@@ -1490,7 +1493,8 @@ void UnloadWave_(Wave *a)
     UnloadWave(*a);
 }
 
-bool IsSoundReady_(Sound *a) {
+bool IsSoundReady_(Sound *a)
+{
     return IsSoundReady(*a);
 }
 
@@ -1580,7 +1584,8 @@ Music *LoadMusicStreamFromMemory_(char *a, unsigned char *b, int c)
     return ptr;
 }
 
-bool IsMusicReady_(Music *a) {
+bool IsMusicReady_(Music *a)
+{
     return IsMusicReady(*a);
 }
 
@@ -1656,7 +1661,8 @@ AudioStream *LoadAudioStream_(unsigned int a, unsigned int b, unsigned int c)
     return ptr;
 }
 
-bool IsAudioStreamReady_(AudioStream *a) {
+bool IsAudioStreamReady_(AudioStream *a)
+{
     return IsAudioStreamReady(*a);
 }
 
@@ -1730,10 +1736,12 @@ void DetachAudioStreamProcessor_(AudioStream *a, AudioCallback *b)
     DetachAudioStreamProcessor(*a, *b);
 }
 
-void AttachAudioMixedProcessor_(AudioCallback *a) {
+void AttachAudioMixedProcessor_(AudioCallback *a)
+{
     AttachAudioMixedProcessor(*a);
 }
 
-void DetachAudioMixedProcessor_(AudioCallback *a) {
+void DetachAudioMixedProcessor_(AudioCallback *a)
+{
     DetachAudioMixedProcessor(*a);
 }

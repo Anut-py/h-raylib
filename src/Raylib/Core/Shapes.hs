@@ -3,8 +3,9 @@
 module Raylib.Core.Shapes where
 
 import Data.List (genericLength)
-import Foreign (Storable (peek), toBool, withArray)
+import Foreign (Storable (peek), toBool)
 import GHC.IO (unsafePerformIO)
+import Raylib.ForeignUtil (pop, withFreeable, withFreeableArray)
 import Raylib.Native
   ( c'checkCollisionCircleRec,
     c'checkCollisionCircles,
@@ -55,7 +56,6 @@ import Raylib.Native
     c'setShapesTexture,
   )
 import Raylib.Types (Color, Rectangle, Texture, Vector2 (Vector2))
-import Raylib.ForeignUtil (pop, withFreeable)
 
 setShapesTexture :: Texture -> Rectangle -> IO ()
 setShapesTexture tex source = withFreeable tex (withFreeable source . c'setShapesTexture)
@@ -109,7 +109,7 @@ drawLineBezierCubic start end startControl endControl thickness color =
     )
 
 drawLineStrip :: [Vector2] -> Color -> IO ()
-drawLineStrip points color = withArray points (\p -> withFreeable color $ c'drawLineStrip p (genericLength points))
+drawLineStrip points color = withFreeableArray points (\p -> withFreeable color $ c'drawLineStrip p (genericLength points))
 
 drawCircle :: Int -> Int -> Float -> Color -> IO ()
 drawCircle centerX centerY radius color = withFreeable color (c'drawCircle (fromIntegral centerX) (fromIntegral centerY) (realToFrac radius))
@@ -283,11 +283,11 @@ drawTriangleLines v1 v2 v3 color =
     )
 
 drawTriangleFan :: [Vector2] -> Color -> IO ()
-drawTriangleFan points color = withArray points (\p -> withFreeable color $ c'drawTriangleFan p (genericLength points))
+drawTriangleFan points color = withFreeableArray points (\p -> withFreeable color $ c'drawTriangleFan p (genericLength points))
 
 drawTriangleStrip :: [Vector2] -> Color -> IO ()
 drawTriangleStrip points color =
-  withArray points (\p -> withFreeable color $ c'drawTriangleStrip p (genericLength points))
+  withFreeableArray points (\p -> withFreeable color $ c'drawTriangleStrip p (genericLength points))
 
 drawPoly :: Vector2 -> Int -> Float -> Float -> Color -> IO ()
 drawPoly center sides radius rotation color =

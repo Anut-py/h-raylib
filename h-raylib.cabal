@@ -80,7 +80,6 @@ common example-options
       , h-raylib
 
 -- core
-
 executable basic-window
   import:         example-options
   hs-source-dirs: examples/basic-window/src
@@ -97,28 +96,24 @@ executable camera-ray-collision
   main-is:        Main.hs
 
 -- textures
-
 executable basic-images
   import:         example-options
   hs-source-dirs: examples/basic-images/src
   main-is:        Main.hs
 
 -- text
-
 executable custom-font-text
   import:         example-options
   hs-source-dirs: examples/custom-font-text/src
   main-is:        Main.hs
 
 -- models
-
 executable basic-models
   import:         example-options
   hs-source-dirs: examples/basic-models/src
   main-is:        Main.hs
 
 -- shaders
-
 executable basic-shaders
   import:         example-options
   hs-source-dirs: examples/basic-shaders/src
@@ -130,10 +125,15 @@ executable postprocessing-effects
   main-is:        Main.hs
 
 -- audio
-
 executable basic-audio
   import:         example-options
   hs-source-dirs: examples/basic-audio/src
+  main-is:        Main.hs
+
+-- rlgl
+executable basic-rlgl
+  import:         example-options
+  hs-source-dirs: examples/basic-rlgl/src
   main-is:        Main.hs
 
 library
@@ -147,6 +147,7 @@ library
     Raylib.Types
     Raylib.Util
     Raylib.Util.Colors
+    Raylib.Util.RLGL
 
   other-modules:
     Raylib.ForeignUtil
@@ -222,6 +223,7 @@ library
       lib/rglfw.m
       lib/rl_bindings.c
       lib/rl_internal.c
+      lib/rlgl_bindings.c
       raylib/src/raudio.c
       raylib/src/rcore.c
       raylib/src/rmodels.c
@@ -234,6 +236,7 @@ library
     c-sources:
       lib/rl_bindings.c
       lib/rl_internal.c
+      lib/rlgl_bindings.c
       raylib/src/raudio.c
       raylib/src/rcore.c
       raylib/src/rglfw.c
