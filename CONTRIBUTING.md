@@ -12,7 +12,7 @@ You can use `run-all-examples.sh` to run all of the examples in one go.
 
 _This section only contains h-raylib specific information. For information about raylib in general, view the [raylib wiki](https://github.com/raysan5/raylib/wiki)._
 
-This project is split into 9 public modules. `Raylib.Types` contains all of raylib's types and low-level code to convert them to and from raw bytes. `Raylib.Util` contains miscellaneous utility functions. `Raylib.Util.Colors` contains some colors defined by raylib. The other 6 public modules, `Raylib.Core`, `Raylib.Core.Shapes`, `Raylib.Core.Textures`, `Raylib.Core.Text`, `Raylib.Core.Models`, and `Raylib.Core.Audio`, correspond to their respective raylib modules.
+This project is split into 10 public modules. `Raylib.Types` contains all of raylib's types and low-level code to convert them to and from raw bytes. `Raylib.Util` contains miscellaneous utility functions. `Raylib.Util.Colors` contains some colors defined by raylib. The other 7 public modules, `Raylib.Core`, `Raylib.Core.Shapes`, `Raylib.Core.Textures`, `Raylib.Core.Text`, `Raylib.Core.Models`, `Raylib.Core.Audio`, and `Raylib.Util.RLGL`, correspond to their respective raylib modules.
 
 The functions in h-raylib are an almost one-to-one mapping to their corresponding raylib functions. The types are, in some cases, slightly modified if it is possible to utilize Haskell features.
 
@@ -22,7 +22,7 @@ Below are some descriptions of these public modules and their purposes.
 
 `Raylib.Types` has 4 sections: one for enumerations, one for typeclasses, one for structures, and one for callbacks.
 
-The enumerations section contains Haskell sum types that are instances of `Enum`. Each of these types corresponds to a raylib `enum`. The `fromEnum` and `toEnum` functions for these types use the numbers associated with these values in the C `enum`s. Most of these types are instances of `Storable` so they can be converted to raw bytes and passed to a C function. _NOTE: Some of these Haskell types correspond to C `enum`s that are in C source files, rather than `raylib.h`._
+The enumerations section contains Haskell sum types that are instances of `Enum`. Each of these types corresponds to a raylib `enum` or set of `define`s. The `fromEnum` and `toEnum` functions for these types use the numbers associated with these values in the C `enum`s. Most of these types are instances of `Storable` so they can be converted to raw bytes and passed to a C function. _NOTE: Some of these Haskell types correspond to C `enum`s that are in C source files, rather than header files._
 
 The typeclasses section contains Haskell typeclasses that are derived by some of the types in the structures section.
 
@@ -38,7 +38,7 @@ The callbacks section contains `FunPtr` types that are passed to some functions.
 
 `Raylib.Util.Colors` is very simple: it declares 26 colors defined in `raylib.h`, namely `lightGray`, `gray`, `darkGray`, `yellow`, `gold`, `orange`, `pink`, `red`, `maroon`, `green`, `lime`, `darkGreen`, `skyBlue`, `blue`, `darkBlue`, `purple`, `violet`, `darkPurple`, `beige`, `brown`, `darkBrown`, `white`, `black`, `blank`, `magenta`, and `rayWhite`.
 
-### The other 6 modules
+### The other 7 modules
 
 These modules contain only functions. Each of these functions corresponds to a C function. The `unload*` functions are optional; even if you do not call them, all assets used by a program will be automatically be unloaded when it terminates (see the "Memory management" section). For some types (e.g. `Image`), there is no unloading function because the memory used by the type can be unloaded in function calls.
 
