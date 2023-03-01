@@ -1,6 +1,6 @@
 set -e
 
-cabal build
+cabal build -j
 
 # core
 cabal run basic-window
@@ -22,3 +22,6 @@ cabal run postprocessing-effects
 
 # audio
 cabal run basic-audio
+
+# rlgl
+cabal run basic-rlgl
