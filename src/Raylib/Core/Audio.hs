@@ -23,7 +23,6 @@ import Raylib.Native
     c'exportWaveAsCode,
     c'getMusicTimeLength,
     c'getMusicTimePlayed,
-    c'getSoundsPlaying,
     c'isAudioDeviceReady,
     c'isAudioStreamPlaying,
     c'isAudioStreamProcessed,
@@ -47,7 +46,6 @@ import Raylib.Native
     c'playAudioStream,
     c'playMusicStream,
     c'playSound,
-    c'playSoundMulti,
     c'resumeAudioStream,
     c'resumeMusicStream,
     c'resumeSound,
@@ -137,16 +135,6 @@ pauseSound sound = withFreeable sound c'pauseSound
 
 resumeSound :: Sound -> IO ()
 resumeSound sound = withFreeable sound c'resumeSound
-
-playSoundMulti :: Sound -> IO ()
-playSoundMulti sound = withFreeable sound c'playSoundMulti
-
-foreign import ccall safe "raylib.h StopSoundMulti"
-  stopSoundMulti ::
-    IO ()
-
-getSoundsPlaying :: IO Int
-getSoundsPlaying = fromIntegral <$> c'getSoundsPlaying
 
 isSoundPlaying :: Sound -> IO Bool
 isSoundPlaying sound = toBool <$> withFreeable sound c'isSoundPlaying

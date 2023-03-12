@@ -200,14 +200,6 @@ unloadModel model = do
   forM_ (model'meshes model) unloadMesh
   forM_ (model'materials model) unloadMaterial
 
--- | Unloads a model from GPU memory (VRAM). This unloads its associated
--- materials, but not meshes. Models are automatically unloaded when `closeWindow`
--- is called, so manually unloading models is not required. In larger projects,
--- you may want to manually unload models to avoid having them in VRAM for too
--- long.
-unloadModelKeepMeshes :: Model -> IO ()
-unloadModelKeepMeshes model = forM_ (model'materials model) unloadMaterial
-
 isModelReady :: Model -> IO Bool
 isModelReady model = toBool <$> withFreeable model c'isModelReady
 

@@ -21,8 +21,8 @@ extra-source-files:
   examples/**/*.frag
   examples/**/*.mtl
   examples/**/*.obj
-  examples/**/*.vert
   examples/**/*.png
+  examples/**/*.vert
   lib/*.c
   lib/*.h
   lib/rglfw.m
@@ -184,7 +184,8 @@ library
         gcc_eh
 
     cc-options:
-      -DPLATFORM_DESKTOP -D_ftelli64=ftello64 -D_fseeki64=fseeko64
+      -Wno-discarded-qualifiers -DPLATFORM_DESKTOP -D_ftelli64=ftello64
+      -D_fseeki64=fseeko64
 
   elif (flag(platform-linux) || (flag(detect-platform) && os(linux)))
     extra-libraries:
@@ -201,18 +202,20 @@ library
       Xi
       Xext
 
-    cc-options:      -Wno-unused-result -DPLATFORM_DESKTOP
+    cc-options:
+      -Wno-discarded-qualifiers -Wimplicit-function-declaration
+      -Wno-unused-result -DPLATFORM_DESKTOP
 
   elif (flag(platform-mac) || (flag(detect-platform) && os(osx)))
     frameworks: OpenGL Cocoa IOKit CoreVideo CoreAudio CoreFoundation
-    cc-options: -DPLATFORM_DESKTOP
+    cc-options: -Wno-discarded-qualifiers -DPLATFORM_DESKTOP
 
   elif (flag(platform-bsd) || (flag(detect-platform) && ((os(freebsd) || os(netbsd)) || os(openbsd))))
     extra-libraries:
       GL
       pthread
 
-    cc-options:      -DPLATFORM_DESKTOP
+    cc-options:      -Wno-discarded-qualifiers -DPLATFORM_DESKTOP
 
   else
 

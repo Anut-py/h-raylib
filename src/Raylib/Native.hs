@@ -1098,8 +1098,6 @@ foreign import ccall safe "rl_bindings.h IsModelReady_" c'isModelReady :: Ptr Mo
 
 foreign import ccall safe "rl_bindings.h UnloadModel_" c'unloadModel :: Ptr Model -> IO ()
 
-foreign import ccall safe "rl_bindings.h UnloadModelKeepMeshes_" c'unloadModelKeepMeshes :: Ptr Model -> IO ()
-
 foreign import ccall safe "rl_bindings.h GetModelBoundingBox_" c'getModelBoundingBox :: Ptr Model -> IO (Ptr BoundingBox)
 
 foreign import ccall safe "rl_bindings.h DrawModel_" c'drawModel :: Ptr Model -> Ptr Vector3 -> CFloat -> Ptr Color -> IO ()
@@ -1256,12 +1254,6 @@ foreign import ccall safe "rl_bindings.h StopSound_" c'stopSound :: Ptr Sound ->
 foreign import ccall safe "rl_bindings.h PauseSound_" c'pauseSound :: Ptr Sound -> IO ()
 
 foreign import ccall safe "rl_bindings.h ResumeSound_" c'resumeSound :: Ptr Sound -> IO ()
-
-foreign import ccall safe "rl_bindings.h PlaySoundMulti_" c'playSoundMulti :: Ptr Sound -> IO ()
-
-foreign import ccall safe "raylib.h GetSoundsPlaying"
-  c'getSoundsPlaying ::
-    IO CInt
 
 foreign import ccall safe "rl_bindings.h IsSoundPlaying_" c'isSoundPlaying :: Ptr Sound -> IO CBool
 

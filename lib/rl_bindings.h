@@ -430,8 +430,6 @@ bool IsModelReady_(Model* a);
 
 void UnloadModel_(Model *a);
 
-void UnloadModelKeepMeshes_(Model *a);
-
 BoundingBox *GetModelBoundingBox_(Model *a);
 
 void DrawModel_(Model *a, Vector3 *b, float c, Color *d);
@@ -543,8 +541,6 @@ void StopSound_(Sound *a);
 void PauseSound_(Sound *a);
 
 void ResumeSound_(Sound *a);
-
-void PlaySoundMulti_(Sound *a);
 
 int IsSoundPlaying_(Sound *a);
 

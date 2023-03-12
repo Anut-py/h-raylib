@@ -1467,32 +1467,28 @@ instance Storable RLTextureParam where
   poke ptr v = poke (castPtr ptr) (fromIntegral (fromEnum v) :: CInt)
 
 -- | OpenGL shader type
-data GLShaderType
+data RLShaderType
   -- | GL_FRAGMENT_SHADER
-  = GLFragmentShader
+  = RLFragmentShader
   -- | GL_VERTEX_SHADER
-  | GLVertexShader
-  -- | GL_GEOMETRY_SHADER
-  | GLGeometryShader
+  | RLVertexShader
   -- | GL_COMPUTE_SHADER
-  | GLComputeShader
+  | RLComputeShader
   deriving (Eq, Show)
 
-instance Enum GLShaderType where
+instance Enum RLShaderType where
   fromEnum n = case n of
-    GLFragmentShader -> 0x8B30
-    GLVertexShader -> 0x8B31
-    GLGeometryShader -> 0x8DD9
-    GLComputeShader -> 0x91B9
+    RLFragmentShader -> 0x8B30
+    RLVertexShader -> 0x8B31
+    RLComputeShader -> 0x91B9
 
   toEnum n = case n of
-    0x8B30 -> GLFragmentShader
-    0x8B31 -> GLVertexShader
-    0x8DD9 -> GLGeometryShader
-    0x91B9 -> GLComputeShader
-    _ -> error $ "(GLShaderType.toEnum) Invalid value: " ++ show n
+    0x8B30 -> RLFragmentShader
+    0x8B31 -> RLVertexShader
+    0x91B9 -> RLComputeShader
+    _ -> error $ "(RLShaderType.toEnum) Invalid value: " ++ show n
 
-instance Storable GLShaderType where
+instance Storable RLShaderType where
   sizeOf _ = 4
   alignment _ = 4
   peek ptr = do

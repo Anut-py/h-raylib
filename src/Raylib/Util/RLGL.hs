@@ -290,7 +290,7 @@ import Raylib.Types
       RLMatrixMode,
       RLDrawMode,
       RLTextureParam,
-      GLShaderType,
+      RLShaderType,
       RLBufferHint )
 
 -- | Choose the current matrix to be transformed
@@ -814,8 +814,8 @@ rlLoadShaderCode :: String -> String -> IO Integer
 rlLoadShaderCode vsCode fsCode =
   fromIntegral <$> withCString vsCode (withCString fsCode . c'rlLoadShaderCode)
 
--- | Compile custom shader and return shader id (type: RL_VERTEX_SHADER, RL_FRAGMENT_SHADER, RL_COMPUTE_SHADER)
-rlCompileShader :: String -> GLShaderType -> IO Integer
+-- | Compile custom shader and return shader id
+rlCompileShader :: String -> RLShaderType -> IO Integer
 rlCompileShader shaderCode shaderType =
   fromIntegral <$> withCString shaderCode (\s -> c'rlCompileShader s (fromIntegral $ fromEnum shaderType))
 

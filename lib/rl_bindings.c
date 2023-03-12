@@ -1202,11 +1202,6 @@ void UnloadModel_(Model *a)
     UnloadModel(*a);
 }
 
-void UnloadModelKeepMeshes_(Model *a)
-{
-    UnloadModelKeepMeshes(*a);
-}
-
 BoundingBox *GetModelBoundingBox_(Model *a)
 {
     BoundingBox *ptr = (BoundingBox *)malloc(sizeof(BoundingBox));
@@ -1531,11 +1526,6 @@ void PauseSound_(Sound *a)
 void ResumeSound_(Sound *a)
 {
     ResumeSound(*a);
-}
-
-void PlaySoundMulti_(Sound *a)
-{
-    PlaySoundMulti(*a);
 }
 
 int IsSoundPlaying_(Sound *a)
