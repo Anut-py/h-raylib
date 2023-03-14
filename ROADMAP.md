@@ -6,6 +6,7 @@ Items higher on the list have higher priority.
 - Bind `rcamera`
 - Bind `raymath`
 - Bind `raygui`
+- Add web build support
 
 ## Completed
 - Make it easier to pass shader parameters (Added in `4.5.3.0`)
