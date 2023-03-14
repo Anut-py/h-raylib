@@ -62,6 +62,18 @@ This library has not yet been tested on platforms other than Windows and Ubuntu.
 If you get it working on other platforms, please create a pull request in the
 GitHub repository and update `h-raylib.cabal` with the relevant config.
 
+## Running in GHCi
+
+You can use this library in GHCi just like any other library, but you will need to add `--constraint="h-raylib +ghci"` to the command. For example, in the root folder of this repository, you could use the command below to use the library through GHCi.
+
+```
+cabal repl --constraint="h-raylib +ghci"
+```
+
+You may need to use `:set -fno-ghci-sandbox` after entering the REPL to fix problems with multithreaded execution.
+
+On Windows, you may lose joystick support when running in GHCi.
+
 ## Contributing
 
 See [CONTRIBUTING.md](https://github.com/Anut-py/h-raylib/blob/master/CONTRIBUTING.md).
