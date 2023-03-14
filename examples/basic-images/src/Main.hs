@@ -1,6 +1,7 @@
 {-# OPTIONS -Wall #-}
 module Main where
 
+import Control.Monad (unless, void)
 import Raylib.Core
   ( beginDrawing,
     beginTextureMode,
@@ -23,17 +24,17 @@ import Raylib.Core.Textures
     loadTextureFromImage,
   )
 import Raylib.Types (Rectangle (Rectangle), RenderTexture (renderTexture'texture), Vector2 (Vector2))
-import Raylib.Util (whileWindowOpen0)
+import Raylib.Util (inGHCi, whileWindowOpen0)
 import Raylib.Util.Colors (black, lightGray, orange, white)
 
 logoPath :: String
-logoPath = "../../../../../../../../../examples/basic-images/assets/raylib-logo.png"
+logoPath = (if not inGHCi then "../../../../../../../../../" else "./") ++ "examples/basic-images/assets/raylib-logo.png"
 
 main :: IO ()
 main = do
   initWindow 600 450 "raylib [textures] example - basic images"
   setTargetFPS 60
-  _ <- getApplicationDirectory >>= changeDirectory
+  unless inGHCi (void $ changeDirectory =<< getApplicationDirectory)
 
   texture <- genImagePerlinNoise 600 450 20 20 2 >>= loadTextureFromImage
   logo <- loadImage logoPath >>= loadTextureFromImage

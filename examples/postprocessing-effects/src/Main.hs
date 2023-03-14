@@ -2,16 +2,17 @@
 
 module Main where
 
-import Raylib.Core (beginDrawing, beginMode3D, beginShaderMode, beginTextureMode, changeDirectory, clearBackground, endDrawing, endMode3D, endShaderMode, endTextureMode, getApplicationDirectory, initWindow, isKeyPressed, loadShader, setShaderValue, setTargetFPS, updateCamera, closeWindow)
+import Control.Monad (unless, void)
+import Raylib.Core (beginDrawing, beginMode3D, beginShaderMode, beginTextureMode, changeDirectory, clearBackground, closeWindow, endDrawing, endMode3D, endShaderMode, endTextureMode, getApplicationDirectory, initWindow, isKeyPressed, loadShader, setShaderValue, setTargetFPS, updateCamera)
 import Raylib.Core.Models (drawCube, drawGrid, drawSphere)
+import Raylib.Core.Text (drawText)
 import Raylib.Core.Textures (drawTextureRec, loadRenderTexture)
 import Raylib.Types (Camera3D (Camera3D), CameraMode (CameraModeOrbital), CameraProjection (CameraPerspective), KeyboardKey (KeyLeft, KeyRight), Rectangle (Rectangle), RenderTexture (renderTexture'texture), ShaderUniformData (ShaderUniformVec2), Vector2 (Vector2), Vector3 (Vector3))
-import Raylib.Util (whileWindowOpen_)
-import Raylib.Util.Colors (orange, white, black, green, darkGreen, red, maroon, blue, darkBlue)
-import Raylib.Core.Text (drawText)
+import Raylib.Util (inGHCi, whileWindowOpen_)
+import Raylib.Util.Colors (black, blue, darkBlue, darkGreen, green, maroon, orange, red, white)
 
 assetsPath :: String
-assetsPath = "../../../../../../../../../examples/postprocessing-effects/assets/"
+assetsPath = (if not inGHCi then "../../../../../../../../../" else "./") ++ "examples/postprocessing-effects/assets/"
 
 main :: IO ()
 main = do
@@ -20,7 +21,7 @@ main = do
 
   initWindow width height "raylib [shaders] example - postprocessing effects"
   setTargetFPS 60
-  _ <- changeDirectory =<< getApplicationDirectory
+  unless inGHCi (void $ changeDirectory =<< getApplicationDirectory)
 
   let camera = Camera3D (Vector3 3 4 3) (Vector3 0 1 0) (Vector3 0 1 0) 45 CameraPerspective
 

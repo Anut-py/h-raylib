@@ -1,5 +1,7 @@
 {-# OPTIONS -Wall #-}
-module Raylib.Util (cameraDirectionRay, whileWindowOpen, whileWindowOpen_, whileWindowOpen0, setMaterialShader) where
+{-# LANGUAGE CPP #-}
+
+module Raylib.Util (cameraDirectionRay, whileWindowOpen, whileWindowOpen_, whileWindowOpen0, setMaterialShader, inGHCi) where
 
 import Control.Monad (void)
 import Raylib.Core (windowShouldClose)
@@ -62,3 +64,12 @@ setMaterialShader model matIdx shader = model {model'materials = setIdx mats mat
     mats = model'materials model
     newMat = (mats !! matIdx) {material'shader = shader}
     setIdx l i v = take i l ++ [v] ++ drop (i + 1) l
+
+-- | True if the program is running in GHCi
+inGHCi :: Bool
+
+#ifdef GHCI
+inGHCi = True
+#else
+inGHCi = False
+#endif

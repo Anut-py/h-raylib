@@ -2,7 +2,8 @@
 
 module Main where
 
-import Control.Monad (when)
+import Control.Monad (unless, void, when)
+import Numeric (showFFloat)
 import Raylib.Core
   ( beginDrawing,
     beginMode3D,
@@ -19,9 +20,9 @@ import Raylib.Core
     loadShader,
     setShaderValue,
     setTargetFPS,
-    updateCamera
+    updateCamera,
   )
-import Raylib.Core.Models (drawModel, genMeshCube, loadModelFromMesh, genMeshSphere, genMeshPlane, drawSphereWires)
+import Raylib.Core.Models (drawModel, drawSphereWires, genMeshCube, genMeshPlane, genMeshSphere, loadModelFromMesh)
 import Raylib.Core.Text (drawText)
 import Raylib.Types
   ( Camera3D (Camera3D, camera3D'position),
@@ -35,21 +36,20 @@ import Raylib.Types
       ),
     Vector3 (Vector3),
     Vector4 (Vector4, vector4'w),
-    vectorToColor
+    vectorToColor,
   )
-import Raylib.Util (whileWindowOpen_, setMaterialShader)
-import Raylib.Util.Colors (black, orange, white, blue, lightGray)
-import Numeric (showFFloat)
+import Raylib.Util (inGHCi, setMaterialShader, whileWindowOpen_)
+import Raylib.Util.Colors (black, blue, lightGray, orange, white)
 
 assetsPath :: String
-assetsPath = "../../../../../../../../../examples/basic-shaders/assets/"
+assetsPath = (if not inGHCi then "../../../../../../../../../" else "./") ++ "examples/basic-shaders/assets/"
 
 main :: IO ()
 main = do
   initWindow 1300 800 "raylib [shaders] example - basic shaders"
   setTargetFPS 60
   disableCursor
-  _ <- changeDirectory =<< getApplicationDirectory
+  unless inGHCi (void $ changeDirectory =<< getApplicationDirectory)
 
   let camera = Camera3D (Vector3 1 3 3) (Vector3 1 0 1) (Vector3 0 1 0) 45 CameraPerspective
 

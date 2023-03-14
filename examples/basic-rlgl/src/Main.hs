@@ -1,30 +1,31 @@
 {-# OPTIONS -Wall #-}
 module Main where
 
+import Control.Monad (unless, void)
 import Raylib.Core (beginDrawing, beginMode3D, changeDirectory, clearBackground, closeWindow, endDrawing, endMode3D, getApplicationDirectory, initWindow, setTargetFPS)
 import Raylib.Core.Models (drawGrid)
 import Raylib.Core.Textures (loadTexture)
 import Raylib.Types (Camera3D (Camera3D), CameraProjection (CameraPerspective), Color (Color), RLDrawMode (RLQuads), Rectangle (Rectangle), Texture (texture'height, texture'id, texture'width), Vector3 (Vector3))
-import Raylib.Util (whileWindowOpen0)
+import Raylib.Util (inGHCi, whileWindowOpen0)
 import Raylib.Util.Colors (rayWhite, white)
-import Raylib.Util.RLGL (rlBegin, rlColor4ub, rlEnd, rlNormal3f, rlPopMatrix, rlSetTexture, rlTexCoord2f, rlVertex3f, rlPushMatrix, rlTranslatef, rlRotatef, rlScalef)
+import Raylib.Util.RLGL (rlBegin, rlColor4ub, rlEnd, rlNormal3f, rlPopMatrix, rlPushMatrix, rlRotatef, rlScalef, rlSetTexture, rlTexCoord2f, rlTranslatef, rlVertex3f)
 import Prelude hiding (length)
 
 texturePath :: String
-texturePath = "../../../../../../../../../examples/basic-rlgl/assets/cubicmap_atlas.png"
+texturePath = (if not inGHCi then "../../../../../../../../../" else "./") ++ "examples/basic-rlgl/assets/cubicmap_atlas.png"
 
 main :: IO ()
 main = do
   initWindow 650 400 "raylib [rlgl] example - basic rlgl"
   setTargetFPS 60
-  _ <- getApplicationDirectory >>= changeDirectory
+  unless inGHCi (void $ changeDirectory =<< getApplicationDirectory)
 
   let camera = Camera3D (Vector3 0 10 10) (Vector3 0 0 0) (Vector3 0 1 0) 45 CameraPerspective
 
   texture <- loadTexture texturePath
 
   whileWindowOpen0
-    (do
+    ( do
         beginDrawing
         clearBackground rayWhite
 
@@ -103,7 +104,6 @@ drawCubeTexture texture (Vector3 x y z) width height length (Color r g b a) = do
   rlTexCoord2f 1 0 >> rlVertex3f (x - width / 2) (y - height / 2) (z + length / 2) -- Bottom Right Of The Texture and Quad
   rlTexCoord2f 1 1 >> rlVertex3f (x - width / 2) (y + height / 2) (z + length / 2) -- Top Right Of The Texture and Quad
   rlTexCoord2f 0 1 >> rlVertex3f (x - width / 2) (y + height / 2) (z - length / 2) -- Top Left Of The Texture and Quad
-  
   rlEnd
   rlPopMatrix
 

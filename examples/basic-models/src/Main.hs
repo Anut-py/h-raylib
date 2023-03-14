@@ -2,21 +2,22 @@
 
 module Main where
 
+import Control.Monad (unless, void)
 import Raylib.Core (beginDrawing, beginMode3D, changeDirectory, clearBackground, closeWindow, disableCursor, endDrawing, endMode3D, getApplicationDirectory, initWindow, setTargetFPS, updateCamera)
 import Raylib.Core.Models (drawGrid, drawModel, genMeshCube, loadModel, loadModelFromMesh)
 import Raylib.Types (Camera3D (Camera3D), CameraMode (CameraModeFirstPerson), CameraProjection (CameraPerspective), Vector3 (Vector3))
-import Raylib.Util (whileWindowOpen_)
+import Raylib.Util (inGHCi, whileWindowOpen_)
 import Raylib.Util.Colors (orange, white)
 
 modelPath :: String
-modelPath = "../../../../../../../../../examples/basic-models/assets/Model.obj"
+modelPath = (if not inGHCi then "../../../../../../../../../" else "./") ++ "examples/basic-models/assets/Model.obj"
 
 main :: IO ()
 main = do
   initWindow 650 400 "raylib [models] example - basic models"
   setTargetFPS 60
   disableCursor
-  _ <- getApplicationDirectory >>= changeDirectory
+  unless inGHCi (void $ changeDirectory =<< getApplicationDirectory)
 
   mesh <- genMeshCube 2 3 4
   cubeModel <- loadModelFromMesh mesh

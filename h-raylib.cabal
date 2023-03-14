@@ -23,9 +23,9 @@ extra-source-files:
   examples/**/*.obj
   examples/**/*.png
   examples/**/*.vert
-  lib/*.c
-  lib/*.h
-  lib/rglfw.m
+  lib/**/*.c
+  lib/**/*.h
+  lib/**/*.m
   raylib/**/*.c
   raylib/**/*.h
   raylib/**/*.m
@@ -66,6 +66,11 @@ flag mingw-cross
 
 flag examples
   description: Build the example projects
+  default:     False
+  manual:      True
+
+flag ghci
+  description: Used when running the program in GHCi
   default:     False
   manual:      True
 
@@ -162,8 +167,11 @@ library
   hs-source-dirs:   src
   default-language: Haskell2010
   other-extensions:
+    CPP
     DeriveAnyClass
     ForeignFunctionInterface
+
+  cc-options:       -Wno-discarded-qualifiers -DPLATFORM_DESKTOP
 
   if (flag(platform-windows) || (flag(detect-platform) && os(windows)))
     if flag(mingw-cross)
@@ -183,9 +191,7 @@ library
         shell32
         gcc_eh
 
-    cc-options:
-      -Wno-discarded-qualifiers -DPLATFORM_DESKTOP -D_ftelli64=ftello64
-      -D_fseeki64=fseeko64
+    cc-options: -D_ftelli64=ftello64 -D_fseeki64=fseeko64
 
   elif (flag(platform-linux) || (flag(detect-platform) && os(linux)))
     extra-libraries:
@@ -202,52 +208,45 @@ library
       Xi
       Xext
 
-    cc-options:
-      -Wno-discarded-qualifiers -Wimplicit-function-declaration
-      -Wno-unused-result -DPLATFORM_DESKTOP
+    cc-options:      -Wno-implicit-function-declaration -Wno-unused-result
 
   elif (flag(platform-mac) || (flag(detect-platform) && os(osx)))
     frameworks: OpenGL Cocoa IOKit CoreVideo CoreAudio CoreFoundation
-    cc-options: -Wno-discarded-qualifiers -DPLATFORM_DESKTOP
 
   elif (flag(platform-bsd) || (flag(detect-platform) && ((os(freebsd) || os(netbsd)) || os(openbsd))))
     extra-libraries:
       GL
       pthread
 
-    cc-options:      -Wno-discarded-qualifiers -DPLATFORM_DESKTOP
-
   else
 
   -- Unsupported OS, do nothing. If you can get it working on an
   -- OS that isn't on here, please add it here.
+  c-sources:
+    lib/rl_bindings.c
+    lib/rl_internal.c
+    lib/rlgl_bindings.c
+    raylib/src/raudio.c
+    raylib/src/rcore.c
+    raylib/src/rmodels.c
+    raylib/src/rshapes.c
+    raylib/src/rtext.c
+    raylib/src/rtextures.c
+    raylib/src/utils.c
+
   if (flag(platform-mac) || (flag(detect-platform) && os(osx)))
     -- Use rgflw.m instead of .c on Mac to force objective-c
-    c-sources:
-      lib/rglfw.m
-      lib/rl_bindings.c
-      lib/rl_internal.c
-      lib/rlgl_bindings.c
-      raylib/src/raudio.c
-      raylib/src/rcore.c
-      raylib/src/rmodels.c
-      raylib/src/rshapes.c
-      raylib/src/rtext.c
-      raylib/src/rtextures.c
-      raylib/src/utils.c
+    c-sources: lib/rglfw.m
+
+  elif (flag(ghci) && (flag(platform-windows) || (flag(detect-platform) && os(windows))))
+    c-sources: lib/glfw_patch/rglfw_patch.c
 
   else
-    c-sources:
-      lib/rl_bindings.c
-      lib/rl_internal.c
-      lib/rlgl_bindings.c
-      raylib/src/raudio.c
-      raylib/src/rcore.c
-      raylib/src/rglfw.c
-      raylib/src/rmodels.c
-      raylib/src/rshapes.c
-      raylib/src/rtext.c
-      raylib/src/rtextures.c
-      raylib/src/utils.c
+    c-sources: raylib/src/rglfw.c
 
-  include-dirs:     lib raylib/src raylib/src/external/glfw/include
+  if flag(ghci)
+    cpp-options: -DGHCI
+
+  include-dirs:
+    lib raylib/src raylib/src/external/glfw/src
+    raylib/src/external/glfw/include
