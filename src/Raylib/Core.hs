@@ -169,7 +169,6 @@ import Raylib.Native
     c'setWindowTitle,
     c'takeScreenshot,
     c'traceLog,
-    c'updateCamera,
     c'waitTime,
     c'windowShouldClose,
   )
@@ -177,7 +176,6 @@ import Raylib.Types
   ( BlendMode,
     Camera2D,
     Camera3D,
-    CameraMode,
     Color,
     ConfigFlag,
     FilePathList,
@@ -870,12 +868,3 @@ getGesturePinchVector = c'getGesturePinchVector >>= pop
 
 getGesturePinchAngle :: IO Float
 getGesturePinchAngle = realToFrac <$> c'getGesturePinchAngle
-
-updateCamera :: Camera3D -> CameraMode -> IO Camera3D
-updateCamera camera mode =
-  withFreeable
-    camera
-    ( \c -> do
-        c'updateCamera c (fromIntegral $ fromEnum mode)
-        peek c
-    )

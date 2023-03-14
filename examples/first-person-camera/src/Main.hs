@@ -11,8 +11,8 @@ import Raylib.Core
     endMode3D,
     initWindow,
     setTargetFPS,
-    updateCamera,
   )
+import Raylib.Core.Camera (updateCamera)
 import Raylib.Core.Models (drawCircle3D, drawCubeWiresV, drawLine3D)
 import Raylib.Core.Text (drawFPS)
 import Raylib.Types (Camera3D (Camera3D), CameraMode (CameraModeFirstPerson), CameraProjection (CameraPerspective), Vector3 (Vector3))

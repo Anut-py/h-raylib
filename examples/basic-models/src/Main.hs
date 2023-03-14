@@ -3,7 +3,8 @@
 module Main where
 
 import Control.Monad (unless, void)
-import Raylib.Core (beginDrawing, beginMode3D, changeDirectory, clearBackground, closeWindow, disableCursor, endDrawing, endMode3D, getApplicationDirectory, initWindow, setTargetFPS, updateCamera)
+import Raylib.Core (beginDrawing, beginMode3D, changeDirectory, clearBackground, closeWindow, disableCursor, endDrawing, endMode3D, getApplicationDirectory, initWindow, setTargetFPS)
+import Raylib.Core.Camera (updateCamera)
 import Raylib.Core.Models (drawGrid, drawModel, genMeshCube, loadModel, loadModelFromMesh)
 import Raylib.Types (Camera3D (Camera3D), CameraMode (CameraModeFirstPerson), CameraProjection (CameraPerspective), Vector3 (Vector3))
 import Raylib.Util (inGHCi, whileWindowOpen_)

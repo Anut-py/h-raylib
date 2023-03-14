@@ -12,8 +12,8 @@ import Raylib.Core
     endMode3D,
     initWindow,
     setTargetFPS,
-    updateCamera,
   )
+import Raylib.Core.Camera (updateCamera)
 import Raylib.Core.Models
   ( drawBoundingBox,
     drawPoint3D,

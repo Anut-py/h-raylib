@@ -146,6 +146,7 @@ library
   exposed-modules:
     Raylib.Core
     Raylib.Core.Audio
+    Raylib.Core.Camera
     Raylib.Core.Models
     Raylib.Core.Shapes
     Raylib.Core.Text

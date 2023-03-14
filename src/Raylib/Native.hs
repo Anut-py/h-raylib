@@ -644,6 +644,10 @@ foreign import ccall safe "raylib.h UpdateCamera"
   c'updateCamera ::
     Ptr Camera3D -> CInt -> IO ()
 
+foreign import ccall safe "rl_bindings.h UpdateCameraPro_"
+  c'updateCameraPro ::
+    Ptr Camera3D -> Ptr Vector3 -> Ptr Vector3 -> CFloat -> IO ()
+
 foreign import ccall safe "rl_bindings.h SetShapesTexture_" c'setShapesTexture :: Ptr Texture -> Ptr Rectangle -> IO ()
 
 foreign import ccall safe "rl_bindings.h DrawPixel_" c'drawPixel :: CInt -> CInt -> Ptr Color -> IO ()

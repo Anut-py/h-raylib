@@ -249,6 +249,10 @@ Vector2 *GetGesturePinchVector_()
     return ptr;
 }
 
+void UpdateCameraPro_(Camera3D *a, Vector3 *b, Vector3 *c, float d) {
+    UpdateCameraPro(a, *b, *c, d);
+}
+
 void SetShapesTexture_(Texture *a, Rectangle *b)
 {
     SetShapesTexture(*a, *b);

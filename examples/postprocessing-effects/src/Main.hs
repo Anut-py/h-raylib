@@ -3,7 +3,8 @@
 module Main where
 
 import Control.Monad (unless, void)
-import Raylib.Core (beginDrawing, beginMode3D, beginShaderMode, beginTextureMode, changeDirectory, clearBackground, closeWindow, endDrawing, endMode3D, endShaderMode, endTextureMode, getApplicationDirectory, initWindow, isKeyPressed, loadShader, setShaderValue, setTargetFPS, updateCamera)
+import Raylib.Core (beginDrawing, beginMode3D, beginShaderMode, beginTextureMode, changeDirectory, clearBackground, closeWindow, endDrawing, endMode3D, endShaderMode, endTextureMode, getApplicationDirectory, initWindow, isKeyPressed, loadShader, setShaderValue, setTargetFPS)
+import Raylib.Core.Camera (updateCamera)
 import Raylib.Core.Models (drawCube, drawGrid, drawSphere)
 import Raylib.Core.Text (drawText)
 import Raylib.Core.Textures (drawTextureRec, loadRenderTexture)

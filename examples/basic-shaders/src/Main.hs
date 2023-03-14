@@ -20,8 +20,8 @@ import Raylib.Core
     loadShader,
     setShaderValue,
     setTargetFPS,
-    updateCamera,
   )
+import Raylib.Core.Camera (updateCamera)
 import Raylib.Core.Models (drawModel, drawSphereWires, genMeshCube, genMeshPlane, genMeshSphere, loadModelFromMesh)
 import Raylib.Core.Text (drawText)
 import Raylib.Types

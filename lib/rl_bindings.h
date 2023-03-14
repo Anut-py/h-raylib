@@ -90,6 +90,8 @@ Vector2 *GetGestureDragVector_();
 
 Vector2 *GetGesturePinchVector_();
 
+void UpdateCameraPro_(Camera3D *a, Vector3 *b, Vector3 *c, float d);
+
 void SetShapesTexture_(Texture *a, Rectangle *b);
 
 void DrawPixel_(int a, int b, Color *c);
