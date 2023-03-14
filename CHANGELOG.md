@@ -1,6 +1,12 @@
 # h-raylib changelog
 
 ## Version 4.5.3.2
+_14 March, 2023_
+
+- Added GHCi support (see README.md for usage instructions)
+- Updated raylib to the master branch
+
+## Version 4.5.3.2
 _1 March, 2023_
 
 \[[#12](https://github.com/Anut-py/h-raylib/pull/12)\]
