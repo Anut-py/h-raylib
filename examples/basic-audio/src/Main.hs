@@ -14,13 +14,13 @@ musicPath = (if not inGHCi then "../../../../../../../../../" else "./") ++ "exa
 
 main :: IO ()
 main = do
-  initWindow 650 400 "raylib [audio] example - basic audio"
+  window <- initWindow 650 400 "raylib [audio] example - basic audio"
   initAudioDevice
 
   setTargetFPS 60
   unless inGHCi (void $ changeDirectory =<< getApplicationDirectory)
 
-  music <- loadMusicStream musicPath
+  music <- loadMusicStream musicPath window
   playMusicStream music
 
   whileWindowOpen0
@@ -35,5 +35,5 @@ main = do
         updateMusicStream music
     )
 
-  closeAudioDevice
-  closeWindow
+  closeAudioDevice window
+  closeWindow window

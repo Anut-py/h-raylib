@@ -21,7 +21,7 @@ import Foreign.C
     withCString,
   )
 import Raylib.ForeignUtil (c'free, configsToBitflag, pop, popCArray, popCString, withFreeable, withFreeableArray, withFreeableArrayLen, withMaybeCString)
-import Raylib.Internal (addShaderId, shaderLocations, unloadFrameBuffers, unloadShaders, unloadSingleShader, unloadTextures, unloadVaoIds, unloadVboIds)
+import Raylib.Internal (addShaderId, unloadFrameBuffers, unloadShaders, unloadSingleShader, unloadTextures, unloadVaoIds, unloadVboIds, WindowResources, shaderLocations, defaultWindowResources)
 import Raylib.Native
   ( c'beginBlendMode,
     c'beginMode2D,
@@ -206,19 +206,19 @@ import Raylib.Types
     unpackShaderUniformDataV,
   )
 
-initWindow :: Int -> Int -> String -> IO ()
-initWindow width height title = withCString title $ c'initWindow (fromIntegral width) (fromIntegral height)
+initWindow :: Int -> Int -> String -> IO WindowResources
+initWindow width height title = withCString title (c'initWindow (fromIntegral width) (fromIntegral height)) >> defaultWindowResources
 
 windowShouldClose :: IO Bool
 windowShouldClose = toBool <$> c'windowShouldClose
 
-closeWindow :: IO ()
-closeWindow = do
-  unloadShaders
-  unloadTextures
-  unloadFrameBuffers
-  unloadVaoIds
-  unloadVboIds
+closeWindow :: WindowResources -> IO ()
+closeWindow wr = do
+  unloadShaders wr
+  unloadTextures wr
+  unloadFrameBuffers wr
+  unloadVaoIds wr
+  unloadVboIds wr
   c'closeWindow
 
 isWindowReady :: IO Bool
@@ -450,37 +450,38 @@ foreign import ccall safe "raylib.h EndVrStereoMode"
 loadVrStereoConfig :: VrDeviceInfo -> IO VrStereoConfig
 loadVrStereoConfig deviceInfo = withFreeable deviceInfo c'loadVrStereoConfig >>= pop
 
-loadShader :: Maybe String -> Maybe String -> IO Shader
-loadShader vsFileName fsFileName = do
+loadShader :: Maybe String -> Maybe String -> WindowResources -> IO Shader
+loadShader vsFileName fsFileName wr = do
   shader <- withMaybeCString vsFileName (withMaybeCString fsFileName . c'loadShader) >>= pop
-  addShaderId $ shader'id shader
+  addShaderId (shader'id shader) wr
   return shader
 
-loadShaderFromMemory :: Maybe String -> Maybe String -> IO Shader
-loadShaderFromMemory vsCode fsCode = do
+loadShaderFromMemory :: Maybe String -> Maybe String -> WindowResources -> IO Shader
+loadShaderFromMemory vsCode fsCode wr = do
   shader <- withMaybeCString vsCode (withMaybeCString fsCode . c'loadShaderFromMemory) >>= pop
-  addShaderId $ shader'id shader
+  addShaderId (shader'id shader) wr
   return shader
 
 isShaderReady :: Shader -> IO Bool
 isShaderReady shader = toBool <$> withFreeable shader c'isShaderReady
 
-getShaderLocation :: Shader -> String -> IO Int
-getShaderLocation shader uniformName = do
+getShaderLocation :: Shader -> String -> WindowResources -> IO Int
+getShaderLocation shader uniformName wr = do
   let sId = shader'id shader
-  locs <- readIORef shaderLocations
+  let sLocs = shaderLocations wr
+  locs <- readIORef sLocs
   -- TODO: Clean this up if possible
   case Map.lookup sId locs of
     Nothing -> do
       idx <- locIdx
       let newMap = Map.fromList [(uniformName, idx)]
-      modifyIORef' shaderLocations (Map.insert sId newMap)
+      modifyIORef' sLocs (Map.insert sId newMap)
       return idx
     Just m -> case Map.lookup uniformName m of
       Nothing -> do
         idx <- locIdx
         let newMap = Map.insert uniformName idx m
-        modifyIORef' shaderLocations (Map.insert sId newMap)
+        modifyIORef' sLocs (Map.insert sId newMap)
         return idx
       Just val -> return val
   where
@@ -489,14 +490,14 @@ getShaderLocation shader uniformName = do
 getShaderLocationAttrib :: Shader -> String -> IO Int
 getShaderLocationAttrib shader attribName = fromIntegral <$> withFreeable shader (withCString attribName . c'getShaderLocationAttrib)
 
-setShaderValue :: Shader -> String -> ShaderUniformData -> IO ()
-setShaderValue shader uniformName value = do
-  idx <- getShaderLocation shader uniformName
+setShaderValue :: Shader -> String -> ShaderUniformData -> WindowResources -> IO ()
+setShaderValue shader uniformName value wr = do
+  idx <- getShaderLocation shader uniformName wr
   nativeSetShaderValue shader idx value
 
-setShaderValueV :: Shader -> String -> ShaderUniformDataV -> IO ()
-setShaderValueV shader uniformName values = do
-  idx <- getShaderLocation shader uniformName
+setShaderValueV :: Shader -> String -> ShaderUniformDataV -> WindowResources -> IO ()
+setShaderValueV shader uniformName values wr = do
+  idx <- getShaderLocation shader uniformName wr
   nativeSetShaderValueV shader idx values
 
 nativeSetShaderValue :: Shader -> Int -> ShaderUniformData -> IO ()
@@ -521,7 +522,7 @@ setShaderValueTexture shader locIndex tex = withFreeable shader (\s -> withFreea
 -- when `closeWindow` is called, so manually unloading shaders is not required.
 -- In larger projects, you may want to manually unload shaders to avoid having
 -- them in VRAM for too long.
-unloadShader :: Shader -> IO ()
+unloadShader :: Shader -> WindowResources -> IO ()
 unloadShader shader = unloadSingleShader (shader'id shader)
 
 getMouseRay :: Vector2 -> Camera3D -> IO Ray

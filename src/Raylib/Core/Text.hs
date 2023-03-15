@@ -20,7 +20,7 @@ import Raylib.ForeignUtil
     withFreeableArray,
     withFreeableArrayLen,
   )
-import Raylib.Internal (addTextureId, unloadSingleTexture)
+import Raylib.Internal (addTextureId, unloadSingleTexture, WindowResources)
 import Raylib.Native
   ( c'codepointToUTF8,
     c'drawFPS,
@@ -63,28 +63,28 @@ import Raylib.Types
 getFontDefault :: IO Font
 getFontDefault = c'getFontDefault >>= pop
 
-loadFont :: String -> IO Font
-loadFont fileName = do
+loadFont :: String -> WindowResources -> IO Font
+loadFont fileName wr = do
   font <- withCString fileName c'loadFont >>= pop
-  addTextureId $ texture'id $ font'texture font
+  addTextureId (texture'id $ font'texture font) wr
   return font
 
-loadFontEx :: String -> Int -> [Int] -> Int -> IO Font
-loadFontEx fileName fontSize fontChars glyphCount = do
+loadFontEx :: String -> Int -> [Int] -> Int -> WindowResources -> IO Font
+loadFontEx fileName fontSize fontChars glyphCount wr = do
   font <- withCString fileName (\f -> withFreeableArray (map fromIntegral fontChars) (\c -> c'loadFontEx f (fromIntegral fontSize) c (fromIntegral glyphCount))) >>= pop
-  addTextureId $ texture'id $ font'texture font
+  addTextureId (texture'id $ font'texture font) wr
   return font
 
-loadFontFromImage :: Image -> Color -> Int -> IO Font
-loadFontFromImage image key firstChar = do
+loadFontFromImage :: Image -> Color -> Int -> WindowResources -> IO Font
+loadFontFromImage image key firstChar wr = do
   font <- withFreeable image (\i -> withFreeable key (\k -> c'loadFontFromImage i k (fromIntegral firstChar))) >>= pop
-  addTextureId $ texture'id $ font'texture font
+  addTextureId (texture'id $ font'texture font) wr
   return font
 
-loadFontFromMemory :: String -> [Integer] -> Int -> [Int] -> Int -> IO Font
-loadFontFromMemory fileType fileData fontSize fontChars glyphCount = do
+loadFontFromMemory :: String -> [Integer] -> Int -> [Int] -> Int -> WindowResources -> IO Font
+loadFontFromMemory fileType fileData fontSize fontChars glyphCount wr = do
   font <- withCString fileType (\t -> withFreeableArrayLen (map fromIntegral fileData) (\size d -> withFreeableArray (map fromIntegral fontChars) (\c -> c'loadFontFromMemory t d (fromIntegral $ size * sizeOf (0 :: CUChar)) (fromIntegral fontSize) c (fromIntegral glyphCount)))) >>= pop
-  addTextureId $ texture'id $ font'texture font
+  addTextureId (texture'id $ font'texture font) wr
   return font
 
 loadFontData :: [Integer] -> Int -> [Int] -> Int -> FontType -> IO GlyphInfo
@@ -97,7 +97,7 @@ genImageFontAtlas chars recs glyphCount fontSize padding packMethod = withFreeab
 -- when `closeWindow` is called, so manually unloading fonts is not required.
 -- In larger projects, you may want to manually unload fonts to avoid having
 -- them in VRAM for too long.
-unloadFont :: Font -> IO ()
+unloadFont :: Font -> WindowResources -> IO ()
 unloadFont font = unloadSingleTexture (texture'id $ font'texture font)
 
 isFontReady :: Font -> IO Bool

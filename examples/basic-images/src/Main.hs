@@ -32,13 +32,13 @@ logoPath = (if not inGHCi then "../../../../../../../../../" else "./") ++ "exam
 
 main :: IO ()
 main = do
-  initWindow 600 450 "raylib [textures] example - basic images"
+  window <- initWindow 600 450 "raylib [textures] example - basic images"
   setTargetFPS 60
   unless inGHCi (void $ changeDirectory =<< getApplicationDirectory)
 
-  texture <- genImagePerlinNoise 600 450 20 20 2 >>= loadTextureFromImage
-  logo <- loadImage logoPath >>= loadTextureFromImage
-  rt <- loadRenderTexture 200 200
+  texture <- genImagePerlinNoise 600 450 20 20 2 >>= (`loadTextureFromImage` window)
+  logo <- loadImage logoPath >>= (`loadTextureFromImage` window)
+  rt <- loadRenderTexture 200 200 window
 
   whileWindowOpen0
     ( do
@@ -59,4 +59,4 @@ main = do
         endDrawing
     )
 
-  closeWindow
+  closeWindow window

@@ -15,7 +15,7 @@ import Raylib.Util.Colors (lightGray, rayWhite)
 
 main :: IO ()
 main = do
-  initWindow 600 450 "raylib [core] example - basic window"
+  window <- initWindow 600 450 "raylib [core] example - basic window"
   setTargetFPS 60
 
   whileWindowOpen0
@@ -28,4 +28,4 @@ main = do
         endDrawing
     )
 
-  closeWindow
+  closeWindow window

@@ -46,14 +46,14 @@ assetsPath = (if not inGHCi then "../../../../../../../../../" else "./") ++ "ex
 
 main :: IO ()
 main = do
-  initWindow 1300 800 "raylib [shaders] example - basic shaders"
+  window <- initWindow 1300 800 "raylib [shaders] example - basic shaders"
   setTargetFPS 60
   disableCursor
   unless inGHCi (void $ changeDirectory =<< getApplicationDirectory)
 
   let camera = Camera3D (Vector3 1 3 3) (Vector3 1 0 1) (Vector3 0 1 0) 45 CameraPerspective
 
-  shader <- loadShader (Just $ assetsPath ++ "lighting.vert") (Just $ assetsPath ++ "lighting.frag")
+  shader <- loadShader (Just $ assetsPath ++ "lighting.vert") (Just $ assetsPath ++ "lighting.frag") window
 
   let pointLightPosition = Vector3 0 3 2
   let pointLightColor = Vector4 1 1 1 1
@@ -62,23 +62,23 @@ main = do
   let ambientLightColor = Vector4 1 1 0 1
   let ambientStrength = 0.1
 
-  setShaderValue shader "pointLightPosition" (ShaderUniformVec3 pointLightPosition)
-  setShaderValue shader "pointLightColor" (ShaderUniformVec4 pointLightColor)
-  setShaderValue shader "pointLightStrength" (ShaderUniformFloat pointLightStrength)
-  setShaderValue shader "specularStrength" (ShaderUniformFloat specularStrength)
-  setShaderValue shader "ambientLightColor" (ShaderUniformVec4 ambientLightColor)
-  setShaderValue shader "ambientStrength" (ShaderUniformFloat ambientStrength)
+  setShaderValue shader "pointLightPosition" (ShaderUniformVec3 pointLightPosition) window
+  setShaderValue shader "pointLightColor" (ShaderUniformVec4 pointLightColor) window
+  setShaderValue shader "pointLightStrength" (ShaderUniformFloat pointLightStrength) window
+  setShaderValue shader "specularStrength" (ShaderUniformFloat specularStrength) window
+  setShaderValue shader "ambientLightColor" (ShaderUniformVec4 ambientLightColor) window
+  setShaderValue shader "ambientStrength" (ShaderUniformFloat ambientStrength) window
 
-  cubeMesh <- genMeshCube 2 2 2
-  cubeModel' <- loadModelFromMesh cubeMesh
+  cubeMesh <- genMeshCube 2 2 2 window
+  cubeModel' <- loadModelFromMesh cubeMesh window
   let cubeModel = setMaterialShader cubeModel' 0 shader
 
-  sphereMesh <- genMeshSphere 0.5 32 32
-  sphereModel' <- loadModelFromMesh sphereMesh
+  sphereMesh <- genMeshSphere 0.5 32 32 window
+  sphereModel' <- loadModelFromMesh sphereMesh window
   let sphereModel = setMaterialShader sphereModel' 0 shader
 
-  planeMesh <- genMeshPlane 100 100 20 20
-  planeModel' <- loadModelFromMesh planeMesh
+  planeMesh <- genMeshPlane 100 100 20 20 window
+  planeModel' <- loadModelFromMesh planeMesh window
   let planeModel = setMaterialShader planeModel' 0 shader
 
   whileWindowOpen_
@@ -115,8 +115,8 @@ main = do
                   | jDown = -1
                   | otherwise = 0
 
-        when (yDown || hDown) $ setShaderValue shader "pointLightStrength" (ShaderUniformFloat newLightStrength)
-        when (uDown || jDown) $ setShaderValue shader "specularStrength" (ShaderUniformFloat newSpecularStrength)
+        when (yDown || hDown) $ setShaderValue shader "pointLightStrength" (ShaderUniformFloat newLightStrength) window
+        when (uDown || jDown) $ setShaderValue shader "specularStrength" (ShaderUniformFloat newSpecularStrength) window
 
         drawText "Press the Y and H keys to increase and decrease the diffuse strength." 10 10 20 white
         drawText ("Current diffuse strength: " ++ showFFloat (Just 2) newLightStrength "") 10 40 20 white
@@ -127,13 +127,13 @@ main = do
         endDrawing
 
         newCam <- updateCamera c CameraModeFirstPerson
-        setShaderValue shader "viewPos" (ShaderUniformVec3 $ camera3D'position newCam)
+        setShaderValue shader "viewPos" (ShaderUniformVec3 $ camera3D'position newCam) window
 
         return (newCam, newLightStrength, newSpecularStrength)
     )
     (camera, pointLightStrength, specularStrength)
 
-  closeWindow
+  closeWindow window
 
 clamp :: Float -> Float -> Float -> Float
 clamp x l h = min h (max x l)

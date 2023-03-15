@@ -20,26 +20,26 @@ main = do
   let width = 1300
       height = 800
 
-  initWindow width height "raylib [shaders] example - postprocessing effects"
+  window <- initWindow width height "raylib [shaders] example - postprocessing effects"
   setTargetFPS 60
   unless inGHCi (void $ changeDirectory =<< getApplicationDirectory)
 
   let camera = Camera3D (Vector3 3 4 3) (Vector3 0 1 0) (Vector3 0 1 0) 45 CameraPerspective
 
-  rt <- loadRenderTexture width height
+  rt <- loadRenderTexture width height window
 
   -- Most of the shaders here are based on the ones at https://github.com/raysan5/raylib/tree/master/examples/shaders/resources/shaders/glsl330
-  defaultShader <- loadShader Nothing Nothing
-  grayscaleShader <- loadShader Nothing (Just $ assetsPath ++ "grayscale.frag")
-  blurShader <- loadShader Nothing (Just $ assetsPath ++ "blur.frag")
-  pixelateShader <- loadShader Nothing (Just $ assetsPath ++ "pixelate.frag")
-  bloomShader <- loadShader Nothing (Just $ assetsPath ++ "bloom.frag")
+  defaultShader <- loadShader Nothing Nothing window
+  grayscaleShader <- loadShader Nothing (Just $ assetsPath ++ "grayscale.frag") window
+  blurShader <- loadShader Nothing (Just $ assetsPath ++ "blur.frag") window
+  pixelateShader <- loadShader Nothing (Just $ assetsPath ++ "pixelate.frag") window
+  bloomShader <- loadShader Nothing (Just $ assetsPath ++ "bloom.frag") window
 
   let shaders = [("None", defaultShader), ("Grayscale", grayscaleShader), ("Blur", blurShader), ("Pixelate", pixelateShader), ("Bloom", bloomShader)]
 
-  setShaderValue blurShader "renderSize" (ShaderUniformVec2 (Vector2 (fromIntegral width) (fromIntegral height)))
-  setShaderValue pixelateShader "renderSize" (ShaderUniformVec2 (Vector2 (fromIntegral width) (fromIntegral height)))
-  setShaderValue bloomShader "renderSize" (ShaderUniformVec2 (Vector2 (fromIntegral width) (fromIntegral height)))
+  setShaderValue blurShader "renderSize" (ShaderUniformVec2 (Vector2 (fromIntegral width) (fromIntegral height))) window
+  setShaderValue pixelateShader "renderSize" (ShaderUniformVec2 (Vector2 (fromIntegral width) (fromIntegral height))) window
+  setShaderValue bloomShader "renderSize" (ShaderUniformVec2 (Vector2 (fromIntegral width) (fromIntegral height))) window
 
   whileWindowOpen_
     ( \(c, currentShader) -> do
@@ -98,4 +98,4 @@ main = do
     )
     (camera, 0)
 
-  closeWindow
+  closeWindow window

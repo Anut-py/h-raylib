@@ -1,106 +1,106 @@
 {-# OPTIONS -Wall #-}
 {-# LANGUAGE ForeignFunctionInterface #-}
 
-module Raylib.Internal (shaderLocations, unloadSingleShader, unloadSingleTexture, unloadSingleFrameBuffer, unloadSingleVaoId, unloadSingleVboIdList, unloadSingleCtxDataPtr, unloadSingleAudioBuffer, unloadShaders, unloadTextures, unloadFrameBuffers, unloadVaoIds, unloadVboIds, unloadCtxData, unloadAudioBuffers, addShaderId, addTextureId, addFrameBuffer, addVaoId, addVboIds, addCtxData, addAudioBuffer, c'rlGetShaderIdDefault, getPixelDataSize) where
+module Raylib.Internal (WindowResources(..), defaultWindowResources, unloadSingleShader, unloadSingleTexture, unloadSingleFrameBuffer, unloadSingleVaoId, unloadSingleVboIdList, unloadSingleCtxDataPtr, unloadSingleAudioBuffer, unloadShaders, unloadTextures, unloadFrameBuffers, unloadVaoIds, unloadVboIds, unloadCtxData, unloadAudioBuffers, addShaderId, addTextureId, addFrameBuffer, addVaoId, addVboIds, addCtxData, addAudioBuffer, c'rlGetShaderIdDefault, getPixelDataSize) where
 
 import Control.Monad (forM_, unless, when)
-import Data.IORef (IORef, modifyIORef, newIORef, readIORef)
+import Data.IORef (IORef, modifyIORef, readIORef, newIORef)
 import Data.List (delete)
 import Data.Map (Map)
-import qualified Data.Map as Map
 import Foreign (Ptr)
 import Foreign.C (CInt (..), CUInt (..))
 import GHC.IO (unsafePerformIO)
+import qualified Data.Map as Map
 
-shaderIds :: IORef [CUInt]
-{-# NOINLINE shaderIds #-}
-shaderIds = unsafePerformIO $ newIORef []
+data WindowResources = WindowResources
+  { shaderIds :: IORef [CUInt],
+    shaderLocations :: IORef (Map Integer (Map String Int)),
+    textureIds :: IORef [CUInt],
+    frameBuffers :: IORef [CUInt],
+    vaoIds :: IORef [CUInt],
+    vboIds :: IORef [CUInt],
+    ctxDataPtrs :: IORef [(CInt, Ptr ())],
+    audioBuffers :: IORef [Ptr ()]
+  }
 
-shaderLocations :: IORef (Map Integer (Map String Int))
-{-# NOINLINE shaderLocations #-}
-shaderLocations = unsafePerformIO $ newIORef Map.empty
+defaultWindowResources :: IO WindowResources
+defaultWindowResources = do
+  sIds <- newIORef []
+  sLocs <- newIORef Map.empty
+  tIds <- newIORef []
+  fbs <- newIORef []
+  vaos <- newIORef []
+  vbos <- newIORef []
+  cdps <- newIORef []
+  aBufs <- newIORef []
+  return WindowResources {
+    shaderIds = sIds,
+    shaderLocations = sLocs,
+    textureIds = tIds,
+    frameBuffers = fbs,
+    vaoIds = vaos,
+    vboIds = vbos,
+    ctxDataPtrs = cdps,
+    audioBuffers = aBufs
+  }
 
-textureIds :: IORef [CUInt]
-{-# NOINLINE textureIds #-}
-textureIds = unsafePerformIO $ newIORef []
-
-frameBuffers :: IORef [CUInt]
-{-# NOINLINE frameBuffers #-}
-frameBuffers = unsafePerformIO $ newIORef []
-
-vaoIds :: IORef [CUInt]
-{-# NOINLINE vaoIds #-}
-vaoIds = unsafePerformIO $ newIORef []
-
-vboIds :: IORef [CUInt]
-{-# NOINLINE vboIds #-}
-vboIds = unsafePerformIO $ newIORef []
-
-ctxDataPtrs :: IORef [(CInt, Ptr ())]
-{-# NOINLINE ctxDataPtrs #-}
-ctxDataPtrs = unsafePerformIO $ newIORef []
-
-audioBuffers :: IORef [Ptr ()]
-{-# NOINLINE audioBuffers #-}
-audioBuffers = unsafePerformIO $ newIORef []
-
-unloadSingleShader :: (Integral a) => a -> IO ()
-unloadSingleShader sId' = do
+unloadSingleShader :: (Integral a) => a -> WindowResources -> IO ()
+unloadSingleShader sId' wr = do
   shaderIdDefault <- c'rlGetShaderIdDefault
   unless (sId == shaderIdDefault) (c'rlUnloadShaderProgram sId)
-  modifyIORef shaderIds (delete sId)
+  modifyIORef (shaderIds wr) (delete sId)
   where
     sId = fromIntegral sId'
 
-unloadSingleTexture :: (Integral a) => a -> IO ()
-unloadSingleTexture tId' = do
+unloadSingleTexture :: (Integral a) => a -> WindowResources -> IO ()
+unloadSingleTexture tId' wr = do
   when (tId > 0) (c'rlUnloadTexture tId)
-  modifyIORef textureIds (delete tId)
+  modifyIORef (textureIds wr) (delete tId)
   where
     tId = fromIntegral tId'
 
-unloadSingleFrameBuffer :: (Integral a) => a -> IO ()
-unloadSingleFrameBuffer fbId' = do
+unloadSingleFrameBuffer :: (Integral a) => a -> WindowResources -> IO ()
+unloadSingleFrameBuffer fbId' wr = do
   when (fbId > 0) (c'rlUnloadFramebuffer fbId)
-  modifyIORef frameBuffers (delete fbId)
+  modifyIORef (frameBuffers wr) (delete fbId)
   where
     fbId = fromIntegral fbId'
 
-unloadSingleVaoId :: (Integral a) => a -> IO ()
-unloadSingleVaoId vaoId' = do
+unloadSingleVaoId :: (Integral a) => a -> WindowResources -> IO ()
+unloadSingleVaoId vaoId' wr = do
   c'rlUnloadVertexArray vaoId
-  modifyIORef vaoIds (delete vaoId)
+  modifyIORef (vaoIds wr) (delete vaoId)
   where
     vaoId = fromIntegral vaoId'
 
-unloadSingleVboIdList :: (Integral a) => Maybe [a] -> IO ()
-unloadSingleVboIdList Nothing = return ()
-unloadSingleVboIdList (Just vboIdList') = do
+unloadSingleVboIdList :: (Integral a) => Maybe [a] -> WindowResources -> IO ()
+unloadSingleVboIdList Nothing _ = return ()
+unloadSingleVboIdList (Just vboIdList') wr = do
   forM_
     vboIdList
     ( \vboId -> do
         c'rlUnloadVertexBuffer vboId
-        modifyIORef vboIds (delete vboId)
+        modifyIORef (vboIds wr) (delete vboId)
     )
   where
     vboIdList = map fromIntegral vboIdList'
 
-unloadSingleCtxDataPtr :: (Integral a) => a -> Ptr () -> IO ()
-unloadSingleCtxDataPtr ctxType' ctxData = do
+unloadSingleCtxDataPtr :: (Integral a) => a -> Ptr () -> WindowResources -> IO ()
+unloadSingleCtxDataPtr ctxType' ctxData wr = do
   c'unloadMusicStreamData ctxType ctxData
-  modifyIORef ctxDataPtrs (delete (ctxType, ctxData))
+  modifyIORef (ctxDataPtrs wr) (delete (ctxType, ctxData))
   where
     ctxType = fromIntegral ctxType'
 
-unloadSingleAudioBuffer :: Ptr () -> IO ()
-unloadSingleAudioBuffer buffer = do
+unloadSingleAudioBuffer :: Ptr () -> WindowResources -> IO ()
+unloadSingleAudioBuffer buffer wr = do
   c'unloadAudioBuffer buffer
-  modifyIORef audioBuffers (delete buffer)
+  modifyIORef (audioBuffers wr) (delete buffer)
 
-unloadShaders :: IO ()
-unloadShaders = do
+unloadShaders :: WindowResources -> IO ()
+unloadShaders wr = do
   shaderIdDefault <- c'rlGetShaderIdDefault
-  vals <- readIORef shaderIds
+  vals <- readIORef (shaderIds wr)
   let l = length vals
   when
     (l > 0)
@@ -109,9 +109,9 @@ unloadShaders = do
         putStrLn $ "INFO: SHADER: h-raylib successfully auto-unloaded shaders (" ++ show l ++ " in total)"
     )
 
-unloadTextures :: IO ()
-unloadTextures = do
-  vals <- readIORef textureIds
+unloadTextures :: WindowResources -> IO ()
+unloadTextures wr = do
+  vals <- readIORef (textureIds wr)
   let l = length vals
   when
     (l > 0)
@@ -120,9 +120,9 @@ unloadTextures = do
         putStrLn $ "INFO: TEXTURE: h-raylib successfully auto-unloaded textures (" ++ show l ++ " in total)"
     )
 
-unloadFrameBuffers :: IO ()
-unloadFrameBuffers = do
-  vals <- readIORef frameBuffers
+unloadFrameBuffers :: WindowResources -> IO ()
+unloadFrameBuffers wr = do
+  vals <- readIORef (frameBuffers wr)
   let l = length vals
   when
     (l > 0)
@@ -131,9 +131,9 @@ unloadFrameBuffers = do
         putStrLn $ "INFO: FBO: h-raylib successfully auto-unloaded frame buffers (" ++ show l ++ " in total)"
     )
 
-unloadVaoIds :: IO ()
-unloadVaoIds = do
-  vals <- readIORef vaoIds
+unloadVaoIds :: WindowResources -> IO ()
+unloadVaoIds wr = do
+  vals <- readIORef (vaoIds wr)
   let l = length vals
   when
     (l > 0)
@@ -142,9 +142,9 @@ unloadVaoIds = do
         putStrLn $ "INFO: VAO: h-raylib successfully auto-unloaded vertex arrays (" ++ show l ++ " in total)"
     )
 
-unloadVboIds :: IO ()
-unloadVboIds = do
-  vals <- readIORef vboIds
+unloadVboIds :: WindowResources -> IO ()
+unloadVboIds wr = do
+  vals <- readIORef (vboIds wr)
   let l = length vals
   when
     (l > 0)
@@ -153,9 +153,9 @@ unloadVboIds = do
         putStrLn $ "INFO: VBO: h-raylib successfully auto-unloaded vertex buffers (" ++ show l ++ " in total)"
     )
 
-unloadCtxData :: IO ()
-unloadCtxData = do
-  vals <- readIORef ctxDataPtrs
+unloadCtxData :: WindowResources -> IO ()
+unloadCtxData wr = do
+  vals <- readIORef (ctxDataPtrs wr)
   let l = length vals
   when
     (l > 0)
@@ -164,9 +164,9 @@ unloadCtxData = do
         putStrLn $ "INFO: AUDIO: h-raylib successfully auto-unloaded music data (" ++ show l ++ " in total)"
     )
 
-unloadAudioBuffers :: IO ()
-unloadAudioBuffers = do
-  vals <- readIORef audioBuffers
+unloadAudioBuffers :: WindowResources -> IO ()
+unloadAudioBuffers wr = do
+  vals <- readIORef (audioBuffers wr)
   let l = length vals
   when
     (l > 0)
@@ -175,46 +175,46 @@ unloadAudioBuffers = do
         putStrLn $ "INFO: AUDIO: h-raylib successfully auto-unloaded audio buffers (" ++ show l ++ " in total)"
     )
 
-addShaderId :: (Integral a) => a -> IO ()
-addShaderId sId' = do
-  modifyIORef shaderIds (\xs -> if sId `elem` xs then xs else sId : xs)
+addShaderId :: (Integral a) => a -> WindowResources -> IO ()
+addShaderId sId' wr = do
+  modifyIORef (shaderIds wr) (\xs -> if sId `elem` xs then xs else sId : xs)
   where
     sId = fromIntegral sId'
 
-addTextureId :: (Integral a) => a -> IO ()
-addTextureId tId' = do
-  modifyIORef textureIds (\xs -> if tId `elem` xs then xs else tId : xs)
+addTextureId :: (Integral a) => a -> WindowResources -> IO ()
+addTextureId tId' wr = do
+  modifyIORef (textureIds wr) (\xs -> if tId `elem` xs then xs else tId : xs)
   where
     tId = fromIntegral tId'
 
-addFrameBuffer :: (Integral a) => a -> IO ()
-addFrameBuffer fbId' = do
-  modifyIORef frameBuffers (\xs -> if fbId `elem` xs then xs else fbId : xs)
+addFrameBuffer :: (Integral a) => a -> WindowResources -> IO ()
+addFrameBuffer fbId' wr = do
+  modifyIORef (frameBuffers wr) (\xs -> if fbId `elem` xs then xs else fbId : xs)
   where
     fbId = fromIntegral fbId'
 
-addVaoId :: (Integral a) => a -> IO ()
-addVaoId vaoId' = do
-  modifyIORef vaoIds (\xs -> if vaoId `elem` xs then xs else vaoId : xs)
+addVaoId :: (Integral a) => a -> WindowResources -> IO ()
+addVaoId vaoId' wr = do
+  modifyIORef (vaoIds wr) (\xs -> if vaoId `elem` xs then xs else vaoId : xs)
   where
     vaoId = fromIntegral vaoId'
 
-addVboIds :: (Integral a) => Maybe [a] -> IO ()
-addVboIds Nothing = return ()
-addVboIds (Just bIds') = do
-  forM_ bIds (\x -> modifyIORef vboIds (\xs -> if x `elem` xs then xs else x : xs))
+addVboIds :: (Integral a) => Maybe [a] -> WindowResources -> IO ()
+addVboIds Nothing _ = return ()
+addVboIds (Just bIds') wr = do
+  forM_ bIds (\x -> modifyIORef (vboIds wr) (\xs -> if x `elem` xs then xs else x : xs))
   where
     bIds = map fromIntegral bIds'
 
-addCtxData :: (Integral a) => a -> Ptr () -> IO ()
-addCtxData ctxType' ctxData = do
-  modifyIORef ctxDataPtrs (\xs -> if (ctxType, ctxData) `elem` xs then xs else (ctxType, ctxData) : xs)
+addCtxData :: (Integral a) => a -> Ptr () -> WindowResources -> IO ()
+addCtxData ctxType' ctxData wr = do
+  modifyIORef (ctxDataPtrs wr) (\xs -> if (ctxType, ctxData) `elem` xs then xs else (ctxType, ctxData) : xs)
   where
     ctxType = fromIntegral ctxType'
 
-addAudioBuffer :: Ptr () -> IO ()
-addAudioBuffer buffer = do
-  modifyIORef audioBuffers (\xs -> if buffer `elem` xs then xs else buffer : xs)
+addAudioBuffer :: Ptr () -> WindowResources -> IO ()
+addAudioBuffer buffer wr = do
+  modifyIORef (audioBuffers wr) (\xs -> if buffer `elem` xs then xs else buffer : xs)
 
 foreign import ccall safe "rlgl.h rlGetShaderIdDefault" c'rlGetShaderIdDefault :: IO CUInt
 

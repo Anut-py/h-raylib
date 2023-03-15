@@ -15,14 +15,14 @@ modelPath = (if not inGHCi then "../../../../../../../../../" else "./") ++ "exa
 
 main :: IO ()
 main = do
-  initWindow 650 400 "raylib [models] example - basic models"
+  window <- initWindow 650 400 "raylib [models] example - basic models"
   setTargetFPS 60
   disableCursor
   unless inGHCi (void $ changeDirectory =<< getApplicationDirectory)
 
-  mesh <- genMeshCube 2 3 4
-  cubeModel <- loadModelFromMesh mesh
-  customModel <- loadModel modelPath
+  mesh <- genMeshCube 2 3 4 window
+  cubeModel <- loadModelFromMesh mesh window
+  customModel <- loadModel modelPath window
 
   let camera = Camera3D (Vector3 3 2 3) (Vector3 0 0 0) (Vector3 0 1 0) 70 CameraPerspective
 
@@ -45,4 +45,4 @@ main = do
     )
     camera
 
-  closeWindow
+  closeWindow window

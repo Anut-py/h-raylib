@@ -16,13 +16,13 @@ texturePath = (if not inGHCi then "../../../../../../../../../" else "./") ++ "e
 
 main :: IO ()
 main = do
-  initWindow 650 400 "raylib [rlgl] example - basic rlgl"
+  window <- initWindow 650 400 "raylib [rlgl] example - basic rlgl"
   setTargetFPS 60
   unless inGHCi (void $ changeDirectory =<< getApplicationDirectory)
 
   let camera = Camera3D (Vector3 0 10 10) (Vector3 0 0 0) (Vector3 0 1 0) 45 CameraPerspective
 
-  texture <- loadTexture texturePath
+  texture <- loadTexture texturePath window
 
   whileWindowOpen0
     ( do
@@ -47,7 +47,7 @@ main = do
         endDrawing
     )
 
-  closeWindow
+  closeWindow window
 
 drawCubeTexture :: Texture -> Vector3 -> Float -> Float -> Float -> Color -> IO ()
 drawCubeTexture texture (Vector3 x y z) width height length (Color r g b a) = do

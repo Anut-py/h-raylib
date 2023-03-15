@@ -1,10 +1,11 @@
 {-# OPTIONS -Wall #-}
 {-# LANGUAGE CPP #-}
 
-module Raylib.Util (cameraDirectionRay, whileWindowOpen, whileWindowOpen_, whileWindowOpen0, setMaterialShader, inGHCi) where
+module Raylib.Util (WindowResources, cameraDirectionRay, whileWindowOpen, whileWindowOpen_, whileWindowOpen0, setMaterialShader, inGHCi) where
 
 import Control.Monad (void)
 import Raylib.Core (windowShouldClose)
+import Raylib.Internal (WindowResources)
 import Raylib.Types
   ( Camera3D (camera3D'position, camera3D'target),
     Material (material'shader),

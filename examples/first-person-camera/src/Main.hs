@@ -21,7 +21,7 @@ import Raylib.Util.Colors (black, white)
 
 main :: IO ()
 main = do
-  initWindow 600 450 "raylib [core] example - first person camera"
+  window <- initWindow 600 450 "raylib [core] example - first person camera"
   setTargetFPS 60
   disableCursor
 
@@ -48,4 +48,4 @@ main = do
     )
     camera
 
-  closeWindow
+  closeWindow window

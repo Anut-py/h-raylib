@@ -33,7 +33,7 @@ import Raylib.Util.Colors (black, red, white)
 
 main :: IO ()
 main = do
-  initWindow 600 450 "raylib [core] example - camera ray collision"
+  window <- initWindow 600 450 "raylib [core] example - camera ray collision"
   setTargetFPS 60
   disableCursor
 
@@ -61,4 +61,4 @@ main = do
     )
     camera
 
-  closeWindow
+  closeWindow window

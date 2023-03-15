@@ -24,11 +24,11 @@ mainFontPath = (if not inGHCi then "../../../../../../../../../" else "./") ++ "
 
 main :: IO ()
 main = do
-  initWindow 800 450 "raylib [text] example - custom font text"
+  window <- initWindow 800 450 "raylib [text] example - custom font text"
   setTargetFPS 60
   unless inGHCi (void $ changeDirectory =<< getApplicationDirectory)
 
-  mainFont <- loadFont mainFontPath
+  mainFont <- loadFont mainFontPath window
 
   whileWindowOpen_
     ( \size -> do
@@ -47,4 +47,4 @@ main = do
     )
     20
 
-  closeWindow
+  closeWindow window
