@@ -12,7 +12,7 @@ You can use `run-all-examples.sh` to run all of the examples in one go.
 
 _This section only contains h-raylib specific information. For information about raylib in general, view the [raylib wiki](https://github.com/raysan5/raylib/wiki)._
 
-This project is split into 10 public modules. `Raylib.Types` contains all of raylib's types and low-level code to convert them to and from raw bytes. `Raylib.Util` contains miscellaneous utility functions. `Raylib.Util.Colors` contains some colors defined by raylib. The other 7 public modules, `Raylib.Core`, `Raylib.Core.Shapes`, `Raylib.Core.Textures`, `Raylib.Core.Text`, `Raylib.Core.Models`, `Raylib.Core.Audio`, and `Raylib.Util.RLGL`, correspond to their respective raylib modules.
+This project is split into 10 public modules. `Raylib.Types` contains all of raylib's types and low-level code to convert them to and from raw bytes. `Raylib.Util` contains miscellaneous utility functions. `Raylib.Util.Colors` contains some colors defined by raylib. The other 8 public modules, `Raylib.Core`, `Raylib.Core.Camera`, `Raylib.Core.Shapes`, `Raylib.Core.Textures`, `Raylib.Core.Text`, `Raylib.Core.Models`, `Raylib.Core.Audio`, and `Raylib.Util.RLGL`, correspond to their respective raylib modules.
 
 The functions in h-raylib are an almost one-to-one mapping to their corresponding raylib functions. The types are, in some cases, slightly modified if it is possible to utilize Haskell features.
 
@@ -38,9 +38,15 @@ The callbacks section contains `FunPtr` types that are passed to some functions.
 
 `Raylib.Util.Colors` is very simple: it declares 26 colors defined in `raylib.h`, namely `lightGray`, `gray`, `darkGray`, `yellow`, `gold`, `orange`, `pink`, `red`, `maroon`, `green`, `lime`, `darkGreen`, `skyBlue`, `blue`, `darkBlue`, `purple`, `violet`, `darkPurple`, `beige`, `brown`, `darkBrown`, `white`, `black`, `blank`, `magenta`, and `rayWhite`.
 
-### The other 7 modules
+### The other 8 modules
 
-These modules contain only functions. Each of these functions corresponds to a C function. The `unload*` functions are optional; even if you do not call them, all assets used by a program will be automatically be unloaded when it terminates (see the "Memory management" section). For some types (e.g. `Image`), there is no unloading function because the memory used by the type can be unloaded in function calls.
+These modules contain only functions. Each of these functions corresponds to a C function.
+
+The `initWindow` returns a `WindowResources` value that must be passed to some `load*` functions and several other functions. 
+
+The `unload*` functions are optional; even if you do not call them, all assets used by a program will be automatically be unloaded when it terminates. For some types (e.g. `Image`), an unloading function is not necessary.
+
+These changes are for automatic memory management. See the "Memory management" section for details.
 
 Functions that took a pointer as an argument in C were changed to take a regular type as an argument and return an updated version of the argument.
 
@@ -66,11 +72,12 @@ The `Freeable` typeclass contains two methods, `rlFreeDependents` and `rlFree`. 
 
 The automatic memory management flow is as follows:
 
-1. A `load*` function is called (e.g. `loadModel`).
-2. The data is loaded.
-3. Any data that requires extra functions be called to unload it is stored in `Raylib.Internal` (e.g. shaders need to be freed from the GPU).
-4. The window is closed and `closeWindow` is called.
-5. All the data stored in `Raylib.Internal` is now unloaded (e.g. `rlUnloadShaderProgram` is called on all loaded shaders).
+1. A `WindowResources` value is retrieved by calling `initWindow`.
+2. A `load*` function is called (e.g. `loadModel`).
+3. The data is loaded.
+4. Any data that requires extra functions be called to unload it is stored in `Raylib.Internal` (e.g. shaders need to be freed from the GPU).
+5. The window is closed and `closeWindow` is called.
+6. All the data stored in `Raylib.Internal` is now unloaded (e.g. `rlUnloadShaderProgram` is called on all loaded shaders).
 
 Keep in mind that this is all automatic; no extra action in the code is necessary for this to happen. Take a look at `Raylib.Internal` to see the functions used for this.
 

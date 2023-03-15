@@ -1,10 +1,11 @@
 # h-raylib changelog
 
 ## Version 4.5.3.2
-_14 March, 2023_
+_15 March, 2023_
 
 - Added GHCi support (see README.md for usage instructions)
 - Updated raylib to the master branch
+- Removed global state; use `WindowResources` (see examples for usage)
 
 ## Version 4.5.3.2
 _1 March, 2023_

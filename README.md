@@ -76,7 +76,7 @@ On Windows, you may lose joystick support when running in GHCi.
 
 ## Contributing
 
-See [CONTRIBUTING.md](https://github.com/Anut-py/h-raylib/blob/master/CONTRIBUTING.md).
+To contribute or learn more about the project, see [CONTRIBUTING.md](https://github.com/Anut-py/h-raylib/blob/master/CONTRIBUTING.md).
 
 ## License
 
