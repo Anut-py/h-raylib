@@ -1,6 +1,11 @@
 # h-raylib changelog
 
-## Version 4.5.3.2
+## Version 4.5.3.4
+_19 March, 2023_
+
+- Updated raylib to the master branch
+
+## Version 4.5.3.3
 _15 March, 2023_
 
 - Added GHCi support (see README.md for usage instructions)
