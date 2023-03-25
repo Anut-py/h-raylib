@@ -976,9 +976,24 @@ void SetPixelColor_(void *a, Color *b, int c)
 
 Font *GetFontDefault_()
 {
-    Font *ptr = (Font *)malloc(sizeof(Font));
-    *ptr = GetFontDefault();
-    return ptr;
+    Font defaultFont      = GetFontDefault();
+    Font *defaultFontCopy = (Font *)malloc(sizeof(Font));
+
+    defaultFontCopy->baseSize     = defaultFont.baseSize;
+    defaultFontCopy->glyphCount   = defaultFont.glyphCount;
+    defaultFontCopy->glyphPadding = defaultFont.glyphPadding; 
+    defaultFontCopy->texture      = defaultFont.texture;
+    
+    defaultFontCopy->glyphs = malloc(sizeof(GlyphInfo) * defaultFont.glyphCount);
+    defaultFontCopy->recs = malloc(sizeof(Rectangle) * defaultFont.glyphCount);
+
+    for (int i = 0; i < defaultFont.glyphCount; i++) {
+        defaultFontCopy->glyphs[i] = defaultFont.glyphs[i];
+        defaultFontCopy->glyphs[i].image = ImageCopy(defaultFont.glyphs[i].image);
+        defaultFontCopy->recs[i]   = defaultFont.recs[i];
+    }
+    
+    return defaultFontCopy;
 }
 
 Font *LoadFont_(char *a)
