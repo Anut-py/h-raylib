@@ -78,6 +78,11 @@ On Windows, you may lose joystick support when running in GHCi.
 
 To contribute or learn more about the project, see [CONTRIBUTING.md](https://github.com/Anut-py/h-raylib/blob/master/CONTRIBUTING.md).
 
+## FAQ
+
+- When I try to run an h-raylib program I get an error saying "*The code execution cannot proceed because libwinpthread-1.dll was not found. Reinstalling the program may fix this problem.*"
+  - See [#14](https://github.com/Anut-py/h-raylib/issues/14)
+
 ## License
 
 This project is licensed under the Apache License 2.0. See more in `LICENSE`.
