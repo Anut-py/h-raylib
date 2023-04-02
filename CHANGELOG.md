@@ -1,5 +1,14 @@
 # h-raylib changelog
 
+## Version 4.6.0.1
+_2 April, 2023_
+
+- Created the `Raylib.Util.Math` and `Raylib.Util.Camera` modules. They are Haskell implementations of `raymath` and `rcamera`.
+
+\[[#15](https://github.com/Anut-py/h-raylib/pull/15)\]
+
+- Fixed a memory issue with `getFontDefault`
+
 ## Version 4.5.3.4
 _19 March, 2023_
 
