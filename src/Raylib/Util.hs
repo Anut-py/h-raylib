@@ -1,10 +1,11 @@
 {-# OPTIONS -Wall #-}
 {-# LANGUAGE CPP #-}
 
-module Raylib.Util (WindowResources, cameraDirectionRay, whileWindowOpen, whileWindowOpen_, whileWindowOpen0, setMaterialShader, inGHCi) where
+module Raylib.Util (WindowResources, cameraDirectionRay, whileWindowOpen, whileWindowOpen_, whileWindowOpen0, setMaterialShader, inGHCi, Freeable (..)) where
 
 import Control.Monad (void)
 import Raylib.Core (windowShouldClose)
+import Raylib.ForeignUtil (Freeable (..))
 import Raylib.Internal (WindowResources)
 import Raylib.Types
   ( Camera3D (camera3D'position, camera3D'target),
@@ -12,12 +13,12 @@ import Raylib.Types
     Model (model'materials),
     Ray (Ray),
     Shader,
-    Vector (normalize, (|-|)),
   )
+import Raylib.Util.Math (Vector (vectorNormalize, (|-|)))
 
 -- | Gets the direction of a camera as a ray.
 cameraDirectionRay :: Camera3D -> Ray
-cameraDirectionRay camera = Ray (camera3D'position camera) (normalize $ camera3D'target camera |-| camera3D'position camera)
+cameraDirectionRay camera = Ray (camera3D'position camera) (vectorNormalize $ camera3D'target camera |-| camera3D'position camera)
 
 -- | Calls the game loop every frame as long as the window is open.
 --  For larger projects, instead of using this function, consider

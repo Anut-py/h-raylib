@@ -577,24 +577,24 @@ data ShaderUniformDataV
 
 -- I don't know if there's a cleaner way to do this
 unpackShaderUniformData :: ShaderUniformData -> IO (ShaderUniformDataType, Ptr ())
-unpackShaderUniformData x = do
-  case x of
+unpackShaderUniformData u = do
+  case u of
     (ShaderUniformFloat f) ->
       do
         ptr <- malloc
         poke ptr (realToFrac f :: CFloat)
         return (ShaderUniformFloatType, castPtr ptr)
-    (ShaderUniformVec2 v) ->
+    (ShaderUniformVec2 (Vector2 x y)) ->
       do
-        ptr <- newArray (map realToFrac (asList v) :: [CFloat])
+        ptr <- newArray (map realToFrac [x, y] :: [CFloat])
         return (ShaderUniformVec2Type, castPtr ptr)
-    (ShaderUniformVec3 v) ->
+    (ShaderUniformVec3 (Vector3 x y z)) ->
       do
-        ptr <- newArray (map realToFrac (asList v) :: [CFloat])
+        ptr <- newArray (map realToFrac [x, y, z] :: [CFloat])
         return (ShaderUniformVec3Type, castPtr ptr)
-    (ShaderUniformVec4 v) ->
+    (ShaderUniformVec4 (Vector4 x y z w)) ->
       do
-        ptr <- newArray (map realToFrac (asList v) :: [CFloat])
+        ptr <- newArray (map realToFrac [x, y, z, w] :: [CFloat])
         return (ShaderUniformVec4Type, castPtr ptr)
     (ShaderUniformInt i) ->
       do
@@ -628,15 +628,15 @@ unpackShaderUniformDataV xs = do
         return (ShaderUniformFloatType, castPtr ptr, length fs)
     (ShaderUniformVec2V vs) ->
       do
-        ptr <- newArray (map realToFrac $ concatMap asList vs :: [CFloat])
+        ptr <- newArray (map realToFrac $ concatMap (\(Vector2 x y) -> [x, y]) vs :: [CFloat])
         return (ShaderUniformVec2Type, castPtr ptr, length vs)
     (ShaderUniformVec3V vs) ->
       do
-        ptr <- newArray (map realToFrac $ concatMap asList vs :: [CFloat])
+        ptr <- newArray (map realToFrac $ concatMap (\(Vector3 x y z) -> [x, y, z]) vs :: [CFloat])
         return (ShaderUniformVec3Type, castPtr ptr, length vs)
     (ShaderUniformVec4V vs) ->
       do
-        ptr <- newArray (map realToFrac $ concatMap asList vs :: [CFloat])
+        ptr <- newArray (map realToFrac $ concatMap (\(Vector4 x y z w) -> [x, y, z, w]) vs :: [CFloat])
         return (ShaderUniformVec4Type, castPtr ptr, length vs)
     (ShaderUniformIntV is) ->
       do
@@ -1551,45 +1551,6 @@ instance Storable RLBufferHint where
   poke ptr v = poke (castPtr ptr) (fromIntegral (fromEnum v) :: CInt)
 
 ------------------------------------------------
--- Raylib typeclasses --------------------------
-------------------------------------------------
-
-class Vector a where
-  -- List representation of the vector
-  asList :: a -> [Float]
-
-  -- Vector-vector addition
-  (|+|) :: a -> a -> a
-
-  -- Vector-vector subtraction
-  (|-|) :: a -> a -> a
-  v1 |-| v2 = v1 |+| inverse v2
-
-  -- Vector-scalar multiplication
-  (|*|) :: a -> Float -> a
-
-  -- Vector-scalar division
-  (|/|) :: a -> Float -> a
-  v |/| num = v |*| (1 / num)
-
-  -- Vector-vector dot product
-  (|.|) :: a -> a -> Float
-
-  -- Zero vector
-  zero :: a
-
-  -- Vector additive inverse
-  inverse :: a -> a
-
-  -- Normalize vector (same direction, magnitude 1)
-  normalize :: a -> a
-  normalize v = v |/| magnitude v
-
-  -- Vector magnitude
-  magnitude :: a -> Float
-  magnitude x = sqrt $ x |.| x
-
-------------------------------------------------
 -- Raylib structures ---------------------------
 ------------------------------------------------
 
@@ -1613,17 +1574,6 @@ instance Storable Vector2 where
     pokeByteOff _p 4 (realToFrac y :: CFloat)
     return ()
 
-instance Vector Vector2 where
-  asList (Vector2 x y) = [x, y]
-
-  (Vector2 x1 y1) |+| (Vector2 x2 y2) = Vector2 (x1 + x2) (y1 + y2)
-  (Vector2 x y) |*| num = Vector2 (x * num) (y * num)
-
-  (Vector2 x1 y1) |.| (Vector2 x2 y2) = (x1 * x2) + (y1 * y2)
-
-  zero = Vector2 0 0
-  inverse (Vector2 x y) = Vector2 (- x) (- y)
-
 data Vector3 = Vector3
   { vector3'x :: Float,
     vector3'y :: Float,
@@ -1644,21 +1594,6 @@ instance Storable Vector3 where
     pokeByteOff _p 4 (realToFrac y :: CFloat)
     pokeByteOff _p 8 (realToFrac z :: CFloat)
     return ()
-
--- Vector cross-product
-cross :: Vector3 -> Vector3 -> Vector3
-(Vector3 x1 y1 z1) `cross` (Vector3 x2 y2 z2) = Vector3 (y1 * z2 - z1 * y2) (z1 * x2 - x1 * z2) (x1 * y2 - y1 * x2)
-
-instance Vector Vector3 where
-  asList (Vector3 x y z) = [x, y, z]
-
-  (Vector3 x1 y1 z1) |+| (Vector3 x2 y2 z2) = Vector3 (x1 + x2) (y1 + y2) (z1 + z2)
-  (Vector3 x y z) |*| num = Vector3 (x * num) (y * num) (z * num)
-
-  (Vector3 x1 y1 z1) |.| (Vector3 x2 y2 z2) = (x1 * x2) + (y1 * y2) + (z1 * z2)
-
-  zero = Vector3 0 0 0
-  inverse (Vector3 x y z) = Vector3 (- x) (- y) (- z)
 
 data Vector4 = Vector4
   { vector4'x :: Float,
@@ -1683,17 +1618,6 @@ instance Storable Vector4 where
     pokeByteOff _p 8 (realToFrac z :: CFloat)
     pokeByteOff _p 12 (realToFrac w :: CFloat)
     return ()
-
-instance Vector Vector4 where
-  asList (Vector4 x y z w) = [x, y, z, w]
-
-  (Vector4 x1 y1 z1 w1) |+| (Vector4 x2 y2 z2 w2) = Vector4 (x1 + x2) (y1 + y2) (z1 + z2) (w1 + w2)
-  (Vector4 x y z w) |*| num = Vector4 (x * num) (y * num) (z * num) (w * num)
-
-  (Vector4 x1 y1 z1 w1) |.| (Vector4 x2 y2 z2 w2) = (x1 * x2) + (y1 * y2) + (z1 * z2) + (w1 * w2)
-
-  zero = Vector4 0 0 0 0
-  inverse (Vector4 x y z w) = Vector4 (- x) (- y) (- z) (- w)
 
 type Quaternion = Vector4
 

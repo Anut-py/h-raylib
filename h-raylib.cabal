@@ -153,7 +153,9 @@ library
     Raylib.Core.Textures
     Raylib.Types
     Raylib.Util
+    Raylib.Util.Camera
     Raylib.Util.Colors
+    Raylib.Util.Math
     Raylib.Util.RLGL
 
   other-modules:
