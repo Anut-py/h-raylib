@@ -1,5 +1,11 @@
 # h-raylib changelog
 
+## Version 4.6.0.2
+_8 April, 2023_
+
+- Fixed a bug in `clamp`
+- Updated raylib to the master branch
+
 ## Version 4.6.0.1
 _2 April, 2023_
 
