@@ -111,7 +111,7 @@ clamp ::
 clamp value low high
   | value < low = low
   | value > high = high
-  | otherwise = 0
+  | otherwise = value
 
 -- | Calculate linear interpolation between two floats
 lerp ::

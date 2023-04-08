@@ -139,7 +139,7 @@ cameraPitch cam angle lockView rotateAroundTarget rotateUp =
   where
     angle' = if not lockView then angle else clamp angle maxAngleDown maxAngleUp
     maxAngleUp = vector3Angle up viewVec - 0.001
-    maxAngleDown = (- vector3Angle (additiveInverse up) viewVec) - 0.001
+    maxAngleDown = (- vector3Angle (additiveInverse up) viewVec) + 0.001
 
     viewVec = target |-| pos
     viewRot = vector3RotateByAxisAngle viewVec right angle'
