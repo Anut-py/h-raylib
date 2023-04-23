@@ -155,6 +155,7 @@ library
     Raylib.Util
     Raylib.Util.Camera
     Raylib.Util.Colors
+    Raylib.Util.Lenses
     Raylib.Util.Math
     Raylib.Util.RLGL
 
@@ -166,6 +167,7 @@ library
   build-depends:
     , base        >=4.0   && <4.17.0
     , containers  >=0.6.0 && <0.6.7.0
+    , lens        >=4.0   && <=5.2.2
 
   hs-source-dirs:   src
   default-language: Haskell2010
