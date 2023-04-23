@@ -1,5 +1,14 @@
 # h-raylib changelog
 
+## Version 4.6.0.3
+_23 April, 2023_
+
+- Updated raylib to the master branch
+
+\[[#18](https://github.com/Anut-py/h-raylib/pull/18)\]
+
+- Added lenses for raylib data structures
+
 ## Version 4.6.0.2
 _8 April, 2023_
 
