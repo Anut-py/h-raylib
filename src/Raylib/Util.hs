@@ -4,6 +4,7 @@
 module Raylib.Util (WindowResources, cameraDirectionRay, whileWindowOpen, whileWindowOpen_, whileWindowOpen0, setMaterialShader, inGHCi, Freeable (..)) where
 
 import Control.Monad (void)
+import Control.Monad.IO.Class (MonadIO (liftIO))
 import Raylib.Core (windowShouldClose)
 import Raylib.ForeignUtil (Freeable (..))
 import Raylib.Internal (WindowResources)
@@ -24,30 +25,33 @@ cameraDirectionRay camera = Ray (camera3D'position camera) (vectorNormalize $ ca
 --  For larger projects, instead of using this function, consider
 --  making a custom game loop for flexibility.
 whileWindowOpen ::
+  (MonadIO m) =>
   -- | The game loop. Its only argument should be the current application state, and it should return a new state.
-  (a -> IO a) ->
+  (a -> m a) ->
   -- | The initial application state.
   a ->
   -- | The application state after the last frame.
-  IO a
+  m a
 whileWindowOpen f state = do
   newState <- f state
-  shouldClose <- windowShouldClose
+  shouldClose <- liftIO windowShouldClose
   if shouldClose
     then return newState
     else whileWindowOpen f newState
 
 -- | Same as `whileWindowOpen`, but discards the final state.
 whileWindowOpen_ ::
-  (a -> IO a) ->
+  (MonadIO m) =>
+  (a -> m a) ->
   a ->
-  IO ()
+  m ()
 whileWindowOpen_ f state = void (whileWindowOpen f state)
 
 -- | Same as `whileWindowOpen`, but without application state.
 whileWindowOpen0 ::
-  IO () ->
-  IO ()
+  (MonadIO m) =>
+  m () ->
+  m ()
 whileWindowOpen0 f = whileWindowOpen (const f) ()
 
 -- | Sets the shader of a material at a specific index (WARNING: This will fail
