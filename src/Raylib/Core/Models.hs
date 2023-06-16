@@ -12,7 +12,7 @@ import Foreign
     peekArray,
     toBool,
   )
-import Foreign.C (CFloat, withCString)
+import Foreign.C (withCString)
 import GHC.IO (unsafePerformIO)
 import Raylib.ForeignUtil
   ( c'free,
@@ -159,10 +159,10 @@ drawCylinderWires position radiusTop radiusBottom height slices color = withFree
 drawCylinderWiresEx :: Vector3 -> Vector3 -> Float -> Float -> Int -> Color -> IO ()
 drawCylinderWiresEx start end startRadius endRadius sides color = withFreeable start (\s -> withFreeable end (\e -> withFreeable color (c'drawCylinderWiresEx s e (realToFrac startRadius) (realToFrac endRadius) (fromIntegral sides))))
 
-drawCapsule :: Vector3 -> Vector3 -> CFloat -> Int -> Int -> Color -> IO ()
+drawCapsule :: Vector3 -> Vector3 -> Float -> Int -> Int -> Color -> IO ()
 drawCapsule start end radius slices rings color = withFreeable start (\s -> withFreeable end (\e -> withFreeable color (c'drawCapsule s e (realToFrac radius) (fromIntegral slices) (fromIntegral rings))))
 
-drawCapsuleWires :: Vector3 -> Vector3 -> CFloat -> Int -> Int -> Color -> IO ()
+drawCapsuleWires :: Vector3 -> Vector3 -> Float -> Int -> Int -> Color -> IO ()
 drawCapsuleWires start end radius slices rings color = withFreeable start (\s -> withFreeable end (\e -> withFreeable color (c'drawCapsuleWires s e (realToFrac radius) (fromIntegral slices) (fromIntegral rings))))
 
 drawPlane :: Vector3 -> Vector2 -> Color -> IO ()
