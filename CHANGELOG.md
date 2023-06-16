@@ -1,5 +1,18 @@
 # h-raylib changelog
 
+## Version 4.6.0.4
+_16 June, 2023_
+
+- Updated raylib to the master branch
+
+\[[#19](https://github.com/Anut-py/h-raylib/pull/19)\]
+
+- Changed all the `Raylib.Util` functions to use `MonadIO` for flexibility
+
+\[[#20](https://github.com/Anut-py/h-raylib/pull/20)\]
+
+- Changed `CFloat` to `Float` in `drawCapsule` and `drawCapsuleWires`
+
 ## Version 4.6.0.3
 _23 April, 2023_
 
