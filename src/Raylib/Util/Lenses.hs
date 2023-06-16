@@ -457,21 +457,25 @@ _model'bindPose f model =
 
 
 _modelAnimation'boneCount :: Lens' RL.ModelAnimation Int
-_modelAnimation'boneCount f (RL.ModelAnimation boneCount frameCount bones framePoses) =
-    (\boneCount' -> RL.ModelAnimation boneCount' frameCount bones framePoses) <$> f boneCount
+_modelAnimation'boneCount f (RL.ModelAnimation boneCount frameCount bones framePoses name) =
+    (\boneCount' -> RL.ModelAnimation boneCount' frameCount bones framePoses name) <$> f boneCount
 {-# INLINE _modelAnimation'boneCount #-}
 _modelAnimation'frameCount :: Lens' RL.ModelAnimation Int
-_modelAnimation'frameCount f (RL.ModelAnimation boneCount frameCount bones framePoses) =
-    (\frameCount' -> RL.ModelAnimation boneCount frameCount' bones framePoses) <$> f frameCount
+_modelAnimation'frameCount f (RL.ModelAnimation boneCount frameCount bones framePoses name) =
+    (\frameCount' -> RL.ModelAnimation boneCount frameCount' bones framePoses name) <$> f frameCount
 {-# INLINE _modelAnimation'frameCount #-}
 _modelAnimation'bones :: Lens' RL.ModelAnimation [RL.BoneInfo]
-_modelAnimation'bones f (RL.ModelAnimation boneCount frameCount bones framePoses) =
-    (\bones' -> RL.ModelAnimation boneCount frameCount bones' framePoses) <$> f bones
+_modelAnimation'bones f (RL.ModelAnimation boneCount frameCount bones framePoses name) =
+    (\bones' -> RL.ModelAnimation boneCount frameCount bones' framePoses name) <$> f bones
 {-# INLINE _modelAnimation'bones #-}
 _modelAnimation'framePoses :: Lens' RL.ModelAnimation [[RL.Transform]]
-_modelAnimation'framePoses f (RL.ModelAnimation boneCount frameCount bones framePoses) =
-    (\framePoses' -> RL.ModelAnimation boneCount frameCount bones framePoses') <$> f framePoses
+_modelAnimation'framePoses f (RL.ModelAnimation boneCount frameCount bones framePoses name) =
+    (\framePoses' -> RL.ModelAnimation boneCount frameCount bones framePoses' name) <$> f framePoses
 {-# INLINE _modelAnimation'framePoses #-}
+_modelAnimation'name :: Lens' RL.ModelAnimation String
+_modelAnimation'name f (RL.ModelAnimation boneCount frameCount bones framePoses name) =
+    (\name' -> RL.ModelAnimation boneCount frameCount bones framePoses name') <$> f name
+{-# INLINE _modelAnimation'name #-}
 
 
 _ray'position :: Lens' RL.Ray RL.Vector3

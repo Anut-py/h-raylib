@@ -760,15 +760,17 @@ foreign import ccall safe "rl_bindings.h UnloadImage_" c'unloadImage :: Ptr Imag
 
 foreign import ccall safe "rl_bindings.h ExportImage_" c'exportImage :: Ptr Image -> CString -> IO CBool
 
+foreign import ccall safe "rl_bindings.h ExportImageToMemory_" c'exportImageToMemory :: Ptr Image -> CString -> Ptr CInt -> IO (Ptr CUChar)
+
 foreign import ccall safe "rl_bindings.h ExportImageAsCode_" c'exportImageAsCode :: Ptr Image -> CString -> IO CBool
 
 foreign import ccall safe "rl_bindings.h GenImageColor_" c'genImageColor :: CInt -> CInt -> Ptr Color -> IO (Ptr Image)
 
-foreign import ccall safe "rl_bindings.h GenImageGradientV_" c'genImageGradientV :: CInt -> CInt -> Ptr Color -> Ptr Color -> IO (Ptr Image)
-
-foreign import ccall safe "rl_bindings.h GenImageGradientH_" c'genImageGradientH :: CInt -> CInt -> Ptr Color -> Ptr Color -> IO (Ptr Image)
+foreign import ccall safe "rl_bindings.h GenImageGradientLinear_" c'genImageGradientLinear :: CInt -> CInt -> CInt -> Ptr Color -> Ptr Color -> IO (Ptr Image)
 
 foreign import ccall safe "rl_bindings.h GenImageGradientRadial_" c'genImageGradientRadial :: CInt -> CInt -> CFloat -> Ptr Color -> Ptr Color -> IO (Ptr Image)
+
+foreign import ccall safe "rl_bindings.h GenImageGradientSquare_" c'genImageGradientSquare :: CInt -> CInt -> CFloat -> Ptr Color -> Ptr Color -> IO (Ptr Image)
 
 foreign import ccall safe "rl_bindings.h GenImageChecked_" c'genImageChecked :: CInt -> CInt -> CInt -> CInt -> Ptr Color -> Ptr Color -> IO (Ptr Image)
 
@@ -837,6 +839,10 @@ foreign import ccall safe "raylib.h ImageFlipVertical"
 foreign import ccall safe "raylib.h ImageFlipHorizontal"
   c'imageFlipHorizontal ::
     Ptr Image -> IO ()
+
+foreign import ccall safe "raylib.h ImageRotate"
+  c'imageRotate ::
+    Ptr Image -> CInt -> IO ()
 
 foreign import ccall safe "raylib.h ImageRotateCW"
   c'imageRotateCW ::

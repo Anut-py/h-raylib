@@ -3,12 +3,13 @@
 module Raylib.Core.Textures where
 
 import Control.Monad ((<=<))
+import Data.Word (Word8)
 import Foreign
   ( Ptr,
     Storable (peek, sizeOf),
     toBool,
   )
-import Foreign.C (CUChar, withCString)
+import Foreign.C (CUChar (CUChar), withCString)
 import GHC.IO (unsafePerformIO)
 import Raylib.ForeignUtil
   ( pop,
@@ -16,7 +17,7 @@ import Raylib.ForeignUtil
     withFreeable,
     withFreeableArrayLen,
   )
-import Raylib.Internal (addFrameBuffer, addTextureId, unloadSingleFrameBuffer, unloadSingleTexture, WindowResources)
+import Raylib.Internal (WindowResources, addFrameBuffer, addTextureId, unloadSingleFrameBuffer, unloadSingleTexture)
 import Raylib.Native
   ( c'colorAlpha,
     c'colorAlphaBlend,
@@ -36,13 +37,14 @@ import Raylib.Native
     c'drawTextureV,
     c'exportImage,
     c'exportImageAsCode,
+    c'exportImageToMemory,
     c'fade,
     c'genImageCellular,
     c'genImageChecked,
     c'genImageColor,
-    c'genImageGradientH,
+    c'genImageGradientLinear,
     c'genImageGradientRadial,
-    c'genImageGradientV,
+    c'genImageGradientSquare,
     c'genImagePerlinNoise,
     c'genImageText,
     c'genImageWhiteNoise,
@@ -89,6 +91,7 @@ import Raylib.Native
     c'imageResize,
     c'imageResizeCanvas,
     c'imageResizeNN,
+    c'imageRotate,
     c'imageRotateCCW,
     c'imageRotateCW,
     c'imageText,
@@ -170,6 +173,24 @@ isImageReady image = toBool <$> withFreeable image c'isImageReady
 exportImage :: Image -> String -> IO Bool
 exportImage image fileName = toBool <$> withFreeable image (withCString fileName . c'exportImage)
 
+exportImageToMemory :: Image -> String -> IO [Word8]
+exportImageToMemory image fileType =
+  withFreeable
+    image
+    ( \i ->
+        withCString
+          fileType
+          ( \t ->
+              withFreeable
+                0
+                ( \s -> do
+                    bytes <- c'exportImageToMemory i t s
+                    size <- fromIntegral <$> peek s
+                    map (\(CUChar x) -> x) <$> popCArray size bytes
+                )
+          )
+    )
+
 exportImageAsCode :: Image -> String -> IO Bool
 exportImageAsCode image fileName =
   toBool <$> withFreeable image (withCString fileName . c'exportImageAsCode)
@@ -178,17 +199,17 @@ genImageColor :: Int -> Int -> Color -> IO Image
 genImageColor width height color =
   withFreeable color (c'genImageColor (fromIntegral width) (fromIntegral height)) >>= pop
 
-genImageGradientV :: Int -> Int -> Color -> Color -> IO Image
-genImageGradientV width height top bottom =
-  withFreeable top (withFreeable bottom . c'genImageGradientV (fromIntegral width) (fromIntegral height)) >>= pop
-
-genImageGradientH :: Int -> Int -> Color -> Color -> IO Image
-genImageGradientH width height left right =
-  withFreeable left (withFreeable right . c'genImageGradientH (fromIntegral width) (fromIntegral height)) >>= pop
+genImageGradientLinear :: Int -> Int -> Int -> Color -> Color -> IO Image
+genImageGradientLinear width height direction start end =
+  withFreeable start (withFreeable end . c'genImageGradientLinear (fromIntegral width) (fromIntegral height) (fromIntegral direction)) >>= pop
 
 genImageGradientRadial :: Int -> Int -> Float -> Color -> Color -> IO Image
 genImageGradientRadial width height density inner outer =
   withFreeable inner (withFreeable outer . c'genImageGradientRadial (fromIntegral width) (fromIntegral height) (realToFrac density)) >>= pop
+
+genImageGradientSquare :: Int -> Int -> Float -> Color -> Color -> IO Image
+genImageGradientSquare width height density inner outer =
+  withFreeable inner (withFreeable outer . c'genImageGradientSquare (fromIntegral width) (fromIntegral height) (realToFrac density)) >>= pop
 
 genImageChecked :: Int -> Int -> Int -> Int -> Color -> Color -> IO Image
 genImageChecked width height checksX checksY col1 col2 =
@@ -268,6 +289,9 @@ imageFlipVertical image = withFreeable image (\i -> c'imageFlipVertical i >> pee
 
 imageFlipHorizontal :: Image -> IO Image
 imageFlipHorizontal image = withFreeable image (\i -> c'imageFlipHorizontal i >> peek i)
+
+imageRotate :: Image -> Int -> IO Image
+imageRotate image degrees = withFreeable image (\i -> c'imageRotate i (fromIntegral degrees) >> peek i)
 
 imageRotateCW :: Image -> IO Image
 imageRotateCW image = withFreeable image (\i -> c'imageRotateCW i >> peek i)

@@ -2251,12 +2251,13 @@ data ModelAnimation = ModelAnimation
   { modelAnimation'boneCount :: Int,
     modelAnimation'frameCount :: Int,
     modelAnimation'bones :: [BoneInfo],
-    modelAnimation'framePoses :: [[Transform]]
+    modelAnimation'framePoses :: [[Transform]],
+    modelAnimation'name :: String
   }
   deriving (Eq, Show)
 
 instance Storable ModelAnimation where
-  sizeOf _ = 24
+  sizeOf _ = 56
   alignment _ = 4
   peek _p = do
     boneCount <- fromIntegral <$> (peekByteOff _p 0 :: IO CInt)
@@ -2266,12 +2267,14 @@ instance Storable ModelAnimation where
     framePosesPtr <- (peekByteOff _p 16 :: IO (Ptr (Ptr Transform)))
     framePosesPtrArr <- peekArray frameCount framePosesPtr
     framePoses <- mapM (peekArray boneCount) framePosesPtrArr
-    return $ ModelAnimation boneCount frameCount bones framePoses
-  poke _p (ModelAnimation boneCount frameCount bones framePoses) = do
+    name <- map castCCharToChar <$> peekStaticArrayOff 32 (castPtr _p) 24
+    return $ ModelAnimation boneCount frameCount bones framePoses name
+  poke _p (ModelAnimation boneCount frameCount bones framePoses name) = do
     pokeByteOff _p 0 (fromIntegral boneCount :: CInt)
     pokeByteOff _p 4 (fromIntegral frameCount :: CInt)
     pokeByteOff _p 8 =<< newArray bones
     mapM newArray framePoses >>= newArray >>= pokeByteOff _p 16
+    pokeStaticArrayOff (castPtr _p) 24 (map castCharToCChar name)
     return ()
 
 instance Freeable ModelAnimation where

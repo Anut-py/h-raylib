@@ -547,6 +547,11 @@ int ExportImage_(Image *a, char *b)
     return ExportImage(*a, b);
 }
 
+unsigned char *ExportImageToMemory_(Image *a, char *fileType, int *fileSize)
+{
+    return ExportImageToMemory(*a, fileType, fileSize);
+}
+
 int ExportImageAsCode_(Image *a, char *b)
 {
     return ExportImageAsCode(*a, b);
@@ -559,17 +564,10 @@ Image *GenImageColor_(int a, int b, Color *c)
     return ptr;
 }
 
-Image *GenImageGradientV_(int a, int b, Color *c, Color *d)
+Image *GenImageGradientLinear_(int a, int b, int c, Color *d, Color *e)
 {
     Image *ptr = (Image *)malloc(sizeof(Image));
-    *ptr = GenImageGradientV(a, b, *c, *d);
-    return ptr;
-}
-
-Image *GenImageGradientH_(int a, int b, Color *c, Color *d)
-{
-    Image *ptr = (Image *)malloc(sizeof(Image));
-    *ptr = GenImageGradientH(a, b, *c, *d);
+    *ptr = GenImageGradientLinear(a, b, c, *d, *e);
     return ptr;
 }
 
@@ -577,6 +575,13 @@ Image *GenImageGradientRadial_(int a, int b, float c, Color *d, Color *e)
 {
     Image *ptr = (Image *)malloc(sizeof(Image));
     *ptr = GenImageGradientRadial(a, b, c, *d, *e);
+    return ptr;
+}
+
+Image *GenImageGradientSquare_(int a, int b, float c, Color *d, Color *e)
+{
+    Image *ptr = (Image *)malloc(sizeof(Image));
+    *ptr = GenImageGradientSquare(a, b, c, *d, *e);
     return ptr;
 }
 

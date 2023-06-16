@@ -204,15 +204,17 @@ void UnloadImage_(Image *a);
 
 int ExportImage_(Image *a, char *b);
 
+unsigned char *ExportImageToMemory_(Image *a, char *fileType, int *fileSize);
+
 int ExportImageAsCode_(Image *a, char *b);
 
 Image *GenImageColor_(int a, int b, Color *c);
 
-Image *GenImageGradientV_(int a, int b, Color *c, Color *d);
-
-Image *GenImageGradientH_(int a, int b, Color *c, Color *d);
+Image *GenImageGradientLinear_(int a, int b, int c, Color *d, Color *e);
 
 Image *GenImageGradientRadial_(int a, int b, float c, Color *d, Color *e);
+
+Image *GenImageGradientSquare_(int a, int b, float c, Color *d, Color *e);
 
 Image *GenImageChecked_(int a, int b, int c, int d, Color *e, Color *f);
 
