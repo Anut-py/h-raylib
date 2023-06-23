@@ -27,7 +27,9 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-
+        with:
+          submodules: recursive
+          
       - name: Set up GHC ${{ matrix.ghc-version }}
         uses: haskell/actions/setup@v2
         id: setup
