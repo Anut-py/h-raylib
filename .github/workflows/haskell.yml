@@ -1,6 +1,10 @@
 name: build
 
-on: [push, pull_request]
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
 
 permissions:
   contents: read
@@ -36,7 +40,12 @@ jobs:
       - name: Install dependencies on ubuntu
         if: startsWith(matrix.config.os, 'ubuntu')
         run: |
-          sudo apt install xorg
+          sudo apt install -y x11proto-xext-dev
+          
+      - name: Install dependencies on windows
+        if: startsWith(matrix.config.os, 'windows')
+        run: |
+          choco install mingw
           
       - name: Configure the build
         run: |
