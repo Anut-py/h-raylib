@@ -20,9 +20,9 @@ jobs:
 
         include:
           - os: windows-latest
-            ghc-version: '9.6'
+            ghc-version: '9.2'
           - os: macos-latest
-            ghc-version: '9.6'
+            ghc-version: '9.2'
 
     steps:
       - uses: actions/checkout@v3
@@ -35,7 +35,12 @@ jobs:
           # Defaults, added for clarity:
           cabal-version: 'latest'
           cabal-update: true
-
+          
+      - name: Install dependencies on ubuntu
+        if: startsWith(matrix.config.os, 'ubuntu')
+        run: |
+          sudo apt install xorg
+          
       - name: Configure the build
         run: |
           cabal configure --enable-tests --enable-benchmarks --disable-documentation
