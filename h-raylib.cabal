@@ -17,7 +17,6 @@ extra-doc-files:
   ROADMAP.md
 
 extra-source-files:
-  CHANGELOG.md
   examples/**/*.frag
   examples/**/*.mtl
   examples/**/*.obj
@@ -29,6 +28,9 @@ extra-source-files:
   raylib/**/*.c
   raylib/**/*.h
   raylib/**/*.m
+
+extra-doc-files:
+  CHANGELOG.md
 
 flag detect-platform
   description:
