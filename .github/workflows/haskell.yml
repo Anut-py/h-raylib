@@ -1,9 +1,6 @@
 name: build
-on:
-  push:
-    branches: [main, master]
-  pull_request:
-    branches: [main, master]
+
+on: [push, pull_request]
 
 permissions:
   contents: read
