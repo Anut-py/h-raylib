@@ -6,6 +6,10 @@ category:           graphics
 description:
   This library contains Haskell bindings to the Raylib library. It supports Windows, Mac, Linux, and BSD.
 
+source-repository head
+  type:     git
+  location: git://github.com/Anut-py/h-raylib.git
+
 bug-reports:        https://github.com/Anut-py/h-raylib/issues
 license:            Apache-2.0
 license-file:       LICENSE
@@ -15,6 +19,7 @@ extra-doc-files:
   CONTRIBUTING.md
   README.md
   ROADMAP.md
+  CHANGELOG.md
 
 extra-source-files:
   examples/**/*.frag
@@ -28,9 +33,6 @@ extra-source-files:
   raylib/**/*.c
   raylib/**/*.h
   raylib/**/*.m
-
-extra-doc-files:
-  CHANGELOG.md
 
 flag detect-platform
   description:
