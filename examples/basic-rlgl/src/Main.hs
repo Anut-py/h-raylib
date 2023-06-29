@@ -2,11 +2,11 @@
 module Main where
 
 import Control.Monad (unless, void)
-import Raylib.Core (beginDrawing, beginMode3D, changeDirectory, clearBackground, closeWindow, endDrawing, endMode3D, getApplicationDirectory, initWindow, setTargetFPS)
+import Raylib.Core (changeDirectory, clearBackground, closeWindow, getApplicationDirectory)
 import Raylib.Core.Models (drawGrid)
 import Raylib.Core.Textures (loadTexture)
 import Raylib.Types (Camera3D (Camera3D), CameraProjection (CameraPerspective), Color (Color), RLDrawMode (RLQuads), Rectangle (Rectangle), Texture (texture'height, texture'id, texture'width), Vector3 (Vector3))
-import Raylib.Util (inGHCi, whileWindowOpen0)
+import Raylib.Util (drawing, inGHCi, mode3D, whileWindowOpen0, withWindow)
 import Raylib.Util.Colors (rayWhite, white)
 import Raylib.Util.RLGL (rlBegin, rlColor4ub, rlEnd, rlNormal3f, rlPopMatrix, rlPushMatrix, rlRotatef, rlScalef, rlSetTexture, rlTexCoord2f, rlTranslatef, rlVertex3f)
 import Prelude hiding (length)
@@ -16,38 +16,41 @@ texturePath = (if not inGHCi then "../../../../../../../../../" else "./") ++ "e
 
 main :: IO ()
 main = do
-  window <- initWindow 650 400 "raylib [rlgl] example - basic rlgl"
-  setTargetFPS 60
-  unless inGHCi (void $ changeDirectory =<< getApplicationDirectory)
+  withWindow
+    650
+    400
+    "raylib [rlgl] example - basic rlgl"
+    60
+    ( \window -> do
+        unless inGHCi (void $ changeDirectory =<< getApplicationDirectory)
 
-  let camera = Camera3D (Vector3 0 10 10) (Vector3 0 0 0) (Vector3 0 1 0) 45 CameraPerspective
+        let camera = Camera3D (Vector3 0 10 10) (Vector3 0 0 0) (Vector3 0 1 0) 45 CameraPerspective
 
-  texture <- loadTexture texturePath window
+        texture <- loadTexture texturePath window
 
-  whileWindowOpen0
-    ( do
-        beginDrawing
-        clearBackground rayWhite
+        whileWindowOpen0
+          ( drawing
+              ( do
+                  clearBackground rayWhite
+                  mode3D
+                    camera
+                    ( do
+                        drawCubeTexture texture (Vector3 (-2) 2 0) 2 4 2 white
+                        drawCubeTextureRec
+                          texture
+                          (Rectangle 0 (fromIntegral (texture'height texture) / 2.0) (fromIntegral (texture'width texture) / 2.0) (fromIntegral (texture'height texture) / 2.0))
+                          (Vector3 2 1 0)
+                          2
+                          2
+                          2
+                          white
+                        drawGrid 10 1
+                    )
+              )
+          )
 
-        beginMode3D camera
-
-        drawCubeTexture texture (Vector3 (-2) 2 0) 2 4 2 white
-        drawCubeTextureRec
-          texture
-          (Rectangle 0 (fromIntegral (texture'height texture) / 2.0) (fromIntegral (texture'width texture) / 2.0) (fromIntegral (texture'height texture) / 2.0))
-          (Vector3 2 1 0)
-          2
-          2
-          2
-          white
-        drawGrid 10 1
-
-        endMode3D
-
-        endDrawing
+        closeWindow window
     )
-
-  closeWindow window
 
 drawCubeTexture :: Texture -> Vector3 -> Float -> Float -> Float -> Color -> IO ()
 drawCubeTexture texture (Vector3 x y z) width height length (Color r g b a) = do

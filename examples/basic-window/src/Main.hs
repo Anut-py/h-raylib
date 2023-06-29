@@ -1,31 +1,24 @@
 {-# OPTIONS -Wall #-}
 module Main where
 
-import Raylib.Core
-  ( beginDrawing,
-    clearBackground,
-    closeWindow,
-    endDrawing,
-    initWindow,
-    setTargetFPS,
-  )
+import Raylib.Core (clearBackground)
 import Raylib.Core.Text (drawText)
-import Raylib.Util (whileWindowOpen0)
+import Raylib.Util (drawing, whileWindowOpen0, withWindow)
 import Raylib.Util.Colors (lightGray, rayWhite)
 
 main :: IO ()
 main = do
-  window <- initWindow 600 450 "raylib [core] example - basic window"
-  setTargetFPS 60
-
-  whileWindowOpen0
-    ( do
-        beginDrawing
-
-        clearBackground rayWhite
-        drawText "Basic raylib window" 30 40 18 lightGray
-
-        endDrawing
+  withWindow
+    600
+    450
+    "raylib [core] example - basic window"
+    60
+    ( \_ -> do
+        whileWindowOpen0
+          ( drawing
+              ( do
+                  clearBackground rayWhite
+                  drawText "Basic raylib window" 30 40 18 lightGray
+              )
+          )
     )
-
-  closeWindow window
