@@ -1,5 +1,10 @@
 # h-raylib changelog
 
+## Version 4.6.0.6
+_24 July, 2023_
+
+- Updated raylib to the master branch
+
 ## Version 4.6.0.5
 _29 June, 2023_
 
