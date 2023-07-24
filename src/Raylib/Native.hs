@@ -1020,6 +1020,10 @@ foreign import ccall safe "rl_bindings.h DrawTextCodepoint_" c'drawTextCodepoint
 
 foreign import ccall safe "rl_bindings.h DrawTextCodepoints_" c'drawTextCodepoints :: Ptr Font -> Ptr CInt -> CInt -> Ptr Vector2 -> CFloat -> CFloat -> Ptr Color -> IO ()
 
+foreign import ccall safe "raylib.h SetTextLineSpacing"
+  c'setTextLineSpacing ::
+    CInt -> IO ()
+
 foreign import ccall safe "raylib.h MeasureText"
   c'measureText ::
     CString -> CInt -> IO CInt

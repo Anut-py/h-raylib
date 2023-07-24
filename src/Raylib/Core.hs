@@ -291,6 +291,10 @@ setWindowSize x y = c'setWindowSize (fromIntegral x) (fromIntegral y)
 setWindowOpacity :: Float -> IO ()
 setWindowOpacity opacity = c'setWindowOpacity $ realToFrac opacity
 
+foreign import ccall safe "raylib.h SetWindowFocused"
+  setWindowFocused ::
+    IO ()
+
 foreign import ccall safe "raylib.h GetWindowHandle"
   getWindowHandle ::
     IO (Ptr ())

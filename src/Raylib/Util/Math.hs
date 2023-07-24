@@ -329,11 +329,11 @@ instance Vector Vector4 where
 
 -- | Angle between two 2D vectors
 vector2Angle :: Vector2 -> Vector2 -> Float
-vector2Angle (Vector2 x1 y1) (Vector2 x2 y2) = atan2 (y2 - y1) (x2 - x1)
+vector2Angle (Vector2 x1 y1) (Vector2 x2 y2) = - atan2 (x1 * x2 + y1 * y2) (x1 * y2 - y1 * x2)
 
 -- | Angle created by the line between two 2D vectors (parameters must be normalized)
 vector2LineAngle :: Vector2 -> Vector2 -> Float
-vector2LineAngle a b = acos $ clamp (a |.| b) (-1) 1
+vector2LineAngle (Vector2 sx sy) (Vector2 ex ey) = atan2 (ey - sy) (ex - sx)
 
 -- | Transform a 2D vector by the given matrix
 vector2Transform :: Vector2 -> Matrix -> Vector2

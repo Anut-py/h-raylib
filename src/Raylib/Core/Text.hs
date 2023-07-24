@@ -47,7 +47,7 @@ import Raylib.Native
     c'loadFontFromMemory,
     c'loadUTF8,
     c'measureText,
-    c'measureTextEx,
+    c'measureTextEx, c'setTextLineSpacing
   )
 import Raylib.Types
   ( Color,
@@ -123,6 +123,9 @@ drawTextCodepoint font codepoint position fontSize tint = withFreeable font (\f 
 
 drawTextCodepoints :: Font -> [Int] -> Vector2 -> Float -> Float -> Color -> IO ()
 drawTextCodepoints font codepoints position fontSize spacing tint = withFreeable font (\f -> withFreeableArrayLen (map fromIntegral codepoints) (\count cp -> withFreeable position (\p -> withFreeable tint (c'drawTextCodepoints f cp (fromIntegral count) p (realToFrac fontSize) (realToFrac spacing)))))
+
+setTextLineSpacing :: Int -> IO ()
+setTextLineSpacing = c'setTextLineSpacing . fromIntegral
 
 measureText :: String -> Int -> IO Int
 measureText text fontSize = fromIntegral <$> withCString text (\t -> c'measureText t (fromIntegral fontSize))
