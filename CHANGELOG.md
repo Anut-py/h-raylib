@@ -1,5 +1,16 @@
 # h-raylib changelog
 
+## Version 4.6.0.5
+_29 June, 2023_
+
+\[[#22](https://github.com/Anut-py/h-raylib/pull/22)\]
+
+- Allowed `base-4.18` to support GHC 9.4 and higher
+
+\[[#23](https://github.com/Anut-py/h-raylib/pull/23)\]
+
+- Added helper functions in `Raylib.Util` as an alternative to the `begin*` and `end*` functions
+
 ## Version 4.6.0.4
 _16 June, 2023_
 
