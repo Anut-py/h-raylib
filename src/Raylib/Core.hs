@@ -170,7 +170,7 @@ import Raylib.Native
     c'takeScreenshot,
     c'traceLog,
     c'waitTime,
-    c'windowShouldClose,
+    c'windowShouldClose, c'isKeyPressedRepeat,
   )
 import Raylib.Types
   ( BlendMode,
@@ -253,6 +253,10 @@ clearWindowState = c'clearWindowState . fromIntegral . configsToBitflag
 
 foreign import ccall safe "raylib.h ToggleFullscreen"
   toggleFullscreen ::
+    IO ()
+
+foreign import ccall safe "raylib.h ToggleBorderlessWindowed"
+  toggleBorderlessWindowed ::
     IO ()
 
 foreign import ccall safe "raylib.h MaximizeWindow"
@@ -744,6 +748,9 @@ decodeDataBase64 encodedData = do
 
 isKeyPressed :: KeyboardKey -> IO Bool
 isKeyPressed key = toBool <$> c'isKeyPressed (fromIntegral $ fromEnum key)
+
+isKeyPressedRepeat :: KeyboardKey -> IO Bool
+isKeyPressedRepeat key = toBool <$> c'isKeyPressedRepeat (fromIntegral $ fromEnum key)
 
 isKeyDown :: KeyboardKey -> IO Bool
 isKeyDown key = toBool <$> c'isKeyDown (fromIntegral $ fromEnum key)

@@ -1,7 +1,7 @@
 {-# OPTIONS -Wall #-}
 {-# LANGUAGE ForeignFunctionInterface #-}
 
-module Raylib.Internal (WindowResources(..), defaultWindowResources, unloadSingleShader, unloadSingleTexture, unloadSingleFrameBuffer, unloadSingleVaoId, unloadSingleVboIdList, unloadSingleCtxDataPtr, unloadSingleAudioBuffer, unloadShaders, unloadTextures, unloadFrameBuffers, unloadVaoIds, unloadVboIds, unloadCtxData, unloadAudioBuffers, addShaderId, addTextureId, addFrameBuffer, addVaoId, addVboIds, addCtxData, addAudioBuffer, c'rlGetShaderIdDefault, getPixelDataSize) where
+module Raylib.Internal (WindowResources(..), defaultWindowResources, unloadSingleShader, unloadSingleTexture, unloadSingleFrameBuffer, unloadSingleVaoId, unloadSingleVboIdList, unloadSingleCtxDataPtr, unloadSingleAudioBuffer, unloadSingleAudioBufferAlias, unloadShaders, unloadTextures, unloadFrameBuffers, unloadVaoIds, unloadVboIds, unloadCtxData, unloadAudioBuffers, unloadAudioBufferAliases, addShaderId, addTextureId, addFrameBuffer, addVaoId, addVboIds, addCtxData, addAudioBuffer, addAudioBufferAlias, c'rlGetShaderIdDefault, getPixelDataSize) where
 
 import Control.Monad (forM_, unless, when)
 import Data.IORef (IORef, modifyIORef, readIORef, newIORef)
@@ -20,7 +20,8 @@ data WindowResources = WindowResources
     vaoIds :: IORef [CUInt],
     vboIds :: IORef [CUInt],
     ctxDataPtrs :: IORef [(CInt, Ptr ())],
-    audioBuffers :: IORef [Ptr ()]
+    audioBuffers :: IORef [Ptr ()],
+    audioBufferAliases :: IORef [Ptr ()]
   }
 
 defaultWindowResources :: IO WindowResources
@@ -33,6 +34,7 @@ defaultWindowResources = do
   vbos <- newIORef []
   cdps <- newIORef []
   aBufs <- newIORef []
+  aliases <- newIORef []
   return WindowResources {
     shaderIds = sIds,
     shaderLocations = sLocs,
@@ -41,7 +43,8 @@ defaultWindowResources = do
     vaoIds = vaos,
     vboIds = vbos,
     ctxDataPtrs = cdps,
-    audioBuffers = aBufs
+    audioBuffers = aBufs,
+    audioBufferAliases = aliases
   }
 
 unloadSingleShader :: (Integral a) => a -> WindowResources -> IO ()
@@ -96,6 +99,11 @@ unloadSingleAudioBuffer :: Ptr () -> WindowResources -> IO ()
 unloadSingleAudioBuffer buffer wr = do
   c'unloadAudioBuffer buffer
   modifyIORef (audioBuffers wr) (delete buffer)
+  
+unloadSingleAudioBufferAlias :: Ptr () -> WindowResources -> IO ()
+unloadSingleAudioBufferAlias buffer wr = do
+  c'unloadAudioBufferAlias buffer
+  modifyIORef (audioBufferAliases wr) (delete buffer)
 
 unloadShaders :: WindowResources -> IO ()
 unloadShaders wr = do
@@ -175,6 +183,17 @@ unloadAudioBuffers wr = do
         putStrLn $ "INFO: AUDIO: h-raylib successfully auto-unloaded audio buffers (" ++ show l ++ " in total)"
     )
 
+unloadAudioBufferAliases :: WindowResources -> IO ()
+unloadAudioBufferAliases wr = do
+  vals <- readIORef (audioBufferAliases wr)
+  let l = length vals
+  when
+    (l > 0)
+    ( do
+        forM_ vals c'unloadAudioBufferAlias
+        putStrLn $ "INFO: AUDIO: h-raylib successfully auto-unloaded audio buffer aliases (" ++ show l ++ " in total)"
+    )
+
 addShaderId :: (Integral a) => a -> WindowResources -> IO ()
 addShaderId sId' wr = do
   modifyIORef (shaderIds wr) (\xs -> if sId `elem` xs then xs else sId : xs)
@@ -215,6 +234,10 @@ addCtxData ctxType' ctxData wr = do
 addAudioBuffer :: Ptr () -> WindowResources -> IO ()
 addAudioBuffer buffer wr = do
   modifyIORef (audioBuffers wr) (\xs -> if buffer `elem` xs then xs else buffer : xs)
+  
+addAudioBufferAlias :: Ptr () -> WindowResources -> IO ()
+addAudioBufferAlias alias wr = do
+  modifyIORef (audioBufferAliases wr) (\xs -> if alias `elem` xs then xs else alias : xs)
 
 foreign import ccall safe "rlgl.h rlGetShaderIdDefault" c'rlGetShaderIdDefault :: IO CUInt
 
@@ -231,6 +254,8 @@ foreign import ccall safe "rlgl.h rlUnloadVertexBuffer" c'rlUnloadVertexBuffer :
 foreign import ccall safe "rl_internal.h UnloadMusicStreamData" c'unloadMusicStreamData :: CInt -> Ptr () -> IO ()
 
 foreign import ccall safe "rl_internal.h UnloadAudioBuffer_" c'unloadAudioBuffer :: Ptr () -> IO ()
+
+foreign import ccall safe "rl_internal.h UnloadAudioBufferAlias" c'unloadAudioBufferAlias :: Ptr () -> IO ()
 
 foreign import ccall safe "raylib.h GetPixelDataSize"
   c'getPixelDataSize ::

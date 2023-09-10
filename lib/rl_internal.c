@@ -11,6 +11,13 @@ void UnloadAudioBuffer_(rAudioBuffer *buffer)
     UnloadAudioBuffer(buffer);
 }
 
+void UnloadAudioBufferAlias(rAudioBuffer *alias)
+{
+    unsigned char ** dataPtr = (unsigned char **) ((char *) alias + 368); // Hack to get a pointer to alias.data (the struct definition is not in scope)
+    *dataPtr = 0; // Set alias.data to NULL so the data is not cleared
+    UnloadAudioBuffer(alias);
+}
+
 void UnloadMusicStreamData(int ctxType, void *ctxData)
 {
     Music music = {0};

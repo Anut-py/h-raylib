@@ -16,7 +16,7 @@ import Raylib.ForeignUtil
     withFreeable,
     withFreeableArrayLen,
   )
-import Raylib.Internal (addAudioBuffer, addCtxData, unloadAudioBuffers, unloadCtxData, unloadSingleAudioBuffer, unloadSingleCtxDataPtr, WindowResources)
+import Raylib.Internal (addAudioBuffer, addCtxData, unloadAudioBuffers, unloadCtxData, unloadSingleAudioBuffer, unloadSingleCtxDataPtr, WindowResources, addAudioBufferAlias, unloadSingleAudioBufferAlias)
 import Raylib.Native
   ( c'closeAudioDevice,
     c'exportWave,
@@ -68,7 +68,7 @@ import Raylib.Native
     c'updateSound,
     c'waveCopy,
     c'waveCrop,
-    c'waveFormat,
+    c'waveFormat, c'loadSoundAlias,
   )
 import Raylib.Types
   ( AudioStream (audioStream'buffer),
@@ -99,16 +99,32 @@ loadWave fileName = withCString fileName c'loadWave >>= pop
 loadWaveFromMemory :: String -> [Integer] -> IO Wave
 loadWaveFromMemory fileType fileData = withCString fileType (\f -> withFreeableArrayLen (map fromIntegral fileData) (\size d -> c'loadWaveFromMemory f d (fromIntegral $ size * sizeOf (0 :: CUChar)))) >>= pop
 
-loadSound :: String -> IO Sound
-loadSound fileName = withCString fileName c'loadSound >>= pop
+loadSound :: String -> WindowResources -> IO Sound
+loadSound fileName wr = do
+  sound <- withCString fileName c'loadSound >>= pop
+  addAudioBuffer (castPtr (audioStream'buffer (sound'stream sound))) wr
+  return sound
 
-loadSoundFromWave :: Wave -> IO Sound
-loadSoundFromWave wave = withFreeable wave c'loadSoundFromWave >>= pop
+loadSoundFromWave :: Wave -> WindowResources -> IO Sound
+loadSoundFromWave wave wr = do
+  sound <- withFreeable wave c'loadSoundFromWave >>= pop
+  addAudioBuffer (castPtr (audioStream'buffer (sound'stream sound))) wr
+  return sound
+
+loadSoundAlias :: Sound -> WindowResources -> IO Sound
+loadSoundAlias source wr = do
+  sound <- withFreeable source c'loadSoundAlias >>= pop
+  addAudioBufferAlias (castPtr (audioStream'buffer (sound'stream sound))) wr
+  return sound
+
+-- | Unloads a sound alias from RAM
+unloadSoundAlias :: Sound -> WindowResources -> IO ()
+unloadSoundAlias sound = unloadSingleAudioBufferAlias (castPtr (audioStream'buffer (sound'stream sound)))
 
 updateSound :: Sound -> Ptr () -> Int -> IO ()
 updateSound sound dataValue sampleCount = withFreeable sound (\s -> c'updateSound s dataValue (fromIntegral sampleCount))
 
--- | Unloads an sound from RAM. Sounds are automatically unloaded
+-- | Unloads a sound from RAM. Sounds are automatically unloaded
 -- when `closeAudioDevice` is called, so manually unloading sounds is
 -- not required. In larger projects, you may want to manually unload
 -- sounds to avoid having them in RAM for too long.

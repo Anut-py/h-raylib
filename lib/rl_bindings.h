@@ -110,6 +110,10 @@ void DrawLineBezierQuad_(Vector2 *a, Vector2 *b, Vector2 *c, float d, Color *e);
 
 void DrawLineBezierCubic_(Vector2 *a, Vector2 *b, Vector2 *c, Vector2 *d, float e, Color *f);
 
+void DrawLineBSpline_(Vector2 *a, int b, float c, Color *d);
+
+void DrawLineCatmullRom_(Vector2 *a, int b, float c, Color *d);
+
 void DrawLineStrip_(Vector2 *a, int b, Color *c);
 
 void DrawCircle_(int a, int b, float c, Color *d);
@@ -189,6 +193,8 @@ Rectangle *GetCollisionRec_(Rectangle *a, Rectangle *b);
 Image *LoadImage_(char *a);
 
 Image *LoadImageRaw_(char *a, int b, int c, int d, int e);
+
+Image *LoadImageSvg_(char *a, int b, int c);
 
 Image *LoadImageAnim_(char *a, int *b);
 
@@ -296,11 +302,11 @@ Texture *LoadTextureCubemap_(Image *a, int b);
 
 RenderTexture *LoadRenderTexture_(int a, int b);
 
-bool IsTextureReady_(Texture* a);
+bool IsTextureReady_(Texture *a);
 
 void UnloadTexture_(Texture *a);
 
-bool IsRenderTextureReady_(RenderTexture* a);
+bool IsRenderTextureReady_(RenderTexture *a);
 
 void UnloadRenderTexture_(RenderTexture *a);
 
@@ -358,7 +364,7 @@ Font *LoadFontFromMemory_(char *a, unsigned char *b, int c, int d, int *e, int f
 
 Image *GenImageFontAtlas_(GlyphInfo *a, Rectangle **b, int c, int d, int e, int f);
 
-bool IsFontReady_(Font* a);
+bool IsFontReady_(Font *a);
 
 void UnloadFont_(Font *a);
 
@@ -430,7 +436,7 @@ Model *LoadModel_(char *a);
 
 Model *LoadModelFromMesh_(Mesh *a);
 
-bool IsModelReady_(Model* a);
+bool IsModelReady_(Model *a);
 
 void UnloadModel_(Model *a);
 
@@ -524,6 +530,8 @@ Sound *LoadSound_(char *a);
 
 Sound *LoadSoundFromWave_(Wave *a);
 
+Sound *LoadSoundAlias_(Sound *a);
+
 void UpdateSound_(Sound *a, const void *b, int c);
 
 bool IsWaveReady_(Wave *a);
@@ -533,6 +541,8 @@ void UnloadWave_(Wave *a);
 bool IsSoundReady_(Sound *a);
 
 void UnloadSound_(Sound *a);
+
+void UnloadSoundAlias_(Sound *a);
 
 int ExportWave_(Wave *a, char *b);
 

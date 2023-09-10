@@ -364,7 +364,7 @@ foreign import ccall safe "raylib.h OpenURL"
 
 foreign import ccall safe "raylib.h LoadFileData"
   c'loadFileData ::
-    CString -> Ptr CUInt -> IO (Ptr CUChar)
+    CString -> Ptr CInt -> IO (Ptr CUChar)
 
 foreign import ccall safe "raylib.h UnloadFileData"
   c'unloadFileData ::
@@ -372,11 +372,11 @@ foreign import ccall safe "raylib.h UnloadFileData"
 
 foreign import ccall safe "raylib.h SaveFileData"
   c'saveFileData ::
-    CString -> Ptr () -> CUInt -> IO CBool
+    CString -> Ptr () -> CInt -> IO CBool
 
 foreign import ccall safe "raylib.h ExportDataAsCode"
   c'exportDataAsCode ::
-    Ptr CUChar -> CUInt -> CString -> IO CBool
+    Ptr CUChar -> CInt -> CString -> IO CBool
 
 foreign import ccall safe "raylib.h LoadFileText"
   c'loadFileText ::
@@ -478,6 +478,10 @@ foreign import ccall safe "raylib.h DecodeDataBase64"
 
 foreign import ccall safe "raylib.h IsKeyPressed"
   c'isKeyPressed ::
+    CInt -> IO CBool
+
+foreign import ccall safe "raylib.h IsKeyPressedRepeat"
+  c'isKeyPressedRepeat ::
     CInt -> IO CBool
 
 foreign import ccall safe "raylib.h IsKeyDown"
@@ -666,6 +670,10 @@ foreign import ccall safe "rl_bindings.h DrawLineBezierQuad_" c'drawLineBezierQu
 
 foreign import ccall safe "rl_bindings.h DrawLineBezierCubic_" c'drawLineBezierCubic :: Ptr Vector2 -> Ptr Vector2 -> Ptr Vector2 -> Ptr Vector2 -> CFloat -> Ptr Color -> IO ()
 
+foreign import ccall safe "rl_bindings.h DrawLineBSpline_" c'drawLineBSpline :: Ptr Vector2 -> CInt -> CFloat -> Ptr Color -> IO ()
+
+foreign import ccall safe "rl_bindings.h DrawLineCatmullRom_" c'drawLineCatmullRom :: Ptr Vector2 -> CInt -> CFloat -> Ptr Color -> IO ()
+
 foreign import ccall safe "rl_bindings.h DrawLineStrip_" c'drawLineStrip :: Ptr Vector2 -> CInt -> Ptr Color -> IO ()
 
 foreign import ccall safe "rl_bindings.h DrawCircle_" c'drawCircle :: CInt -> CInt -> CFloat -> Ptr Color -> IO ()
@@ -745,6 +753,8 @@ foreign import ccall safe "rl_bindings.h GetCollisionRec_" c'getCollisionRec :: 
 foreign import ccall safe "rl_bindings.h LoadImage_" c'loadImage :: CString -> IO (Ptr Image)
 
 foreign import ccall safe "rl_bindings.h LoadImageRaw_" c'loadImageRaw :: CString -> CInt -> CInt -> CInt -> CInt -> IO (Ptr Image)
+
+foreign import ccall safe "rl_bindings.h LoadImageSvg_" c'loadImageSvg :: CString -> CInt -> CInt -> IO (Ptr Image)
 
 foreign import ccall safe "rl_bindings.h LoadImageAnim_" c'loadImageAnim :: CString -> Ptr CInt -> IO (Ptr Image)
 
@@ -1190,7 +1200,7 @@ foreign import ccall safe "raylib.h SetModelMeshMaterial"
 
 foreign import ccall safe "raylib.h LoadModelAnimations"
   c'loadModelAnimations ::
-    CString -> Ptr CUInt -> IO (Ptr ModelAnimation)
+    CString -> Ptr CInt -> IO (Ptr ModelAnimation)
 
 foreign import ccall safe "rl_bindings.h UpdateModelAnimation_" c'updateModelAnimation :: Ptr Model -> Ptr ModelAnimation -> CInt -> IO ()
 
@@ -1198,7 +1208,7 @@ foreign import ccall safe "rl_bindings.h UnloadModelAnimation_" c'unloadModelAni
 
 foreign import ccall safe "raylib.h UnloadModelAnimations"
   c'unloadModelAnimations ::
-    Ptr ModelAnimation -> CUInt -> IO ()
+    Ptr ModelAnimation -> CInt -> IO ()
 
 foreign import ccall safe "rl_bindings.h IsModelAnimationValid_" c'isModelAnimationValid :: Ptr Model -> Ptr ModelAnimation -> IO CBool
 
@@ -1247,6 +1257,8 @@ foreign import ccall safe "rl_bindings.h LoadSound_" c'loadSound :: CString -> I
 
 foreign import ccall safe "rl_bindings.h LoadSoundFromWave_" c'loadSoundFromWave :: Ptr Wave -> IO (Ptr Sound)
 
+foreign import ccall safe "rl_bindings.h LoadSoundAlias_" c'loadSoundAlias :: Ptr Sound -> IO (Ptr Sound)
+
 foreign import ccall safe "rl_bindings.h UpdateSound_" c'updateSound :: Ptr Sound -> Ptr () -> CInt -> IO ()
 
 foreign import ccall safe "rl_bindings.h IsWaveReady_" c'isWaveReady :: Ptr Wave -> IO CBool
@@ -1256,6 +1268,8 @@ foreign import ccall safe "rl_bindings.h UnloadWave_" c'unloadWave :: Ptr Wave -
 foreign import ccall safe "rl_bindings.h IsSoundReady_" c'isSoundReady :: Ptr Sound -> IO CBool
 
 foreign import ccall safe "rl_bindings.h UnloadSound_" c'unloadSound :: Ptr Sound -> IO ()
+
+foreign import ccall safe "rl_bindings.h UnloadSoundAlias_" c'unloadSoundAlias :: Ptr Sound -> IO ()
 
 foreign import ccall safe "rl_bindings.h ExportWave_" c'exportWave :: Ptr Wave -> CString -> IO CBool
 

@@ -5,7 +5,7 @@ module Raylib.Core.Shapes where
 import Data.List (genericLength)
 import Foreign (Storable (peek), toBool)
 import GHC.IO (unsafePerformIO)
-import Raylib.ForeignUtil (pop, withFreeable, withFreeableArray)
+import Raylib.ForeignUtil (pop, withFreeable, withFreeableArray, withFreeableArrayLen)
 import Raylib.Native
   ( c'checkCollisionCircleRec,
     c'checkCollisionCircles,
@@ -53,7 +53,7 @@ import Raylib.Native
     c'drawTriangleLines,
     c'drawTriangleStrip,
     c'getCollisionRec,
-    c'setShapesTexture,
+    c'setShapesTexture, c'drawLineBSpline, c'drawLineCatmullRom,
   )
 import Raylib.Types (Color, Rectangle, Texture, Vector2 (Vector2))
 
@@ -107,6 +107,12 @@ drawLineBezierCubic start end startControl endControl thickness color =
                 )
           )
     )
+
+drawLineBSpline :: [Vector2] -> Float -> Color -> IO ()
+drawLineBSpline points thickness color = withFreeableArrayLen points (\s p -> withFreeable color (c'drawLineBSpline p (fromIntegral s) (realToFrac thickness)))
+
+drawLineCatmullRom :: [Vector2] -> Float -> Color -> IO ()
+drawLineCatmullRom points thickness color = withFreeableArrayLen points (\s p -> withFreeable color (c'drawLineCatmullRom p (fromIntegral s) (realToFrac thickness)))
 
 drawLineStrip :: [Vector2] -> Color -> IO ()
 drawLineStrip points color = withFreeableArray points (\p -> withFreeable color $ c'drawLineStrip p (genericLength points))

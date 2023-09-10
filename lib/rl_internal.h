@@ -8,6 +8,8 @@
 
 void UnloadAudioBuffer_(rAudioBuffer *buffer);
 
+void UnloadAudioBufferAlias(rAudioBuffer *buffer);
+
 void UnloadMusicStreamData(int ctxType, void *ctxData);
 
 int rlGetPixelDataSize(int width, int height, int format);

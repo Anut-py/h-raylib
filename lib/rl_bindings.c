@@ -249,7 +249,8 @@ Vector2 *GetGesturePinchVector_()
     return ptr;
 }
 
-void UpdateCameraPro_(Camera3D *a, Vector3 *b, Vector3 *c, float d) {
+void UpdateCameraPro_(Camera3D *a, Vector3 *b, Vector3 *c, float d)
+{
     UpdateCameraPro(a, *b, *c, d);
 }
 
@@ -296,6 +297,16 @@ void DrawLineBezierQuad_(Vector2 *a, Vector2 *b, Vector2 *c, float d, Color *e)
 void DrawLineBezierCubic_(Vector2 *a, Vector2 *b, Vector2 *c, Vector2 *d, float e, Color *f)
 {
     DrawLineBezierCubic(*a, *b, *c, *d, e, *f);
+}
+
+void DrawLineBSpline_(Vector2 *a, int b, float c, Color *d)
+{
+    DrawLineBSpline(a, b, c, *d);
+}
+
+void DrawLineCatmullRom_(Vector2 *a, int b, float c, Color *d)
+{
+    DrawLineCatmullRom(a, b, c, *d);
 }
 
 void DrawLineStrip_(Vector2 *a, int b, Color *c)
@@ -501,6 +512,12 @@ Image *LoadImageRaw_(char *a, int b, int c, int d, int e)
 {
     Image *ptr = (Image *)malloc(sizeof(Image));
     *ptr = LoadImageRaw(a, b, c, d, e);
+    return ptr;
+}
+
+Image *LoadImageSvg_(char *a, int b, int c) {
+    Image *ptr = (Image *)malloc(sizeof(Image));
+    *ptr = LoadImageSvg(a, b, c);
     return ptr;
 }
 
@@ -981,23 +998,24 @@ void SetPixelColor_(void *a, Color *b, int c)
 
 Font *GetFontDefault_()
 {
-    Font defaultFont      = GetFontDefault();
+    Font defaultFont = GetFontDefault();
     Font *defaultFontCopy = (Font *)malloc(sizeof(Font));
 
-    defaultFontCopy->baseSize     = defaultFont.baseSize;
-    defaultFontCopy->glyphCount   = defaultFont.glyphCount;
-    defaultFontCopy->glyphPadding = defaultFont.glyphPadding; 
-    defaultFontCopy->texture      = defaultFont.texture;
-    
+    defaultFontCopy->baseSize = defaultFont.baseSize;
+    defaultFontCopy->glyphCount = defaultFont.glyphCount;
+    defaultFontCopy->glyphPadding = defaultFont.glyphPadding;
+    defaultFontCopy->texture = defaultFont.texture;
+
     defaultFontCopy->glyphs = malloc(sizeof(GlyphInfo) * defaultFont.glyphCount);
     defaultFontCopy->recs = malloc(sizeof(Rectangle) * defaultFont.glyphCount);
 
-    for (int i = 0; i < defaultFont.glyphCount; i++) {
+    for (int i = 0; i < defaultFont.glyphCount; i++)
+    {
         defaultFontCopy->glyphs[i] = defaultFont.glyphs[i];
         defaultFontCopy->glyphs[i].image = ImageCopy(defaultFont.glyphs[i].image);
-        defaultFontCopy->recs[i]   = defaultFont.recs[i];
+        defaultFontCopy->recs[i] = defaultFont.recs[i];
     }
-    
+
     return defaultFontCopy;
 }
 
@@ -1497,6 +1515,12 @@ Sound *LoadSoundFromWave_(Wave *a)
     return ptr;
 }
 
+Sound *LoadSoundAlias_(Sound *a) {
+    Sound *ptr = (Sound *)malloc(sizeof(Sound));
+    *ptr = LoadSoundAlias(*a);
+    return ptr;
+}
+
 void UpdateSound_(Sound *a, const void *b, int c)
 {
     UpdateSound(*a, b, c);
@@ -1520,6 +1544,10 @@ bool IsSoundReady_(Sound *a)
 void UnloadSound_(Sound *a)
 {
     UnloadSound(*a);
+}
+
+void UnloadSoundAlias_(Sound *a) {
+    UnloadSoundAlias(*a);
 }
 
 int ExportWave_(Wave *a, char *b)

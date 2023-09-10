@@ -59,6 +59,7 @@ data ConfigFlag
   | WindowTransparent
   | WindowHighdpi
   | WindowMousePassthrough
+  | BorderlessWindowedMode
   | Msaa4xHint
   | InterlacedHint
   deriving (Eq, Show, Freeable)
@@ -78,6 +79,7 @@ instance Enum ConfigFlag where
     WindowTransparent -> 16
     WindowHighdpi -> 8192
     WindowMousePassthrough -> 16384
+    BorderlessWindowedMode -> 32768
     Msaa4xHint -> 32
     InterlacedHint -> 65536
   toEnum x = case x of
@@ -94,6 +96,7 @@ instance Enum ConfigFlag where
     16 -> WindowTransparent
     8192 -> WindowHighdpi
     16384 -> WindowMousePassthrough
+    32768 -> BorderlessWindowedMode
     32 -> Msaa4xHint
     65536 -> InterlacedHint
     n -> error $ "(ConfigFlag.toEnum) Invalid value: " ++ show n
@@ -679,6 +682,9 @@ data PixelFormat
   | PixelFormatUncompressedR32
   | PixelFormatUncompressedR32G32B32
   | PixelFormatUncompressedR32G32B32A32
+  | PixelFormatUncompressedR16
+  | PixelFormatUncompressedR16G16B16
+  | PixelFormatUncompressedR16G16B16A16
   | PixelFormatCompressedDxt1Rgb
   | PixelFormatCompressedDxt1Rgba
   | PixelFormatCompressedDxt3Rgba
@@ -714,17 +720,20 @@ instance Enum PixelFormat where
     PixelFormatUncompressedR32 -> 8
     PixelFormatUncompressedR32G32B32 -> 9
     PixelFormatUncompressedR32G32B32A32 -> 10
-    PixelFormatCompressedDxt1Rgb -> 11
-    PixelFormatCompressedDxt1Rgba -> 12
-    PixelFormatCompressedDxt3Rgba -> 13
-    PixelFormatCompressedDxt5Rgba -> 14
-    PixelFormatCompressedEtc1Rgb -> 15
-    PixelFormatCompressedEtc2Rgb -> 16
-    PixelFormatCompressedEtc2EacRgba -> 17
-    PixelFormatCompressedPvrtRgb -> 18
-    PixelFormatCompressedPvrtRgba -> 19
-    PixelFormatCompressedAstc4x4Rgba -> 20
-    PixelFormatCompressedAstc8x8Rgba -> 21
+    PixelFormatUncompressedR16  -> 11
+    PixelFormatUncompressedR16G16B16 -> 12
+    PixelFormatUncompressedR16G16B16A16 -> 13
+    PixelFormatCompressedDxt1Rgb -> 14
+    PixelFormatCompressedDxt1Rgba -> 15
+    PixelFormatCompressedDxt3Rgba -> 16
+    PixelFormatCompressedDxt5Rgba -> 17
+    PixelFormatCompressedEtc1Rgb -> 18
+    PixelFormatCompressedEtc2Rgb -> 19
+    PixelFormatCompressedEtc2EacRgba -> 20
+    PixelFormatCompressedPvrtRgb -> 21
+    PixelFormatCompressedPvrtRgba -> 22
+    PixelFormatCompressedAstc4x4Rgba -> 23
+    PixelFormatCompressedAstc8x8Rgba -> 24
 
   toEnum n = case n of
     0 -> PixelFormatUnset
@@ -738,17 +747,20 @@ instance Enum PixelFormat where
     8 -> PixelFormatUncompressedR32
     9 -> PixelFormatUncompressedR32G32B32
     10 -> PixelFormatUncompressedR32G32B32A32
-    11 -> PixelFormatCompressedDxt1Rgb
-    12 -> PixelFormatCompressedDxt1Rgba
-    13 -> PixelFormatCompressedDxt3Rgba
-    14 -> PixelFormatCompressedDxt5Rgba
-    15 -> PixelFormatCompressedEtc1Rgb
-    16 -> PixelFormatCompressedEtc2Rgb
-    17 -> PixelFormatCompressedEtc2EacRgba
-    18 -> PixelFormatCompressedPvrtRgb
-    19 -> PixelFormatCompressedPvrtRgba
-    20 -> PixelFormatCompressedAstc4x4Rgba
-    21 -> PixelFormatCompressedAstc8x8Rgba
+    11 -> PixelFormatUncompressedR16 
+    12 -> PixelFormatUncompressedR16G16B16
+    13 -> PixelFormatUncompressedR16G16B16A16
+    14 -> PixelFormatCompressedDxt1Rgb
+    15 -> PixelFormatCompressedDxt1Rgba
+    16 -> PixelFormatCompressedDxt3Rgba
+    17 -> PixelFormatCompressedDxt5Rgba
+    18 -> PixelFormatCompressedEtc1Rgb
+    19 -> PixelFormatCompressedEtc2Rgb
+    20 -> PixelFormatCompressedEtc2EacRgba
+    21 -> PixelFormatCompressedPvrtRgb
+    22 -> PixelFormatCompressedPvrtRgba
+    23 -> PixelFormatCompressedAstc4x4Rgba
+    24 -> PixelFormatCompressedAstc8x8Rgba
     _ -> error $ "(PixelFormat.toEnum) Invalid value: " ++ show n
 
 data TextureFilter
@@ -969,6 +981,12 @@ data RLPixelFormat
     RLPixelFormatUncompressedR32G32B32
   | -- | 32*4 bpp (4 channels - float)
     RLPixelFormatUncompressedR32G32B32A32
+  | -- | 16 bpp (1 channel - half float)
+    RLPixelFormatUncompressedR16
+  | -- | 16*3 bpp (3 channels - half float)
+    RLPixelFormatUncompressedR16G16B16
+  | -- | 16*4 bpp (4 channels - half float)
+    RLPixelFormatUncompressedR16G16B16A16
   | -- | 4 bpp (no alpha)
     RLPixelFormatCompressedDxt1Rgb
   | -- | 4 bpp (1 bit alpha)
@@ -1005,17 +1023,20 @@ instance Enum RLPixelFormat where
     RLPixelFormatUncompressedR32 -> 8
     RLPixelFormatUncompressedR32G32B32 -> 9
     RLPixelFormatUncompressedR32G32B32A32 -> 10
-    RLPixelFormatCompressedDxt1Rgb -> 11
-    RLPixelFormatCompressedDxt1Rgba -> 12
-    RLPixelFormatCompressedDxt3Rgba -> 13
-    RLPixelFormatCompressedDxt5Rgba -> 14
-    RLPixelFormatCompressedEtc1Rgb -> 15
-    RLPixelFormatCompressedEtc2Rgb -> 16
-    RLPixelFormatCompressedEtc2EacRgba -> 17
-    RLPixelFormatCompressedPvrtRgb -> 18
-    RLPixelFormatCompressedPvrtRgba -> 19
-    RLPixelFormatCompressedAstc4x4Rgba -> 20
-    RLPixelFormatCompressedAstc8x8Rgba -> 21
+    RLPixelFormatUncompressedR16 -> 11
+    RLPixelFormatUncompressedR16G16B16 -> 12
+    RLPixelFormatUncompressedR16G16B16A16 -> 13
+    RLPixelFormatCompressedDxt1Rgb -> 14
+    RLPixelFormatCompressedDxt1Rgba -> 15
+    RLPixelFormatCompressedDxt3Rgba -> 16
+    RLPixelFormatCompressedDxt5Rgba -> 17
+    RLPixelFormatCompressedEtc1Rgb -> 18
+    RLPixelFormatCompressedEtc2Rgb -> 19
+    RLPixelFormatCompressedEtc2EacRgba -> 20
+    RLPixelFormatCompressedPvrtRgb -> 21
+    RLPixelFormatCompressedPvrtRgba -> 22
+    RLPixelFormatCompressedAstc4x4Rgba -> 23
+    RLPixelFormatCompressedAstc8x8Rgba -> 24
 
   toEnum n = case n of
     1 -> RLPixelFormatUncompressedGrayscale
@@ -1028,17 +1049,20 @@ instance Enum RLPixelFormat where
     8 -> RLPixelFormatUncompressedR32
     9 -> RLPixelFormatUncompressedR32G32B32
     10 -> RLPixelFormatUncompressedR32G32B32A32
-    11 -> RLPixelFormatCompressedDxt1Rgb
-    12 -> RLPixelFormatCompressedDxt1Rgba
-    13 -> RLPixelFormatCompressedDxt3Rgba
-    14 -> RLPixelFormatCompressedDxt5Rgba
-    15 -> RLPixelFormatCompressedEtc1Rgb
-    16 -> RLPixelFormatCompressedEtc2Rgb
-    17 -> RLPixelFormatCompressedEtc2EacRgba
-    18 -> RLPixelFormatCompressedPvrtRgb
-    19 -> RLPixelFormatCompressedPvrtRgba
-    20 -> RLPixelFormatCompressedAstc4x4Rgba
-    21 -> RLPixelFormatCompressedAstc8x8Rgba
+    11 -> RLPixelFormatUncompressedR16
+    12 -> RLPixelFormatUncompressedR16G16B16
+    13 -> RLPixelFormatUncompressedR16G16B16A16
+    14 -> RLPixelFormatCompressedDxt1Rgb
+    15 -> RLPixelFormatCompressedDxt1Rgba
+    16 -> RLPixelFormatCompressedDxt3Rgba
+    17 -> RLPixelFormatCompressedDxt5Rgba
+    18 -> RLPixelFormatCompressedEtc1Rgb
+    19 -> RLPixelFormatCompressedEtc2Rgb
+    20 -> RLPixelFormatCompressedEtc2EacRgba
+    21 -> RLPixelFormatCompressedPvrtRgb
+    22 -> RLPixelFormatCompressedPvrtRgba
+    23 -> RLPixelFormatCompressedAstc4x4Rgba
+    24 -> RLPixelFormatCompressedAstc8x8Rgba
     _ -> error $ "(RLPixelFormat.toEnum) Invalid value: " ++ show n
 
 instance Storable RLPixelFormat where

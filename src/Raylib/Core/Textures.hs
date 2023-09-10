@@ -116,7 +116,7 @@ import Raylib.Native
     c'setTextureFilter,
     c'setTextureWrap,
     c'updateTexture,
-    c'updateTextureRec,
+    c'updateTextureRec, c'loadImageSvg,
   )
 import Raylib.Types
   ( Color,
@@ -141,6 +141,9 @@ loadImage fileName = withCString fileName c'loadImage >>= pop
 loadImageRaw :: String -> Int -> Int -> Int -> Int -> IO Image
 loadImageRaw fileName width height format headerSize =
   withCString fileName (\str -> c'loadImageRaw str (fromIntegral width) (fromIntegral height) (fromIntegral $ fromEnum format) (fromIntegral headerSize)) >>= pop
+
+loadImageSvg :: String -> Int -> Int -> IO Image
+loadImageSvg fileNameOrString width height = withCString fileNameOrString (\s -> c'loadImageSvg s (fromIntegral width) (fromIntegral height)) >>= pop
 
 -- | Returns the animation and the number of frames in a tuple
 loadImageAnim :: String -> IO (Image, Int)
