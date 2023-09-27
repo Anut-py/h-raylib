@@ -744,6 +744,8 @@ foreign import ccall safe "rl_bindings.h CheckCollisionPointCircle_" c'checkColl
 
 foreign import ccall safe "rl_bindings.h CheckCollisionPointTriangle_" c'checkCollisionPointTriangle :: Ptr Vector2 -> Ptr Vector2 -> Ptr Vector2 -> Ptr Vector2 -> IO CBool
 
+foreign import ccall safe "rl_bindings.h CheckCollisionPointPoly_" c'checkCollisionPointPoly :: Ptr Vector2 -> Ptr Vector2 -> CInt -> IO CBool
+
 foreign import ccall safe "rl_bindings.h CheckCollisionLines_" c'checkCollisionLines :: Ptr Vector2 -> Ptr Vector2 -> Ptr Vector2 -> Ptr Vector2 -> Ptr Vector2 -> IO CBool
 
 foreign import ccall safe "rl_bindings.h CheckCollisionPointLine_" c'checkCollisionPointLine :: Ptr Vector2 -> Ptr Vector2 -> Ptr Vector2 -> CInt -> IO CBool

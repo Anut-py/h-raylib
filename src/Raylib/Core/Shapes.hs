@@ -340,6 +340,10 @@ checkCollisionPointTriangle :: Vector2 -> Vector2 -> Vector2 -> Vector2 -> Bool
 checkCollisionPointTriangle point p1 p2 p3 =
   unsafePerformIO $ toBool <$> withFreeable point (\p -> withFreeable p1 (\ptr1 -> withFreeable p2 (withFreeable p3 . c'checkCollisionPointTriangle p ptr1)))
 
+checkCollisionPointPoly :: Vector2 -> [Vector2] -> Bool
+checkCollisionPointPoly point points =
+  unsafePerformIO $ toBool <$> withFreeableArrayLen points (\l ps -> withFreeable point (\p -> c'checkCollisionPointPoly p ps (fromIntegral l)))
+
 -- | If a collision is found, returns @Just collisionPoint@, otherwise returns @Nothing@
 checkCollisionLines :: Vector2 -> Vector2 -> Vector2 -> Vector2 -> Maybe Vector2
 checkCollisionLines start1 end1 start2 end2 =

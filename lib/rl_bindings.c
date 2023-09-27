@@ -454,42 +454,47 @@ void DrawPolyLinesEx_(Vector2 *a, int b, float c, float d, float e, Color *f)
     DrawPolyLinesEx(*a, b, c, d, e, *f);
 }
 
-int CheckCollisionRecs_(Rectangle *a, Rectangle *b)
+bool CheckCollisionRecs_(Rectangle *a, Rectangle *b)
 {
     return CheckCollisionRecs(*a, *b);
 }
 
-int CheckCollisionCircles_(Vector2 *a, float b, Vector2 *c, float d)
+bool CheckCollisionCircles_(Vector2 *a, float b, Vector2 *c, float d)
 {
     return CheckCollisionCircles(*a, b, *c, d);
 }
 
-int CheckCollisionCircleRec_(Vector2 *a, float b, Rectangle *c)
+bool CheckCollisionCircleRec_(Vector2 *a, float b, Rectangle *c)
 {
     return CheckCollisionCircleRec(*a, b, *c);
 }
 
-int CheckCollisionPointRec_(Vector2 *a, Rectangle *b)
+bool CheckCollisionPointRec_(Vector2 *a, Rectangle *b)
 {
     return CheckCollisionPointRec(*a, *b);
 }
 
-int CheckCollisionPointCircle_(Vector2 *a, Vector2 *b, float c)
+bool CheckCollisionPointCircle_(Vector2 *a, Vector2 *b, float c)
 {
     return CheckCollisionPointCircle(*a, *b, c);
 }
 
-int CheckCollisionPointTriangle_(Vector2 *a, Vector2 *b, Vector2 *c, Vector2 *d)
+bool CheckCollisionPointTriangle_(Vector2 *a, Vector2 *b, Vector2 *c, Vector2 *d)
 {
     return CheckCollisionPointTriangle(*a, *b, *c, *d);
 }
 
-int CheckCollisionLines_(Vector2 *a, Vector2 *b, Vector2 *c, Vector2 *d, Vector2 *e)
+bool CheckCollisionPointPoly_(Vector2 *a, Vector2 *b, int c)
+{
+    return CheckCollisionPointPoly(*a, b, c);
+}
+
+bool CheckCollisionLines_(Vector2 *a, Vector2 *b, Vector2 *c, Vector2 *d, Vector2 *e)
 {
     return CheckCollisionLines(*a, *b, *c, *d, e);
 }
 
-int CheckCollisionPointLine_(Vector2 *a, Vector2 *b, Vector2 *c, int d)
+bool CheckCollisionPointLine_(Vector2 *a, Vector2 *b, Vector2 *c, int d)
 {
     return CheckCollisionPointLine(*a, *b, *c, d);
 }
@@ -1432,22 +1437,22 @@ void UnloadModelAnimation_(ModelAnimation *a)
     UnloadModelAnimation(*a);
 }
 
-int IsModelAnimationValid_(Model *a, ModelAnimation *b)
+bool IsModelAnimationValid_(Model *a, ModelAnimation *b)
 {
     return IsModelAnimationValid(*a, *b);
 }
 
-int CheckCollisionSpheres_(Vector3 *a, float b, Vector3 *c, float d)
+bool CheckCollisionSpheres_(Vector3 *a, float b, Vector3 *c, float d)
 {
     return CheckCollisionSpheres(*a, b, *c, d);
 }
 
-int CheckCollisionBoxes_(BoundingBox *a, BoundingBox *b)
+bool CheckCollisionBoxes_(BoundingBox *a, BoundingBox *b)
 {
     return CheckCollisionBoxes(*a, *b);
 }
 
-int CheckCollisionBoxSphere_(BoundingBox *a, Vector3 *b, float c)
+bool CheckCollisionBoxSphere_(BoundingBox *a, Vector3 *b, float c)
 {
     return CheckCollisionBoxSphere(*a, *b, c);
 }

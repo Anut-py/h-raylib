@@ -172,21 +172,23 @@ void DrawPolyLines_(Vector2 *a, int b, float c, float d, Color *e);
 
 void DrawPolyLinesEx_(Vector2 *a, int b, float c, float d, float e, Color *f);
 
-int CheckCollisionRecs_(Rectangle *a, Rectangle *b);
+bool CheckCollisionRecs_(Rectangle *a, Rectangle *b);
 
-int CheckCollisionCircles_(Vector2 *a, float b, Vector2 *c, float d);
+bool CheckCollisionCircles_(Vector2 *a, float b, Vector2 *c, float d);
 
-int CheckCollisionCircleRec_(Vector2 *a, float b, Rectangle *c);
+bool CheckCollisionCircleRec_(Vector2 *a, float b, Rectangle *c);
 
-int CheckCollisionPointRec_(Vector2 *a, Rectangle *b);
+bool CheckCollisionPointRec_(Vector2 *a, Rectangle *b);
 
-int CheckCollisionPointCircle_(Vector2 *a, Vector2 *b, float c);
+bool CheckCollisionPointCircle_(Vector2 *a, Vector2 *b, float c);
 
-int CheckCollisionPointTriangle_(Vector2 *a, Vector2 *b, Vector2 *c, Vector2 *d);
+bool CheckCollisionPointTriangle_(Vector2 *a, Vector2 *b, Vector2 *c, Vector2 *d);
 
-int CheckCollisionLines_(Vector2 *a, Vector2 *b, Vector2 *c, Vector2 *d, Vector2 *e);
+bool CheckCollisionPointPoly_(Vector2 *a, Vector2 *b, int c);
 
-int CheckCollisionPointLine_(Vector2 *a, Vector2 *b, Vector2 *c, int d);
+bool CheckCollisionLines_(Vector2 *a, Vector2 *b, Vector2 *c, Vector2 *d, Vector2 *e);
+
+bool CheckCollisionPointLine_(Vector2 *a, Vector2 *b, Vector2 *c, int d);
 
 Rectangle *GetCollisionRec_(Rectangle *a, Rectangle *b);
 
@@ -504,13 +506,13 @@ void UpdateModelAnimation_(Model *a, ModelAnimation *b, int c);
 
 void UnloadModelAnimation_(ModelAnimation *a);
 
-int IsModelAnimationValid_(Model *a, ModelAnimation *b);
+bool IsModelAnimationValid_(Model *a, ModelAnimation *b);
 
-int CheckCollisionSpheres_(Vector3 *a, float b, Vector3 *c, float d);
+bool CheckCollisionSpheres_(Vector3 *a, float b, Vector3 *c, float d);
 
-int CheckCollisionBoxes_(BoundingBox *a, BoundingBox *b);
+bool CheckCollisionBoxes_(BoundingBox *a, BoundingBox *b);
 
-int CheckCollisionBoxSphere_(BoundingBox *a, Vector3 *b, float c);
+bool CheckCollisionBoxSphere_(BoundingBox *a, Vector3 *b, float c);
 
 RayCollision *GetRayCollisionSphere_(Ray *a, Vector3 *b, float c);
 
