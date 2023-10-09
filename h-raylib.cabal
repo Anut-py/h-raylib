@@ -61,6 +61,11 @@ flag platform-bsd
   default:     False
   manual:      True
 
+flag platform-nixos
+  description: Use external GLFW
+  default:     False
+  manual:      True
+
 flag mingw-cross
   description:
     Cross-compiling for mingw (used in combination with Windows)
@@ -227,22 +232,30 @@ library
     extra-libraries:
       GL
       pthread
-
-  else
+  elif (flag(platform-nixos))
+    pkgconfig-depends:
+      raylib
+  else:
 
   -- Unsupported OS, do nothing. If you can get it working on an
   -- OS that isn't on here, please add it here.
-  c-sources:
-    lib/rl_bindings.c
-    lib/rl_internal.c
-    lib/rlgl_bindings.c
-    raylib/src/raudio.c
-    raylib/src/rcore.c
-    raylib/src/rmodels.c
-    raylib/src/rshapes.c
-    raylib/src/rtext.c
-    raylib/src/rtextures.c
-    raylib/src/utils.c
+  if (!flag(platform-nixos))
+    c-sources:
+      lib/rl_bindings.c
+      lib/rl_internal.c
+      lib/rlgl_bindings.c
+      raylib/src/raudio.c
+      raylib/src/rcore.c
+      raylib/src/rmodels.c
+      raylib/src/rshapes.c
+      raylib/src/rtext.c
+      raylib/src/rtextures.c
+      raylib/src/utils.c
+  elif (flag(platform-nixos))
+    c-sources:
+      lib/rl_bindings.c
+      lib/rl_internal.c
+      lib/rlgl_bindings.c
 
   if (flag(platform-mac) || (flag(detect-platform) && os(osx)))
     -- Use rgflw.m instead of .c on Mac to force objective-c
@@ -251,12 +264,18 @@ library
   elif (flag(ghci) && (flag(platform-windows) || (flag(detect-platform) && os(windows))))
     c-sources: lib/glfw_patch/rglfw_patch.c
 
+  elif (flag(platform-nixos))
+
   else
     c-sources: raylib/src/rglfw.c
 
   if flag(ghci)
     cpp-options: -DGHCI
 
-  include-dirs:
-    lib raylib/src raylib/src/external/glfw/src
-    raylib/src/external/glfw/include
+  if (flag(platform-nixos))
+    include-dirs:
+      lib
+  else
+    include-dirs:
+      lib raylib/src raylib/src/external/glfw/src
+      raylib/src/external/glfw/include
