@@ -232,10 +232,12 @@ library
     extra-libraries:
       GL
       pthread
+
   elif (flag(platform-nixos))
     pkgconfig-depends:
       raylib
-  else:
+
+  else
 
   -- Unsupported OS, do nothing. If you can get it working on an
   -- OS that isn't on here, please add it here.
