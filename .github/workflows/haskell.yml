@@ -2,9 +2,9 @@ name: build
 
 on:
   push:
-    branches: [main, master]
+    branches: [main, master, fix]
   pull_request:
-    branches: [main, master]
+    branches: [main, master, fix]
 
 permissions:
   contents: read
@@ -26,12 +26,12 @@ jobs:
             ghc-version: '9.2'
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: recursive
           
       - name: Set up GHC ${{ matrix.ghc-version }}
-        uses: haskell/actions/setup@v2
+        uses: haskell-actions/setup@v2
         id: setup
         with:
           ghc-version: ${{ matrix.ghc-version }}
@@ -42,17 +42,18 @@ jobs:
       - name: Install dependencies on ubuntu
         if: startsWith(matrix.os, 'ubuntu')
         run: |
+          sudo apt update
           sudo apt install -y x11proto-xext-dev libx11-dev xorg-dev freeglut3-dev
           
-      - name: Install dependencies on windows
-        if: startsWith(matrix.os, 'windows')
-        run: |
-          choco install mingw
+      # - name: Install dependencies on windows
+      #   if: startsWith(matrix.os, 'windows')
+      #   run: |
+      #     choco install mingw
           
-      - name: Install dependencies on macOS
-        if: startsWith(matrix.os, 'macOS')
-        run: |
-          brew install pkg-config
+      # - name: Install dependencies on macOS
+      #   if: startsWith(matrix.os, 'macOS')
+      #   run: |
+      #     brew install pkg-config
           
       - name: Configure the build
         run: |
