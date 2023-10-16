@@ -14,6 +14,7 @@ import Raylib.Native
     c'checkCollisionPointLine,
     c'checkCollisionPointRec,
     c'checkCollisionPointTriangle,
+    c'checkCollisionPointPoly,
     c'checkCollisionRecs,
     c'drawCircle,
     c'drawCircleGradient,
