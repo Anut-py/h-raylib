@@ -453,7 +453,7 @@ data MouseButton
   | MouseButtonExtra
   | MouseButtonForward
   | MouseButtonBack
-  deriving (Eq, Show, Enum)
+  deriving (Eq, Show, Enum, Bounded)
 
 data MouseCursor
   = MouseCursorDefault
@@ -467,7 +467,7 @@ data MouseCursor
   | MouseCursorResizeNESW
   | MouseCursorResizeAll
   | MouseCursorNotAllowed
-  deriving (Eq, Show, Enum)
+  deriving (Eq, Show, Enum, Bounded)
 
 data GamepadButton
   = GamepadButtonUnknown
@@ -488,7 +488,7 @@ data GamepadButton
   | GamepadButtonMiddleRight
   | GamepadButtonLeftThumb
   | GamepadButtonRightThumb
-  deriving (Eq, Show, Enum)
+  deriving (Eq, Show, Enum, Bounded)
 
 data GamepadAxis
   = GamepadAxisLeftX
@@ -497,7 +497,7 @@ data GamepadAxis
   | GamepadAxisRightY
   | GamepadAxisLeftTrigger
   | GamepadAxisRightTrigger
-  deriving (Eq, Show, Enum)
+  deriving (Eq, Show, Enum, Bounded)
 
 data MaterialMapIndex
   = MaterialMapAlbedo
@@ -813,7 +813,7 @@ data Gesture
   | GestureSwipeDown
   | GesturePinchIn
   | GesturePinchOut
-  deriving (Show)
+  deriving (Show, Eq)
 
 -- NOTE: This is not the ideal solution, I need to make this unjanky
 instance Enum Gesture where

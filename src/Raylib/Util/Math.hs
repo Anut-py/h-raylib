@@ -85,6 +85,7 @@ module Raylib.Util.Math
 where
 
 import Raylib.Types (Matrix (..), Quaternion, Vector2 (Vector2), Vector3 (Vector3), Vector4 (Vector4))
+import Foldable (foldl')
 
 epsilon :: Float
 epsilon = 0.000001
