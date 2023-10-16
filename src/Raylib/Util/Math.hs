@@ -307,6 +307,10 @@ class Vector a where
   -- | Max value for each pair of components
   vectorMax :: a -> a -> a
   vectorMax v1 v2 = fromList $ zipWith max (asList v1) (asList v2)
+  
+  -- | sum of vectors
+  vectorSum :: Foldable t => t a -> a
+  vectorSum = foldl' (|+|) zero 
 
 instance Vector Vector2 where
   asList (Vector2 x y) = [x, y]
