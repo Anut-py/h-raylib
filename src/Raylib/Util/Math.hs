@@ -85,6 +85,7 @@ module Raylib.Util.Math
 where
 
 import Raylib.Types (Matrix (..), Quaternion, Vector2 (Vector2), Vector3 (Vector3), Vector4 (Vector4))
+import Data.Foldable (foldl')
 
 epsilon :: Float
 epsilon = 0.000001
@@ -223,6 +224,10 @@ class Vector a where
   -- | Scalar to vector (all elements are set to the scalar)
   constant :: Float -> a
   constant val = fromList $ repeat val
+
+  -- | Sum of all vectors in a structure
+  vectorSum :: Foldable t => t a -> a
+  vectorSum = foldl' (|+|) zero
 
   -- | Vector additive inverse
   additiveInverse :: a -> a
