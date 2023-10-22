@@ -334,11 +334,11 @@ instance Vector Vector4 where
 
 -- | Angle between two 2D vectors
 vector2Angle :: Vector2 -> Vector2 -> Float
-vector2Angle (Vector2 x1 y1) (Vector2 x2 y2) = - atan2 (x1 * x2 + y1 * y2) (x1 * y2 - y1 * x2)
+vector2Angle (Vector2 x1 y1) (Vector2 x2 y2) = atan2 (x1 * x2 + y1 * y2) (x1 * y2 - y1 * x2)
 
 -- | Angle created by the line between two 2D vectors (parameters must be normalized)
 vector2LineAngle :: Vector2 -> Vector2 -> Float
-vector2LineAngle (Vector2 sx sy) (Vector2 ex ey) = atan2 (ey - sy) (ex - sx)
+vector2LineAngle (Vector2 sx sy) (Vector2 ex ey) = - atan2 (ey - sy) (ex - sx)
 
 -- | Transform a 2D vector by the given matrix
 vector2Transform :: Vector2 -> Matrix -> Vector2
@@ -893,7 +893,7 @@ quaternionSLerp ::
 quaternionSLerp q1 q2 amount
   | cosHalfTheta >= 1 = q1
   | cosHalfTheta > 0.95 = quaternionNLerp q1 q2' amount
-  | abs sinHalfTheta < 0.001 = (q1 |+| q2') |/ 2
+  | abs sinHalfTheta < epsilon = (q1 |+| q2') |/ 2
   | otherwise = (q1 |* ratioA) |+| (q2 |* ratioB)
   where
     cosHalfTheta = if dot < 0 then - dot else dot

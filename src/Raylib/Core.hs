@@ -161,6 +161,7 @@ import Raylib.Native
     c'setWindowIcon,
     c'setWindowIcons,
     c'setWindowMinSize,
+    c'setWindowMaxSize,
     c'setWindowMonitor,
     c'setWindowOpacity,
     c'setWindowPosition,
@@ -288,6 +289,9 @@ setWindowMonitor = c'setWindowMonitor . fromIntegral
 
 setWindowMinSize :: Int -> Int -> IO ()
 setWindowMinSize x y = c'setWindowMinSize (fromIntegral x) (fromIntegral y)
+
+setWindowMaxSize :: Int -> Int -> IO ()
+setWindowMaxSize x y = c'setWindowMaxSize (fromIntegral x) (fromIntegral y)
 
 setWindowSize :: Int -> Int -> IO ()
 setWindowSize x y = c'setWindowSize (fromIntegral x) (fromIntegral y)

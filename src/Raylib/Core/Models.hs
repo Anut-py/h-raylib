@@ -18,9 +18,11 @@ import Raylib.ForeignUtil
   ( c'free,
     pop,
     popCArray,
-    withFreeable, withFreeableArray, withFreeableArrayLen
+    withFreeable,
+    withFreeableArray,
+    withFreeableArrayLen,
   )
-import Raylib.Internal (addShaderId, addTextureId, addVaoId, addVboIds, unloadSingleShader, unloadSingleTexture, unloadSingleVaoId, unloadSingleVboIdList, WindowResources)
+import Raylib.Internal (WindowResources, addShaderId, addTextureId, addVaoId, addVboIds, unloadSingleShader, unloadSingleTexture, unloadSingleVaoId, unloadSingleVboIdList)
 import Raylib.Native
   ( c'checkCollisionBoxSphere,
     c'checkCollisionBoxes,

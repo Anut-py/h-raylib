@@ -139,7 +139,7 @@ cameraPitch cam angle lockView rotateAroundTarget rotateUp =
   where
     angle' = if not lockView then angle else clamp angle maxAngleDown maxAngleUp
     maxAngleUp = vector3Angle up viewVec - 0.001
-    maxAngleDown = (- vector3Angle (additiveInverse up) viewVec) + 0.001
+    maxAngleDown = (-vector3Angle (additiveInverse up) viewVec) + 0.001
 
     viewVec = target |-| pos
     viewRot = vector3RotateByAxisAngle viewVec right angle'
@@ -181,7 +181,7 @@ getCameraProjectionMatrix ::
 getCameraProjectionMatrix cam aspect near far =
   case camera3D'projection cam of
     CameraPerspective -> matrixPerspective (camera3D'fovy cam * deg2Rad) aspect near far
-    CameraOrthographic -> matrixOrtho (- right) right (- top) top near far
+    CameraOrthographic -> matrixOrtho (-right) right (-top) top near far
       where
         top = camera3D'fovy cam / 2
         right = top * aspect

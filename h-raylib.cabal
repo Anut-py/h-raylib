@@ -1,6 +1,6 @@
 cabal-version:      2.4
 name:               h-raylib
-version:            4.6.0.7
+version:            5.0.0.1
 synopsis:           Raylib bindings for Haskell
 category:           graphics
 description:
@@ -186,7 +186,7 @@ library
     DeriveAnyClass
     ForeignFunctionInterface
 
-  cc-options:       -Wno-discarded-qualifiers -DPLATFORM_DESKTOP
+  cc-options:       -Wno-discarded-qualifiers -Wno-stringop-overflow -DPLATFORM_DESKTOP
 
   if (flag(platform-windows) || (flag(detect-platform) && os(windows)))
     if flag(mingw-cross)
@@ -205,8 +205,6 @@ library
         winmm
         shell32
         gcc_eh
-
-    cc-options: -D_ftelli64=ftello64 -D_fseeki64=fseeko64
 
   elif (flag(platform-linux) || (flag(detect-platform) && os(linux)))
     extra-libraries:

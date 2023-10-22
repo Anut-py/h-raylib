@@ -128,6 +128,8 @@ void DrawCircleV_(Vector2 *a, float b, Color *c);
 
 void DrawCircleLines_(int a, int b, float c, Color *d);
 
+void DrawCircleLinesV_(Vector2 *a, float b, Color *c);
+
 void DrawEllipse_(int a, int b, float c, float d, Color *e);
 
 void DrawEllipseLines_(int a, int b, float c, float d, Color *e);

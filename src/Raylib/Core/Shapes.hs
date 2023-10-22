@@ -12,22 +12,25 @@ import Raylib.Native
     c'checkCollisionLines,
     c'checkCollisionPointCircle,
     c'checkCollisionPointLine,
+    c'checkCollisionPointPoly,
     c'checkCollisionPointRec,
     c'checkCollisionPointTriangle,
-    c'checkCollisionPointPoly,
     c'checkCollisionRecs,
     c'drawCircle,
     c'drawCircleGradient,
     c'drawCircleLines,
+    c'drawCircleLinesV,
     c'drawCircleSector,
     c'drawCircleSectorLines,
     c'drawCircleV,
     c'drawEllipse,
     c'drawEllipseLines,
     c'drawLine,
+    c'drawLineBSpline,
     c'drawLineBezier,
     c'drawLineBezierCubic,
     c'drawLineBezierQuad,
+    c'drawLineCatmullRom,
     c'drawLineEx,
     c'drawLineStrip,
     c'drawLineV,
@@ -54,7 +57,7 @@ import Raylib.Native
     c'drawTriangleLines,
     c'drawTriangleStrip,
     c'getCollisionRec,
-    c'setShapesTexture, c'drawLineBSpline, c'drawLineCatmullRom,
+    c'setShapesTexture,
   )
 import Raylib.Types (Color, Rectangle, Texture, Vector2 (Vector2))
 
@@ -154,6 +157,10 @@ drawCircleV center radius color =
 drawCircleLines :: Int -> Int -> Float -> Color -> IO ()
 drawCircleLines centerX centerY radius color =
   withFreeable color (c'drawCircleLines (fromIntegral centerX) (fromIntegral centerY) (realToFrac radius))
+
+drawCircleLinesV :: Vector2 -> Float -> Color -> IO ()
+drawCircleLinesV center radius color =
+  withFreeable center (\c -> withFreeable color (c'drawCircleLinesV c (realToFrac radius)))
 
 drawEllipse :: Int -> Int -> Float -> Float -> Color -> IO ()
 drawEllipse centerX centerY radiusH radiusV color =

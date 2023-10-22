@@ -166,6 +166,10 @@ foreign import ccall safe "raylib.h SetWindowMinSize"
   c'setWindowMinSize ::
     CInt -> CInt -> IO ()
 
+foreign import ccall safe "raylib.h SetWindowMinSize"
+  c'setWindowMaxSize ::
+    CInt -> CInt -> IO ()
+
 foreign import ccall safe "raylib.h SetWindowSize"
   c'setWindowSize ::
     CInt -> CInt -> IO ()
@@ -622,7 +626,7 @@ foreign import ccall safe "raylib.h SetGesturesEnabled"
 
 foreign import ccall safe "raylib.h IsGestureDetected"
   c'isGestureDetected ::
-    CInt -> IO CBool
+    CUInt -> IO CBool
 
 foreign import ccall safe "raylib.h GetGestureDetected"
   c'getGestureDetected ::
@@ -687,6 +691,8 @@ foreign import ccall safe "rl_bindings.h DrawCircleGradient_" c'drawCircleGradie
 foreign import ccall safe "rl_bindings.h DrawCircleV_" c'drawCircleV :: Ptr Vector2 -> CFloat -> Ptr Color -> IO ()
 
 foreign import ccall safe "rl_bindings.h DrawCircleLines_" c'drawCircleLines :: CInt -> CInt -> CFloat -> Ptr Color -> IO ()
+
+foreign import ccall safe "rl_bindings.h DrawCircleLinesV_" c'drawCircleLinesV :: Ptr Vector2 -> CFloat -> Ptr Color -> IO ()
 
 foreign import ccall safe "rl_bindings.h DrawEllipse_" c'drawEllipse :: CInt -> CInt -> CFloat -> CFloat -> Ptr Color -> IO ()
 
@@ -1250,6 +1256,10 @@ foreign import ccall safe "raylib.h IsAudioDeviceReady"
 foreign import ccall safe "raylib.h SetMasterVolume"
   c'setMasterVolume ::
     CFloat -> IO ()
+
+foreign import ccall safe "raylib.h GetMasterVolume"
+  c'getMasterVolume ::
+    IO CFloat
 
 foreign import ccall safe "rl_bindings.h LoadWave_" c'loadWave :: CString -> IO (Ptr Wave)
 

@@ -2,7 +2,7 @@
 module Main where
 
 import Control.Monad (unless, void)
-import Raylib.Core (changeDirectory, clearBackground, closeWindow, getApplicationDirectory)
+import Raylib.Core (changeDirectory, clearBackground, getApplicationDirectory)
 import Raylib.Core.Models (drawGrid)
 import Raylib.Core.Textures (loadTexture)
 import Raylib.Types (Camera3D (Camera3D), CameraProjection (CameraPerspective), Color (Color), RLDrawMode (RLQuads), Rectangle (Rectangle), Texture (texture'height, texture'id, texture'width), Vector3 (Vector3))
@@ -48,8 +48,6 @@ main = do
                     )
               )
           )
-
-        closeWindow window
     )
 
 drawCubeTexture :: Texture -> Vector3 -> Float -> Float -> Float -> Color -> IO ()

@@ -15,12 +15,12 @@ import Raylib.ForeignUtil
   ( pop,
     popCArray,
     popCString,
-    withFreeableArray2D,
     withFreeable,
     withFreeableArray,
+    withFreeableArray2D,
     withFreeableArrayLen,
   )
-import Raylib.Internal (addTextureId, unloadSingleTexture, WindowResources)
+import Raylib.Internal (WindowResources, addTextureId, unloadSingleTexture)
 import Raylib.Native
   ( c'codepointToUTF8,
     c'drawFPS,
@@ -47,7 +47,8 @@ import Raylib.Native
     c'loadFontFromMemory,
     c'loadUTF8,
     c'measureText,
-    c'measureTextEx, c'setTextLineSpacing
+    c'measureTextEx,
+    c'setTextLineSpacing,
   )
 import Raylib.Types
   ( Color,

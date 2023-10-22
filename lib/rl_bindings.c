@@ -344,6 +344,11 @@ void DrawCircleLines_(int a, int b, float c, Color *d)
     DrawCircleLines(a, b, c, *d);
 }
 
+void DrawCircleLinesV_(Vector2 *a, float b, Color *c)
+{
+    DrawCircleLinesV(*a, b, *c);
+}
+
 void DrawEllipse_(int a, int b, float c, float d, Color *e)
 {
     DrawEllipse(a, b, c, d, *e);

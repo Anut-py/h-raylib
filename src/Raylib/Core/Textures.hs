@@ -108,6 +108,7 @@ import Raylib.Native
     c'loadImageFromTexture,
     c'loadImagePalette,
     c'loadImageRaw,
+    c'loadImageSvg,
     c'loadRenderTexture,
     c'loadTexture,
     c'loadTextureCubemap,
@@ -116,7 +117,7 @@ import Raylib.Native
     c'setTextureFilter,
     c'setTextureWrap,
     c'updateTexture,
-    c'updateTextureRec, c'loadImageSvg,
+    c'updateTextureRec,
   )
 import Raylib.Types
   ( Color,

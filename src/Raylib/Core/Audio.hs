@@ -16,11 +16,12 @@ import Raylib.ForeignUtil
     withFreeable,
     withFreeableArrayLen,
   )
-import Raylib.Internal (addAudioBuffer, addCtxData, unloadAudioBuffers, unloadCtxData, unloadSingleAudioBuffer, unloadSingleCtxDataPtr, WindowResources, addAudioBufferAlias, unloadSingleAudioBufferAlias)
+import Raylib.Internal (WindowResources, addAudioBuffer, addAudioBufferAlias, addCtxData, unloadAudioBuffers, unloadCtxData, unloadSingleAudioBuffer, unloadSingleAudioBufferAlias, unloadSingleCtxDataPtr)
 import Raylib.Native
   ( c'closeAudioDevice,
     c'exportWave,
     c'exportWaveAsCode,
+    c'getMasterVolume,
     c'getMusicTimeLength,
     c'getMusicTimePlayed,
     c'isAudioDeviceReady,
@@ -36,6 +37,7 @@ import Raylib.Native
     c'loadMusicStream,
     c'loadMusicStreamFromMemory,
     c'loadSound,
+    c'loadSoundAlias,
     c'loadSoundFromWave,
     c'loadWave,
     c'loadWaveFromMemory,
@@ -68,7 +70,7 @@ import Raylib.Native
     c'updateSound,
     c'waveCopy,
     c'waveCrop,
-    c'waveFormat, c'loadSoundAlias,
+    c'waveFormat,
   )
 import Raylib.Types
   ( AudioStream (audioStream'buffer),
@@ -92,6 +94,9 @@ isAudioDeviceReady = toBool <$> c'isAudioDeviceReady
 
 setMasterVolume :: Float -> IO ()
 setMasterVolume volume = c'setMasterVolume (realToFrac volume)
+
+getMasterVolume :: IO Float
+getMasterVolume = realToFrac <$> c'getMasterVolume
 
 loadWave :: String -> IO Wave
 loadWave fileName = withCString fileName c'loadWave >>= pop
