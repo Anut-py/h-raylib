@@ -102,14 +102,14 @@ rad2Deg = 180 / pi
 
 -- | Clamp float to range
 clamp ::
-  -- | Value to clamp
-  Float ->
   -- | Lower bound
   Float ->
   -- | Upper bound
   Float ->
+  -- | Value to clamp
+  Float ->
   Float
-clamp value low high
+clamp low high value
   | value < low = low
   | value > high = high
   | otherwise = value
@@ -127,19 +127,17 @@ lerp start end amount = start + amount * (end - start)
 
 -- | Normalize input value within input range
 normalize ::
-  -- | Value to normalize
-  Float ->
   -- | Starting value of range
   Float ->
   -- | Ending value of range
   Float ->
+  -- | Value to normalize
+  Float ->
   Float
-normalize value start end = (value - start) / (end - start)
+normalize start end value = (value - start) / (end - start)
 
 -- | Remap input value within input range to output range
 remap ::
-  -- | Input value
-  Float ->
   -- | Input range start
   Float ->
   -- | Input range end
@@ -148,19 +146,21 @@ remap ::
   Float ->
   -- | Output range end
   Float ->
+  -- | Input value
+  Float ->
   Float
-remap value inputStart inputEnd outputStart outputEnd = (value - inputStart) / (inputEnd - inputStart) * (outputEnd - outputStart) + outputStart
+remap inputStart inputEnd outputStart outputEnd value = (value - inputStart) / (inputEnd - inputStart) * (outputEnd - outputStart) + outputStart
 
 -- | Wrap input value from min to max
 wrap ::
-  -- | Input value
-  Float ->
   -- | Min value
   Float ->
   -- | Max value
   Float ->
+  -- | Input value
+  Float ->
   Float
-wrap value low high = value - (high - low) * fromIntegral (floor ((value - low) / (high - low)) :: Integer)
+wrap low high value = value - (high - low) * fromIntegral (floor ((value - low) / (high - low)) :: Integer)
 
 -- | Check if two floats are close to equal
 floatEquals :: Float -> Float -> Bool
