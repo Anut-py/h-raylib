@@ -80,8 +80,11 @@ To contribute or learn more about the project, see [CONTRIBUTING.md](https://git
 
 ## FAQ
 
-- When I try to run an h-raylib program I get an error saying "*The code execution cannot proceed because libwinpthread-1.dll was not found. Reinstalling the program may fix this problem.*"
+- When I try to run an h-raylib program I get the error `The code execution cannot proceed because libwinpthread-1.dll was not found. Reinstalling the program may fix this problem.`
   - See [#14](https://github.com/Anut-py/h-raylib/issues/14)
+ 
+- When I try to compile an h-raylib program I get the error `Missing (or bad) C libraries: gcc_eh`
+  - See [#36](https://github.com/Anut-py/h-raylib/issues/36)
 
 ## License
 
