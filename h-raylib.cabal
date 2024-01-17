@@ -201,7 +201,8 @@ library
         winmm
         shell32
         gcc
-        gcc_eh
+      if impl(ghc < 9.4.1)
+        extra-libraries: gcc_eh
 
     else
       extra-libraries:
@@ -209,7 +210,8 @@ library
         gdi32
         winmm
         shell32
-        gcc_eh
+      if impl(ghc < 9.4.1)
+        extra-libraries: gcc_eh
 
   elif (flag(platform-linux) || (flag(detect-platform) && os(linux)))
     extra-libraries:
