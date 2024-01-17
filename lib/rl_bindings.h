@@ -78,6 +78,12 @@ FilePathList *LoadDroppedFiles_();
 
 void UnloadDroppedFiles_(FilePathList *a);
 
+AutomationEventList *LoadAutomationEventList_(char *a);
+
+bool ExportAutomationEventList_(AutomationEventList *a, char *b);
+
+void PlayAutomationEvent_(AutomationEvent *a);
+
 Vector2 *GetMousePosition_();
 
 Vector2 *GetMouseDelta_();
@@ -94,6 +100,10 @@ void UpdateCameraPro_(Camera3D *a, Vector3 *b, Vector3 *c, float d);
 
 void SetShapesTexture_(Texture *a, Rectangle *b);
 
+Texture2D *GetShapesTexture_();
+
+Rectangle *GetShapesTextureRectangle_();
+
 void DrawPixel_(int a, int b, Color *c);
 
 void DrawPixelV_(Vector2 *a, Color *b);
@@ -104,17 +114,9 @@ void DrawLineV_(Vector2 *a, Vector2 *b, Color *c);
 
 void DrawLineEx_(Vector2 *a, Vector2 *b, float c, Color *d);
 
-void DrawLineBezier_(Vector2 *a, Vector2 *b, float c, Color *d);
-
-void DrawLineBezierQuad_(Vector2 *a, Vector2 *b, Vector2 *c, float d, Color *e);
-
-void DrawLineBezierCubic_(Vector2 *a, Vector2 *b, Vector2 *c, Vector2 *d, float e, Color *f);
-
-void DrawLineBSpline_(Vector2 *a, int b, float c, Color *d);
-
-void DrawLineCatmullRom_(Vector2 *a, int b, float c, Color *d);
-
 void DrawLineStrip_(Vector2 *a, int b, Color *c);
+
+void DrawLineBezier_(Vector2 *a, Vector2 *b, float c, Color *d);
 
 void DrawCircle_(int a, int b, float c, Color *d);
 
@@ -174,6 +176,36 @@ void DrawPolyLines_(Vector2 *a, int b, float c, float d, Color *e);
 
 void DrawPolyLinesEx_(Vector2 *a, int b, float c, float d, float e, Color *f);
 
+void DrawSplineLinear_(Vector2 *a, int b, float c, Color *d);
+
+void DrawSplineBasis_(Vector2 *a, int b, float c, Color *d);
+
+void DrawSplineCatmullRom_(Vector2 *a, int b, float c, Color *d);
+
+void DrawSplineBezierQuadratic_(Vector2 *a, int b, float c, Color *d);
+
+void DrawSplineBezierCubic_(Vector2 *a, int b, float c, Color *d);
+
+void DrawSplineSegmentLinear_(Vector2 *a, Vector2 *b, float c, Color *d);
+
+void DrawSplineSegmentBasis_(Vector2 *a, Vector2 *b, Vector2 *c, Vector2 *d, float e, Color *f);
+
+void DrawSplineSegmentCatmullRom_(Vector2 *a, Vector2 *b, Vector2 *c, Vector2 *d, float e, Color *f);
+
+void DrawSplineSegmentBezierQuadratic_(Vector2 *a, Vector2 *b, Vector2 *c, float d, Color *e);
+
+void DrawSplineSegmentBezierCubic_(Vector2 *a, Vector2 *b, Vector2 *c, Vector2 *d, float e, Color *f);
+
+Vector2 *GetSplinePointLinear_(Vector2 *a, Vector2 *b, float c);
+
+Vector2 *GetSplinePointBasis_(Vector2 *a, Vector2 *b, Vector2 *c, Vector2 *d, float e);
+
+Vector2 *GetSplinePointCatmullRom_(Vector2 *a, Vector2 *b, Vector2 *c, Vector2 *d, float e);
+
+Vector2 *GetSplinePointBezierQuad_(Vector2 *a, Vector2 *b, Vector2 *c, float d);
+
+Vector2 *GetSplinePointBezierCubic_(Vector2 *a, Vector2 *b, Vector2 *c, Vector2 *d, float e);
+
 bool CheckCollisionRecs_(Rectangle *a, Rectangle *b);
 
 bool CheckCollisionCircles_(Vector2 *a, float b, Vector2 *c, float d);
@@ -201,6 +233,8 @@ Image *LoadImageRaw_(char *a, int b, int c, int d, int e);
 Image *LoadImageSvg_(char *a, int b, int c);
 
 Image *LoadImageAnim_(char *a, int *b);
+
+Image *LoadImageAnimFromMemory_(char *a, unsigned char *b, int c, int *d);
 
 Image *LoadImageFromMemory_(char *a, unsigned char *b, int c);
 
@@ -470,7 +504,9 @@ void DrawMesh_(Mesh *a, Material *b, Matrix *c);
 
 void DrawMeshInstanced_(Mesh *a, Material *b, Matrix *c, int d);
 
-int ExportMesh_(Mesh *a, char *b);
+bool ExportMesh_(Mesh *a, char *b);
+
+bool ExportMeshAsCode_(Mesh *a, char *b);
 
 BoundingBox *GetMeshBoundingBox_(Mesh *a);
 

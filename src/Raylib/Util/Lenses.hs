@@ -717,11 +717,6 @@ _vrDeviceInfo'vScreenSize f device =
     (\vScreenSize' -> device { RL.vrDeviceInfo'vScreenSize = vScreenSize' }) <$>
     f (RL.vrDeviceInfo'vScreenSize device)
 {-# INLINE _vrDeviceInfo'vScreenSize #-}
-_vrDeviceInfo'vScreenCenter :: Lens' RL.VrDeviceInfo Float
-_vrDeviceInfo'vScreenCenter f device =
-    (\vScreenCenter' -> device { RL.vrDeviceInfo'vScreenCenter = vScreenCenter' }) <$>
-    f (RL.vrDeviceInfo'vScreenCenter device)
-{-# INLINE _vrDeviceInfo'vScreenCenter #-}
 _vrDeviceInfo'eyeToScreenDistance :: Lens' RL.VrDeviceInfo Float
 _vrDeviceInfo'eyeToScreenDistance f device =
     (\eyeToScreenDistance' -> device { RL.vrDeviceInfo'eyeToScreenDistance = eyeToScreenDistance' }) <$>

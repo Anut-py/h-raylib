@@ -13,8 +13,8 @@ void UnloadAudioBuffer_(rAudioBuffer *buffer)
 
 void UnloadAudioBufferAlias(rAudioBuffer *alias)
 {
-    unsigned char ** dataPtr = (unsigned char **) ((char *) alias + 368); // Hack to get a pointer to alias.data (the struct definition is not in scope)
-    *dataPtr = 0; // Set alias.data to NULL so the data is not cleared
+    unsigned char **dataPtr = (unsigned char **)((char *)alias + 368); // Hack to get a pointer to alias.data (the struct definition is not in scope)
+    *dataPtr = 0;                                                      // Set alias.data to NULL so the data is not cleared
     UnloadAudioBuffer(alias);
 }
 
@@ -57,6 +57,15 @@ int rlGetPixelDataSize(int width, int height, int format)
         break;
     case RL_PIXELFORMAT_UNCOMPRESSED_R32G32B32A32:
         bpp = 32 * 4;
+        break;
+    case RL_PIXELFORMAT_UNCOMPRESSED_R16:
+        bpp = 16;
+        break;
+    case RL_PIXELFORMAT_UNCOMPRESSED_R16G16B16:
+        bpp = 16 * 3;
+        break;
+    case RL_PIXELFORMAT_UNCOMPRESSED_R16G16B16A16:
+        bpp = 16 * 4;
         break;
     case RL_PIXELFORMAT_COMPRESSED_DXT1_RGB:
     case RL_PIXELFORMAT_COMPRESSED_DXT1_RGBA:

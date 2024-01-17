@@ -18,6 +18,8 @@ import Foreign.C
 import Raylib.Types
   ( AudioCallback,
     AudioStream,
+    AutomationEvent,
+    AutomationEventList,
     BoundingBox,
     Camera2D,
     Camera3D,
@@ -35,6 +37,7 @@ import Raylib.Types
     ModelAnimation,
     Music,
     NPatchInfo,
+    RLRenderBatch,
     Ray,
     RayCollision,
     Rectangle,
@@ -49,7 +52,7 @@ import Raylib.Types
     Vector4,
     VrDeviceInfo,
     VrStereoConfig,
-    Wave, RLRenderBatch
+    Wave,
   )
 import Prelude hiding (length)
 
@@ -326,13 +329,17 @@ foreign import ccall safe "raylib.h GetTime"
   c'getTime ::
     IO CDouble
 
+foreign import ccall safe "raylib.h SetRandomSeed"
+  c'setRandomSeed ::
+    CUInt -> IO ()
+
 foreign import ccall safe "raylib.h GetRandomValue"
   c'getRandomValue ::
     CInt -> CInt -> IO CInt
 
-foreign import ccall safe "raylib.h SetRandomSeed"
-  c'setRandomSeed ::
-    CUInt -> IO ()
+foreign import ccall safe "raylib.h LoadRandomSequence"
+  c'loadRandomSequence ::
+    CUInt -> CInt -> CInt -> IO (Ptr CInt)
 
 foreign import ccall safe "raylib.h TakeScreenshot"
   c'takeScreenshot ::
@@ -479,6 +486,34 @@ foreign import ccall safe "raylib.h EncodeDataBase64"
 foreign import ccall safe "raylib.h DecodeDataBase64"
   c'decodeDataBase64 ::
     Ptr CUChar -> Ptr CInt -> IO (Ptr CUChar)
+
+foreign import ccall safe "rl_bindings.h LoadAutomationEventList_"
+  c'loadAutomationEventList ::
+    CString -> IO (Ptr AutomationEventList)
+
+foreign import ccall safe "rl_bindings.h ExportAutomationEventList_"
+  c'exportAutomationEventList ::
+    Ptr AutomationEventList -> CString -> IO CBool
+
+foreign import ccall safe "raylib.h SetAutomationEventList"
+  c'setAutomationEventList ::
+    Ptr AutomationEventList -> IO ()
+
+foreign import ccall safe "raylib.h SetAutomationEventBaseFrame"
+  c'setAutomationEventBaseFrame ::
+    CInt -> IO ()
+
+foreign import ccall safe "raylib.h StartAutomationEventRecording"
+  c'startAutomationEventRecording ::
+    IO ()
+
+foreign import ccall safe "raylib.h StopAutomationEventRecording"
+  c'stopAutomationEventRecording ::
+    IO ()
+
+foreign import ccall safe "rl_bindings.h PlayAutomationEvent"
+  c'playAutomationEvent ::
+    Ptr AutomationEvent -> IO ()
 
 foreign import ccall safe "raylib.h IsKeyPressed"
   c'isKeyPressed ::
@@ -658,6 +693,10 @@ foreign import ccall safe "rl_bindings.h UpdateCameraPro_"
 
 foreign import ccall safe "rl_bindings.h SetShapesTexture_" c'setShapesTexture :: Ptr Texture -> Ptr Rectangle -> IO ()
 
+foreign import ccall safe "rl_bindings.h GetShapesTexture_" c'getShapesTexture :: IO (Ptr Texture)
+
+foreign import ccall safe "rl_bindings.h GetShapesTextureRectangle_" c'getShapesTextureRectangle :: IO (Ptr Rectangle)
+
 foreign import ccall safe "rl_bindings.h DrawPixel_" c'drawPixel :: CInt -> CInt -> Ptr Color -> IO ()
 
 foreign import ccall safe "rl_bindings.h DrawPixelV_" c'drawPixelV :: Ptr Vector2 -> Ptr Color -> IO ()
@@ -668,17 +707,9 @@ foreign import ccall safe "rl_bindings.h DrawLineV_" c'drawLineV :: Ptr Vector2 
 
 foreign import ccall safe "rl_bindings.h DrawLineEx_" c'drawLineEx :: Ptr Vector2 -> Ptr Vector2 -> CFloat -> Ptr Color -> IO ()
 
-foreign import ccall safe "rl_bindings.h DrawLineBezier_" c'drawLineBezier :: Ptr Vector2 -> Ptr Vector2 -> CFloat -> Ptr Color -> IO ()
-
-foreign import ccall safe "rl_bindings.h DrawLineBezierQuad_" c'drawLineBezierQuad :: Ptr Vector2 -> Ptr Vector2 -> Ptr Vector2 -> CFloat -> Ptr Color -> IO ()
-
-foreign import ccall safe "rl_bindings.h DrawLineBezierCubic_" c'drawLineBezierCubic :: Ptr Vector2 -> Ptr Vector2 -> Ptr Vector2 -> Ptr Vector2 -> CFloat -> Ptr Color -> IO ()
-
-foreign import ccall safe "rl_bindings.h DrawLineBSpline_" c'drawLineBSpline :: Ptr Vector2 -> CInt -> CFloat -> Ptr Color -> IO ()
-
-foreign import ccall safe "rl_bindings.h DrawLineCatmullRom_" c'drawLineCatmullRom :: Ptr Vector2 -> CInt -> CFloat -> Ptr Color -> IO ()
-
 foreign import ccall safe "rl_bindings.h DrawLineStrip_" c'drawLineStrip :: Ptr Vector2 -> CInt -> Ptr Color -> IO ()
+
+foreign import ccall safe "rl_bindings.h DrawLineBezier_" c'drawLineBezier :: Ptr Vector2 -> Ptr Vector2 -> CFloat -> Ptr Color -> IO ()
 
 foreign import ccall safe "rl_bindings.h DrawCircle_" c'drawCircle :: CInt -> CInt -> CFloat -> Ptr Color -> IO ()
 
@@ -738,6 +769,36 @@ foreign import ccall safe "rl_bindings.h DrawPolyLines_" c'drawPolyLines :: Ptr 
 
 foreign import ccall safe "rl_bindings.h DrawPolyLinesEx_" c'drawPolyLinesEx :: Ptr Vector2 -> CInt -> CFloat -> CFloat -> CFloat -> Ptr Color -> IO ()
 
+foreign import ccall safe "rl_bindings.h DrawSplineLinear_" c'drawSplineLinear :: Ptr Vector2 -> CInt -> CFloat -> Ptr Color -> IO ()
+
+foreign import ccall safe "rl_bindings.h DrawSplineBasis_" c'drawSplineBasis :: Ptr Vector2 -> CInt -> CFloat -> Ptr Color -> IO ()
+
+foreign import ccall safe "rl_bindings.h DrawSplineCatmullRom_" c'drawSplineCatmullRom :: Ptr Vector2 -> CInt -> CFloat -> Ptr Color -> IO ()
+
+foreign import ccall safe "rl_bindings.h DrawSplineBezierQuadratic_" c'drawSplineBezierQuadratic :: Ptr Vector2 -> CInt -> CFloat -> Ptr Color -> IO ()
+
+foreign import ccall safe "rl_bindings.h DrawSplineBezierCubic_" c'drawSplineBezierCubic :: Ptr Vector2 -> CInt -> CFloat -> Ptr Color -> IO ()
+
+foreign import ccall safe "rl_bindings.h DrawSplineSegmentLinear_" c'drawSplineSegmentLinear :: Ptr Vector2 -> Ptr Vector2 -> CFloat -> Ptr Color -> IO ()
+
+foreign import ccall safe "rl_bindings.h DrawSplineSegmentBasis_" c'drawSplineSegmentBasis :: Ptr Vector2 -> Ptr Vector2 -> Ptr Vector2 -> Ptr Vector2 -> CFloat -> Ptr Color -> IO ()
+
+foreign import ccall safe "rl_bindings.h DrawSplineSegmentCatmullRom_" c'drawSplineSegmentCatmullRom :: Ptr Vector2 -> Ptr Vector2 -> Ptr Vector2 -> Ptr Vector2 -> CFloat -> Ptr Color -> IO ()
+
+foreign import ccall safe "rl_bindings.h DrawSplineSegmentBezierQuadratic_" c'drawSplineSegmentBezierQuadratic :: Ptr Vector2 -> Ptr Vector2 -> Ptr Vector2 -> CFloat -> Ptr Color -> IO ()
+
+foreign import ccall safe "rl_bindings.h DrawSplineSegmentBezierCubic_" c'drawSplineSegmentBezierCubic :: Ptr Vector2 -> Ptr Vector2 -> Ptr Vector2 -> Ptr Vector2 -> CFloat -> Ptr Color -> IO ()
+
+foreign import ccall safe "rl_bindings.h GetSplinePointLinear_" c'getSplinePointLinear :: Ptr Vector2 -> Ptr Vector2 -> CFloat -> IO (Ptr Vector2)
+
+foreign import ccall safe "rl_bindings.h GetSplinePointBasis_" c'getSplinePointBasis :: Ptr Vector2 -> Ptr Vector2 -> Ptr Vector2 -> Ptr Vector2 -> CFloat -> IO (Ptr Vector2)
+
+foreign import ccall safe "rl_bindings.h GetSplinePointCatmullRom_" c'getSplinePointCatmullRom :: Ptr Vector2 -> Ptr Vector2 -> Ptr Vector2 -> Ptr Vector2 -> CFloat -> IO (Ptr Vector2)
+
+foreign import ccall safe "rl_bindings.h GetSplinePointBezierQuad_" c'getSplinePointBezierQuad :: Ptr Vector2 -> Ptr Vector2 -> Ptr Vector2 -> CFloat -> IO (Ptr Vector2)
+
+foreign import ccall safe "rl_bindings.h GetSplinePointBezierCubic_" c'getSplinePointBezierCubic :: Ptr Vector2 -> Ptr Vector2 -> Ptr Vector2 -> Ptr Vector2 -> CFloat -> IO (Ptr Vector2)
+
 foreign import ccall safe "rl_bindings.h CheckCollisionRecs_" c'checkCollisionRecs :: Ptr Rectangle -> Ptr Rectangle -> IO CBool
 
 foreign import ccall safe "rl_bindings.h CheckCollisionCircles_" c'checkCollisionCircles :: Ptr Vector2 -> CFloat -> Ptr Vector2 -> CFloat -> IO CBool
@@ -765,6 +826,8 @@ foreign import ccall safe "rl_bindings.h LoadImageRaw_" c'loadImageRaw :: CStrin
 foreign import ccall safe "rl_bindings.h LoadImageSvg_" c'loadImageSvg :: CString -> CInt -> CInt -> IO (Ptr Image)
 
 foreign import ccall safe "rl_bindings.h LoadImageAnim_" c'loadImageAnim :: CString -> Ptr CInt -> IO (Ptr Image)
+
+foreign import ccall safe "rl_bindings.h LoadImageAnimFromMemory_" c'loadImageAnimFromMemory :: CString -> Ptr CUChar -> CInt -> Ptr CInt -> IO (Ptr Image)
 
 foreign import ccall safe "rl_bindings.h LoadImageFromMemory_" c'loadImageFromMemory :: CString -> Ptr CUChar -> CInt -> IO (Ptr Image)
 
@@ -831,6 +894,10 @@ foreign import ccall safe "raylib.h ImageAlphaPremultiply"
 foreign import ccall safe "raylib.h ImageBlurGaussian"
   c'imageBlurGaussian ::
     Ptr Image -> CInt -> IO ()
+
+foreign import ccall safe "raylib.h ImageKernelConvolution"
+  c'imageKernelConvolution ::
+    Ptr Image -> Ptr CFloat -> CInt -> IO ()
 
 foreign import ccall safe "raylib.h ImageResize"
   c'imageResize ::
@@ -1162,6 +1229,8 @@ foreign import ccall safe "rl_bindings.h DrawMeshInstanced_" c'drawMeshInstanced
 
 foreign import ccall safe "rl_bindings.h ExportMesh_" c'exportMesh :: Ptr Mesh -> CString -> IO CBool
 
+foreign import ccall safe "rl_bindings.h ExportMeshAsCode_" c'exportMeshAsCode :: Ptr Mesh -> CString -> IO CBool
+
 foreign import ccall safe "rl_bindings.h GetMeshBoundingBox_" c'getMeshBoundingBox :: Ptr Mesh -> IO (Ptr BoundingBox)
 
 foreign import ccall safe "raylib.h GenMeshTangents"
@@ -1452,6 +1521,12 @@ foreign import ccall safe "rlgl.h rlEnableShader" c'rlEnableShader :: CUInt -> I
 foreign import ccall safe "rlgl.h rlEnableFramebuffer" c'rlEnableFramebuffer :: CUInt -> IO ()
 
 foreign import ccall safe "rlgl.h rlActiveDrawBuffers" c'rlActiveDrawBuffers :: CInt -> IO ()
+
+foreign import ccall safe "rlgl.h rlBlitFramebuffer" c'rlBlitFramebuffer :: CInt -> CInt -> CInt -> CInt -> CInt -> CInt -> CInt -> CInt -> CInt -> IO ()
+
+foreign import ccall safe "rlgl.h rlBindFramebuffer" c'rlBindFramebuffer :: CUInt -> CUInt -> IO ()
+
+foreign import ccall safe "rlgl.h rlColorMask" c'rlColorMask :: CBool -> CBool -> CBool -> CBool -> IO ()
 
 foreign import ccall safe "rlgl.h rlSetCullFace" c'rlSetCullFace :: CInt -> IO ()
 

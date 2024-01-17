@@ -7,11 +7,11 @@ import Data.IORef (modifyIORef', readIORef)
 import qualified Data.Map as Map
 import Foreign
   ( Ptr,
-    Storable (peek, sizeOf),
+    Storable (peek, sizeOf, poke),
     castPtr,
     fromBool,
     peekArray,
-    toBool,
+    toBool, malloc
   )
 import Foreign.C
   ( CInt (CInt),
@@ -21,7 +21,7 @@ import Foreign.C
     withCString,
   )
 import Raylib.ForeignUtil (c'free, configsToBitflag, pop, popCArray, popCString, withFreeable, withFreeableArray, withFreeableArrayLen, withMaybeCString)
-import Raylib.Internal (addShaderId, unloadFrameBuffers, unloadShaders, unloadSingleShader, unloadTextures, unloadVaoIds, unloadVboIds, WindowResources, shaderLocations, defaultWindowResources)
+import Raylib.Internal (addShaderId, unloadFrameBuffers, unloadShaders, unloadSingleShader, unloadTextures, unloadVaoIds, unloadVboIds, WindowResources, shaderLocations, defaultWindowResources, addAutomationEventList, unloadSingleAutomationEventList, unloadAutomationEventLists)
 import Raylib.Native
   ( c'beginBlendMode,
     c'beginMode2D,
@@ -171,7 +171,7 @@ import Raylib.Native
     c'takeScreenshot,
     c'traceLog,
     c'waitTime,
-    c'windowShouldClose, c'isKeyPressedRepeat,
+    c'windowShouldClose, c'isKeyPressedRepeat, c'loadRandomSequence, c'loadAutomationEventList, c'exportAutomationEventList, c'setAutomationEventList, c'setAutomationEventBaseFrame, c'startAutomationEventRecording, c'stopAutomationEventRecording, c'playAutomationEvent,
   )
 import Raylib.Types
   ( BlendMode,
@@ -204,8 +204,9 @@ import Raylib.Types
     VrDeviceInfo,
     VrStereoConfig,
     unpackShaderUniformData,
-    unpackShaderUniformDataV,
+    unpackShaderUniformDataV, AutomationEventList, AutomationEventListRef, AutomationEvent,
   )
+import Foreign.Ptr (nullPtr)
 
 initWindow :: Int -> Int -> String -> IO WindowResources
 initWindow width height title = withCString title (c'initWindow (fromIntegral width) (fromIntegral height)) >> defaultWindowResources
@@ -220,6 +221,7 @@ closeWindow wr = do
   unloadFrameBuffers wr
   unloadVaoIds wr
   unloadVboIds wr
+  unloadAutomationEventLists wr
   c'closeWindow
 
 isWindowReady :: IO Bool
@@ -570,11 +572,14 @@ getFrameTime = realToFrac <$> c'getFrameTime
 getTime :: IO Double
 getTime = realToFrac <$> c'getTime
 
+setRandomSeed :: Integer -> IO ()
+setRandomSeed seed = c'setRandomSeed $ fromIntegral seed
+
 getRandomValue :: Int -> Int -> IO Int
 getRandomValue minVal maxVal = fromIntegral <$> c'getRandomValue (fromIntegral minVal) (fromIntegral maxVal)
 
-setRandomSeed :: Integer -> IO ()
-setRandomSeed seed = c'setRandomSeed $ fromIntegral seed
+loadRandomSequence :: Integer -> Int -> Int -> IO [Int]
+loadRandomSequence count rMin rMax = map fromIntegral <$> (popCArray (fromIntegral count) =<< c'loadRandomSequence (fromIntegral count) (fromIntegral rMin) (fromIntegral rMax))
 
 takeScreenshot :: String -> IO ()
 takeScreenshot fileName = withCString fileName c'takeScreenshot
@@ -749,6 +754,41 @@ decodeDataBase64 encodedData = do
               return $ map fromIntegral arr
           )
     )
+
+loadAutomationEventList :: String -> IO AutomationEventList
+loadAutomationEventList fileName = withCString fileName c'loadAutomationEventList >>= pop
+
+newAutomationEventList :: IO AutomationEventList
+newAutomationEventList = c'loadAutomationEventList nullPtr >>= pop
+
+exportAutomationEventList :: AutomationEventList -> String -> IO Bool
+exportAutomationEventList list fileName = toBool <$> withFreeable list (withCString fileName . c'exportAutomationEventList)
+
+setAutomationEventList :: AutomationEventList -> WindowResources -> IO AutomationEventListRef
+setAutomationEventList list wr = do
+  ptr <- malloc
+  poke ptr list
+  c'setAutomationEventList ptr
+  addAutomationEventList (castPtr ptr) wr
+  return ptr
+
+setAutomationEventBaseFrame :: Int -> IO ()
+setAutomationEventBaseFrame frame = c'setAutomationEventBaseFrame (fromIntegral frame)
+
+startAutomationEventRecording :: IO ()
+startAutomationEventRecording = c'startAutomationEventRecording
+
+stopAutomationEventRecording :: IO ()
+stopAutomationEventRecording = c'stopAutomationEventRecording
+
+playAutomationEvent :: AutomationEvent -> IO ()
+playAutomationEvent event = withFreeable event c'playAutomationEvent
+
+peekAutomationEventList :: AutomationEventListRef -> IO AutomationEventList
+peekAutomationEventList = peek
+
+freeAutomationEventList :: AutomationEventListRef -> WindowResources -> IO ()
+freeAutomationEventList list = unloadSingleAutomationEventList (castPtr list)
 
 isKeyPressed :: KeyboardKey -> IO Bool
 isKeyPressed key = toBool <$> c'isKeyPressed (fromIntegral $ fromEnum key)

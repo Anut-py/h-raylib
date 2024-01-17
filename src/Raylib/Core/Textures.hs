@@ -9,13 +9,13 @@ import Foreign
     Storable (peek, sizeOf),
     toBool,
   )
-import Foreign.C (CUChar (CUChar), withCString)
+import Foreign.C (CUChar (CUChar), withCString, CInt, CFloat)
 import GHC.IO (unsafePerformIO)
 import Raylib.ForeignUtil
   ( pop,
     popCArray,
     withFreeable,
-    withFreeableArrayLen,
+    withFreeableArrayLen, withFreeableArray,
   )
 import Raylib.Internal (WindowResources, addFrameBuffer, addTextureId, unloadSingleFrameBuffer, unloadSingleTexture)
 import Raylib.Native
@@ -117,7 +117,7 @@ import Raylib.Native
     c'setTextureFilter,
     c'setTextureWrap,
     c'updateTexture,
-    c'updateTextureRec,
+    c'updateTextureRec, c'loadImageAnimFromMemory, c'imageKernelConvolution,
   )
 import Raylib.Types
   ( Color,
@@ -159,6 +159,22 @@ loadImageAnim fileName =
               frameNum <- fromIntegral <$> peek frames
               return (img, frameNum)
           )
+    )
+
+
+loadImageAnimFromMemory :: String -> [Integer] -> IO (Image, Int)
+loadImageAnimFromMemory fileType fileData =
+  withCString fileType
+    (\ft ->
+      withFreeableArrayLen (map fromIntegral fileData)
+        (\size fd ->
+          withFreeable (0 :: CInt)
+            (\frames -> do
+                img <- c'loadImageAnimFromMemory ft fd (fromIntegral $ size * sizeOf (0 :: CUChar)) frames >>= pop
+                frameNum <- fromIntegral <$> peek frames
+                return (img, frameNum)
+            )
+        )
     )
 
 loadImageFromMemory :: String -> [Integer] -> IO Image
@@ -272,6 +288,9 @@ imageAlphaPremultiply image = withFreeable image (\i -> c'imageAlphaPremultiply 
 
 imageBlurGaussian :: Image -> Int -> IO Image
 imageBlurGaussian image blurSize = withFreeable image (\i -> c'imageBlurGaussian i (fromIntegral blurSize) >> peek i)
+
+imageKernelConvolution :: Image -> [Float] -> IO Image
+imageKernelConvolution image kernel = withFreeable image (\i -> withFreeableArray (map realToFrac kernel :: [CFloat]) (\k -> c'imageKernelConvolution i k (fromIntegral $ length kernel) >> peek i))
 
 imageResize :: Image -> Int -> Int -> IO Image
 imageResize image newWidth newHeight = withFreeable image (\i -> c'imageResize i (fromIntegral newWidth) (fromIntegral newHeight) >> peek i)

@@ -90,7 +90,7 @@ import Raylib.Native
     c'setModelMeshMaterial,
     c'updateMeshBuffer,
     c'updateModelAnimation,
-    c'uploadMesh,
+    c'uploadMesh, c'exportMeshAsCode,
   )
 import Raylib.Types
   ( BoundingBox,
@@ -262,6 +262,9 @@ drawMeshInstanced mesh material transforms = withFreeable mesh (\m -> withFreeab
 
 exportMesh :: Mesh -> String -> IO Bool
 exportMesh mesh fileName = toBool <$> withFreeable mesh (withCString fileName . c'exportMesh)
+
+exportMeshAsCode :: Mesh -> String -> IO Bool
+exportMeshAsCode mesh fileName = toBool <$> withFreeable mesh (withCString fileName . c'exportMeshAsCode)
 
 getMeshBoundingBox :: Mesh -> IO BoundingBox
 getMeshBoundingBox mesh = withFreeable mesh c'getMeshBoundingBox >>= pop

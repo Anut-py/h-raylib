@@ -100,6 +100,11 @@ executable basic-window
   hs-source-dirs: examples/basic-window/src
   main-is:        Main.hs
 
+executable basic-automation-events
+  import:         example-options
+  hs-source-dirs: examples/basic-automation-events/src
+  main-is:        Main.hs
+
 executable first-person-camera
   import:         example-options
   hs-source-dirs: examples/first-person-camera/src
@@ -186,7 +191,7 @@ library
     DeriveAnyClass
     ForeignFunctionInterface
 
-  cc-options:       -Wno-discarded-qualifiers -Wno-stringop-overflow -DPLATFORM_DESKTOP
+  cc-options:       -DPLATFORM_DESKTOP
 
   if (flag(platform-windows) || (flag(detect-platform) && os(windows)))
     if flag(mingw-cross)

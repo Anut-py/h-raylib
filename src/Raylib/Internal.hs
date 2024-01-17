@@ -1,16 +1,49 @@
 {-# OPTIONS -Wall #-}
 {-# LANGUAGE ForeignFunctionInterface #-}
 
-module Raylib.Internal (WindowResources(..), defaultWindowResources, unloadSingleShader, unloadSingleTexture, unloadSingleFrameBuffer, unloadSingleVaoId, unloadSingleVboIdList, unloadSingleCtxDataPtr, unloadSingleAudioBuffer, unloadSingleAudioBufferAlias, unloadShaders, unloadTextures, unloadFrameBuffers, unloadVaoIds, unloadVboIds, unloadCtxData, unloadAudioBuffers, unloadAudioBufferAliases, addShaderId, addTextureId, addFrameBuffer, addVaoId, addVboIds, addCtxData, addAudioBuffer, addAudioBufferAlias, c'rlGetShaderIdDefault, getPixelDataSize) where
+module Raylib.Internal
+  ( WindowResources (..),
+    defaultWindowResources,
+    unloadSingleShader,
+    unloadSingleTexture,
+    unloadSingleFrameBuffer,
+    unloadSingleVaoId,
+    unloadSingleVboIdList,
+    unloadSingleCtxDataPtr,
+    unloadSingleAudioBuffer,
+    unloadSingleAudioBufferAlias,
+    unloadSingleAutomationEventList,
+    unloadShaders,
+    unloadTextures,
+    unloadFrameBuffers,
+    unloadVaoIds,
+    unloadVboIds,
+    unloadCtxData,
+    unloadAudioBuffers,
+    unloadAudioBufferAliases,
+    unloadAutomationEventLists,
+    addShaderId,
+    addTextureId,
+    addFrameBuffer,
+    addVaoId,
+    addVboIds,
+    addCtxData,
+    addAudioBuffer,
+    addAudioBufferAlias,
+    addAutomationEventList,
+    c'rlGetShaderIdDefault,
+    getPixelDataSize,
+  )
+where
 
 import Control.Monad (forM_, unless, when)
-import Data.IORef (IORef, modifyIORef, readIORef, newIORef)
+import Data.IORef (IORef, modifyIORef, newIORef, readIORef)
 import Data.List (delete)
 import Data.Map (Map)
-import Foreign (Ptr)
+import qualified Data.Map as Map
+import Foreign (Ptr, Storable (peekByteOff), free)
 import Foreign.C (CInt (..), CUInt (..))
 import GHC.IO (unsafePerformIO)
-import qualified Data.Map as Map
 
 data WindowResources = WindowResources
   { shaderIds :: IORef [CUInt],
@@ -21,7 +54,8 @@ data WindowResources = WindowResources
     vboIds :: IORef [CUInt],
     ctxDataPtrs :: IORef [(CInt, Ptr ())],
     audioBuffers :: IORef [Ptr ()],
-    audioBufferAliases :: IORef [Ptr ()]
+    audioBufferAliases :: IORef [Ptr ()],
+    automationEventLists :: IORef [Ptr ()]
   }
 
 defaultWindowResources :: IO WindowResources
@@ -35,17 +69,20 @@ defaultWindowResources = do
   cdps <- newIORef []
   aBufs <- newIORef []
   aliases <- newIORef []
-  return WindowResources {
-    shaderIds = sIds,
-    shaderLocations = sLocs,
-    textureIds = tIds,
-    frameBuffers = fbs,
-    vaoIds = vaos,
-    vboIds = vbos,
-    ctxDataPtrs = cdps,
-    audioBuffers = aBufs,
-    audioBufferAliases = aliases
-  }
+  eventLists <- newIORef []
+  return
+    WindowResources
+      { shaderIds = sIds,
+        shaderLocations = sLocs,
+        textureIds = tIds,
+        frameBuffers = fbs,
+        vaoIds = vaos,
+        vboIds = vbos,
+        ctxDataPtrs = cdps,
+        audioBuffers = aBufs,
+        audioBufferAliases = aliases,
+        automationEventLists = eventLists
+      }
 
 unloadSingleShader :: (Integral a) => a -> WindowResources -> IO ()
 unloadSingleShader sId' wr = do
@@ -99,11 +136,16 @@ unloadSingleAudioBuffer :: Ptr () -> WindowResources -> IO ()
 unloadSingleAudioBuffer buffer wr = do
   c'unloadAudioBuffer buffer
   modifyIORef (audioBuffers wr) (delete buffer)
-  
+
 unloadSingleAudioBufferAlias :: Ptr () -> WindowResources -> IO ()
 unloadSingleAudioBufferAlias buffer wr = do
   c'unloadAudioBufferAlias buffer
   modifyIORef (audioBufferAliases wr) (delete buffer)
+
+unloadSingleAutomationEventList :: Ptr () -> WindowResources -> IO ()
+unloadSingleAutomationEventList eventList wr = do
+  _unloadAutomationEventList eventList
+  modifyIORef (automationEventLists wr) (delete eventList)
 
 unloadShaders :: WindowResources -> IO ()
 unloadShaders wr = do
@@ -194,6 +236,17 @@ unloadAudioBufferAliases wr = do
         putStrLn $ "INFO: AUDIO: h-raylib successfully auto-unloaded audio buffer aliases (" ++ show l ++ " in total)"
     )
 
+unloadAutomationEventLists :: WindowResources -> IO ()
+unloadAutomationEventLists wr = do
+  vals <- readIORef (automationEventLists wr)
+  let l = length vals
+  when
+    (l > 0)
+    ( do
+        forM_ vals _unloadAutomationEventList
+        putStrLn $ "INFO: AUTOMATION: h-raylib successfully auto-unloaded automation event lists (" ++ show l ++ " in total)"
+    )
+
 addShaderId :: (Integral a) => a -> WindowResources -> IO ()
 addShaderId sId' wr = do
   modifyIORef (shaderIds wr) (\xs -> if sId `elem` xs then xs else sId : xs)
@@ -234,10 +287,14 @@ addCtxData ctxType' ctxData wr = do
 addAudioBuffer :: Ptr () -> WindowResources -> IO ()
 addAudioBuffer buffer wr = do
   modifyIORef (audioBuffers wr) (\xs -> if buffer `elem` xs then xs else buffer : xs)
-  
+
 addAudioBufferAlias :: Ptr () -> WindowResources -> IO ()
 addAudioBufferAlias alias wr = do
   modifyIORef (audioBufferAliases wr) (\xs -> if alias `elem` xs then xs else alias : xs)
+
+addAutomationEventList :: Ptr () -> WindowResources -> IO ()
+addAutomationEventList eventList wr = do
+  modifyIORef (automationEventLists wr) (\xs -> if eventList `elem` xs then xs else eventList : xs)
 
 foreign import ccall safe "rlgl.h rlGetShaderIdDefault" c'rlGetShaderIdDefault :: IO CUInt
 
@@ -256,6 +313,9 @@ foreign import ccall safe "rl_internal.h UnloadMusicStreamData" c'unloadMusicStr
 foreign import ccall safe "rl_internal.h UnloadAudioBuffer_" c'unloadAudioBuffer :: Ptr () -> IO ()
 
 foreign import ccall safe "rl_internal.h UnloadAudioBufferAlias" c'unloadAudioBufferAlias :: Ptr () -> IO ()
+
+_unloadAutomationEventList :: Ptr () -> IO ()
+_unloadAutomationEventList ptr = (free =<< (peekByteOff ptr 8 :: IO (Ptr ()))) >> free ptr
 
 foreign import ccall safe "raylib.h GetPixelDataSize"
   c'getPixelDataSize ::

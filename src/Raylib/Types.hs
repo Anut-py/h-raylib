@@ -13,6 +13,7 @@ import Foreign
     castPtr,
     fromBool,
     malloc,
+    callocBytes,
     newArray,
     newForeignPtr,
     nullFunPtr,
@@ -1574,6 +1575,36 @@ instance Storable RLBufferHint where
     return $ toEnum $ fromEnum (val :: CInt)
   poke ptr v = poke (castPtr ptr) (fromIntegral (fromEnum v) :: CInt)
 
+-- | GL buffer mask
+data RLBitField
+  -- | GL_COLOR_BUFFER_BIT
+  = RLGLColorBuffer
+  -- | GL_DEPTH_BUFFER_BIT
+  | RLGLDepthBuffer
+  -- | GL_STENCIL_BUFFER_BIT
+  | RLGLStencilBuffer
+  deriving (Eq, Show)
+
+instance Enum RLBitField where
+  fromEnum n = case n of
+    RLGLColorBuffer -> 0x00004000
+    RLGLDepthBuffer -> 0x00000100
+    RLGLStencilBuffer -> 0x00000400
+  
+  toEnum n = case n of
+    0x00004000 -> RLGLColorBuffer
+    0x00000100 -> RLGLDepthBuffer
+    0x00000400 -> RLGLStencilBuffer
+    _ -> error $ "(RLGLBitField.toEnum) Invalid value: " ++ show n
+
+instance Storable RLBitField where
+  sizeOf _ = 4
+  alignment _ = 4
+  peek ptr = do
+    val <- peek (castPtr ptr)
+    return $ toEnum $ fromEnum (val :: CInt)
+  poke ptr v = poke (castPtr ptr) (fromIntegral (fromEnum v) :: CInt)
+
 ------------------------------------------------
 -- Raylib structures ---------------------------
 ------------------------------------------------
@@ -2676,7 +2707,6 @@ data VrDeviceInfo = VrDeviceInfo
     vrDeviceInfo'vResolution :: Int,
     vrDeviceInfo'hScreenSize :: Float,
     vrDeviceInfo'vScreenSize :: Float,
-    vrDeviceInfo'vScreenCenter :: Float,
     vrDeviceInfo'eyeToScreenDistance :: Float,
     vrDeviceInfo'lensSeparationDistance :: Float,
     vrDeviceInfo'interpupillaryDistance :: Float,
@@ -2686,31 +2716,29 @@ data VrDeviceInfo = VrDeviceInfo
   deriving (Eq, Show, Freeable)
 
 instance Storable VrDeviceInfo where
-  sizeOf _ = 64
+  sizeOf _ = 60
   alignment _ = 4
   peek _p = do
     hResolution <- fromIntegral <$> (peekByteOff _p 0 :: IO CInt)
     vResolution <- fromIntegral <$> (peekByteOff _p 4 :: IO CInt)
     hScreenSize <- realToFrac <$> (peekByteOff _p 8 :: IO CFloat)
     vScreenSize <- realToFrac <$> (peekByteOff _p 12 :: IO CFloat)
-    vScreenCenter <- realToFrac <$> (peekByteOff _p 16 :: IO CFloat)
-    eyeToScreenDistance <- realToFrac <$> (peekByteOff _p 20 :: IO CFloat)
-    lensSeparationDistance <- realToFrac <$> (peekByteOff _p 24 :: IO CFloat)
-    interpupillaryDistance <- realToFrac <$> (peekByteOff _p 28 :: IO CFloat)
-    lensDistortionValues <- map realToFrac <$> (peekStaticArrayOff 4 (castPtr _p) 32 :: IO [CFloat])
-    chromaAbCorrection <- map realToFrac <$> (peekStaticArrayOff 4 (castPtr _p) 48 :: IO [CFloat])
-    return $ VrDeviceInfo hResolution vResolution hScreenSize vScreenSize vScreenCenter eyeToScreenDistance lensSeparationDistance interpupillaryDistance lensDistortionValues chromaAbCorrection
-  poke _p (VrDeviceInfo hResolution vResolution hScreenSize vScreenSize vScreenCenter eyeToScreenDistance lensSeparationDistance interpupillaryDistance lensDistortionValues chromaAbCorrection) = do
+    eyeToScreenDistance <- realToFrac <$> (peekByteOff _p 16 :: IO CFloat)
+    lensSeparationDistance <- realToFrac <$> (peekByteOff _p 20 :: IO CFloat)
+    interpupillaryDistance <- realToFrac <$> (peekByteOff _p 24 :: IO CFloat)
+    lensDistortionValues <- map realToFrac <$> (peekStaticArrayOff 4 (castPtr _p) 28 :: IO [CFloat])
+    chromaAbCorrection <- map realToFrac <$> (peekStaticArrayOff 4 (castPtr _p) 44 :: IO [CFloat])
+    return $ VrDeviceInfo hResolution vResolution hScreenSize vScreenSize eyeToScreenDistance lensSeparationDistance interpupillaryDistance lensDistortionValues chromaAbCorrection
+  poke _p (VrDeviceInfo hResolution vResolution hScreenSize vScreenSize eyeToScreenDistance lensSeparationDistance interpupillaryDistance lensDistortionValues chromaAbCorrection) = do
     pokeByteOff _p 0 (fromIntegral hResolution :: CInt)
     pokeByteOff _p 4 (fromIntegral vResolution :: CInt)
     pokeByteOff _p 8 (realToFrac hScreenSize :: CFloat)
     pokeByteOff _p 12 (realToFrac vScreenSize :: CFloat)
-    pokeByteOff _p 16 (realToFrac vScreenCenter :: CFloat)
-    pokeByteOff _p 20 (realToFrac eyeToScreenDistance :: CFloat)
-    pokeByteOff _p 24 (realToFrac lensSeparationDistance :: CFloat)
-    pokeByteOff _p 28 (realToFrac interpupillaryDistance :: CFloat)
-    pokeStaticArrayOff (castPtr _p) 32 (map realToFrac lensDistortionValues :: [CFloat])
-    pokeStaticArrayOff (castPtr _p) 48 (map realToFrac chromaAbCorrection :: [CFloat])
+    pokeByteOff _p 16 (realToFrac eyeToScreenDistance :: CFloat)
+    pokeByteOff _p 20 (realToFrac lensSeparationDistance :: CFloat)
+    pokeByteOff _p 24 (realToFrac interpupillaryDistance :: CFloat)
+    pokeStaticArrayOff (castPtr _p) 28 (map realToFrac lensDistortionValues :: [CFloat])
+    pokeStaticArrayOff (castPtr _p) 44 (map realToFrac chromaAbCorrection :: [CFloat])
     return ()
 
 data VrStereoConfig = VrStereoConfig
@@ -2754,7 +2782,7 @@ data FilePathList = FilePathList
     filePathList'paths :: [String]
   }
   deriving (Eq, Show)
-
+  
 instance Storable FilePathList where
   sizeOf _ = 16
   alignment _ = 4
@@ -2778,6 +2806,57 @@ instance Freeable FilePathList where
     pathsCStrings <- peekArray (length $ filePathList'paths val) pathsPtr
     mapM_ (c'free . castPtr) pathsCStrings
     c'free $ castPtr pathsPtr
+
+data AutomationEvent = AutomationEvent
+  {
+    automationEvent'frame :: Integer,
+    automationEvent'type :: Integer,
+    automationEvent'params :: [Int]
+  }
+  deriving (Eq, Show, Freeable)
+
+instance Storable AutomationEvent where
+  sizeOf _ = 24
+  alignment _ = 4
+  peek _p = do
+    frame <- fromIntegral <$> (peekByteOff _p 0 :: IO CUInt)
+    aeType <- fromIntegral <$> (peekByteOff _p 4 :: IO CUInt)
+    params <- map fromIntegral <$> peekStaticArrayOff 4 (castPtr _p :: Ptr CInt) 8
+    return $ AutomationEvent frame aeType params
+  poke _p (AutomationEvent frame aeType params) = do
+    pokeByteOff _p 0 (fromIntegral frame :: CUInt)
+    pokeByteOff _p 4 (fromIntegral aeType :: CUInt)
+    pokeStaticArrayOff (castPtr _p :: Ptr CInt) 8 (map fromIntegral params)
+    return ()
+
+data AutomationEventList = AutomationEventList
+  {
+    automationEventList'capacity :: Integer,
+    automationEventList'events :: [AutomationEvent]
+  } deriving (Eq, Show)
+
+instance Storable AutomationEventList where
+  sizeOf _ = 16
+  alignment _ = 8
+  peek _p = do
+    capacity <- fromIntegral <$> (peekByteOff _p 0 :: IO CUInt)
+    count <- fromIntegral <$> (peekByteOff _p 4 :: IO CUInt)
+    eventsPtr <- (peekByteOff _p 8 :: IO (Ptr AutomationEvent))
+    events <- peekArray count eventsPtr
+    return $ AutomationEventList capacity events
+  poke _p (AutomationEventList capacity events) = do
+    pokeByteOff _p 0 (fromIntegral capacity :: CUInt)
+    pokeByteOff _p 4 (fromIntegral (length events) :: CUInt)
+    ptr <- callocBytes (fromIntegral capacity * sizeOf (undefined :: AutomationEvent))
+    pokeByteOff _p 8 ptr
+    return ()
+
+instance Freeable AutomationEventList where
+  rlFreeDependents _ ptr = do
+    eventsPtr <- (peekByteOff ptr 8 :: IO (Ptr AutomationEvent))
+    c'free $ castPtr eventsPtr
+
+type AutomationEventListRef = Ptr AutomationEventList
 
 ---- rlgl.h
 

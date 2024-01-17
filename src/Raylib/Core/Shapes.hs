@@ -26,11 +26,7 @@ import Raylib.Native
     c'drawEllipse,
     c'drawEllipseLines,
     c'drawLine,
-    c'drawLineBSpline,
     c'drawLineBezier,
-    c'drawLineBezierCubic,
-    c'drawLineBezierQuad,
-    c'drawLineCatmullRom,
     c'drawLineEx,
     c'drawLineStrip,
     c'drawLineV,
@@ -57,12 +53,18 @@ import Raylib.Native
     c'drawTriangleLines,
     c'drawTriangleStrip,
     c'getCollisionRec,
-    c'setShapesTexture,
+    c'setShapesTexture, c'getShapesTexture, c'getShapesTextureRectangle, c'drawSplineLinear, c'drawSplineBasis, c'drawSplineCatmullRom, c'drawSplineBezierQuadratic, c'drawSplineBezierCubic, c'drawSplineSegmentLinear, c'drawSplineSegmentBasis, c'drawSplineSegmentCatmullRom, c'drawSplineSegmentBezierCubic, c'drawSplineSegmentBezierQuadratic, c'getSplinePointLinear, c'getSplinePointBasis, c'getSplinePointCatmullRom, c'getSplinePointBezierCubic, c'getSplinePointBezierQuad,
   )
 import Raylib.Types (Color, Rectangle, Texture, Vector2 (Vector2))
 
 setShapesTexture :: Texture -> Rectangle -> IO ()
 setShapesTexture tex source = withFreeable tex (withFreeable source . c'setShapesTexture)
+
+getShapesTexture :: IO Texture
+getShapesTexture = c'getShapesTexture >>= pop
+
+getShapesTextureRectangle :: IO Rectangle
+getShapesTextureRectangle = c'getShapesTextureRectangle >>= pop
 
 drawPixel :: Int -> Int -> Color -> IO ()
 drawPixel x y color = withFreeable color $ c'drawPixel (fromIntegral x) (fromIntegral y)
@@ -81,45 +83,12 @@ drawLineEx :: Vector2 -> Vector2 -> Float -> Color -> IO ()
 drawLineEx start end thickness color =
   withFreeable start (\s -> withFreeable end (\e -> withFreeable color (c'drawLineEx s e (realToFrac thickness))))
 
+drawLineStrip :: [Vector2] -> Color -> IO ()
+drawLineStrip points color = withFreeableArray points (\p -> withFreeable color $ c'drawLineStrip p (genericLength points))
+
 drawLineBezier :: Vector2 -> Vector2 -> Float -> Color -> IO ()
 drawLineBezier start end thickness color =
   withFreeable start (\s -> withFreeable end (\e -> withFreeable color (c'drawLineBezier s e (realToFrac thickness))))
-
-drawLineBezierQuad :: Vector2 -> Vector2 -> Vector2 -> Float -> Color -> IO ()
-drawLineBezierQuad start end control thickness color =
-  withFreeable start (\s -> withFreeable end (\e -> withFreeable control (\c -> withFreeable color (c'drawLineBezierQuad s e c (realToFrac thickness)))))
-
-drawLineBezierCubic :: Vector2 -> Vector2 -> Vector2 -> Vector2 -> Float -> Color -> IO ()
-drawLineBezierCubic start end startControl endControl thickness color =
-  withFreeable
-    start
-    ( \s ->
-        withFreeable
-          end
-          ( \e ->
-              withFreeable
-                startControl
-                ( \sc ->
-                    withFreeable
-                      endControl
-                      ( \ec ->
-                          withFreeable
-                            color
-                            ( c'drawLineBezierCubic s e sc ec (realToFrac thickness)
-                            )
-                      )
-                )
-          )
-    )
-
-drawLineBSpline :: [Vector2] -> Float -> Color -> IO ()
-drawLineBSpline points thickness color = withFreeableArrayLen points (\s p -> withFreeable color (c'drawLineBSpline p (fromIntegral s) (realToFrac thickness)))
-
-drawLineCatmullRom :: [Vector2] -> Float -> Color -> IO ()
-drawLineCatmullRom points thickness color = withFreeableArrayLen points (\s p -> withFreeable color (c'drawLineCatmullRom p (fromIntegral s) (realToFrac thickness)))
-
-drawLineStrip :: [Vector2] -> Color -> IO ()
-drawLineStrip points color = withFreeableArray points (\p -> withFreeable color $ c'drawLineStrip p (genericLength points))
 
 drawCircle :: Int -> Int -> Float -> Color -> IO ()
 drawCircle centerX centerY radius color = withFreeable color (c'drawCircle (fromIntegral centerX) (fromIntegral centerY) (realToFrac radius))
@@ -324,6 +293,51 @@ drawPolyLinesEx center sides radius rotation thickness color =
             (realToFrac rotation)
             (realToFrac thickness)
     )
+
+drawSplineLinear :: [Vector2] -> Float -> Color -> IO ()
+drawSplineLinear points thick color = withFreeableArrayLen points (\l p -> withFreeable color (c'drawSplineLinear p (fromIntegral l) (realToFrac thick)))
+
+drawSplineBasis :: [Vector2] -> Float -> Color -> IO ()
+drawSplineBasis points thick color = withFreeableArrayLen points (\l p -> withFreeable color (c'drawSplineBasis p (fromIntegral l) (realToFrac thick)))
+
+drawSplineCatmullRom :: [Vector2] -> Float -> Color -> IO ()
+drawSplineCatmullRom points thick color = withFreeableArrayLen points (\l p -> withFreeable color (c'drawSplineCatmullRom p (fromIntegral l) (realToFrac thick)))
+
+drawSplineBezierQuadratic :: [Vector2] -> Float -> Color -> IO ()
+drawSplineBezierQuadratic points thick color = withFreeableArrayLen points (\l p -> withFreeable color (c'drawSplineBezierQuadratic p (fromIntegral l) (realToFrac thick)))
+
+drawSplineBezierCubic :: [Vector2] -> Float -> Color -> IO ()
+drawSplineBezierCubic points thick color = withFreeableArrayLen points (\l p -> withFreeable color (c'drawSplineBezierCubic p (fromIntegral l) (realToFrac thick)))
+
+drawSplineSegmentLinear :: Vector2 -> Vector2 -> Float -> Color -> IO ()
+drawSplineSegmentLinear p1 p2 thick color = withFreeable p1 (\q1 -> withFreeable p2 (\q2 -> withFreeable color (c'drawSplineSegmentLinear q1 q2 (realToFrac thick))))
+
+drawSplineSegmentBasis :: Vector2 -> Vector2 -> Vector2 -> Vector2 -> Float -> Color -> IO ()
+drawSplineSegmentBasis p1 p2 p3 p4 thick color = withFreeable p1 (\q1 -> withFreeable p2 (\q2 -> withFreeable p3 (\q3 -> withFreeable p4 (\q4 -> withFreeable color (c'drawSplineSegmentBasis q1 q2 q3 q4 (realToFrac thick))))))
+
+drawSplineSegmentCatmullRom :: Vector2 -> Vector2 -> Vector2 -> Vector2 -> Float -> Color -> IO ()
+drawSplineSegmentCatmullRom p1 p2 p3 p4 thick color = withFreeable p1 (\q1 -> withFreeable p2 (\q2 -> withFreeable p3 (\q3 -> withFreeable p4 (\q4 -> withFreeable color (c'drawSplineSegmentCatmullRom q1 q2 q3 q4 (realToFrac thick))))))
+
+drawSplineSegmentBezierQuadratic :: Vector2 -> Vector2 -> Vector2 -> Float -> Color -> IO ()
+drawSplineSegmentBezierQuadratic p1 p2 p3 thick color = withFreeable p1 (\q1 -> withFreeable p2 (\q2 -> withFreeable p3 (\q3 -> withFreeable color (c'drawSplineSegmentBezierQuadratic q1 q2 q3 (realToFrac thick)))))
+
+drawSplineSegmentBezierCubic :: Vector2 -> Vector2 -> Vector2 -> Vector2 -> Float -> Color -> IO ()
+drawSplineSegmentBezierCubic p1 p2 p3 p4 thick color = withFreeable p1 (\q1 -> withFreeable p2 (\q2 -> withFreeable p3 (\q3 -> withFreeable p4 (\q4 -> withFreeable color (c'drawSplineSegmentBezierCubic q1 q2 q3 q4 (realToFrac thick))))))
+
+getSplinePointLinear :: Vector2 -> Vector2 -> Float -> Vector2
+getSplinePointLinear p1 p2 t = unsafePerformIO $ withFreeable p1 (\q1 -> withFreeable p2 (\q2 -> c'getSplinePointLinear q1 q2 (realToFrac t))) >>= pop
+
+getSplinePointBasis :: Vector2 -> Vector2 -> Vector2 -> Vector2 -> Float -> Vector2
+getSplinePointBasis p1 p2 p3 p4 t = unsafePerformIO $ withFreeable p1 (\q1 -> withFreeable p2 (\q2 -> withFreeable p3 (\q3 -> withFreeable p4 (\q4 -> c'getSplinePointBasis q1 q2 q3 q4 (realToFrac t))))) >>= pop
+
+getSplinePointCatmullRom :: Vector2 -> Vector2 -> Vector2 -> Vector2 -> Float -> Vector2
+getSplinePointCatmullRom p1 p2 p3 p4 t = unsafePerformIO $ withFreeable p1 (\q1 -> withFreeable p2 (\q2 -> withFreeable p3 (\q3 -> withFreeable p4 (\q4 -> c'getSplinePointCatmullRom q1 q2 q3 q4 (realToFrac t))))) >>= pop
+
+getSplinePointBezierQuad :: Vector2 -> Vector2 -> Vector2 -> Float -> Vector2
+getSplinePointBezierQuad p1 p2 p3 t = unsafePerformIO $ withFreeable p1 (\q1 -> withFreeable p2 (\q2 -> withFreeable p3 (\q3 -> c'getSplinePointBezierQuad q1 q2 q3 (realToFrac t)))) >>= pop
+
+getSplinePointBezierCubic :: Vector2 -> Vector2 -> Vector2 -> Vector2 -> Float -> Vector2
+getSplinePointBezierCubic p1 p2 p3 p4 t = unsafePerformIO $ withFreeable p1 (\q1 -> withFreeable p2 (\q2 -> withFreeable p3 (\q3 -> withFreeable p4 (\q4 -> c'getSplinePointBezierCubic q1 q2 q3 q4 (realToFrac t))))) >>= pop
 
 checkCollisionRecs :: Rectangle -> Rectangle -> Bool
 checkCollisionRecs rec1 rec2 = unsafePerformIO $ toBool <$> withFreeable rec1 (withFreeable rec2 . c'checkCollisionRecs)

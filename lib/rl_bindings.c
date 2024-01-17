@@ -207,6 +207,28 @@ void UnloadDroppedFiles_(FilePathList *a)
     UnloadDroppedFiles(*a);
 }
 
+AutomationEventList *LoadAutomationEventList_(char *a)
+{
+    AutomationEventList *ptr = (AutomationEventList *)malloc(sizeof(AutomationEventList));
+    *ptr = LoadAutomationEventList(a);
+    return ptr;
+}
+
+void UnloadAutomationEventList_(AutomationEventList *a)
+{
+    UnloadAutomationEventList(*a);
+}
+
+bool ExportAutomationEventList_(AutomationEventList *a, char *b)
+{
+    return ExportAutomationEventList(*a, b);
+}
+
+void PlayAutomationEvent_(AutomationEvent *a)
+{
+    PlayAutomationEvent(*a);
+}
+
 Vector2 *GetMousePosition_()
 {
     Vector2 *ptr = (Vector2 *)malloc(sizeof(Vector2));
@@ -259,6 +281,20 @@ void SetShapesTexture_(Texture *a, Rectangle *b)
     SetShapesTexture(*a, *b);
 }
 
+Texture2D *GetShapesTexture_()
+{
+    Texture2D *ptr = (Texture2D *)malloc(sizeof(Texture2D));
+    *ptr = GetShapesTexture();
+    return ptr;
+}
+
+Rectangle *GetShapesTextureRectangle_()
+{
+    Rectangle *ptr = (Rectangle *)malloc(sizeof(Rectangle));
+    *ptr = GetShapesTextureRectangle();
+    return ptr;
+}
+
 void DrawPixel_(int a, int b, Color *c)
 {
     DrawPixel(a, b, *c);
@@ -284,34 +320,14 @@ void DrawLineEx_(Vector2 *a, Vector2 *b, float c, Color *d)
     DrawLineEx(*a, *b, c, *d);
 }
 
-void DrawLineBezier_(Vector2 *a, Vector2 *b, float c, Color *d)
-{
-    DrawLineBezier(*a, *b, c, *d);
-}
-
-void DrawLineBezierQuad_(Vector2 *a, Vector2 *b, Vector2 *c, float d, Color *e)
-{
-    DrawLineBezierQuad(*a, *b, *c, d, *e);
-}
-
-void DrawLineBezierCubic_(Vector2 *a, Vector2 *b, Vector2 *c, Vector2 *d, float e, Color *f)
-{
-    DrawLineBezierCubic(*a, *b, *c, *d, e, *f);
-}
-
-void DrawLineBSpline_(Vector2 *a, int b, float c, Color *d)
-{
-    DrawLineBSpline(a, b, c, *d);
-}
-
-void DrawLineCatmullRom_(Vector2 *a, int b, float c, Color *d)
-{
-    DrawLineCatmullRom(a, b, c, *d);
-}
-
 void DrawLineStrip_(Vector2 *a, int b, Color *c)
 {
     DrawLineStrip(a, b, *c);
+}
+
+void DrawLineBezier_(Vector2 *a, Vector2 *b, float c, Color *d)
+{
+    DrawLineBezier(*a, *b, c, *d);
 }
 
 void DrawCircle_(int a, int b, float c, Color *d)
@@ -459,6 +475,91 @@ void DrawPolyLinesEx_(Vector2 *a, int b, float c, float d, float e, Color *f)
     DrawPolyLinesEx(*a, b, c, d, e, *f);
 }
 
+void DrawSplineLinear_(Vector2 *a, int b, float c, Color *d)
+{
+    DrawSplineLinear(a, b, c, *d);
+}
+
+void DrawSplineBasis_(Vector2 *a, int b, float c, Color *d)
+{
+    DrawSplineBasis(a, b, c, *d);
+}
+
+void DrawSplineCatmullRom_(Vector2 *a, int b, float c, Color *d)
+{
+    DrawSplineCatmullRom(a, b, c, *d);
+}
+
+void DrawSplineBezierQuadratic_(Vector2 *a, int b, float c, Color *d)
+{
+    DrawSplineBezierQuadratic(a, b, c, *d);
+}
+
+void DrawSplineBezierCubic_(Vector2 *a, int b, float c, Color *d)
+{
+    DrawSplineBezierCubic(a, b, c, *d);
+}
+
+void DrawSplineSegmentLinear_(Vector2 *a, Vector2 *b, float c, Color *d)
+{
+    DrawSplineSegmentLinear(*a, *b, c, *d);
+}
+
+void DrawSplineSegmentBasis_(Vector2 *a, Vector2 *b, Vector2 *c, Vector2 *d, float e, Color *f)
+{
+    DrawSplineSegmentBasis(*a, *b, *c, *d, e, *f);
+}
+
+void DrawSplineSegmentCatmullRom_(Vector2 *a, Vector2 *b, Vector2 *c, Vector2 *d, float e, Color *f)
+{
+    DrawSplineSegmentCatmullRom(*a, *b, *c, *d, e, *f);
+}
+
+void DrawSplineSegmentBezierQuadratic_(Vector2 *a, Vector2 *b, Vector2 *c, float d, Color *e)
+{
+    DrawSplineSegmentBezierQuadratic(*a, *b, *c, d, *e);
+}
+
+void DrawSplineSegmentBezierCubic_(Vector2 *a, Vector2 *b, Vector2 *c, Vector2 *d, float e, Color *f)
+{
+    DrawSplineSegmentBezierCubic(*a, *b, *c, *d, e, *f);
+}
+
+Vector2 *GetSplinePointLinear_(Vector2 *a, Vector2 *b, float c)
+{
+    Vector2 *ptr = (Vector2 *)malloc(sizeof(Vector2));
+    *ptr = GetSplinePointLinear(*a, *b, c);
+    return ptr;
+}
+
+Vector2 *GetSplinePointBasis_(Vector2 *a, Vector2 *b, Vector2 *c, Vector2 *d, float e)
+{
+    Vector2 *ptr = (Vector2 *)malloc(sizeof(Vector2));
+    *ptr = GetSplinePointBasis(*a, *b, *c, *d, e);
+    return ptr;
+}
+
+Vector2 *GetSplinePointCatmullRom_(Vector2 *a, Vector2 *b, Vector2 *c, Vector2 *d, float e)
+{
+    Vector2 *ptr = (Vector2 *)malloc(sizeof(Vector2));
+    *ptr = GetSplinePointCatmullRom(*a, *b, *c, *d, e);
+    return ptr;
+}
+
+Vector2 *GetSplinePointBezierQuad_(Vector2 *a, Vector2 *b, Vector2 *c, float d)
+{
+    Vector2 *ptr = (Vector2 *)malloc(sizeof(Vector2));
+    *ptr = GetSplinePointBezierQuad(*a, *b, *c, d);
+    return ptr;
+}
+
+Vector2 *GetSplinePointBezierCubic_(Vector2 *a, Vector2 *b, Vector2 *c, Vector2 *d, float e)
+{
+    Vector2 *ptr = (Vector2 *)malloc(sizeof(Vector2));
+    *ptr = GetSplinePointBezierCubic(*a, *b, *c, *d, e);
+    return ptr;
+}
+
 bool CheckCollisionRecs_(Rectangle *a, Rectangle *b)
 {
     return CheckCollisionRecs(*a, *b);
@@ -535,6 +636,12 @@ Image *LoadImageAnim_(char *a, int *b)
 {
     Image *ptr = (Image *)malloc(sizeof(Image));
     *ptr = LoadImageAnim(a, b);
+    return ptr;
+}
+
+Image *LoadImageAnimFromMemory_(char *a, unsigned char *b, int c, int *d) {
+    Image *ptr = (Image *)malloc(sizeof(Image));
+    *ptr = LoadImageAnimFromMemory(a, b, c, d);
     return ptr;
 }
 
@@ -1321,9 +1428,13 @@ void DrawMeshInstanced_(Mesh *a, Material *b, Matrix *c, int d)
     DrawMeshInstanced(*a, *b, c, d);
 }
 
-int ExportMesh_(Mesh *a, char *b)
+bool ExportMesh_(Mesh *a, char *b)
 {
     return ExportMesh(*a, b);
+}
+
+bool ExportMeshAsCode_(Mesh *a, char *b) {
+    return ExportMeshAsCode(*a, b);
 }
 
 BoundingBox *GetMeshBoundingBox_(Mesh *a)
