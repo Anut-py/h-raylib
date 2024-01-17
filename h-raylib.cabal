@@ -22,7 +22,9 @@ extra-source-files:
   examples/**/*.mtl
   examples/**/*.obj
   examples/**/*.png
+  examples/**/*.ttf
   examples/**/*.vert
+  examples/**/*.xm
   lib/**/*.c
   lib/**/*.h
   lib/**/*.m
@@ -201,7 +203,8 @@ library
         winmm
         shell32
         gcc
-      if impl(ghc < 9.4.1)
+
+      if impl(ghc <9.4.1)
         extra-libraries: gcc_eh
 
     else
@@ -210,7 +213,8 @@ library
         gdi32
         winmm
         shell32
-      if impl(ghc < 9.4.1)
+
+      if impl(ghc <9.4.1)
         extra-libraries: gcc_eh
 
   elif (flag(platform-linux) || (flag(detect-platform) && os(linux)))
@@ -238,9 +242,8 @@ library
       GL
       pthread
 
-  elif (flag(platform-nixos))
-    pkgconfig-depends:
-      raylib
+  elif flag(platform-nixos)
+    pkgconfig-depends: raylib
 
   else
 
@@ -250,8 +253,8 @@ library
     lib/rl_bindings.c
     lib/rl_internal.c
     lib/rlgl_bindings.c
-  
-  if (!flag(platform-nixos))
+
+  if !flag(platform-nixos)
     c-sources:
       raylib/src/raudio.c
       raylib/src/rcore.c
@@ -268,16 +271,15 @@ library
   elif (flag(ghci) && (flag(platform-windows) || (flag(detect-platform) && os(windows))))
     c-sources: lib/glfw_patch/rglfw_patch.c
 
-  elif (!flag(platform-nixos))
+  elif !flag(platform-nixos)
     c-sources: raylib/src/rglfw.c
 
   if flag(ghci)
     cpp-options: -DGHCI
 
-  include-dirs:
-    lib
+  include-dirs:     lib
 
-  if (!flag(platform-nixos))
+  if !flag(platform-nixos)
     include-dirs:
       raylib/src raylib/src/external/glfw/src
       raylib/src/external/glfw/include

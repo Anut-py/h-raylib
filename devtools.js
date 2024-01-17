@@ -1,14 +1,26 @@
-const { rmSync, readFileSync, existsSync, writeFileSync } = require("fs");
+const {
+  rmSync,
+  readFileSync,
+  existsSync,
+  writeFileSync,
+  copyFileSync,
+} = require("fs");
 const { execSync, spawnSync } = require("child_process");
 const path = require("path");
 
-const exec = (c) => execSync(c).toString();
+const exec = (...c) => execSync(...c).toString();
 
 const silent = process.argv.includes("-s") || process.argv.includes("--silent"); // No logs
 const quiet = process.argv.includes("-q") || process.argv.includes("--quiet"); // Errors only
 const verbose =
   process.argv.includes("-v") || process.argv.includes("--verbose"); // All logs
 const normal = !silent && !quiet && !verbose; // Non-verbose logs
+
+const hraylibVersion = readFileSync(path.join(__dirname, "h-raylib.cabal"))
+  .toString()
+  .split("\n")
+  .find((line) => line.startsWith("version:"))
+  .split(/\s+/)[1];
 
 const logLevel = { VERB: 0, INFO: 1, WARN: 2, ERR: 3 };
 const log = (level, ...strs) => {
@@ -86,13 +98,6 @@ if (process.argv.includes("-u") || process.argv.includes("--nix-update")) {
 
     log(logLevel.VERB, "Found revision: " + revision);
     log(logLevel.VERB, "Fetching h-raylib version");
-
-    const hraylibVersion = readFileSync(path.join(__dirname, "h-raylib.cabal"))
-      .toString()
-      .split("\n")
-      .find((line) => line.startsWith("version:"))
-      .split(/\s+/)[1];
-
     log(logLevel.INFO, "h-raylib version " + hraylibVersion);
 
     const flakeUpdated = readFileSync(
@@ -201,6 +206,46 @@ if (process.argv.includes("-u") || process.argv.includes("--nix-update")) {
       shell: true,
     });
   }
+} else if (process.argv.includes("-p") || process.argv.includes("--package")) {
+  const cabalPath = findCommandPath("cabal", "--cabal-path", "-c");
+
+  log(logLevel.INFO, "Using cabal path: " + cabalPath);
+  log(logLevel.VERB, "Cleaning and packaging");
+
+  exec(`${cabalPath} clean`);
+  exec(`${cabalPath} sdist`);
+
+  log(logLevel.INFO, "Successfully packaged the project");
+  log(logLevel.INFO, "Extracting dist files");
+  log(logLevel.VERB, "h-raylib version " + hraylibVersion);
+
+  exec(
+    `cd ${path.join(
+      __dirname,
+      "dist-newstyle",
+      "sdist"
+    )} && tar -xzf h-raylib-${hraylibVersion}.tar.gz`
+  );
+
+  log(logLevel.VERB, "Dist files extracted");
+  log(logLevel.VERB, "Copying files");
+
+  const extractPath = path.join(
+    __dirname,
+    "dist-newstyle",
+    "sdist",
+    `h-raylib-${hraylibVersion}`
+  );
+
+  copyFileSync(path.join(__dirname, "cabal.project"), path.join(extractPath, "cabal.project"));
+  copyFileSync(path.join(__dirname, "run-all-examples.sh"), path.join(extractPath, "run-all-examples.sh"));
+
+  log(logLevel.INFO, `Building and running project in ${extractPath}`);
+
+  spawnSync(`cd ${extractPath} && sh ${path.join(extractPath, "run-all-examples.sh")}`, {
+    shell: true,
+    stdio: "inherit",
+  });
 } else {
   const helpText = `
 This script contains useful tools for h-raylib development
@@ -224,13 +269,19 @@ This script contains useful tools for h-raylib development
     -d                Diff the local raylib source with the latest remote code
     --raylib-diff
 
+    -p                Package the cabal project and run the examples
+    --package
+
   Additional options
 
-    -n <NIX-PATH>     Manually provide the path to nix; if not provided, the PATH environment variable will be searched
+    -n <NIX-PATH>          Manually provide the path to nix; if not provided, the PATH environment variable will be searched
     --nix-path=<NIX-PATH>
 
-    -g <NIX-PATH>     Manually provide the path to git; if not provided, the PATH environment variable will be searched
-    --git-path=<NIX-PATH>
+    -g <GIT-PATH>          Manually provide the path to git; if not provided, the PATH environment variable will be searched
+    --git-path=<GIT-PATH>
+
+    -c <CABAL-PATH>        Manually provide the path to cabal; if not provided, the PATH environment variable will be searched
+    --cabal-path=<CABAL-PATH>
 `;
   console.log(helpText);
 }
