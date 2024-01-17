@@ -1,5 +1,18 @@
 # h-raylib changelog
 
+## Version 5.1.0.1
+_16 January, 2024_
+
+- Updated raylib to the master branch
+
+\[[#26](https://github.com/Anut-py/h-raylib/pull/26)\]
+
+- New `platform-nixos` build flag
+
+\[[#27](https://github.com/Anut-py/h-raylib/pull/27), [#35](https://github.com/Anut-py/h-raylib/pull/35)\]
+
+- Added flake.nix
+
 ## Version 4.6.0.7
 _10 September, 2023_
 
