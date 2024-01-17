@@ -795,6 +795,30 @@ _filePathList'paths f (RL.FilePathList capacity paths) =
     (\paths' -> RL.FilePathList capacity paths') <$> f paths
 {-# INLINE _filePathList'paths #-}
 
+_automationEvent'frame :: Lens' RL.AutomationEvent Integer
+_automationEvent'frame f (RL.AutomationEvent frame _type params) =
+    (\frame' -> RL.AutomationEvent frame' _type params) <$> f frame
+{-# INLINE _automationEvent'frame #-}
+
+_automationEvent'type :: Lens' RL.AutomationEvent Integer
+_automationEvent'type f (RL.AutomationEvent frame _type params) =
+    (\type' -> RL.AutomationEvent frame type' params) <$> f _type
+{-# INLINE _automationEvent'type #-}
+
+_automationEvent'params :: Lens' RL.AutomationEvent [Int]
+_automationEvent'params f (RL.AutomationEvent frame _type params) =
+    (\params' -> RL.AutomationEvent frame _type params') <$> f params
+{-# INLINE _automationEvent'params #-}
+
+_automationEventList'capacity :: Lens' RL.AutomationEventList Integer
+_automationEventList'capacity f (RL.AutomationEventList capacity events) =
+    (\capacity' -> RL.AutomationEventList capacity' events) <$> f capacity
+{-# INLINE _automationEventList'capacity #-}
+
+_automationEventList'events :: Lens' RL.AutomationEventList [RL.AutomationEvent]
+_automationEventList'events f (RL.AutomationEventList capacity events) =
+    (\events' -> RL.AutomationEventList capacity events') <$> f events
+{-# INLINE _automationEventList'events #-}
 
 _rlVertexBuffer'elementCount :: Lens' RL.RLVertexBuffer Int
 _rlVertexBuffer'elementCount f buffer =
