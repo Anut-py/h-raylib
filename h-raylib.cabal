@@ -14,6 +14,7 @@ maintainer:         Anut
 extra-doc-files:
   CHANGELOG.md
   CONTRIBUTING.md
+  DOCUMENTATION.md
   README.md
   ROADMAP.md
 
@@ -68,6 +69,11 @@ flag platform-nixos
   default:     False
   manual:      True
 
+flag platform-web
+  description: Build for web
+  default:     False
+  manual:      True
+
 flag mingw-cross
   description:
     Cross-compiling for mingw (used in combination with Windows)
@@ -101,6 +107,12 @@ executable basic-window
   import:         example-options
   hs-source-dirs: examples/basic-window/src
   main-is:        Main.hs
+
+  if flag(platform-web)
+    ghc-options:
+      -no-hs-main -optl-mexec-model=reactor
+      "-optl-Wl,--export=hs_init,--import-memory,--shared-memory,--max-memory=67108864,--no-check-features"
+      "-optl-Wl,--export=startup,--export=mainLoop,--export=shouldClose,--export=teardown"
 
 executable basic-automation-events
   import:         example-options
@@ -179,21 +191,25 @@ library
     Raylib.ForeignUtil
     Raylib.Internal
     Raylib.Native
+    Raylib.Web.Native
+    Raylib.Web.Processable
 
   build-depends:
-    , base        >=4.0    && <4.20
-    , containers  >=0.6.0  && <0.7.0
-    , exceptions  >=0.10.4 && <0.10.8
-    , lens        >=4.0    && <5.2.3.0
+    , base              >=4.0      && <4.20
+    , containers        >=0.6.0    && <0.7.0
+    , exceptions        >=0.10.4   && <0.10.8
+    , lens              >=4.0      && <5.2.4
+    , template-haskell  >=2.17.0.0 && <2.22.0.0
 
   hs-source-dirs:   src
   default-language: Haskell2010
   other-extensions:
     CPP
+    ConstrainedClassMethods
     DeriveAnyClass
     ForeignFunctionInterface
-
-  cc-options:       -DPLATFORM_DESKTOP
+    ScopedTypeVariables
+    TemplateHaskell
 
   if (flag(platform-windows) || (flag(detect-platform) && os(windows)))
     if flag(mingw-cross)
@@ -248,38 +264,42 @@ library
   else
 
   -- Unsupported OS, do nothing. If you can get it working on an
-  -- OS that isn't on here, please add it here.
-  c-sources:
-    lib/rl_bindings.c
-    lib/rl_internal.c
-    lib/rlgl_bindings.c
+  -- OS that isn't listed here, please add it here.
+  include-dirs:     lib
 
-  if !flag(platform-nixos)
+  if flag(platform-web)
+    cpp-options: -DWEB_FFI
+    c-sources: lib/web.c
+  else
+    cc-options: -DPLATFORM_DESKTOP
     c-sources:
-      raylib/src/raudio.c
-      raylib/src/rcore.c
-      raylib/src/rmodels.c
-      raylib/src/rshapes.c
-      raylib/src/rtext.c
-      raylib/src/rtextures.c
-      raylib/src/utils.c
+      lib/rl_bindings.c
+      lib/rl_internal.c
+      lib/rlgl_bindings.c
 
-  if (flag(platform-mac) || (flag(detect-platform) && os(osx)))
-    -- Use rgflw.m instead of .c on Mac to force objective-c
-    c-sources: lib/rglfw.m
+    if !flag(platform-nixos)
+      include-dirs:
+        raylib/src raylib/src/external/glfw/src
+        raylib/src/external/glfw/include
 
-  elif (flag(ghci) && (flag(platform-windows) || (flag(detect-platform) && os(windows))))
-    c-sources: lib/glfw_patch/rglfw_patch.c
+      c-sources:
+        raylib/src/raudio.c
+        raylib/src/rcore.c
+        raylib/src/rmodels.c
+        raylib/src/rshapes.c
+        raylib/src/rtext.c
+        raylib/src/rtextures.c
+        raylib/src/utils.c
 
-  elif !flag(platform-nixos)
-    c-sources: raylib/src/rglfw.c
+      if (flag(platform-mac) || (flag(detect-platform) && os(osx)))
+        -- Use rgflw.m instead of .c on Mac to force objective-c
+        c-sources: lib/rglfw.m
+
+      elif (flag(ghci) && (flag(platform-windows) || (flag(detect-platform) && os(windows))))
+        c-sources: lib/glfw_patch/rglfw_patch.c
+
+      else
+        c-sources: raylib/src/rglfw.c
 
   if flag(ghci)
     cpp-options: -DGHCI
-
-  include-dirs:     lib
-
-  if !flag(platform-nixos)
-    include-dirs:
-      raylib/src raylib/src/external/glfw/src
-      raylib/src/external/glfw/include

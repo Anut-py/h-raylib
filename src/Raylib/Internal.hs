@@ -1,5 +1,6 @@
 {-# OPTIONS -Wall #-}
 {-# LANGUAGE ForeignFunctionInterface #-}
+{-# LANGUAGE CPP #-}
 
 module Raylib.Internal
   ( WindowResources (..),
@@ -44,6 +45,12 @@ import qualified Data.Map as Map
 import Foreign (Ptr, Storable (peekByteOff), free)
 import Foreign.C (CInt (..), CUInt (..))
 import GHC.IO (unsafePerformIO)
+
+#ifdef WEB_FFI
+
+import Raylib.Web.Native (callRaylibFunction)
+
+#endif
 
 data WindowResources = WindowResources
   { shaderIds :: IORef [CUInt],
@@ -296,17 +303,54 @@ addAutomationEventList :: Ptr () -> WindowResources -> IO ()
 addAutomationEventList eventList wr = do
   modifyIORef (automationEventLists wr) (\xs -> if eventList `elem` xs then xs else eventList : xs)
 
-foreign import ccall safe "rlgl.h rlGetShaderIdDefault" c'rlGetShaderIdDefault :: IO CUInt
+_unloadAutomationEventList :: Ptr () -> IO ()
+_unloadAutomationEventList ptr = (free =<< (peekByteOff ptr 8 :: IO (Ptr ()))) >> free ptr
 
-foreign import ccall safe "rlgl.h rlUnloadShaderProgram" c'rlUnloadShaderProgram :: CUInt -> IO ()
+#ifdef WEB_FFI
 
-foreign import ccall safe "rlgl.h rlUnloadTexture" c'rlUnloadTexture :: CUInt -> IO ()
+c'rlGetShaderIdDefault :: IO CUInt
+c'rlGetShaderIdDefault = callRaylibFunction "_rlGetShaderIdDefault_"
 
-foreign import ccall safe "rlgl.h rlUnloadFramebuffer" c'rlUnloadFramebuffer :: CUInt -> IO ()
+c'rlUnloadShaderProgram :: CUInt -> IO ()
+c'rlUnloadShaderProgram = callRaylibFunction "_rlUnloadShaderProgram_"
 
-foreign import ccall safe "rlgl.h rlUnloadVertexArray" c'rlUnloadVertexArray :: CUInt -> IO ()
+c'rlUnloadTexture :: CUInt -> IO ()
+c'rlUnloadTexture = callRaylibFunction "_rlUnloadTexture_"
 
-foreign import ccall safe "rlgl.h rlUnloadVertexBuffer" c'rlUnloadVertexBuffer :: CUInt -> IO ()
+c'rlUnloadFramebuffer :: CUInt -> IO ()
+c'rlUnloadFramebuffer = callRaylibFunction "_rlUnloadFramebuffer_"
+
+c'rlUnloadVertexArray :: CUInt -> IO ()
+c'rlUnloadVertexArray = callRaylibFunction "_rlUnloadVertexArray_"
+
+c'rlUnloadVertexBuffer :: CUInt -> IO ()
+c'rlUnloadVertexBuffer = callRaylibFunction "_rlUnloadVertexBuffer_"
+
+c'unloadMusicStreamData :: CInt -> Ptr () -> IO ()
+c'unloadMusicStreamData = callRaylibFunction "_UnloadMusicStreamData"
+
+c'unloadAudioBuffer :: Ptr () -> IO ()
+c'unloadAudioBuffer = callRaylibFunction "_UnloadAudioBuffer_"
+
+c'unloadAudioBufferAlias :: Ptr () -> IO ()
+c'unloadAudioBufferAlias = callRaylibFunction "_UnloadAudioBufferAlias"
+
+c'getPixelDataSize :: CInt -> CInt -> CInt -> IO CInt
+c'getPixelDataSize = callRaylibFunction "_GetPixelDataSize_"
+
+#else
+
+foreign import ccall safe "rlgl_bindings.h rlGetShaderIdDefault_" c'rlGetShaderIdDefault :: IO CUInt
+
+foreign import ccall safe "rlgl_bindings.h rlUnloadShaderProgram_" c'rlUnloadShaderProgram :: CUInt -> IO ()
+
+foreign import ccall safe "rlgl_bindings.h rlUnloadTexture_" c'rlUnloadTexture :: CUInt -> IO ()
+
+foreign import ccall safe "rlgl_bindings.h rlUnloadFramebuffer_" c'rlUnloadFramebuffer :: CUInt -> IO ()
+
+foreign import ccall safe "rlgl_bindings.h rlUnloadVertexArray_" c'rlUnloadVertexArray :: CUInt -> IO ()
+
+foreign import ccall safe "rlgl_bindings.h rlUnloadVertexBuffer_" c'rlUnloadVertexBuffer :: CUInt -> IO ()
 
 foreign import ccall safe "rl_internal.h UnloadMusicStreamData" c'unloadMusicStreamData :: CInt -> Ptr () -> IO ()
 
@@ -314,12 +358,9 @@ foreign import ccall safe "rl_internal.h UnloadAudioBuffer_" c'unloadAudioBuffer
 
 foreign import ccall safe "rl_internal.h UnloadAudioBufferAlias" c'unloadAudioBufferAlias :: Ptr () -> IO ()
 
-_unloadAutomationEventList :: Ptr () -> IO ()
-_unloadAutomationEventList ptr = (free =<< (peekByteOff ptr 8 :: IO (Ptr ()))) >> free ptr
+foreign import ccall safe "rl_bindings.h GetPixelDataSize_" c'getPixelDataSize :: CInt -> CInt -> CInt -> IO CInt
 
-foreign import ccall safe "raylib.h GetPixelDataSize"
-  c'getPixelDataSize ::
-    CInt -> CInt -> CInt -> IO CInt
+#endif
 
 getPixelDataSize :: Int -> Int -> Int -> Int
 getPixelDataSize width height format = unsafePerformIO (fromIntegral <$> c'getPixelDataSize (fromIntegral width) (fromIntegral height) (fromIntegral format))

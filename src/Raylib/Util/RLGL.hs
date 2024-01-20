@@ -1,5 +1,4 @@
 {-# OPTIONS -Wall #-}
-{-# LANGUAGE ForeignFunctionInterface #-}
 
 module Raylib.Util.RLGL
   ( rlMatrixMode,
@@ -288,6 +287,40 @@ import Raylib.Native
     c'rlVertex3f,
     c'rlViewport,
     c'rlglInit,
+    c'rlPushMatrix,
+    c'rlPopMatrix,
+    c'rlLoadIdentity,
+    c'rlEnd,
+    c'rlDisableVertexArray,
+    c'rlDisableVertexBuffer,
+    c'rlDisableVertexBufferElement,
+    c'rlDisableTexture,
+    c'rlDisableTextureCubemap,
+    c'rlDisableShader,
+    c'rlDisableFramebuffer,
+    c'rlEnableColorBlend,
+    c'rlDisableColorBlend,
+    c'rlEnableDepthTest,
+    c'rlDisableDepthTest,
+    c'rlEnableDepthMask,
+    c'rlDisableDepthMask,
+    c'rlEnableBackfaceCulling,
+    c'rlDisableBackfaceCulling,
+    c'rlEnableScissorTest,
+    c'rlDisableScissorTest,
+    c'rlEnableWireMode,
+    c'rlEnablePointMode,
+    c'rlDisableWireMode,
+    c'rlEnableSmoothLines,
+    c'rlDisableSmoothLines,
+    c'rlEnableStereoRender,
+    c'rlDisableStereoRender,
+    c'rlClearScreenBuffers,
+    c'rlCheckErrors,
+    c'rlglClose,
+    c'rlDrawRenderBatchActive,
+    c'rlLoadDrawCube,
+    c'rlLoadDrawQuad
   )
 import Raylib.Types
   ( Matrix,
@@ -312,13 +345,16 @@ rlMatrixMode :: RLMatrixMode -> IO ()
 rlMatrixMode mode = c'rlMatrixMode (fromIntegral $ fromEnum mode)
 
 -- | Push the current matrix to stack
-foreign import ccall safe "rlgl.h rlPushMatrix" rlPushMatrix :: IO ()
+rlPushMatrix :: IO ()
+rlPushMatrix = c'rlPushMatrix
 
 -- | Pop latest inserted matrix from stack
-foreign import ccall safe "rlgl.h rlPopMatrix" rlPopMatrix :: IO ()
+rlPopMatrix :: IO ()
+rlPopMatrix = c'rlPopMatrix
 
 -- | Reset current matrix to identity matrix
-foreign import ccall safe "rlgl.h rlLoadIdentity" rlLoadIdentity :: IO ()
+rlLoadIdentity :: IO ()
+rlLoadIdentity = c'rlLoadIdentity
 
 -- | Multiply the current matrix by a translation matrix
 rlTranslatef :: Float -> Float -> Float -> IO ()
@@ -353,7 +389,8 @@ rlBegin :: RLDrawMode -> IO ()
 rlBegin mode = c'rlBegin (fromIntegral $ fromEnum mode)
 
 -- | Finish vertex providing
-foreign import ccall safe "rlgl.h rlEnd" rlEnd :: IO ()
+rlEnd :: IO ()
+rlEnd = c'rlEnd
 
 -- | Define one vertex (position) - 2 int
 rlVertex2i :: Int -> Int -> IO ()
@@ -392,21 +429,24 @@ rlEnableVertexArray :: Integer -> IO Bool
 rlEnableVertexArray vaoId = toBool <$> c'rlEnableVertexArray (fromIntegral vaoId)
 
 -- | Disable vertex array (VAO, if supported)
-foreign import ccall safe "rlgl.h rlDisableVertexArray" rlDisableVertexArray :: IO ()
+rlDisableVertexArray :: IO ()
+rlDisableVertexArray = c'rlDisableVertexArray
 
 -- | Enable vertex buffer (VBO)
 rlEnableVertexBuffer :: Integer -> IO ()
 rlEnableVertexBuffer vboId = c'rlEnableVertexBuffer (fromIntegral vboId)
 
 -- | Disable vertex buffer (VBO)
-foreign import ccall safe "rlgl.h rlDisableVertexBuffer" rlDisableVertexBuffer :: IO ()
+rlDisableVertexBuffer :: IO ()
+rlDisableVertexBuffer = c'rlDisableVertexBuffer
 
 -- | Enable vertex buffer element (VBO element)
 rlEnableVertexBufferElement :: Integer -> IO ()
 rlEnableVertexBufferElement vboeId = c'rlEnableVertexBufferElement (fromIntegral vboeId)
 
 -- | Disable vertex buffer element (VBO element)
-foreign import ccall safe "rlgl.h rlDisableVertexBufferElement" rlDisableVertexBufferElement :: IO ()
+rlDisableVertexBufferElement :: IO ()
+rlDisableVertexBufferElement = c'rlDisableVertexBufferElement
 
 -- | Enable vertex attribute index
 rlEnableVertexAttribute :: Integer -> IO ()
@@ -432,14 +472,16 @@ rlEnableTexture :: Integer -> IO ()
 rlEnableTexture tId = c'rlEnableTexture (fromIntegral tId)
 
 -- | Disable texture
-foreign import ccall safe "rlgl.h rlDisableTexture" rlDisableTexture :: IO ()
+rlDisableTexture :: IO ()
+rlDisableTexture = c'rlDisableTexture
 
 -- | Enable texture cubemap
 rlEnableTextureCubemap :: Integer -> IO ()
 rlEnableTextureCubemap tId = c'rlEnableTextureCubemap (fromIntegral tId)
 
 -- | Disable texture cubemap
-foreign import ccall safe "rlgl.h rlDisableTextureCubemap" rlDisableTextureCubemap :: IO ()
+rlDisableTextureCubemap :: IO ()
+rlDisableTextureCubemap = c'rlDisableTextureCubemap
 
 -- | Set texture parameters (filter, wrap)
 rlTextureParameters :: Integer -> RLTextureParam -> Int -> IO ()
@@ -454,14 +496,16 @@ rlEnableShader :: Integer -> IO ()
 rlEnableShader sId = c'rlEnableShader (fromIntegral sId)
 
 -- | Disable shader program
-foreign import ccall safe "rlgl.h rlDisableShader" rlDisableShader :: IO ()
+rlDisableShader :: IO ()
+rlDisableShader = c'rlDisableShader
 
 -- | Enable render texture (fbo)
 rlEnableFramebuffer :: Integer -> IO ()
 rlEnableFramebuffer fboId = c'rlEnableFramebuffer (fromIntegral fboId)
 
 -- | Disable render texture (fbo), return to default framebuffer
-foreign import ccall safe "rlgl.h rlDisableFramebuffer" rlDisableFramebuffer :: IO ()
+rlDisableFramebuffer :: IO ()
+rlDisableFramebuffer = c'rlDisableFramebuffer
 
 -- | Activate multiple draw color buffers
 rlActiveDrawBuffers :: Int -> IO ()
@@ -477,28 +521,36 @@ rlBindFramebuffer :: Integer -> Integer -> IO ()
 rlBindFramebuffer target framebuffer = c'rlBindFramebuffer (fromIntegral target) (fromIntegral framebuffer)
 
 -- | Enable color blending
-foreign import ccall safe "rlgl.h rlEnableColorBlend" rlEnableColorBlend :: IO ()
+rlEnableColorBlend :: IO ()
+rlEnableColorBlend = c'rlEnableColorBlend
 
 -- | Disable color blending
-foreign import ccall safe "rlgl.h rlDisableColorBlend" rlDisableColorBlend :: IO ()
+rlDisableColorBlend :: IO ()
+rlDisableColorBlend = c'rlDisableColorBlend
 
 -- | Enable depth test
-foreign import ccall safe "rlgl.h rlEnableDepthTest" rlEnableDepthTest :: IO ()
+rlEnableDepthTest :: IO ()
+rlEnableDepthTest = c'rlEnableDepthTest
 
 -- | Disable depth test
-foreign import ccall safe "rlgl.h rlDisableDepthTest" rlDisableDepthTest :: IO ()
+rlDisableDepthTest :: IO ()
+rlDisableDepthTest = c'rlDisableDepthTest
 
 -- | Enable depth write
-foreign import ccall safe "rlgl.h rlEnableDepthMask" rlEnableDepthMask :: IO ()
+rlEnableDepthMask :: IO ()
+rlEnableDepthMask = c'rlEnableDepthMask
 
 -- | Disable depth write
-foreign import ccall safe "rlgl.h rlDisableDepthMask" rlDisableDepthMask :: IO ()
+rlDisableDepthMask :: IO ()
+rlDisableDepthMask = c'rlDisableDepthMask
 
 -- | Enable backface culling
-foreign import ccall safe "rlgl.h rlEnableBackfaceCulling" rlEnableBackfaceCulling :: IO ()
+rlEnableBackfaceCulling :: IO ()
+rlEnableBackfaceCulling = c'rlEnableBackfaceCulling
 
 -- | Disable backface culling
-foreign import ccall safe "rlgl.h rlDisableBackfaceCulling" rlDisableBackfaceCulling :: IO ()
+rlDisableBackfaceCulling :: IO ()
+rlDisableBackfaceCulling = c'rlDisableBackfaceCulling
 
 -- | Color mask control
 rlColorMask :: Bool -> Bool -> Bool -> Bool -> IO ()
@@ -509,23 +561,28 @@ rlSetCullFace :: RLCullMode -> IO ()
 rlSetCullFace mode = c'rlSetCullFace (fromIntegral $ fromEnum mode)
 
 -- | Enable scissor test
-foreign import ccall safe "rlgl.h rlEnableScissorTest" rlEnableScissorTest :: IO ()
+rlEnableScissorTest :: IO ()
+rlEnableScissorTest = c'rlEnableScissorTest
 
 -- | Disable scissor test
-foreign import ccall safe "rlgl.h rlDisableScissorTest" rlDisableScissorTest :: IO ()
+rlDisableScissorTest :: IO ()
+rlDisableScissorTest = c'rlDisableScissorTest
 
 -- | Scissor test
 rlScissor :: Int -> Int -> Int -> Int -> IO ()
 rlScissor x y width height = c'rlScissor (fromIntegral x) (fromIntegral y) (fromIntegral width) (fromIntegral height)
 
 -- | Enable wire mode
-foreign import ccall safe "rlgl.h rlEnableWireMode" rlEnableWireMode :: IO ()
+rlEnableWireMode :: IO ()
+rlEnableWireMode = c'rlEnableWireMode
 
 -- | Enable point mode
-foreign import ccall safe "rlgl.h rlEnablePointMode" rlEnablePointMode :: IO ()
+rlEnablePointMode :: IO ()
+rlEnablePointMode = c'rlEnablePointMode
 
 -- | Disable wire and point mode
-foreign import ccall safe "rlgl.h rlDisableWireMode" rlDisableWireMode :: IO ()
+rlDisableWireMode :: IO ()
+rlDisableWireMode = c'rlDisableWireMode
 
 -- | Set the line drawing width
 rlSetLineWidth :: Float -> IO ()
@@ -536,16 +593,20 @@ rlGetLineWidth :: IO Float
 rlGetLineWidth = realToFrac <$> c'rlGetLineWidth
 
 -- | Enable line aliasing
-foreign import ccall safe "rlgl.h rlEnableSmoothLines" rlEnableSmoothLines :: IO ()
+rlEnableSmoothLines :: IO ()
+rlEnableSmoothLines = c'rlEnableSmoothLines
 
 -- | Disable line aliasing
-foreign import ccall safe "rlgl.h rlDisableSmoothLines" rlDisableSmoothLines :: IO ()
+rlDisableSmoothLines :: IO ()
+rlDisableSmoothLines = c'rlDisableSmoothLines
 
 -- | Enable stereo rendering
-foreign import ccall safe "rlgl.h rlEnableStereoRender" rlEnableStereoRender :: IO ()
+rlEnableStereoRender :: IO ()
+rlEnableStereoRender = c'rlEnableStereoRender
 
 -- | Disable stereo rendering
-foreign import ccall safe "rlgl.h rlDisableStereoRender" rlDisableStereoRender :: IO ()
+rlDisableStereoRender :: IO ()
+rlDisableStereoRender = c'rlDisableStereoRender
 
 -- | Check if stereo render is enabled
 rlIsStereoRenderEnabled :: IO Bool
@@ -556,10 +617,12 @@ rlClearColor :: Word8 -> Word8 -> Word8 -> Word8 -> IO ()
 rlClearColor r g b a = c'rlClearColor (fromIntegral r) (fromIntegral g) (fromIntegral b) (fromIntegral a)
 
 -- | Clear used screen buffers (color and depth)
-foreign import ccall safe "rlgl.h rlClearScreenBuffers" rlClearScreenBuffers :: IO ()
+rlClearScreenBuffers :: IO ()
+rlClearScreenBuffers = c'rlClearScreenBuffers
 
 -- | Check and log OpenGL error codes
-foreign import ccall safe "rlgl.h rlCheckErrors" rlCheckErrors :: IO ()
+rlCheckErrors :: IO ()
+rlCheckErrors = c'rlCheckErrors
 
 -- | Set blending mode
 rlSetBlendMode :: RLBlendMode -> IO ()
@@ -579,7 +642,8 @@ rlglInit :: Int -> Int -> IO ()
 rlglInit width height = c'rlglInit (fromIntegral width) (fromIntegral height)
 
 -- | De-initialize rlgl (buffers, shaders, textures)
-foreign import ccall safe "rlgl.h rlglClose" rlglClose :: IO ()
+rlglClose :: IO ()
+rlglClose = c'rlglClose
 
 -- | Load OpenGL extensions (loader function required)
 rlLoadExtensions :: Ptr () -> IO ()
@@ -638,7 +702,8 @@ rlSetRenderBatchActive (Just val) = do
   c'rlSetRenderBatchActive ptr
 
 -- | Update and draw internal render batch
-foreign import ccall safe "rlgl.h rlDrawRenderBatchActive" rlDrawRenderBatchActive :: IO ()
+rlDrawRenderBatchActive :: IO ()
+rlDrawRenderBatchActive = c'rlDrawRenderBatchActive
 
 -- | Check internal buffer overflow for a given number of vertex
 rlCheckRenderBatchLimit :: Int -> IO Bool
@@ -971,7 +1036,10 @@ rlSetMatrixViewOffsetStereo :: Matrix -> Matrix -> IO ()
 rlSetMatrixViewOffsetStereo right left = withFreeable right (withFreeable left . c'rlSetMatrixViewOffsetStereo)
 
 -- | Load and draw a cube
-foreign import ccall safe "rlgl.h rlLoadDrawCube" rlLoadDrawCube :: IO ()
+rlLoadDrawCube :: IO ()
+rlLoadDrawCube = c'rlLoadDrawCube
 
 -- | Load and draw a quad
-foreign import ccall safe "rlgl.h rlLoadDrawQuad" rlLoadDrawQuad :: IO ()
+rlLoadDrawQuad :: IO ()
+rlLoadDrawQuad = c'rlLoadDrawQuad
+

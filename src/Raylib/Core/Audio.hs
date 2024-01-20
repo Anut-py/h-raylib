@@ -1,5 +1,4 @@
 {-# OPTIONS -Wall #-}
-{-# LANGUAGE ForeignFunctionInterface #-}
 
 module Raylib.Core.Audio where
 
@@ -70,7 +69,7 @@ import Raylib.Native
     c'updateSound,
     c'waveCopy,
     c'waveCrop,
-    c'waveFormat,
+    c'waveFormat, c'initAudioDevice,
   )
 import Raylib.Types
   ( AudioStream (audioStream'buffer),
@@ -79,9 +78,8 @@ import Raylib.Types
     Wave (wave'channels, wave'frameCount),
   )
 
-foreign import ccall safe "raylib.h InitAudioDevice"
-  initAudioDevice ::
-    IO ()
+initAudioDevice :: IO ()
+initAudioDevice = c'initAudioDevice
 
 closeAudioDevice :: WindowResources -> IO ()
 closeAudioDevice wr = do

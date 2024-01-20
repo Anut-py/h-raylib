@@ -1,4 +1,5 @@
 {-# OPTIONS -Wall #-}
+{-# LANGUAGE CPP #-}
 
 module Raylib.ForeignUtil (c'free, p'free, freeMaybePtr, Freeable (..), rlFreeArray, rlFreeMaybeArray, pop, popCArray, popCString, withFreeable, withFreeableArray, withFreeableArrayLen, withFreeableArray2D, configsToBitflag, withMaybe, withMaybeCString, peekMaybe, peekMaybeOff, pokeMaybe, pokeMaybeOff, peekMaybeArray, newMaybeArray, peekStaticArray, peekStaticArrayOff, pokeStaticArray, pokeStaticArrayOff, rightPad) where
 
@@ -10,9 +11,23 @@ import Foreign.C.Types (CBool, CChar, CShort, CUShort)
 
 -- Internal utility functions
 
+#ifdef WEB_FFI
+
+import Raylib.Web.Native (jsfree, p'jsfree)
+
+c'free :: Ptr () -> IO ()
+c'free = jsfree
+
+p'free :: FunPtr (Ptr a -> IO ())
+p'free = p'jsfree
+
+#else
+
 foreign import ccall "stdlib.h free" c'free :: Ptr () -> IO ()
 
 foreign import ccall "stdlib.h &free" p'free :: FunPtr (Ptr a -> IO ())
+
+#endif
 
 freeMaybePtr :: Ptr () -> IO ()
 freeMaybePtr ptr = unless (ptr == nullPtr) (c'free ptr)

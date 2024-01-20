@@ -1,5 +1,4 @@
 {-# OPTIONS -Wall #-}
-{-# LANGUAGE ForeignFunctionInterface #-}
 
 module Raylib.Core where
 
@@ -7,23 +6,24 @@ import Data.IORef (modifyIORef', readIORef)
 import qualified Data.Map as Map
 import Foreign
   ( Ptr,
-    Storable (peek, sizeOf, poke),
+    Storable (peek, poke, sizeOf),
     castPtr,
     fromBool,
+    malloc,
     peekArray,
-    toBool, malloc
+    toBool,
   )
 import Foreign.C
-  ( CInt (CInt),
-    CUChar,
-    CUInt (CUInt),
+  ( CUChar,
     peekCString,
     withCString,
   )
+import Foreign.Ptr (nullPtr)
 import Raylib.ForeignUtil (c'free, configsToBitflag, pop, popCArray, popCString, withFreeable, withFreeableArray, withFreeableArrayLen, withMaybeCString)
-import Raylib.Internal (addShaderId, unloadFrameBuffers, unloadShaders, unloadSingleShader, unloadTextures, unloadVaoIds, unloadVboIds, WindowResources, shaderLocations, defaultWindowResources, addAutomationEventList, unloadSingleAutomationEventList, unloadAutomationEventLists)
+import Raylib.Internal (WindowResources, addAutomationEventList, addShaderId, defaultWindowResources, shaderLocations, unloadAutomationEventLists, unloadFrameBuffers, unloadShaders, unloadSingleAutomationEventList, unloadSingleShader, unloadTextures, unloadVaoIds, unloadVboIds)
 import Raylib.Native
   ( c'beginBlendMode,
+    c'beginDrawing,
     c'beginMode2D,
     c'beginMode3D,
     c'beginScissorMode,
@@ -38,7 +38,20 @@ import Raylib.Native
     c'decodeDataBase64,
     c'decompressData,
     c'directoryExists,
+    c'disableCursor,
+    c'disableEventWaiting,
+    c'enableCursor,
+    c'enableEventWaiting,
     c'encodeDataBase64,
+    c'endBlendMode,
+    c'endDrawing,
+    c'endMode2D,
+    c'endMode3D,
+    c'endScissorMode,
+    c'endShaderMode,
+    c'endTextureMode,
+    c'endVrStereoMode,
+    c'exportAutomationEventList,
     c'exportDataAsCode,
     c'fileExists,
     c'getApplicationDirectory,
@@ -96,12 +109,14 @@ import Raylib.Native
     c'getTouchPosition,
     c'getTouchX,
     c'getTouchY,
+    c'getWindowHandle,
     c'getWindowPosition,
     c'getWindowScaleDPI,
     c'getWorkingDirectory,
     c'getWorldToScreen,
     c'getWorldToScreen2D,
     c'getWorldToScreenEx,
+    c'hideCursor,
     c'initWindow,
     c'isCursorHidden,
     c'isCursorOnScreen,
@@ -115,6 +130,7 @@ import Raylib.Native
     c'isGestureDetected,
     c'isKeyDown,
     c'isKeyPressed,
+    c'isKeyPressedRepeat,
     c'isKeyReleased,
     c'isKeyUp,
     c'isMouseButtonDown,
@@ -131,17 +147,26 @@ import Raylib.Native
     c'isWindowReady,
     c'isWindowResized,
     c'isWindowState,
+    c'loadAutomationEventList,
     c'loadDirectoryFiles,
     c'loadDirectoryFilesEx,
     c'loadDroppedFiles,
     c'loadFileData,
     c'loadFileText,
+    c'loadRandomSequence,
     c'loadShader,
     c'loadShaderFromMemory,
     c'loadVrStereoConfig,
+    c'maximizeWindow,
+    c'minimizeWindow,
     c'openURL,
+    c'playAutomationEvent,
+    c'pollInputEvents,
+    c'restoreWindow,
     c'saveFileData,
     c'saveFileText,
+    c'setAutomationEventBaseFrame,
+    c'setAutomationEventList,
     c'setClipboardText,
     c'setConfigFlags,
     c'setExitKey,
@@ -158,23 +183,33 @@ import Raylib.Native
     c'setShaderValueV,
     c'setTargetFPS,
     c'setTraceLogLevel,
+    c'setWindowFocused,
     c'setWindowIcon,
     c'setWindowIcons,
-    c'setWindowMinSize,
     c'setWindowMaxSize,
+    c'setWindowMinSize,
     c'setWindowMonitor,
     c'setWindowOpacity,
     c'setWindowPosition,
     c'setWindowSize,
     c'setWindowState,
     c'setWindowTitle,
+    c'showCursor,
+    c'startAutomationEventRecording,
+    c'stopAutomationEventRecording,
+    c'swapScreenBuffer,
     c'takeScreenshot,
+    c'toggleBorderlessWindowed,
+    c'toggleFullscreen,
     c'traceLog,
     c'waitTime,
-    c'windowShouldClose, c'isKeyPressedRepeat, c'loadRandomSequence, c'loadAutomationEventList, c'exportAutomationEventList, c'setAutomationEventList, c'setAutomationEventBaseFrame, c'startAutomationEventRecording, c'stopAutomationEventRecording, c'playAutomationEvent,
+    c'windowShouldClose, c'setLoadFileDataCallback, c'setSaveFileDataCallback, c'setLoadFileTextCallback, c'setSaveFileTextCallback,
   )
 import Raylib.Types
-  ( BlendMode,
+  ( AutomationEvent,
+    AutomationEventList,
+    AutomationEventListRef,
+    BlendMode,
     Camera2D,
     Camera3D,
     Color,
@@ -204,9 +239,8 @@ import Raylib.Types
     VrDeviceInfo,
     VrStereoConfig,
     unpackShaderUniformData,
-    unpackShaderUniformDataV, AutomationEventList, AutomationEventListRef, AutomationEvent,
+    unpackShaderUniformDataV,
   )
-import Foreign.Ptr (nullPtr)
 
 initWindow :: Int -> Int -> String -> IO WindowResources
 initWindow width height title = withCString title (c'initWindow (fromIntegral width) (fromIntegral height)) >> defaultWindowResources
@@ -254,25 +288,20 @@ setWindowState = c'setWindowState . fromIntegral . configsToBitflag
 clearWindowState :: [ConfigFlag] -> IO ()
 clearWindowState = c'clearWindowState . fromIntegral . configsToBitflag
 
-foreign import ccall safe "raylib.h ToggleFullscreen"
-  toggleFullscreen ::
-    IO ()
+toggleFullscreen :: IO ()
+toggleFullscreen = c'toggleFullscreen
 
-foreign import ccall safe "raylib.h ToggleBorderlessWindowed"
-  toggleBorderlessWindowed ::
-    IO ()
+toggleBorderlessWindowed :: IO ()
+toggleBorderlessWindowed = c'toggleBorderlessWindowed
 
-foreign import ccall safe "raylib.h MaximizeWindow"
-  maximizeWindow ::
-    IO ()
+maximizeWindow :: IO ()
+maximizeWindow = c'maximizeWindow
 
-foreign import ccall safe "raylib.h MinimizeWindow"
-  minimizeWindow ::
-    IO ()
+minimizeWindow :: IO ()
+minimizeWindow = c'minimizeWindow
 
-foreign import ccall safe "raylib.h RestoreWindow"
-  restoreWindow ::
-    IO ()
+restoreWindow :: IO ()
+restoreWindow = c'restoreWindow
 
 setWindowIcon :: Image -> IO ()
 setWindowIcon image = withFreeable image c'setWindowIcon
@@ -301,13 +330,11 @@ setWindowSize x y = c'setWindowSize (fromIntegral x) (fromIntegral y)
 setWindowOpacity :: Float -> IO ()
 setWindowOpacity opacity = c'setWindowOpacity $ realToFrac opacity
 
-foreign import ccall safe "raylib.h SetWindowFocused"
-  setWindowFocused ::
-    IO ()
+setWindowFocused :: IO ()
+setWindowFocused = c'setWindowFocused
 
-foreign import ccall safe "raylib.h GetWindowHandle"
-  getWindowHandle ::
-    IO (Ptr ())
+getWindowHandle :: IO (Ptr ())
+getWindowHandle = c'getWindowHandle
 
 getScreenWidth :: IO Int
 getScreenWidth = fromIntegral <$> c'getScreenWidth
@@ -360,43 +387,35 @@ setClipboardText text = withCString text c'setClipboardText
 getClipboardText :: IO String
 getClipboardText = c'getClipboardText >>= peekCString
 
-foreign import ccall safe "raylib.h EnableEventWaiting"
-  enableEventWaiting ::
-    IO ()
+enableEventWaiting :: IO ()
+enableEventWaiting = c'enableEventWaiting
 
-foreign import ccall safe "raylib.h DisableEventWaiting"
-  disableEventWaiting ::
-    IO ()
+disableEventWaiting :: IO ()
+disableEventWaiting = c'disableEventWaiting
 
-foreign import ccall safe "raylib.h SwapScreenBuffer"
-  swapScreenBuffer ::
-    IO ()
+swapScreenBuffer :: IO ()
+swapScreenBuffer = c'swapScreenBuffer
 
-foreign import ccall safe "raylib.h PollInputEvents"
-  pollInputEvents ::
-    IO ()
+pollInputEvents :: IO ()
+pollInputEvents = c'pollInputEvents
 
 waitTime :: Double -> IO ()
 waitTime seconds = c'waitTime $ realToFrac seconds
 
-foreign import ccall safe "raylib.h ShowCursor"
-  showCursor ::
-    IO ()
+showCursor :: IO ()
+showCursor = c'showCursor
 
-foreign import ccall safe "raylib.h HideCursor"
-  hideCursor ::
-    IO ()
+hideCursor :: IO ()
+hideCursor = c'hideCursor
 
 isCursorHidden :: IO Bool
 isCursorHidden = toBool <$> c'isCursorHidden
 
-foreign import ccall safe "raylib.h EnableCursor"
-  enableCursor ::
-    IO ()
+enableCursor :: IO ()
+enableCursor = c'enableCursor
 
-foreign import ccall safe "raylib.h DisableCursor"
-  disableCursor ::
-    IO ()
+disableCursor :: IO ()
+disableCursor = c'disableCursor
 
 isCursorOnScreen :: IO Bool
 isCursorOnScreen = toBool <$> c'isCursorOnScreen
@@ -404,62 +423,53 @@ isCursorOnScreen = toBool <$> c'isCursorOnScreen
 clearBackground :: Color -> IO ()
 clearBackground color = withFreeable color c'clearBackground
 
-foreign import ccall safe "raylib.h BeginDrawing"
-  beginDrawing ::
-    IO ()
+beginDrawing :: IO ()
+beginDrawing = c'beginDrawing
 
-foreign import ccall safe "raylib.h EndDrawing"
-  endDrawing ::
-    IO ()
+endDrawing :: IO ()
+endDrawing = c'endDrawing
 
 beginMode2D :: Camera2D -> IO ()
 beginMode2D camera = withFreeable camera c'beginMode2D
 
-foreign import ccall safe "raylib.h EndMode2D"
-  endMode2D ::
-    IO ()
+endMode2D :: IO ()
+endMode2D = c'endMode2D
 
 beginMode3D :: Camera3D -> IO ()
 beginMode3D camera = withFreeable camera c'beginMode3D
 
-foreign import ccall safe "raylib.h EndMode3D"
-  endMode3D ::
-    IO ()
+endMode3D :: IO ()
+endMode3D = c'endMode3D
 
 beginTextureMode :: RenderTexture -> IO ()
 beginTextureMode renderTexture = withFreeable renderTexture c'beginTextureMode
 
-foreign import ccall safe "raylib.h EndTextureMode"
-  endTextureMode ::
-    IO ()
+endTextureMode :: IO ()
+endTextureMode = c'endTextureMode
 
 beginShaderMode :: Shader -> IO ()
 beginShaderMode shader = withFreeable shader c'beginShaderMode
 
-foreign import ccall safe "raylib.h EndShaderMode"
-  endShaderMode ::
-    IO ()
+endShaderMode :: IO ()
+endShaderMode = c'endShaderMode
 
 beginBlendMode :: BlendMode -> IO ()
 beginBlendMode = c'beginBlendMode . fromIntegral . fromEnum
 
-foreign import ccall safe "raylib.h EndBlendMode"
-  endBlendMode ::
-    IO ()
+endBlendMode :: IO ()
+endBlendMode = c'endBlendMode
 
 beginScissorMode :: Int -> Int -> Int -> Int -> IO ()
 beginScissorMode x y width height = c'beginScissorMode (fromIntegral x) (fromIntegral y) (fromIntegral width) (fromIntegral height)
 
-foreign import ccall safe "raylib.h EndScissorMode"
-  endScissorMode ::
-    IO ()
+endScissorMode :: IO ()
+endScissorMode = c'endScissorMode
 
 beginVrStereoMode :: VrStereoConfig -> IO ()
 beginVrStereoMode config = withFreeable config c'beginVrStereoMode
 
-foreign import ccall safe "raylib.h EndVrStereoMode"
-  endVrStereoMode ::
-    IO ()
+endVrStereoMode :: IO ()
+endVrStereoMode = c'endVrStereoMode
 
 loadVrStereoConfig :: VrDeviceInfo -> IO VrStereoConfig
 loadVrStereoConfig deviceInfo = withFreeable deviceInfo c'loadVrStereoConfig >>= pop
@@ -596,21 +606,17 @@ setTraceLogLevel = c'setTraceLogLevel . fromIntegral . fromEnum
 openURL :: String -> IO ()
 openURL url = withCString url c'openURL
 
-foreign import ccall safe "raylib.h SetLoadFileDataCallback"
-  setLoadFileDataCallback ::
-    LoadFileDataCallback -> IO ()
+setLoadFileDataCallback :: LoadFileDataCallback -> IO ()
+setLoadFileDataCallback = c'setLoadFileDataCallback
 
-foreign import ccall safe "raylib.h SetSaveFileDataCallback"
-  setSaveFileDataCallback ::
-    SaveFileDataCallback -> IO ()
+setSaveFileDataCallback :: SaveFileDataCallback -> IO ()
+setSaveFileDataCallback = c'setSaveFileDataCallback
 
-foreign import ccall safe "raylib.h SetLoadFileTextCallback"
-  setLoadFileTextCallback ::
-    LoadFileTextCallback -> IO ()
+setLoadFileTextCallback :: LoadFileTextCallback -> IO ()
+setLoadFileTextCallback = c'setLoadFileTextCallback
 
-foreign import ccall safe "raylib.h SetSaveFileTextCallback"
-  setSaveFileTextCallback ::
-    SaveFileTextCallback -> IO ()
+setSaveFileTextCallback :: SaveFileTextCallback -> IO ()
+setSaveFileTextCallback = c'setSaveFileTextCallback
 
 loadFileData :: String -> IO [Integer]
 loadFileData fileName =

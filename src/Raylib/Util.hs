@@ -1,9 +1,9 @@
 {-# OPTIONS -Wall #-}
 {-# LANGUAGE CPP #-}
+{-# LANGUAGE TemplateHaskellQuotes #-}
 
 module Raylib.Util
-  ( 
-    -- * Bracket functions
+  ( -- * Bracket functions
     withWindow,
     drawing,
     mode2D,
@@ -15,6 +15,7 @@ module Raylib.Util
     vrStereoMode,
 
     -- * Game loop functions
+    raylibApplication,
     whileWindowOpen,
     whileWindowOpen_,
     whileWindowOpen0,
@@ -23,6 +24,7 @@ module Raylib.Util
     cameraDirectionRay,
     setMaterialShader,
     inGHCi,
+    inWeb,
     WindowResources,
     Freeable (..),
   )
@@ -46,6 +48,19 @@ import Raylib.Types
     VrStereoConfig,
   )
 import Raylib.Util.Math (Vector (vectorNormalize, (|-|)))
+
+#ifdef WEB_FFI
+
+import Foreign (Ptr, castPtrToStablePtr, castStablePtrToPtr, deRefStablePtr, freeStablePtr, newStablePtr)
+import Language.Haskell.TH (Body (NormalB), Callconv (CCall), Clause (Clause), Dec (ForeignD, FunD, SigD), DecsQ, Exp (AppE, VarE), Foreign (ExportF), Name, Pat (VarP), Q, Type (AppT, ArrowT, ConT, TupleT), mkName, ppr, reifyType)
+import Language.Haskell.TH.Syntax (Name (Name), OccName (OccName))
+
+#else
+
+import Language.Haskell.TH (Name, DecsQ, Type (AppT, ConT, ArrowT, TupleT), Q, reifyType, mkName, ppr, Dec (SigD, FunD), Clause (Clause), Body (NormalB), Exp (VarE, AppE))
+import Language.Haskell.TH.Syntax (Name (Name), OccName (OccName))
+
+#endif
 
 withWindow :: (MonadIO m, MonadMask m) => Int -> Int -> String -> Int -> (WindowResources -> m b) -> m b
 withWindow w h title fps = bracket (liftIO $ initWindow w h title <* setTargetFPS fps) (liftIO . closeWindow)
@@ -77,6 +92,156 @@ vrStereoMode config = bracket_ (liftIO (beginVrStereoMode config)) (liftIO endVr
 -- | Gets the direction of a camera as a ray.
 cameraDirectionRay :: Camera3D -> Ray
 cameraDirectionRay camera = Ray (camera3D'position camera) (vectorNormalize $ camera3D'target camera |-| camera3D'position camera)
+
+-- | Creates a raylib application using the given program functions
+raylibApplication ::
+  -- | The startup function, should be of type `IO AppState`
+  Name ->
+  -- | The mainLoop function, should be of type `AppState -> IO AppState`
+  Name ->
+  -- | The shouldClose function, should be of type `AppState -> IO Bool`
+  Name ->
+  -- | The teardown function, should be of type `AppState -> IO ()`
+  Name ->
+  DecsQ
+
+#ifdef WEB_FFI
+
+raylibApplication
+  startup@(Name (OccName sun) _)
+  mainLoop@(Name (OccName mln) _)
+  shouldClose@(Name (OccName scn) _)
+  teardown@(Name (OccName tdn) _) =
+    do
+      assertTypes startup mainLoop shouldClose teardown
+
+      let _startupN = mkName ('_' : sun)
+          _startupT = ConT ''IO `AppT` (ConT ''Ptr `AppT` TupleT 0)
+          _startupS = SigD _startupN _startupT -- _startup :: IO (Ptr ())
+          _startupF =
+            -- _startup = startup >>= createStablePtr
+            FunD
+              _startupN
+              [Clause [] (NormalB ((VarE '(>>=) `AppE` VarE startup) `AppE` VarE 'createStablePtr)) []]
+
+      let _mainLoopN = mkName ('_' : mln)
+          _mainLoopPtrN = mkName "ptr"
+          _mainLoopT = (ArrowT `AppT` (ConT ''Ptr `AppT` TupleT 0)) `AppT` (ConT ''IO `AppT` (ConT ''Ptr `AppT` TupleT 0))
+          _mainLoopS = SigD _mainLoopN _mainLoopT -- _mainLoop :: Ptr () -> IO (Ptr ())
+          _mainLoopF =
+            -- _mainLoop ptr = popStablePtr ptr >>= mainLoop >>= createStablePtr
+            FunD
+              _mainLoopN
+              [ Clause
+                  [VarP _mainLoopPtrN]
+                  (NormalB ((VarE '(>>=) `AppE` ((VarE '(>>=) `AppE` (VarE 'popStablePtr `AppE` VarE _mainLoopPtrN)) `AppE` VarE mainLoop)) `AppE` VarE 'createStablePtr))
+                  []
+              ]
+
+      let _shouldCloseN = mkName ('_' : scn)
+          _shouldClosePtrN = mkName "ptr"
+          _shouldCloseT = (ArrowT `AppT` (ConT ''Ptr `AppT` TupleT 0)) `AppT` (ConT ''IO `AppT` ConT ''Bool)
+          _shouldCloseS = SigD _shouldCloseN _shouldCloseT -- _shouldClose :: Ptr () -> IO Bool
+          _shouldCloseF =
+            -- _shouldClose ptr = readStablePtr ptr >>= P.shouldClose
+            FunD
+              _shouldCloseN
+              [ Clause
+                  [VarP _shouldClosePtrN]
+                  (NormalB ((VarE '(>>=) `AppE` (VarE 'readStablePtr `AppE` VarE _shouldClosePtrN)) `AppE` VarE shouldClose))
+                  []
+              ]
+
+      let _teardownN = mkName ('_' : tdn)
+          _teardownPtrN = mkName "ptr"
+          _teardownT = (ArrowT `AppT` (ConT ''Ptr `AppT` TupleT 0)) `AppT` (ConT ''IO `AppT` TupleT 0)
+          _teardownS = SigD _teardownN _teardownT -- _teardown :: Ptr () -> IO ()
+          _teardownF =
+            -- _teardown ptr = popStablePtr ptr >>= teardown
+            FunD
+              _teardownN
+              [ Clause
+                  [VarP _teardownPtrN]
+                  (NormalB ((VarE '(>>=) `AppE` (VarE 'popStablePtr `AppE` VarE _teardownPtrN)) `AppE` VarE teardown))
+                  []
+              ]
+      
+      return
+        [ _startupS,
+          _startupF,
+          _mainLoopS,
+          _mainLoopF,
+          _shouldCloseS,
+          _shouldCloseF,
+          _teardownS,
+          _teardownF,
+          ForeignD (ExportF CCall "startup" _startupN _startupT),
+          ForeignD (ExportF CCall "mainLoop" _mainLoopN _mainLoopT),
+          ForeignD (ExportF CCall "shouldClose" _shouldCloseN _shouldCloseT),
+          ForeignD (ExportF CCall "teardown" _teardownN _teardownT)
+        ]
+
+createStablePtr :: a -> IO (Ptr ())
+createStablePtr val = castStablePtrToPtr <$> newStablePtr val
+
+readStablePtr :: Ptr () -> IO a
+readStablePtr ptr = deRefStablePtr $ castPtrToStablePtr ptr
+
+popStablePtr :: Ptr () -> IO a
+popStablePtr ptr = do
+  let sptr = castPtrToStablePtr ptr
+  val <- deRefStablePtr sptr
+  freeStablePtr sptr
+  return val
+
+#else
+
+raylibApplication startup mainLoop shouldClose teardown = do
+  assertTypes startup mainLoop shouldClose teardown
+
+  return
+    [
+      -- main :: IO ()
+      SigD main (ConT ''IO `AppT` TupleT 0),
+      -- main = runRaylibProgram startup mainLoop shouldClose teardown
+      FunD main [Clause [] (NormalB ((((VarE 'runRaylibProgram `AppE` VarE startup) `AppE` VarE mainLoop) `AppE` VarE shouldClose) `AppE` VarE teardown)) []]
+    ]
+  where main = mkName "main"
+
+runRaylibProgram :: IO a -> (a -> IO a) -> (a -> IO Bool) -> (a -> IO ()) -> IO ()
+runRaylibProgram startup mainLoop shouldClose teardown = do
+  st <- startup
+  helper st
+  where helper s = shouldClose s >>= (\close -> if close then teardown s else mainLoop s >>= helper)
+
+#endif
+
+assertTypes :: Name -> Name -> Name -> Name -> Q ()
+assertTypes startup mainLoop shouldClose teardown = do
+  sut <- reifyType startup
+  state <-
+    case sut of
+      m `AppT` st ->
+        if m == ConT ''IO
+          then return st
+          else typeErr startup (ConT ''IO `AppT` ConT (mkName "AppState")) sut
+      _ -> typeErr startup (ConT ''IO `AppT` ConT (mkName "AppState")) sut
+
+  mlt <- reifyType mainLoop
+  assertType mainLoop ((ArrowT `AppT` state) `AppT` (ConT ''IO `AppT` state)) mlt
+
+  sct <- reifyType shouldClose
+  assertType shouldClose ((ArrowT `AppT` state) `AppT` (ConT ''IO `AppT` ConT ''Bool)) sct
+
+  tdt <- reifyType teardown
+  assertType teardown ((ArrowT `AppT` state) `AppT` (ConT ''IO `AppT` TupleT 0)) tdt
+  
+assertType :: Name -> Type -> Type -> Q ()
+assertType n expected actual = if expected == actual then return () else typeErr n expected actual
+
+typeErr :: Name -> Type -> Type -> a
+typeErr (Name (OccName n) _) expected actual =
+  error (n ++ " was not the expected type\n\nexpected " ++ show (ppr expected) ++ "\n\ngot " ++ show (ppr actual) ++ "\n")
 
 -- | Calls the game loop every frame as long as the window is open.
 --  For larger projects, instead of using this function, consider
@@ -135,4 +300,13 @@ inGHCi :: Bool
 inGHCi = True
 #else
 inGHCi = False
+#endif
+
+-- | True if the program is running in the web
+inWeb :: Bool
+
+#ifdef WEB_FFI
+inWeb = True
+#else
+inWeb = False
 #endif
