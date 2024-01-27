@@ -1,0 +1,15 @@
+name: publish
+on: release
+jobs:
+  publish:
+    name: Publish ${{github.ref_name}} on Hackage
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - run: cabal v2-sdist
+        shell: bash
+      - uses: haskell-actions/hackage-publish@v1
+        with:
+          hackageToken: ${{ secrets.HACKAGE_AUTH_TOKEN }}
+          packagesPath: dist-newstyle/sdist
+          publish: true
