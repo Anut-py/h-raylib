@@ -60,6 +60,8 @@ import Raylib.Types
 
 import Raylib.Web.Native (callRaylibFunction)
 
+---- raylib.h
+
 c'initWindow :: CInt -> CInt -> CString -> IO ()
 c'initWindow = callRaylibFunction "_InitWindow_"
 
@@ -1660,6 +1662,8 @@ c'attachAudioMixedProcessor = callRaylibFunction "_AttachAudioMixedProcessor_"
 c'detachAudioMixedProcessor :: Ptr AudioCallback -> IO ()
 c'detachAudioMixedProcessor = callRaylibFunction "_DetachAudioMixedProcessor_"
 
+---- rlgl.h
+
 c'rlMatrixMode :: CInt -> IO ()
 c'rlMatrixMode = callRaylibFunction "_rlMatrixMode_"
 
@@ -2109,6 +2113,176 @@ c'rlLoadDrawCube = callRaylibFunction "_rlLoadDrawCube_"
 
 c'rlLoadDrawQuad :: IO ()
 c'rlLoadDrawQuad = callRaylibFunction "_rlLoadDrawQuad_"
+
+---- raygui.h
+
+c'guiEnable :: IO ()
+guiEnable = callRaylibFunction "_GuiEnable_"
+
+c'guiDisable :: IO ()
+guiDisable = callRaylibFunction "_GuiDisable_"
+
+c'guiLock :: IO ()
+guiLock = callRaylibFunction "_GuiLock_"
+
+c'guiUnlock :: IO ()
+guiUnlock = callRaylibFunction "_GuiUnlock_"
+
+c'guiIsLocked :: IO CBool
+guiIsLocked = callRaylibFunction "_GuiIsLocked_"
+
+c'guiSetAlpha :: CFloat -> IO ()
+guiSetAlpha = callRaylibFunction "_GuiSetAlpha_"
+
+c'guiSetState :: CInt -> IO ()
+guiSetState = callRaylibFunction "_GuiSetState_"
+
+c'guiGetState :: IO CInt
+guiGetState = callRaylibFunction "_GuiGetState_"
+
+c'guiSetFont :: Ptr Font -> IO ()
+guiSetFont = callRaylibFunction "_GuiSetFont_"
+
+c'guiGetFont :: IO (Ptr Font)
+guiGetFont = callRaylibFunction "_GuiGetFont_"
+
+c'guiSetStyle :: CInt -> CInt -> CInt -> IO ()
+guiSetStyle = callRaylibFunction "_GuiSetStyle_"
+
+c'guiGetStyle :: CInt -> CInt -> IO CInt
+guiGetStyle = callRaylibFunction "_GuiGetStyle_"
+
+c'guiLoadStyle :: CString -> IO ()
+guiLoadStyle = callRaylibFunction "_GuiLoadStyle_"
+
+c'guiLoadStyleDefault :: IO ()
+guiLoadStyleDefault = callRaylibFunction "_GuiLoadStyleDefault_"
+
+c'guiEnableTooltip :: IO ()
+guiEnableTooltip = callRaylibFunction "_GuiEnableTooltip_"
+
+c'guiDisableTooltip :: IO ()
+guiDisableTooltip = callRaylibFunction "_GuiDisableTooltip_"
+
+c'guiSetTooltip :: CString -> IO ()
+guiSetTooltip = callRaylibFunction "_GuiSetTooltip_"
+
+c'guiIconText :: CInt -> CString -> IO CString
+guiIconText = callRaylibFunction "_GuiIconText_"
+
+c'guiSetIconScale :: CInt -> IO ()
+guiSetIconScale = callRaylibFunction "_GuiSetIconScale_"
+
+c'guiGetIcons :: IO (Ptr CUInt)
+guiGetIcons = callRaylibFunction "_GuiGetIcons_"
+
+c'guiLoadIcons :: CString -> CBool -> IO (Ptr CString)
+guiLoadIcons = callRaylibFunction "_GuiLoadIcons_"
+
+c'guiDrawIcon :: CInt -> CInt -> CInt -> CInt -> Ptr Color -> IO ()
+guiDrawIcon = callRaylibFunction "_GuiDrawIcon_"
+
+c'guiWindowBox :: Ptr Rectangle -> CString -> IO CInt
+guiWindowBox = callRaylibFunction "_GuiWindowBox_"
+
+c'guiGroupBox :: Ptr Rectangle -> CString -> IO CInt
+guiGroupBox = callRaylibFunction "_GuiGroupBox_"
+
+c'guiLine :: Ptr Rectangle -> CString -> IO CInt
+guiLine = callRaylibFunction "_GuiLine_"
+
+c'guiPanel :: Ptr Rectangle -> CString -> IO CInt
+guiPanel = callRaylibFunction "_GuiPanel_"
+
+c'guiTabBar :: Ptr Rectangle -> Ptr CString -> CInt -> Ptr CInt -> IO CInt
+guiTabBar = callRaylibFunction "_GuiTabBar_"
+
+c'guiScrollPanel :: Ptr Rectangle -> CString -> Ptr Rectangle -> Ptr Vector2 -> Ptr Rectangle -> IO CInt
+guiScrollPanel = callRaylibFunction "_GuiScrollPanel_"
+
+c'guiLabel :: Ptr Rectangle -> CString -> IO CInt
+guiLabel = callRaylibFunction "_GuiLabel_"
+
+c'guiButton :: Ptr Rectangle -> CString -> IO CInt
+guiButton = callRaylibFunction "_GuiButton_"
+
+c'guiLabelButton :: Ptr Rectangle -> CString -> IO CInt
+guiLabelButton = callRaylibFunction "_GuiLabelButton_"
+
+c'guiToggle :: Ptr Rectangle -> CString -> Ptr CBool -> IO CInt
+guiToggle = callRaylibFunction "_GuiToggle_"
+
+c'guiToggleGroup :: Ptr Rectangle -> CString -> Ptr CInt -> IO CInt
+guiToggleGroup = callRaylibFunction "_GuiToggleGroup_"
+
+c'guiToggleSlider :: Ptr Rectangle -> CString -> Ptr CInt -> IO CInt
+guiToggleSlider = callRaylibFunction "_GuiToggleSlider_"
+
+c'guiCheckBox :: Ptr Rectangle -> CString -> Ptr CBool -> IO CInt
+guiCheckBox = callRaylibFunction "_GuiCheckBox_"
+
+c'guiComboBox :: Ptr Rectangle -> CString -> Ptr CInt -> IO CInt
+guiComboBox = callRaylibFunction "_GuiComboBox_"
+
+c'guiDropdownBox :: Ptr Rectangle -> CString -> Ptr CInt -> CBool -> IO CInt
+guiDropdownBox = callRaylibFunction "_GuiDropdownBox_"
+
+c'guiSpinner :: Ptr Rectangle -> CString -> Ptr CInt -> CInt -> CInt -> CBool -> IO CInt
+guiSpinner = callRaylibFunction "_GuiSpinner_"
+
+c'guiValueBox :: Ptr Rectangle -> CString -> Ptr CInt -> CInt -> CInt -> CBool -> IO CInt
+guiValueBox = callRaylibFunction "_GuiValueBox_"
+
+c'guiTextBox :: Ptr Rectangle -> CString -> CInt -> CBool -> IO CInt
+guiTextBox = callRaylibFunction "_GuiTextBox_"
+
+c'guiSlider :: Ptr Rectangle -> CString -> CString -> Ptr CFloat -> CFloat -> CFloat -> IO CInt
+guiSlider = callRaylibFunction "_GuiSlider_"
+
+c'guiSliderBar :: Ptr Rectangle -> CString -> CString -> Ptr CFloat -> CFloat -> CFloat -> IO CInt
+guiSliderBar = callRaylibFunction "_GuiSliderBar_"
+
+c'guiProgressBar :: Ptr Rectangle -> CString -> CString -> Ptr CFloat -> CFloat -> CFloat -> IO CInt
+guiProgressBar = callRaylibFunction "_GuiProgressBar_"
+
+c'guiStatusBar :: Ptr Rectangle -> CString -> IO CInt
+guiStatusBar = callRaylibFunction "_GuiStatusBar_"
+
+c'guiDummyRec :: Ptr Rectangle -> CString -> IO CInt
+guiDummyRec = callRaylibFunction "_GuiDummyRec_"
+
+c'guiGrid :: Ptr Rectangle -> CString -> CFloat -> CInt -> Ptr Vector2 -> IO CInt
+guiGrid = callRaylibFunction "_GuiGrid_"
+
+c'guiListView :: Ptr Rectangle -> CString -> Ptr CInt -> Ptr CInt -> IO CInt
+guiListView = callRaylibFunction "_GuiListView_"
+
+c'guiListViewEx :: Ptr Rectangle -> Ptr CString -> CInt -> Ptr CInt -> Ptr CInt -> Ptr CInt -> IO CInt
+guiListViewEx = callRaylibFunction "_GuiListViewEx_"
+
+c'guiMessageBox :: Ptr Rectangle -> CString -> CString -> CString -> IO CInt
+guiMessageBox = callRaylibFunction "_GuiMessageBox_"
+
+c'guiTextInputBox :: Ptr Rectangle -> CString -> CString -> CString -> CString -> CInt -> Ptr CBool -> IO CInt
+guiTextInputBox = callRaylibFunction "_GuiTextInputBox_"
+
+c'guiColorPicker :: Ptr Rectangle -> CString -> Ptr Color -> IO CInt
+guiColorPicker = callRaylibFunction "_GuiColorPicker_"
+
+c'guiColorPanel :: Ptr Rectangle -> CString -> Ptr Color -> IO CInt
+guiColorPanel = callRaylibFunction "_GuiColorPanel_"
+
+c'guiColorBarAlpha :: Ptr Rectangle -> CString -> Ptr CFloat -> IO CInt
+guiColorBarAlpha = callRaylibFunction "_GuiColorBarAlpha_"
+
+c'guiColorBarHue :: Ptr Rectangle -> CString -> Ptr CFloat -> IO CInt
+guiColorBarHue = callRaylibFunction "_GuiColorBarHue_"
+
+c'guiColorPickerHSV :: Ptr Rectangle -> CString -> Ptr Vector3 -> IO CInt
+guiColorPickerHSV = callRaylibFunction "_GuiColorPickerHSV_"
+
+c'guiColorPanelHSV :: Ptr Rectangle -> CString -> Ptr Vector3 -> IO CInt
+guiColorPanelHSV = callRaylibFunction "_GuiColorPanelHSV_"
 
 #else
 
@@ -3885,6 +4059,232 @@ foreign import ccall safe "rlgl_bindings.h rlDrawRenderBatchActive_" c'rlDrawRen
 foreign import ccall safe "rlgl_bindings.h rlLoadDrawCube_" c'rlLoadDrawCube :: IO ()
 
 foreign import ccall safe "rlgl_bindings.h rlLoadDrawQuad_" c'rlLoadDrawQuad :: IO ()
+
+---- raygui.h
+
+foreign import ccall safe "rgui_bindings.h GuiEnable_"
+  c'guiEnable ::
+    IO ()
+
+foreign import ccall safe "rgui_bindings.h GuiDisable_"
+  c'guiDisable ::
+    IO ()
+
+foreign import ccall safe "rgui_bindings.h GuiLock_"
+  c'guiLock ::
+    IO ()
+
+foreign import ccall safe "rgui_bindings.h GuiUnlock_"
+  c'guiUnlock ::
+    IO ()
+
+foreign import ccall safe "rgui_bindings.h GuiIsLocked_"
+  c'guiIsLocked ::
+    IO CBool
+
+foreign import ccall safe "rgui_bindings.h GuiSetAlpha_"
+  c'guiSetAlpha ::
+    CFloat -> IO ()
+
+foreign import ccall safe "rgui_bindings.h GuiSetState_"
+  c'guiSetState ::
+    CInt -> IO ()
+
+foreign import ccall safe "rgui_bindings.h GuiGetState_"
+  c'guiGetState ::
+    IO CInt
+
+foreign import ccall safe "rgui_bindings.h GuiSetFont_"
+  c'guiSetFont ::
+    Ptr Font -> IO ()
+
+foreign import ccall safe "rgui_bindings.h GuiGetFont_"
+  c'guiGetFont ::
+    IO (Ptr Font)
+
+foreign import ccall safe "rgui_bindings.h GuiSetStyle_"
+  c'guiSetStyle ::
+    CInt -> CInt -> CInt -> IO ()
+
+foreign import ccall safe "rgui_bindings.h GuiGetStyle_"
+  c'guiGetStyle ::
+    CInt -> CInt -> IO CInt
+
+foreign import ccall safe "rgui_bindings.h GuiLoadStyle_"
+  c'guiLoadStyle ::
+    CString -> IO ()
+
+foreign import ccall safe "rgui_bindings.h GuiLoadStyleDefault_"
+  c'guiLoadStyleDefault ::
+    IO ()
+
+foreign import ccall safe "rgui_bindings.h GuiEnableTooltip_"
+  c'guiEnableTooltip ::
+    IO ()
+
+foreign import ccall safe "rgui_bindings.h GuiDisableTooltip_"
+  c'guiDisableTooltip ::
+    IO ()
+
+foreign import ccall safe "rgui_bindings.h GuiSetTooltip_"
+  c'guiSetTooltip ::
+    CString -> IO ()
+
+foreign import ccall safe "rgui_bindings.h GuiIconText_"
+  c'guiIconText ::
+    CInt -> CString -> IO CString
+
+foreign import ccall safe "rgui_bindings.h GuiSetIconScale_"
+  c'guiSetIconScale ::
+    CInt -> IO ()
+
+foreign import ccall safe "rgui_bindings.h GuiGetIcons_"
+  c'guiGetIcons ::
+    IO (Ptr CUInt)
+
+foreign import ccall safe "rgui_bindings.h GuiLoadIcons_"
+  c'guiLoadIcons ::
+    CString -> CBool -> IO (Ptr CString)
+
+foreign import ccall safe "rgui_bindings.h GuiDrawIcon_"
+  c'guiDrawIcon ::
+    CInt -> CInt -> CInt -> CInt -> Ptr Color -> IO ()
+
+foreign import ccall safe "rgui_bindings.h GuiWindowBox_"
+  c'guiWindowBox ::
+    Ptr Rectangle -> CString -> IO CInt
+
+foreign import ccall safe "rgui_bindings.h GuiGroupBox_"
+  c'guiGroupBox ::
+    Ptr Rectangle -> CString -> IO CInt
+
+foreign import ccall safe "rgui_bindings.h GuiLine_"
+  c'guiLine ::
+    Ptr Rectangle -> CString -> IO CInt
+
+foreign import ccall safe "rgui_bindings.h GuiPanel_"
+  c'guiPanel ::
+    Ptr Rectangle -> CString -> IO CInt
+
+foreign import ccall safe "rgui_bindings.h GuiTabBar_"
+  c'guiTabBar ::
+    Ptr Rectangle -> Ptr CString -> CInt -> Ptr CInt -> IO CInt
+
+foreign import ccall safe "rgui_bindings.h GuiScrollPanel_"
+  c'guiScrollPanel ::
+    Ptr Rectangle -> CString -> Ptr Rectangle -> Ptr Vector2 -> Ptr Rectangle -> IO CInt
+
+foreign import ccall safe "rgui_bindings.h GuiLabel_"
+  c'guiLabel ::
+    Ptr Rectangle -> CString -> IO CInt
+
+foreign import ccall safe "rgui_bindings.h GuiButton_"
+  c'guiButton ::
+    Ptr Rectangle -> CString -> IO CInt
+
+foreign import ccall safe "rgui_bindings.h GuiLabelButton_"
+  c'guiLabelButton ::
+    Ptr Rectangle -> CString -> IO CInt
+
+foreign import ccall safe "rgui_bindings.h GuiToggle_"
+  c'guiToggle ::
+    Ptr Rectangle -> CString -> Ptr CBool -> IO CInt
+
+foreign import ccall safe "rgui_bindings.h GuiToggleGroup_"
+  c'guiToggleGroup ::
+    Ptr Rectangle -> CString -> Ptr CInt -> IO CInt
+
+foreign import ccall safe "rgui_bindings.h GuiToggleSlider_"
+  c'guiToggleSlider ::
+    Ptr Rectangle -> CString -> Ptr CInt -> IO CInt
+
+foreign import ccall safe "rgui_bindings.h GuiCheckBox_"
+  c'guiCheckBox ::
+    Ptr Rectangle -> CString -> Ptr CBool -> IO CInt
+
+foreign import ccall safe "rgui_bindings.h GuiComboBox_"
+  c'guiComboBox ::
+    Ptr Rectangle -> CString -> Ptr CInt -> IO CInt
+
+foreign import ccall safe "rgui_bindings.h GuiDropdownBox_"
+  c'guiDropdownBox ::
+    Ptr Rectangle -> CString -> Ptr CInt -> CBool -> IO CInt
+
+foreign import ccall safe "rgui_bindings.h GuiSpinner_"
+  c'guiSpinner ::
+    Ptr Rectangle -> CString -> Ptr CInt -> CInt -> CInt -> CBool -> IO CInt
+
+foreign import ccall safe "rgui_bindings.h GuiValueBox_"
+  c'guiValueBox ::
+    Ptr Rectangle -> CString -> Ptr CInt -> CInt -> CInt -> CBool -> IO CInt
+
+foreign import ccall safe "rgui_bindings.h GuiTextBox_"
+  c'guiTextBox ::
+    Ptr Rectangle -> CString -> CInt -> CBool -> IO CInt
+
+foreign import ccall safe "rgui_bindings.h GuiSlider_"
+  c'guiSlider ::
+    Ptr Rectangle -> CString -> CString -> Ptr CFloat -> CFloat -> CFloat -> IO CInt
+
+foreign import ccall safe "rgui_bindings.h GuiSliderBar_"
+  c'guiSliderBar ::
+    Ptr Rectangle -> CString -> CString -> Ptr CFloat -> CFloat -> CFloat -> IO CInt
+
+foreign import ccall safe "rgui_bindings.h GuiProgressBar_"
+  c'guiProgressBar ::
+    Ptr Rectangle -> CString -> CString -> Ptr CFloat -> CFloat -> CFloat -> IO CInt
+
+foreign import ccall safe "rgui_bindings.h GuiStatusBar_"
+  c'guiStatusBar ::
+    Ptr Rectangle -> CString -> IO CInt
+
+foreign import ccall safe "rgui_bindings.h GuiDummyRec_"
+  c'guiDummyRec ::
+    Ptr Rectangle -> CString -> IO CInt
+
+foreign import ccall safe "rgui_bindings.h GuiGrid_"
+  c'guiGrid ::
+    Ptr Rectangle -> CString -> CFloat -> CInt -> Ptr Vector2 -> IO CInt
+
+foreign import ccall safe "rgui_bindings.h GuiListView_"
+  c'guiListView ::
+    Ptr Rectangle -> CString -> Ptr CInt -> Ptr CInt -> IO CInt
+
+foreign import ccall safe "rgui_bindings.h GuiListViewEx_"
+  c'guiListViewEx ::
+    Ptr Rectangle -> Ptr CString -> CInt -> Ptr CInt -> Ptr CInt -> Ptr CInt -> IO CInt
+
+foreign import ccall safe "rgui_bindings.h GuiMessageBox_"
+  c'guiMessageBox ::
+    Ptr Rectangle -> CString -> CString -> CString -> IO CInt
+
+foreign import ccall safe "rgui_bindings.h GuiTextInputBox_"
+  c'guiTextInputBox ::
+    Ptr Rectangle -> CString -> CString -> CString -> CString -> CInt -> Ptr CBool -> IO CInt
+
+foreign import ccall safe "rgui_bindings.h GuiColorPicker_"
+  c'guiColorPicker ::
+    Ptr Rectangle -> CString -> Ptr Color -> IO CInt
+
+foreign import ccall safe "rgui_bindings.h GuiColorPanel_"
+  c'guiColorPanel ::
+    Ptr Rectangle -> CString -> Ptr Color -> IO CInt
+
+foreign import ccall safe "rgui_bindings.h GuiColorBarAlpha_"
+  c'guiColorBarAlpha ::
+    Ptr Rectangle -> CString -> Ptr CFloat -> IO CInt
+
+foreign import ccall safe "rgui_bindings.h GuiColorBarHue_"
+  c'guiColorBarHue ::
+    Ptr Rectangle -> CString -> Ptr CFloat -> IO CInt
+
+foreign import ccall safe "rgui_bindings.h GuiColorPickerHSV_"
+  c'guiColorPickerHSV ::
+    Ptr Rectangle -> CString -> Ptr Vector3 -> IO CInt
+
+foreign import ccall safe "rgui_bindings.h GuiColorPanelHSV_"
+  c'guiColorPanelHSV ::
+    Ptr Rectangle -> CString -> Ptr Vector3 -> IO CInt
 
 #endif
 

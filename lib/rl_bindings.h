@@ -8,7 +8,7 @@
  * file contains wrapper functions for all Raylib functions that do not take pointers.
  */
 
-#include <raylib.h>
+#include "rl_common.h"
 
 void SetWindowIcon_(Image *a);
 

@@ -4,8 +4,6 @@
 
 #pragma GCC diagnostic ignored "-Wimplicit-function-declaration"
 #include "rl_internal.h"
-#include "rl_common.h"
-#include <config.h>
 
 RLBIND void UnloadAudioBuffer_(rAudioBuffer *buffer)
 {

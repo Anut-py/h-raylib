@@ -3,8 +3,6 @@
  */
 
 #include "rlgl_bindings.h"
-#include "rl_common.h"
-#include <stdlib.h>
 
 RLBIND rlRenderBatch *rlLoadRenderBatch_(int numBuffers, int bufferElements)
 {

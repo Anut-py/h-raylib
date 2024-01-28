@@ -20,8 +20,8 @@
                 src = self.fetchFromGitHub {
                   owner = "raysan5";
                   repo = "raylib";
-                  rev = "c57b8d5a6abbf210fece6b44dcdadd112a7e072e";
-                  sha256 = "sha256-wByQ+8jBSp9r2Z4Ocv1H1KDEpsyvebPkHQvZabDJXS0=";
+                  rev = "40f3df5b865eee0cd87a9e4e1347cb04c87841f8";
+                  sha256 = "sha256-yJndpOz1DM9jmroZf5A+82uZ8f6TM+Qraidc9qetvbc=";
                 };
                 postFixup = ''
                   cp ../src/*.h $out/include/

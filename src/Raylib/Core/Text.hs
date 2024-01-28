@@ -95,7 +95,7 @@ genImageFontAtlas :: [GlyphInfo] -> [[Rectangle]] -> Int -> Int -> Int -> Int ->
 genImageFontAtlas chars recs glyphCount fontSize padding packMethod = withFreeableArray chars (\c -> withFreeableArray2D recs (\r -> c'genImageFontAtlas c r (fromIntegral glyphCount) (fromIntegral fontSize) (fromIntegral padding) (fromIntegral packMethod))) >>= pop
 
 -- | Unloads a font from GPU memory (VRAM). Fonts are automatically unloaded
--- when `closeWindow` is called, so manually unloading fonts is not required.
+-- when `Raylib.Core.closeWindow` is called, so manually unloading fonts is not required.
 -- In larger projects, you may want to manually unload fonts to avoid having
 -- them in VRAM for too long.
 unloadFont :: Font -> WindowResources -> IO ()

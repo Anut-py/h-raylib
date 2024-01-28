@@ -1,4 +1,8 @@
-#include <web.h>
+/**
+ * See web.h
+ */
+
+#include "web.h"
 
 // See https://gitlab.haskell.org/ghc/ghc-wasm-meta#custom-imports
 void _jslog(void *buf, uint32_t len) __attribute__((__import_module__("env"), __import_name__("log")));

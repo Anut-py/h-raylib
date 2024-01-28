@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 const {
   rmSync,
   readFileSync,
@@ -7,6 +8,7 @@ const {
 } = require("fs");
 const { execSync, spawnSync } = require("child_process");
 const path = require("path");
+const readline = require("readline");
 
 const exec = (...c) => execSync(...c).toString();
 
@@ -82,6 +84,58 @@ const findCommandPath = (commandName, longForm, shortForm) => {
 
   return commandName;
 };
+const diffWithRemote = (module) => {
+  const modulePath = withQuotes(path.join(__dirname, module));
+  const gitPath = findCommandPath("git", "--git-path", "-g");
+
+  log(logLevel.VERB, "Using git path: " + gitPath);
+  log(logLevel.VERB, "Running `git fetch`");
+
+  exec(`cd ${modulePath} && ${gitPath} fetch`);
+
+  log(logLevel.VERB, "Comparing revisions");
+
+  const headRev = exec(`cd ${modulePath} && ${gitPath} rev-parse HEAD`).split("\n")[0];
+  const remoteRev = exec(`cd ${modulePath} && ${gitPath} rev-parse origin/master`).split(
+    "\n"
+  )[0];
+
+  log(logLevel.VERB, "Local revision:  " + headRev);
+  log(logLevel.VERB, "Remote revision: " + remoteRev);
+
+  if (headRev === remoteRev) {
+    log(logLevel.INFO, "Already up to date");
+  } else {
+    spawnSync(`cd ${modulePath} && ${gitPath} diff HEAD origin/master`, {
+      stdio: "inherit",
+      shell: true,
+    });
+
+    const rl = readline.createInterface({
+      input: process.stdin,
+      output: process.stdout,
+    });
+
+    log(logLevel.VERB, "Prompting to pull");
+
+    rl.setPrompt("Pull code (y/N)? ");
+    rl.prompt(true);
+
+    rl.on("line", (line) => {
+      log(logLevel.VERB, "Prompt response: " + line);
+      if (line.trim().toLowerCase() === "y") {
+        log(logLevel.INFO, "Pulling code");
+
+        exec(`cd ${modulePath} && ${gitPath} pull`);
+        
+        log(logLevel.INFO, "Don't forget to run nix-update")
+      }
+      log(logLevel.INFO, "All done!");
+      process.exitCode = 0;
+      rl.close();
+    });
+  }
+}
 
 if (process.argv.includes("-u") || process.argv.includes("--nix-update")) {
   (() => {
@@ -115,7 +169,9 @@ if (process.argv.includes("-u") || process.argv.includes("--nix-update")) {
 
     log(logLevel.VERB, "Deleting flake.lock");
 
-    rmSync(path.join(__dirname, "flake.lock"));
+    rmSync(path.join(__dirname, "flake.lock"), {
+      force: true
+    });
 
     if (!flakeUpdated) {
       log(logLevel.INFO, "Prefetching with nix, this might take a while");
@@ -181,31 +237,12 @@ if (process.argv.includes("-u") || process.argv.includes("--nix-update")) {
   process.argv.includes("-d") ||
   process.argv.includes("--raylib-diff")
 ) {
-  const gitPath = findCommandPath("git", "--git-path", "-g");
-
-  log(logLevel.VERB, "Using git path: " + gitPath);
-  log(logLevel.VERB, "Running `git fetch`");
-
-  exec(`cd raylib && ${gitPath} fetch`);
-
-  log(logLevel.VERB, "Comparing revisions");
-
-  const headRev = exec("cd raylib && git rev-parse HEAD").split("\n")[0];
-  const remoteRev = exec("cd raylib && git rev-parse origin/master").split(
-    "\n"
-  )[0];
-
-  log(logLevel.VERB, "Local revision:  " + headRev);
-  log(logLevel.VERB, "Remote revision: " + remoteRev);
-
-  if (headRev === remoteRev) {
-    log(logLevel.INFO, "Already up to date");
-  } else {
-    spawnSync(`cd raylib && ${gitPath} diff HEAD origin/master`, {
-      stdio: "inherit",
-      shell: true,
-    });
-  }
+  diffWithRemote("raylib");
+} else if (
+  process.argv.includes("-g") ||
+  process.argv.includes("--raygui-diff")
+) {
+  diffWithRemote("raygui");
 } else if (process.argv.includes("-p") || process.argv.includes("--package")) {
   const cabalPath = findCommandPath("cabal", "--cabal-path", "-c");
 
@@ -237,15 +274,24 @@ if (process.argv.includes("-u") || process.argv.includes("--nix-update")) {
     `h-raylib-${hraylibVersion}`
   );
 
-  copyFileSync(path.join(__dirname, "cabal.project"), path.join(extractPath, "cabal.project"));
-  copyFileSync(path.join(__dirname, "run-all-examples.sh"), path.join(extractPath, "run-all-examples.sh"));
+  copyFileSync(
+    path.join(__dirname, "cabal.project"),
+    path.join(extractPath, "cabal.project")
+  );
+  copyFileSync(
+    path.join(__dirname, "run-all-examples.sh"),
+    path.join(extractPath, "run-all-examples.sh")
+  );
 
   log(logLevel.INFO, `Building and running project in ${extractPath}`);
 
-  spawnSync(`cd ${extractPath} && sh ${path.join(extractPath, "run-all-examples.sh")}`, {
-    shell: true,
-    stdio: "inherit",
-  });
+  spawnSync(
+    `cd ${extractPath} && sh ${path.join(extractPath, "run-all-examples.sh")}`,
+    {
+      shell: true,
+      stdio: "inherit",
+    }
+  );
 } else {
   const helpText = `
 This script contains useful tools for h-raylib development
@@ -268,6 +314,9 @@ This script contains useful tools for h-raylib development
 
     -d                Diff the local raylib source with the latest remote code
     --raylib-diff
+    --nix-update
+
+    --raygui-diff     Diff the local raygui source with the latest remote code
 
     -p                Package the cabal project and run the examples
     --package

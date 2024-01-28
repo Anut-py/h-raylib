@@ -3,8 +3,6 @@
  */
 
 #include "rl_bindings.h"
-#include "rl_common.h"
-#include <stdlib.h>
 
 RLBIND void SetWindowIcon_(Image *a)
 {

@@ -1,3 +1,9 @@
+/**
+ * @file web.h
+ * @author Anut-py
+ * @brief Intermediate functions to integrate h-raylib with the browser
+ */
+
 #ifndef WEB_H
 #define WEB_H
 

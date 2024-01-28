@@ -193,7 +193,7 @@ loadModelFromMesh mesh wr = do
   return model
 
 -- | Unloads a model from GPU memory (VRAM). This unloads its associated
--- meshes and materials. Models are automatically unloaded when `closeWindow`
+-- meshes and materials. Models are automatically unloaded when `Raylib.Core.closeWindow`
 -- is called, so manually unloading models is not required. In larger projects,
 -- you may want to manually unload models to avoid having them in VRAM for too
 -- long.
@@ -239,7 +239,7 @@ updateMeshBuffer :: Mesh -> Int -> Ptr () -> Int -> Int -> IO ()
 updateMeshBuffer mesh index dataValue dataSize offset = withFreeable mesh (\m -> c'updateMeshBuffer m (fromIntegral index) dataValue (fromIntegral dataSize) (fromIntegral offset))
 
 -- | Unloads a mesh from GPU memory (VRAM). Meshes are
--- automatically unloaded when `closeWindow` is called, so manually unloading
+-- automatically unloaded when `Raylib.Core.closeWindow` is called, so manually unloading
 -- meshes is not required. In larger projects, you may want to
 -- manually unload meshes to avoid having them in VRAM for too long.
 unloadMesh :: Mesh -> WindowResources -> IO ()
@@ -334,7 +334,7 @@ storeMaterialData materials wr =
     )
 
 -- | Unloads a material from GPU memory (VRAM). Materials are
--- automatically unloaded when `closeWindow` is called, so manually unloading
+-- automatically unloaded when `Raylib.Core.closeWindow` is called, so manually unloading
 -- materials is not required. In larger projects, you may want to
 -- manually unload materials to avoid having them in VRAM for too long.
 unloadMaterial :: Material -> WindowResources -> IO ()

@@ -4,7 +4,7 @@
  * @brief Required methods for binding Haskell to rlgl
  */
 
-#include <rlgl.h>
+#include "rl_common.h"
 
 rlRenderBatch *rlLoadRenderBatch_(int numBuffers, int bufferElements);
 
