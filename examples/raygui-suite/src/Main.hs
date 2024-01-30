@@ -2,9 +2,8 @@
 module Main where
 
 import Raylib.Core (clearBackground)
-import Raylib.Core.Text (drawText)
 import Raylib.Util (drawing, whileWindowOpen_, withWindow)
-import Raylib.Util.Colors (lightGray, rayWhite)
+import Raylib.Util.Colors (rayWhite)
 import Raylib.Util.GUI (guiLabel, guiSetStyleTextSize)
 import Raylib.Types (Rectangle (Rectangle))
 
