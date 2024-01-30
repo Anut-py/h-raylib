@@ -4,6 +4,8 @@ This file only contains h-raylib specific information. For documentation on indi
 
 ## Project structure
 
+h-raylib contains bindings for raylib.h, rlgl.h, and raygui.h.
+
 ### Public modules
 
 `Raylib.Types` contains all of raylib's types and low-level code to convert them to and from raw bytes (i.e. from C to Haskell and vice versa). `Raylib.Util` contains miscellaneous utility functions. `Raylib.Util.Colors` contains some colors defined by raylib. `Raylib.Util.Lenses` provides lenses for the raylib types. The other public modules, `Raylib.Core`, `Raylib.Core.\*`, and `Raylib.Util.\*`, correspond to their respective raylib modules.
@@ -24,7 +26,7 @@ The callbacks section contains `FunPtr` types that are passed to some functions.
 
 #### Raylib.Util
 
-`Raylib.Util` contains some functions that may be useful for an h-raylib application. These functions are Haskell-only; i.e. they are not connected to C in any way.
+`Raylib.Util` contains some functions that may be useful for an h-raylib application. These functions are Haskell-only; i.e. they are not connected to C in any way. Additionally, it contains the Template Haskell function `raylibApplication`, which makes it easier to create a raylib application that supports native and web targets (TODO: add more details).
 
 #### Raylib.Util.Colors
 
@@ -42,7 +44,7 @@ Contains `lens` definitions for all the Haskell types.
 
 These modules contain only functions. Each of these functions corresponds to a C function.
 
-The `initWindow` function returns a `WindowResources` value that must be passed to some `load*` functions and several other functions. 
+The `initWindow` function (Raylib.Core) returns a `WindowResources` value that must be passed to some `load*` functions and several other functions. 
 
 The `unload*` functions are optional; even if you do not call them, all assets used by a program will be automatically be unloaded when it terminates. For some types (e.g. `Image`), an unloading function is not necessary.
 
@@ -50,13 +52,17 @@ These changes are for automatic memory management. See the "Memory management" s
 
 Functions that took a pointer as an argument in C were changed to take a regular type as an argument and return an updated version of the argument.
 
+##### Raylib.Util.GUI
+
+This is a binding module for [raygui](https://github.com/raysan5/raygui), an immediate-mode GUI library built on top of raylib. The C version of raygui involves a lot of pointers because of the way it is designed. Unfortunately, this is problematic when binding it to Haskell, as Haskell's immutability makes it difficult to represent pointers properly. This means many functions will take the previous state of a control as an argument, and return the updated state of that control. You should use the Haddock documentation as a reference to make your life easier.
+
 ### Private modules
 
-h-raylib has 3 modules that are not exposed for external use: `Raylib.Native`, `Raylib.Internal`, and `Raylib.ForeignUtil`.
+h-raylib has 5 modules that are not exposed for external use: `Raylib.Native`, `Raylib.Internal`, `Raylib.ForeignUtil`, `Raylib.Web.Native`, and `Raylib.Web.Processable`.
 
 #### Raylib.Native
 
-`Raylib.Native` consists solely of `foreign import` functions. These are used in the 6 public modules mentioned above. (TODO: web support)
+`Raylib.Native` consists solely of `foreign import` functions. These are used in the 6 public modules mentioned above. When compiling for the web, the `foreign import`s are replaced with `callRaylibFunction` calls (see the documentation for `Raylib.Web.Native` for details).
 
 #### Raylib.Internal
 
@@ -67,6 +73,14 @@ h-raylib has 3 modules that are not exposed for external use: `Raylib.Native`, `
 `Raylib.ForeignUtil` contains miscellaneous utility functions for marshalling values to/from C. The most notable thing in this module is the `Freeable` typeclass.
 
 The `Freeable` typeclass contains two methods, `rlFreeDependents` and `rlFree`. `rlFree` receives a pointer and frees all of the data associated with it, including the pointer itself. `rlFreeDependents` only frees the data "dependent" on the pointer, which usually means dynamic C arrays, i.e. pointers.
+
+#### Raylib.Web.Native, Raylib.Web.Processable
+
+_NOTE: These modules are only used when building for the web._
+
+`Raylib.Web.Native` exports `callRaylibFunction`. This is an interfacing function that allows Haskell to call raylib functions that have been compiled with emscripten. This has to be done in a roundabout way because we cannot directly call these functions through Haskell; we have to call a JS function that calls the actual raylib functions.
+
+`Raylib.Web.Processable` contains internal code to convert Haskell types to raw bytes.
 
 ## Memory management
 
