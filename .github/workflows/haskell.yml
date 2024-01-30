@@ -2,9 +2,18 @@ name: build
 
 on:
   push:
-    branches: [main, master]
+    branches: '*'
+    paths:
+      - 'examples/**'
+      - 'lib/**'
+      - 'raygui/**'
+      - 'raylib/**'
+      - 'src/**'
+      - 'cabal.project'
+      - 'h-raylib.cabal'
+      - '*.nix'
   pull_request:
-    branches: [main, master]
+    branches: '*'
 
 permissions:
   contents: read
