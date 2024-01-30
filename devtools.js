@@ -145,23 +145,31 @@ if (process.argv.includes("-u") || process.argv.includes("--nix-update")) {
     log(logLevel.INFO, "Using nix path: " + nixPath);
     log(logLevel.INFO, "Using git path: " + gitPath);
 
-    log(logLevel.VERB, "Fetching git revision");
+    log(logLevel.VERB, "Fetching git revisions");
 
-    const gitOutput = exec(`cd raylib && ${gitPath} rev-parse HEAD`);
-    const revision = gitOutput.split("\n")[0];
+    const raylibGitOutput = exec(`cd raylib && ${gitPath} rev-parse HEAD`);
+    const raylibRevision = raylibGitOutput.split("\n")[0];
 
-    log(logLevel.VERB, "Found revision: " + revision);
-    log(logLevel.VERB, "Fetching h-raylib version");
+    log(logLevel.VERB, "Found raylib revision: " + raylibRevision);
+
+    const rayguiGitOutput = exec(`cd raygui && ${gitPath} rev-parse HEAD`);
+    const rayguiRevision = rayguiGitOutput.split("\n")[0];
+
+    log(logLevel.VERB, "Found raygui revision: " + rayguiRevision);
+
     log(logLevel.INFO, "h-raylib version " + hraylibVersion);
 
-    const flakeUpdated = readFileSync(
+    const flakeNixRaw = readFileSync(
       path.join(__dirname, "flake.nix")
-    ).includes(revision);
+    );
+
+    const flakeUpdatedRaylib = flakeNixRaw.includes(`rev = "${raylibRevision}"`);
+    const flakeUpdatedRaygui = flakeNixRaw.includes(`rev = "${rayguiRevision}"`);
     const defaultUpdated = readFileSync(
       path.join(__dirname, "default.nix")
-    ).includes(hraylibVersion);
+    ).includes(`version = "${hraylibVersion}"`);
 
-    if (flakeUpdated && defaultUpdated) {
+    if (flakeUpdatedRaylib && flakeUpdatedRaygui && defaultUpdated) {
       log(logLevel.INFO, "The flake is already up to date");
       process.exitCode = 0;
       return;
@@ -173,12 +181,17 @@ if (process.argv.includes("-u") || process.argv.includes("--nix-update")) {
       force: true
     });
 
-    if (!flakeUpdated) {
+    if (!flakeUpdatedRaylib || !flakeUpdatedRaygui) {
       log(logLevel.INFO, "Prefetching with nix, this might take a while");
 
-      const { hash } = JSON.parse(
+      const { raylibHash } = JSON.parse(
         exec(
-          `${nixPath} flake prefetch github:raysan5/raylib/${revision} --extra-experimental-features nix-command --extra-experimental-features flakes --json`
+          `${nixPath} flake prefetch github:raysan5/raylib/${raylibRevision} --extra-experimental-features nix-command --extra-experimental-features flakes --json`
+        )
+      );
+      const { rayguiHash } = JSON.parse(
+        exec(
+          `${nixPath} flake prefetch github:raysan5/raygui/${rayguiRevision} --extra-experimental-features nix-command --extra-experimental-features flakes --json`
         )
       );
 
@@ -193,8 +206,10 @@ if (process.argv.includes("-u") || process.argv.includes("--nix-update")) {
         path.join(__dirname, "flake.nix.template")
       )
         .toString()
-        .replace("REVISION", revision)
-        .replace("HASH", hash);
+        .replace("RAYLIB_REVISION", raylibRevision)
+        .replace("RAYLIB_HASH", raylibHash)
+        .replace("RAYGUI_REVISION", rayguiRevision)
+        .replace("RAYGUI_HASH", rayguiHash);
       writeFileSync(path.join(__dirname, "flake.nix"), flakeTemplate);
 
       log(logLevel.INFO, "Successfully updated flake.nix");
@@ -239,7 +254,7 @@ if (process.argv.includes("-u") || process.argv.includes("--nix-update")) {
 ) {
   diffWithRemote("raylib");
 } else if (
-  process.argv.includes("-g") ||
+  process.argv.includes("-gd") ||
   process.argv.includes("--raygui-diff")
 ) {
   diffWithRemote("raygui");
@@ -316,7 +331,8 @@ This script contains useful tools for h-raylib development
     --raylib-diff
     --nix-update
 
-    --raygui-diff     Diff the local raygui source with the latest remote code
+    -gd               Diff the local raygui source with the latest remote code
+    --raygui-diff
 
     -p                Package the cabal project and run the examples
     --package

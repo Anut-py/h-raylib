@@ -14,7 +14,7 @@ then
   then
     cabal clean
   fi
-  cabal build -j
+  cabal build all -j
 fi
 
 # core
@@ -41,3 +41,6 @@ cabal run basic-audio
 
 # rlgl
 cabal run basic-rlgl
+
+# raygui
+cabal run raygui-suite
