@@ -184,12 +184,12 @@ if (process.argv.includes("-u") || process.argv.includes("--nix-update")) {
     if (!flakeUpdatedRaylib || !flakeUpdatedRaygui) {
       log(logLevel.INFO, "Prefetching with nix, this might take a while");
 
-      const { raylibHash } = JSON.parse(
+      const { hash: raylibHash } = JSON.parse(
         exec(
           `${nixPath} flake prefetch github:raysan5/raylib/${raylibRevision} --extra-experimental-features nix-command --extra-experimental-features flakes --json`
         )
       );
-      const { rayguiHash } = JSON.parse(
+      const { hash: rayguiHash } = JSON.parse(
         exec(
           `${nixPath} flake prefetch github:raysan5/raygui/${rayguiRevision} --extra-experimental-features nix-command --extra-experimental-features flakes --json`
         )
