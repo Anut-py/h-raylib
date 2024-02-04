@@ -21,8 +21,8 @@
                 src = self.fetchFromGitHub {
                   owner = "raysan5";
                   repo = "raylib";
-                  rev = "40f3df5b865eee0cd87a9e4e1347cb04c87841f8";
-                  sha256 = "sha256-yJndpOz1DM9jmroZf5A+82uZ8f6TM+Qraidc9qetvbc=";
+                  rev = "e9291fa4c77c85e1fe6808289632e5ce4a93eed6";
+                  sha256 = "sha256-BtDD3L9O7mKcG4O/Nl449q/4sG7pdH/5G2XjvaqzxpU=";
                 };
                 postFixup = "cp ../src/*.h $out/include/";
               });
@@ -31,8 +31,8 @@
                 src = self.fetchFromGitHub {
                   owner = "raysan5";
                   repo = "raygui";
-                  rev = "45e7f967e62088b9fec02ac38c07d4b67d6466b0";
-                  sha256 = "sha256-rt3W8hVAnq4WCnnMFj4sVOq0UjlkglHTKvtMye4w+TA=";
+                  rev = "7fe39be75af7d166c50afb6e6b9013398d66a7e1";
+                  sha256 = "sha256-jAVWNNieuYsSVQ/vQbSKOQLf4aedkUUgo8XCQt1oaGY=";
                 };
                 nativeBuildInputs = [];
                 postFixup = "mkdir -p $out/include/ && cp ./src/raygui.h $out/include/ && cp ./examples/styles/*.h $out/include/";

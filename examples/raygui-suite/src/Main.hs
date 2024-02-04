@@ -152,10 +152,10 @@ mainLoop state = do
         guiState <- guiGetState
 
         guiSetStyleTextSize 40
-        guiLabel (Rectangle 20 20 300 40) "raygui test suite"
+        guiLabel (Rectangle 20 20 (width - 40) 40) "raygui test suite"
 
         guiSetStyleTextSize 20
-        guiLabel (Rectangle 20 70 300 20) ("gui state: " ++ show guiState)
+        guiLabel (Rectangle 20 70 (width - 40) 20) ("gui state: " ++ show guiState)
 
         locked <- guiIsLocked
         let status

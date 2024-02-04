@@ -56,6 +56,8 @@ void UnloadShader_(Shader *a);
 
 Ray *GetMouseRay_(Vector2 *a, Camera3D *b);
 
+Ray *GetViewRay_(Vector2 *a, Camera3D *b, float c, float d);
+
 Matrix *GetCameraMatrix_(Camera3D *a);
 
 Matrix *GetCameraMatrix2D_(Camera2D *a);

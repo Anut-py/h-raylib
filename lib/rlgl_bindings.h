@@ -190,7 +190,7 @@ void *rlReadTexturePixels_(unsigned int a, int b, int c, int d);
 
 unsigned char *rlReadScreenPixels_(int a, int b);
 
-unsigned int rlLoadFramebuffer_(int a, int b);
+unsigned int rlLoadFramebuffer_();
 
 void rlFramebufferAttach_(unsigned int a, unsigned int b, int c, int d, int e);
 
@@ -257,6 +257,8 @@ void rlDisableTextureCubemap_();
 void rlDisableShader_();
 
 void rlDisableFramebuffer_();
+
+unsigned int rlGetActiveFramebuffer_();
 
 void rlEnableColorBlend_();
 

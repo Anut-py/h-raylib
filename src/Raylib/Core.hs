@@ -90,6 +90,7 @@ import Raylib.Native
     c'getMouseDelta,
     c'getMousePosition,
     c'getMouseRay,
+    c'getViewRay,
     c'getMouseWheelMove,
     c'getMouseWheelMoveV,
     c'getMouseX,
@@ -551,6 +552,9 @@ unloadShader shader = unloadSingleShader (shader'id shader)
 
 getMouseRay :: Vector2 -> Camera3D -> IO Ray
 getMouseRay mousePosition camera = withFreeable mousePosition (withFreeable camera . c'getMouseRay) >>= pop
+
+getViewRay :: Vector2 -> Camera3D -> Float -> Float -> IO Ray
+getViewRay mousePosition camera width height = withFreeable mousePosition (\p -> withFreeable camera (\c -> c'getViewRay p c (realToFrac width) (realToFrac height))) >>= pop
 
 getCameraMatrix :: Camera3D -> IO Matrix
 getCameraMatrix camera = withFreeable camera c'getCameraMatrix >>= pop

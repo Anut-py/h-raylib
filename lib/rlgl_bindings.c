@@ -476,9 +476,9 @@ RLBIND unsigned char *rlReadScreenPixels_(int a, int b)
   return rlReadScreenPixels(a, b);
 }
 
-RLBIND unsigned int rlLoadFramebuffer_(int a, int b)
+RLBIND unsigned int rlLoadFramebuffer_()
 {
-  return rlLoadFramebuffer(a, b);
+  return rlLoadFramebuffer();
 }
 
 RLBIND void rlFramebufferAttach_(unsigned int a, unsigned int b, int c, int d, int e)
@@ -644,6 +644,11 @@ RLBIND void rlDisableShader_()
 RLBIND void rlDisableFramebuffer_()
 {
   rlDisableFramebuffer();
+}
+
+RLBIND unsigned int rlGetActiveFramebuffer_()
+{
+  return rlGetActiveFramebuffer();
 }
 
 RLBIND void rlEnableColorBlend_()

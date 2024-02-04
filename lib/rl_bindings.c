@@ -133,6 +133,13 @@ RLBIND Ray *GetMouseRay_(Vector2 *a, Camera3D *b)
     return ptr;
 }
 
+RLBIND Ray *GetViewRay_(Vector2 *a, Camera3D *b, float c, float d)
+{
+    Ray *ptr = (Ray *)malloc(sizeof(Ray));
+    *ptr = GetViewRay(*a, *b, c, d);
+    return ptr;
+}
+
 RLBIND Matrix *GetCameraMatrix_(Camera3D *a)
 {
     Matrix *ptr = (Matrix *)malloc(sizeof(Matrix));

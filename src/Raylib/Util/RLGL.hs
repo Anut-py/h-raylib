@@ -41,6 +41,7 @@ module Raylib.Util.RLGL
     rlDisableShader,
     rlEnableFramebuffer,
     rlDisableFramebuffer,
+    rlGetActiveFramebuffer,
     rlActiveDrawBuffers,
     rlEnableColorBlend,
     rlDisableColorBlend,
@@ -298,6 +299,7 @@ import Raylib.Native
     c'rlDisableTextureCubemap,
     c'rlDisableShader,
     c'rlDisableFramebuffer,
+    c'rlGetActiveFramebuffer,
     c'rlEnableColorBlend,
     c'rlDisableColorBlend,
     c'rlEnableDepthTest,
@@ -506,6 +508,10 @@ rlEnableFramebuffer fboId = c'rlEnableFramebuffer (fromIntegral fboId)
 -- | Disable render texture (fbo), return to default framebuffer
 rlDisableFramebuffer :: IO ()
 rlDisableFramebuffer = c'rlDisableFramebuffer
+
+-- | Get the currently active render texture (fbo), 0 for default framebuffer
+rlGetActiveFramebuffer :: IO Integer
+rlGetActiveFramebuffer = fromIntegral <$> c'rlGetActiveFramebuffer
 
 -- | Activate multiple draw color buffers
 rlActiveDrawBuffers :: Int -> IO ()
@@ -891,8 +897,8 @@ rlReadScreenPixels width height =
   map fromIntegral <$> (c'rlReadScreenPixels (fromIntegral width) (fromIntegral height) >>= popCArray (width * height * 4))
 
 -- | Load an empty framebuffer
-rlLoadFramebuffer :: Int -> Int -> IO Integer
-rlLoadFramebuffer width height = fromIntegral <$> c'rlLoadFramebuffer (fromIntegral width) (fromIntegral height)
+rlLoadFramebuffer :: IO Integer
+rlLoadFramebuffer = fromIntegral <$> c'rlLoadFramebuffer
 
 -- | Attach texture/renderbuffer to a framebuffer
 rlFramebufferAttach :: Integer -> Integer -> RLFramebufferAttachType -> RLFramebufferAttachTextureType -> Int -> IO ()

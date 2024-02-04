@@ -323,6 +323,9 @@ c'unloadShader = callRaylibFunction "_UnloadShader_"
 c'getMouseRay :: Ptr Vector2 -> Ptr Camera3D -> IO (Ptr Ray)
 c'getMouseRay = callRaylibFunction "_GetMouseRay_"
 
+c'getViewRay :: Ptr Vector2 -> Ptr Camera3D -> CFloat -> CFloat -> IO (Ptr Ray)
+c'getViewRay = callRaylibFunction "_GetViewRay_"
+
 c'getCameraMatrix :: Ptr Camera3D -> IO (Ptr Matrix)
 c'getCameraMatrix = callRaylibFunction "_GetCameraMatrix_"
 
@@ -2045,6 +2048,9 @@ c'rlDisableShader = callRaylibFunction "_rlDisableShader_"
 c'rlDisableFramebuffer :: IO ()
 c'rlDisableFramebuffer = callRaylibFunction "_rlDisableFramebuffer_"
 
+c'rlGetActiveFramebuffer :: IO CUInt
+c'rlGetActiveFramebuffer = callRaylibFunction "_rlGetActiveFramebuffer_"
+
 c'rlEnableColorBlend :: IO ()
 c'rlEnableColorBlend = callRaylibFunction "_rlEnableColorBlend_"
 
@@ -2620,6 +2626,8 @@ foreign import ccall safe "rl_bindings.h SetShaderValueTexture_" c'setShaderValu
 foreign import ccall safe "rl_bindings.h UnloadShader_" c'unloadShader :: Ptr Shader -> IO ()
 
 foreign import ccall safe "rl_bindings.h GetMouseRay_" c'getMouseRay :: Ptr Vector2 -> Ptr Camera3D -> IO (Ptr Ray)
+
+foreign import ccall safe "rl_bindings.h GetViewRay_" c'getViewRay :: Ptr Vector2 -> Ptr Camera3D -> CFloat -> CFloat -> IO (Ptr Ray)
 
 foreign import ccall safe "rl_bindings.h GetCameraMatrix_" c'getCameraMatrix :: Ptr Camera3D -> IO (Ptr Matrix)
 
@@ -3957,7 +3965,7 @@ foreign import ccall safe "rlgl_bindings.h rlReadTexturePixels_" c'rlReadTexture
 
 foreign import ccall safe "rlgl_bindings.h rlReadScreenPixels_" c'rlReadScreenPixels :: CInt -> CInt -> IO (Ptr CUChar)
 
-foreign import ccall safe "rlgl_bindings.h rlLoadFramebuffer_" c'rlLoadFramebuffer :: CInt -> CInt -> IO CUInt
+foreign import ccall safe "rlgl_bindings.h rlLoadFramebuffer_" c'rlLoadFramebuffer :: IO CUInt
 
 foreign import ccall safe "rlgl_bindings.h rlFramebufferAttach_" c'rlFramebufferAttach :: CUInt -> CUInt -> CInt -> CInt -> CInt -> IO ()
 
@@ -4046,6 +4054,8 @@ foreign import ccall safe "rlgl_bindings.h rlDisableTextureCubemap_" c'rlDisable
 foreign import ccall safe "rlgl_bindings.h rlDisableShader_" c'rlDisableShader :: IO ()
 
 foreign import ccall safe "rlgl_bindings.h rlDisableFramebuffer_" c'rlDisableFramebuffer :: IO ()
+
+foreign import ccall safe "rlgl_bindings.h rlGetActiveFramebuffer_" c'rlGetActiveFramebuffer :: IO CUInt
 
 foreign import ccall safe "rlgl_bindings.h rlEnableColorBlend_" c'rlEnableColorBlend :: IO ()
 
