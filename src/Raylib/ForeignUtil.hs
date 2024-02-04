@@ -1,18 +1,68 @@
 {-# OPTIONS -Wall #-}
+{-# LANGUAGE CPP #-}
+{-# LANGUAGE FlexibleInstances #-}
 
-module Raylib.ForeignUtil (c'free, p'free, freeMaybePtr, Freeable (..), rlFreeArray, rlFreeMaybeArray, pop, popCArray, popCString, withFreeable, withFreeableArray, withFreeableArrayLen, withFreeableArray2D, configsToBitflag, withMaybe, withMaybeCString, peekMaybe, peekMaybeOff, pokeMaybe, pokeMaybeOff, peekMaybeArray, newMaybeArray, peekStaticArray, peekStaticArrayOff, pokeStaticArray, pokeStaticArrayOff, rightPad) where
+module Raylib.ForeignUtil
+  ( c'free,
+    p'free,
+    freeMaybePtr,
+    Freeable (..),
+    rlFreeArray,
+    rlFreeMaybeArray,
+    pop,
+    popCArray,
+    popCString,
+    withFreeable,
+    withFreeableArray,
+    withFreeableArrayLen,
+    withFreeableArray2D,
+    configsToBitflag,
+    withMaybe,
+    withMaybeCString,
+    withCStringBuffer,
+    peekMaybe,
+    peekMaybeOff,
+    pokeMaybe,
+    pokeMaybeOff,
+    peekMaybeArray,
+    newMaybeArray,
+    peekStaticArray,
+    peekStaticArrayOff,
+    pokeStaticArray,
+    pokeStaticArrayOff,
+    rightPad,
+  )
+where
 
 import Control.Monad (forM_, unless)
 import Data.Bits ((.|.))
-import Foreign (FunPtr, Ptr, Storable (peek, peekByteOff, poke, sizeOf), castPtr, malloc, newArray, nullPtr, peekArray, plusPtr, with)
+import Foreign (FunPtr, Ptr, Storable (peek, peekByteOff, poke, pokeByteOff, sizeOf), castPtr, malloc, newArray, nullPtr, peekArray, plusPtr, with, callocBytes)
 import Foreign.C (CFloat, CInt, CString, CUChar, CUInt, peekCString, withCString)
 import Foreign.C.Types (CBool, CChar, CShort, CUShort)
+import qualified Data.Text as T
+import qualified Data.Text.Encoding as TE
+import qualified Data.ByteString as BS
+import Data.Maybe (fromMaybe)
 
 -- Internal utility functions
+
+#ifdef WEB_FFI
+
+import Raylib.Web.Native (jsfree, p'jsfree)
+
+c'free :: Ptr () -> IO ()
+c'free = jsfree
+
+p'free :: FunPtr (Ptr a -> IO ())
+p'free = p'jsfree
+
+#else
 
 foreign import ccall "stdlib.h free" c'free :: Ptr () -> IO ()
 
 foreign import ccall "stdlib.h &free" p'free :: FunPtr (Ptr a -> IO ())
+
+#endif
 
 freeMaybePtr :: Ptr () -> IO ()
 freeMaybePtr ptr = unless (ptr == nullPtr) (c'free ptr)
@@ -39,6 +89,9 @@ instance Freeable CUChar
 instance Freeable CUInt
 
 instance Freeable CUShort
+
+instance Freeable (Ptr CChar) where
+  rlFreeDependents str _ = c'free (castPtr str)
 
 instance (Freeable a, Storable a) => Freeable [a] where
   rlFreeDependents arr ptr =
@@ -100,7 +153,7 @@ withFreeableArray2D arr func = do
   arrays <- mapM newArray arr
   ptr <- newArray arrays
   res <- func ptr
-  forM_ (zip [0..] arrays) (\(i, a) -> rlFreeArray (arr !! i) a)
+  forM_ (zip [0 ..] arrays) (\(i, a) -> rlFreeArray (arr !! i) a)
   c'free $ castPtr ptr
   return res
 
@@ -118,6 +171,17 @@ withMaybeCString :: Maybe String -> (CString -> IO b) -> IO b
 withMaybeCString a f = case a of
   (Just val) -> withCString val f
   Nothing -> f nullPtr
+
+withCStringBuffer :: String -> Maybe Int -> (Int -> CString -> IO b) -> IO (b, String)
+withCStringBuffer str bufferSize f = do
+  let bytes = BS.unpack (TE.encodeUtf8 (T.pack str))
+      bufferSize' = fromMaybe (length bytes + 8) bufferSize
+  buffer <- callocBytes bufferSize'
+  mapM_ (uncurry (pokeByteOff buffer)) (zip [0 ..] bytes)
+  res <- f bufferSize' buffer
+  str' <- peekCString buffer
+  c'free $ castPtr buffer
+  return (res, str')
 
 peekMaybe :: (Storable a) => Ptr (Ptr a) -> IO (Maybe a)
 peekMaybe ptr = do

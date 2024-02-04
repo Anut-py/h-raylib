@@ -3,8 +3,7 @@
  * @author Anut-py
  * @brief Additional functions required for C/Haskell FFI
  */
-#include <raylib.h>
-#include <rlgl.h>
+#include "rl_common.h"
 
 void UnloadAudioBuffer_(rAudioBuffer *buffer);
 

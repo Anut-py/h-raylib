@@ -1,4 +1,12 @@
+# Cabal output
 dist-newstyle/
+
+# Nix output
+result
+
+# Miscellaneous development files (scratch files)
 other/
+
+# IDE files
 .vscode/
 hie.yaml

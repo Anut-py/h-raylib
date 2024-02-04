@@ -4,21 +4,20 @@
 
 #pragma GCC diagnostic ignored "-Wimplicit-function-declaration"
 #include "rl_internal.h"
-#include <config.h>
 
-void UnloadAudioBuffer_(rAudioBuffer *buffer)
+RLBIND void UnloadAudioBuffer_(rAudioBuffer *buffer)
 {
     UnloadAudioBuffer(buffer);
 }
 
-void UnloadAudioBufferAlias(rAudioBuffer *alias)
+RLBIND void UnloadAudioBufferAlias(rAudioBuffer *alias)
 {
     unsigned char **dataPtr = (unsigned char **)((char *)alias + 368); // Hack to get a pointer to alias.data (the struct definition is not in scope)
     *dataPtr = 0;                                                      // Set alias.data to NULL so the data is not cleared
     UnloadAudioBuffer(alias);
 }
 
-void UnloadMusicStreamData(int ctxType, void *ctxData)
+RLBIND void UnloadMusicStreamData(int ctxType, void *ctxData)
 {
     Music music = {0};
     music.ctxData = ctxData;
@@ -27,7 +26,7 @@ void UnloadMusicStreamData(int ctxType, void *ctxData)
     UnloadMusicStream(music);
 }
 
-int rlGetPixelDataSize(int width, int height, int format)
+RLBIND int rlGetPixelDataSize(int width, int height, int format)
 {
     int dataSize = 0; // Size in bytes
     int bpp = 0;      // Bits per pixel

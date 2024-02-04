@@ -448,14 +448,14 @@ isRenderTextureReady :: RenderTexture -> IO Bool
 isRenderTextureReady renderTexture = toBool <$> withFreeable renderTexture c'isRenderTextureReady
 
 -- | Unloads a texture from GPU memory (VRAM). Textures are automatically unloaded
--- when `closeWindow` is called, so manually unloading textures is not required.
+-- when `Raylib.Core.closeWindow` is called, so manually unloading textures is not required.
 -- In larger projects, you may want to manually unload textures to avoid having
 -- them in VRAM for too long.
 unloadTexture :: Texture -> WindowResources -> IO ()
 unloadTexture texture = unloadSingleTexture (texture'id texture)
 
 -- | Unloads a render texture from GPU memory (VRAM). Render textures are
--- automatically unloaded when `closeWindow` is called, so manually unloading
+-- automatically unloaded when `Raylib.Core.closeWindow` is called, so manually unloading
 -- render textures is not required. In larger projects, you may want to
 -- manually unload render textures to avoid having them in VRAM for too long.
 unloadRenderTexture :: RenderTexture -> WindowResources -> IO ()

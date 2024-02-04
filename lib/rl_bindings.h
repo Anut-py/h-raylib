@@ -8,7 +8,7 @@
  * file contains wrapper functions for all Raylib functions that do not take pointers.
  */
 
-#include <raylib.h>
+#include "rl_common.h"
 
 void SetWindowIcon_(Image *a);
 
@@ -79,6 +79,8 @@ FilePathList *LoadDroppedFiles_();
 void UnloadDroppedFiles_(FilePathList *a);
 
 AutomationEventList *LoadAutomationEventList_(char *a);
+
+void UnloadAutomationEventList_(AutomationEventList *a);
 
 bool ExportAutomationEventList_(AutomationEventList *a, char *b);
 
@@ -390,6 +392,8 @@ Color *GetPixelColor_(void *a, int b);
 
 void SetPixelColor_(void *a, Color *b, int c);
 
+int GetPixelDataSize_(int a, int b, int c);
+
 Font *GetFontDefault_();
 
 Font *LoadFont_(char *a);
@@ -675,3 +679,401 @@ void DetachAudioStreamProcessor_(AudioStream *a, AudioCallback *b);
 void AttachAudioMixedProcessor_(AudioCallback *a);
 
 void DetachAudioMixedProcessor_(AudioCallback *a);
+
+void InitWindow_(int a, int b, const char *c);
+
+bool WindowShouldClose_();
+
+void CloseWindow_();
+
+bool IsWindowReady_();
+
+bool IsWindowFullscreen_();
+
+bool IsWindowHidden_();
+
+bool IsWindowMinimized_();
+
+bool IsWindowMaximized_();
+
+bool IsWindowFocused_();
+
+bool IsWindowResized_();
+
+bool IsWindowState_(unsigned int a);
+
+void SetWindowState_(unsigned int a);
+
+void ClearWindowState_(unsigned int a);
+
+void ToggleFullscreen_();
+
+void ToggleBorderlessWindowed_();
+
+void MaximizeWindow_();
+
+void MinimizeWindow_();
+
+void RestoreWindow_();
+
+void SetWindowIcons_(Image *a, int b);
+
+void SetWindowTitle_(const char *a);
+
+void SetWindowPosition_(int a, int b);
+
+void SetWindowMonitor_(int a);
+
+void SetWindowMinSize_(int a, int b);
+
+void SetWindowMaxSize_(int a, int b);
+
+void SetWindowSize_(int a, int b);
+
+void SetWindowOpacity_(float a);
+
+void SetWindowFocused_();
+
+void *GetWindowHandle_();
+
+int GetScreenWidth_();
+
+int GetScreenHeight_();
+
+int GetRenderWidth_();
+
+int GetRenderHeight_();
+
+int GetMonitorCount_();
+
+int GetCurrentMonitor_();
+
+int GetMonitorWidth_(int a);
+
+int GetMonitorHeight_(int a);
+
+int GetMonitorPhysicalWidth_(int a);
+
+int GetMonitorPhysicalHeight_(int a);
+
+int GetMonitorRefreshRate_(int a);
+
+const char *GetMonitorName_(int a);
+
+void SetClipboardText_(const char *a);
+
+const char *GetClipboardText_();
+
+void EnableEventWaiting_();
+
+void DisableEventWaiting_();
+
+void SwapScreenBuffer_();
+
+void PollInputEvents_();
+
+void WaitTime_(double a);
+
+void ShowCursor_();
+
+void HideCursor_();
+
+bool IsCursorHidden_();
+
+void EnableCursor_();
+
+void DisableCursor_();
+
+bool IsCursorOnScreen_();
+
+void BeginDrawing_();
+
+void EndDrawing_();
+
+void EndMode2D_();
+
+void EndMode3D_();
+
+void EndTextureMode_();
+
+void EndShaderMode_();
+
+void BeginBlendMode_(int a);
+
+void EndBlendMode_();
+
+void BeginScissorMode_(int a, int b, int c, int d);
+
+void EndScissorMode_();
+
+void EndVrStereoMode_();
+
+void SetTargetFPS_(int a);
+
+int GetFPS_();
+
+float GetFrameTime_();
+
+double GetTime_();
+
+void SetRandomSeed_(unsigned int a);
+
+int GetRandomValue_(int a, int b);
+
+int *LoadRandomSequence_(unsigned int a, int b, int c);
+
+void TakeScreenshot_(const char *a);
+
+void SetConfigFlags_(unsigned int a);
+
+void TraceLog_(int a, const char *b);
+
+void SetTraceLogLevel_(int a);
+
+void *MemAlloc_(unsigned int a);
+
+void *MemRealloc_(void *a, unsigned int b);
+
+void MemFree_(void *a);
+
+void OpenURL_(const char *a);
+
+void SetLoadFileDataCallback_(LoadFileDataCallback a);
+
+void SetSaveFileDataCallback_(SaveFileDataCallback a);
+
+void SetLoadFileTextCallback_(LoadFileTextCallback a);
+
+void SetSaveFileTextCallback_(SaveFileTextCallback a);
+
+unsigned char *LoadFileData_(const char *a, int *b);
+
+void UnloadFileData_(unsigned char *a);
+
+bool SaveFileData_(const char *a, void *b, int c);
+
+bool ExportDataAsCode_(const unsigned char *a, int b, const char *c);
+
+char *LoadFileText_(const char *a);
+
+void UnloadFileText_(char *a);
+
+bool SaveFileText_(const char *a, char *b);
+
+bool FileExists_(const char *a);
+
+bool DirectoryExists_(const char *a);
+
+bool IsFileExtension_(const char *a, const char *b);
+
+int GetFileLength_(const char *a);
+
+const char *GetFileExtension_(const char *a);
+
+const char *GetFileName_(const char *a);
+
+const char *GetFileNameWithoutExt_(const char *a);
+
+const char *GetDirectoryPath_(const char *a);
+
+const char *GetPrevDirectoryPath_(const char *a);
+
+const char *GetWorkingDirectory_();
+
+const char *GetApplicationDirectory_();
+
+bool ChangeDirectory_(const char *a);
+
+bool IsPathFile_(const char *a);
+
+bool IsFileDropped_();
+
+long GetFileModTime_(const char *a);
+
+unsigned char *CompressData_(const unsigned char *a, int b, int *c);
+
+unsigned char *DecompressData_(const unsigned char *a, int b, int *c);
+
+char *EncodeDataBase64_(const unsigned char *a, int b, int *c);
+
+unsigned char *DecodeDataBase64_(const unsigned char *a, int *b);
+
+void SetAutomationEventList_(AutomationEventList *a);
+
+void SetAutomationEventBaseFrame_(int a);
+
+void StartAutomationEventRecording_();
+
+void StopAutomationEventRecording_();
+
+bool IsKeyPressed_(int a);
+
+bool IsKeyPressedRepeat_(int a);
+
+bool IsKeyDown_(int a);
+
+bool IsKeyReleased_(int a);
+
+bool IsKeyUp_(int a);
+
+void SetExitKey_(int a);
+
+int GetKeyPressed_();
+
+int GetCharPressed_();
+
+bool IsGamepadAvailable_(int a);
+
+const char *GetGamepadName_(int a);
+
+bool IsGamepadButtonPressed_(int a, int b);
+
+bool IsGamepadButtonDown_(int a, int b);
+
+bool IsGamepadButtonReleased_(int a, int b);
+
+bool IsGamepadButtonUp_(int a, int b);
+
+int GetGamepadButtonPressed_();
+
+int GetGamepadAxisCount_(int a);
+
+float GetGamepadAxisMovement_(int a, int b);
+
+int SetGamepadMappings_(const char *a);
+
+bool IsMouseButtonPressed_(int a);
+
+bool IsMouseButtonDown_(int a);
+
+bool IsMouseButtonReleased_(int a);
+
+bool IsMouseButtonUp_(int a);
+
+int GetMouseX_();
+
+int GetMouseY_();
+
+void SetMousePosition_(int a, int b);
+
+void SetMouseOffset_(int a, int b);
+
+void SetMouseScale_(float a, float b);
+
+float GetMouseWheelMove_();
+
+void SetMouseCursor_(int a);
+
+int GetTouchX_();
+
+int GetTouchY_();
+
+int GetTouchPointId_(int a);
+
+int GetTouchPointCount_();
+
+void SetGesturesEnabled_(unsigned int a);
+
+bool IsGestureDetected_(unsigned int a);
+
+int GetGestureDetected_();
+
+float GetGestureHoldDuration_();
+
+float GetGestureDragAngle_();
+
+float GetGesturePinchAngle_();
+
+void UpdateCamera_(Camera *a, int b);
+
+void ImageFormat_(Image *a, int b);
+
+void ImageAlphaCrop_(Image *a, float b);
+
+void ImageAlphaPremultiply_(Image *a);
+
+void ImageBlurGaussian_(Image *a, int b);
+
+void ImageKernelConvolution_(Image *a, float *b, int c);
+
+void ImageResize_(Image *a, int b, int c);
+
+void ImageResizeNN_(Image *a, int newWidth, int b);
+
+void ImageMipmaps_(Image *a);
+
+void ImageDither_(Image *a, int b, int c, int d, int e);
+
+void ImageFlipVertical_(Image *a);
+
+void ImageFlipHorizontal_(Image *a);
+
+void ImageRotate_(Image *a, int b);
+
+void ImageRotateCW_(Image *a);
+
+void ImageRotateCCW_(Image *a);
+
+void ImageColorInvert_(Image *a);
+
+void ImageColorGrayscale_(Image *a);
+
+void ImageColorContrast_(Image *a, float b);
+
+void ImageColorBrightness_(Image *a, int b);
+
+void GenTextureMipmaps_(Texture2D *a);
+
+GlyphInfo *LoadFontData_(const unsigned char *a, int b, int c, int *d, int e, int f);
+
+void UnloadFontData_(GlyphInfo *a, int b);
+
+void DrawFPS_(int a, int b);
+
+void SetTextLineSpacing_(int a);
+
+int MeasureText_(const char *a, int b);
+
+char *LoadUTF8_(const int *a, int b);
+
+int *LoadCodepoints_(const char *a, int *b);
+
+int GetCodepointCount_(const char *a);
+
+int GetCodepointNext_(const char *a, int *b);
+
+int GetCodepointPrevious_(const char *a, int *b);
+
+const char *CodepointToUTF8_(int a, int *b);
+
+void DrawGrid_(int a, float b);
+
+void UploadMesh_(Mesh *a, bool b);
+
+void GenMeshTangents_(Mesh *a);
+
+Material *LoadMaterials_(const char *a, int *b);
+
+void SetModelMeshMaterial_(Model *a, int b, int c);
+
+ModelAnimation *LoadModelAnimations_(const char *a, int *b);
+
+void UnloadModelAnimations_(ModelAnimation *a, int b);
+
+void InitAudioDevice_();
+
+void CloseAudioDevice_();
+
+bool IsAudioDeviceReady_();
+
+void SetMasterVolume_(float a);
+
+float GetMasterVolume_();
+
+void WaveCrop_(Wave *a, int b, int c);
+
+void WaveFormat_(Wave *a, int b, int c, int d);
+
+void UnloadWaveSamples_(float *a);
+
+void SetAudioStreamBufferSizeDefault_(int a);

@@ -1,5 +1,5 @@
-{ mkDerivation, base, containers, exceptions, lens, lib, libGL
-, libX11, libXcursor, libXext, libXi, libXinerama, libXrandr, raylib, ...
+{ mkDerivation, base, containers, exceptions, lens, template-haskell, text, bytestring
+, lib, libGL, libX11, libXcursor, libXext, libXi, libXinerama, libXrandr, raylib, raygui, ...
 }:
 mkDerivation {
   pname = "h-raylib";
@@ -8,11 +8,19 @@ mkDerivation {
   isLibrary = true;
   isExecutable = true;
   configureFlags = [
-    "-fplatform-nixos"
+    "-f-detect-platform -fplatform-nixos"
   ];
-  libraryHaskellDepends = [ base containers exceptions lens ];
+  libraryHaskellDepends = [ base containers exceptions lens template-haskell text bytestring ];
   librarySystemDepends = [
-    libGL libX11 libXcursor libXext libXi libXinerama libXrandr raylib
+    libGL
+    libX11
+    libXcursor
+    libXext
+    libXi
+    libXinerama
+    libXrandr
+    raylib
+    raygui
   ];
   description = "Raylib bindings for Haskell";
   license = lib.licenses.asl20;
