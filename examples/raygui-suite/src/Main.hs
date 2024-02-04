@@ -4,7 +4,7 @@
 module Main where
 
 import Control.Monad (when, unless)
-import Data.Maybe (fromJust, fromMaybe, isNothing, isJust)
+import Data.Maybe (fromJust, fromMaybe, isNothing)
 import Raylib.Core (clearBackground, closeWindow, initWindow, isKeyPressed, setTargetFPS, windowShouldClose)
 import Raylib.Types
   ( GuiControl (Statusbar),
