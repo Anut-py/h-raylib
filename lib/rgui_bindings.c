@@ -78,6 +78,61 @@ RLBIND void GuiLoadStyleDefault_(void)
   return GuiLoadStyleDefault();
 }
 
+RLBIND void GuiLoadStyleAshes_(void)
+{
+  GuiLoadStyleAshes();
+}
+
+RLBIND void GuiLoadStyleBluish_(void)
+{
+  GuiLoadStyleBluish();
+}
+
+RLBIND void GuiLoadStyleCandy_(void)
+{
+  GuiLoadStyleCandy();
+}
+
+RLBIND void GuiLoadStyleCherry_(void)
+{
+  GuiLoadStyleCherry();
+}
+
+RLBIND void GuiLoadStyleCyber_(void)
+{
+  GuiLoadStyleCyber();
+}
+
+RLBIND void GuiLoadStyleDark_(void)
+{
+  GuiLoadStyleDark();
+}
+
+RLBIND void GuiLoadStyleEnefete_(void)
+{
+  GuiLoadStyleEnefete();
+}
+
+RLBIND void GuiLoadStyleJungle_(void)
+{
+  GuiLoadStyleJungle();
+}
+
+RLBIND void GuiLoadStyleLavanda_(void)
+{
+  GuiLoadStyleLavanda();
+}
+
+RLBIND void GuiLoadStyleSunny_(void)
+{
+  GuiLoadStyleSunny();
+}
+
+RLBIND void GuiLoadStyleTerminal_(void)
+{
+  GuiLoadStyleTerminal();
+}
+
 RLBIND void GuiEnableTooltip_(void)
 {
   return GuiEnableTooltip();

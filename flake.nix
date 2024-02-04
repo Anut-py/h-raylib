@@ -35,7 +35,7 @@
                   sha256 = "sha256-rt3W8hVAnq4WCnnMFj4sVOq0UjlkglHTKvtMye4w+TA=";
                 };
                 nativeBuildInputs = [];
-                postFixup = "mkdir -p $out/include/ && cp ./src/raygui.h $out/include/";
+                postFixup = "mkdir -p $out/include/ && cp ./src/raygui.h $out/include/ && cp ./examples/styles/*.h $out/include/";
               };
             })
           ]; 

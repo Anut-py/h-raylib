@@ -141,10 +141,10 @@ module Raylib.Util.GUI
   )
 where
 
-import Control.Monad (void)
+import Control.Monad (void, (>=>))
 import Data.Maybe (fromMaybe)
 import Foreign (Ptr, Storable (peek), fromBool, nullPtr, toBool)
-import Foreign.C (CBool, CUInt, newCString, withCString)
+import Foreign.C (CBool, CUInt, newCString, withCString, peekCString)
 import Raylib.Core.Textures (colorToInt, getColor)
 import Raylib.ForeignUtil (pop, popCArray, popCString, withCStringBuffer, withFreeable, withFreeableArrayLen, withMaybe, withMaybeCString)
 import Raylib.Native (c'guiButton, c'guiCheckBox, c'guiColorBarAlpha, c'guiColorBarHue, c'guiColorPanel, c'guiColorPanelHSV, c'guiColorPicker, c'guiColorPickerHSV, c'guiComboBox, c'guiDisable, c'guiDisableTooltip, c'guiDrawIcon, c'guiDropdownBox, c'guiDummyRec, c'guiEnable, c'guiEnableTooltip, c'guiGetFont, c'guiGetIcons, c'guiGetState, c'guiGetStyle, c'guiGrid, c'guiGroupBox, c'guiIconText, c'guiIsLocked, c'guiLabel, c'guiLabelButton, c'guiLine, c'guiListView, c'guiListViewEx, c'guiLoadIcons, c'guiLoadStyle, c'guiLoadStyleDefault, c'guiLock, c'guiMessageBox, c'guiPanel, c'guiScrollPanel, c'guiSetAlpha, c'guiSetFont, c'guiSetIconScale, c'guiSetState, c'guiSetStyle, c'guiSetTooltip, c'guiSlider, c'guiSliderBar, c'guiSpinner, c'guiStatusBar, c'guiTabBar, c'guiTextBox, c'guiTextInputBox, c'guiToggle, c'guiToggleGroup, c'guiToggleSlider, c'guiUnlock, c'guiValueBox, c'guiWindowBox)
@@ -456,7 +456,7 @@ guiSetTooltip tooltip = withCString tooltip c'guiSetTooltip
 
 -- | Get text with icon id prepended (if supported)
 guiIconText :: GuiIconName -> String -> IO String
-guiIconText icon text = withCString text (c'guiIconText (fromIntegral (fromEnum icon))) >>= popCString
+guiIconText icon text = withCString text (c'guiIconText (fromIntegral (fromEnum icon)) >=> peekCString)
 
 -- | Set default icon drawing size
 guiSetIconScale :: Int -> IO ()
@@ -899,10 +899,10 @@ guiListView ::
   -- | Current scroll index
   Int ->
   -- | Currently selected option index (active index)
-  Int ->
+  Maybe Int ->
   -- | A tuple, the first element is the updated scroll index, the second
   --   element is the updated active index
-  IO (Int, Int)
+  IO (Int, Maybe Int)
 guiListView bounds text scrollIndex active =
   withFreeable
     bounds
@@ -914,12 +914,12 @@ guiListView bounds text scrollIndex active =
                 (fromIntegral scrollIndex)
                 ( \s ->
                     withFreeable
-                      (fromIntegral active)
+                      (fromIntegral (fromMaybe (-1) active))
                       ( \a -> do
                           _ <- c'guiListView b t s a
                           scrollIndex' <- peek s
                           active' <- peek a
-                          return (fromIntegral scrollIndex', fromIntegral active')
+                          return (fromIntegral scrollIndex', if active' == (-1) then Nothing else Just (fromIntegral active'))
                       )
                 )
           )
@@ -933,13 +933,13 @@ guiListViewEx ::
   -- | Current scroll index
   Int ->
   -- | Currently selected option index (active index)
-  Int ->
+  Maybe Int ->
   -- | Currently focused option index
   Maybe Int ->
   -- | A tuple, the first element is the updated scroll index, the second
   --   element is the updated active index, the third element is the updated
   --   focus index
-  IO (Int, Int, Maybe Int)
+  IO (Int, Maybe Int, Maybe Int)
 guiListViewEx bounds text scrollIndex active focus = do
   cStrings <- mapM newCString text
   withFreeable
@@ -952,7 +952,7 @@ guiListViewEx bounds text scrollIndex active focus = do
                 (fromIntegral scrollIndex)
                 ( \s ->
                     withFreeable
-                      (fromIntegral active)
+                      (fromIntegral (fromMaybe (-1) active))
                       ( \a ->
                           withFreeable
                             (fromIntegral (fromMaybe (-1) focus))
@@ -961,7 +961,7 @@ guiListViewEx bounds text scrollIndex active focus = do
                                 scrollIndex' <- peek s
                                 active' <- peek a
                                 focus' <- peek f
-                                return (fromIntegral scrollIndex', fromIntegral active', if focus' == (-1) then Nothing else Just (fromIntegral focus'))
+                                return (fromIntegral scrollIndex', if active' == (-1) then Nothing else Just (fromIntegral active'), if focus' == (-1) then Nothing else Just (fromIntegral focus'))
                             )
                       )
                 )

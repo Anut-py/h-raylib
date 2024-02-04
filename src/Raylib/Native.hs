@@ -2158,6 +2158,39 @@ guiLoadStyle = callRaylibFunction "_GuiLoadStyle_"
 c'guiLoadStyleDefault :: IO ()
 guiLoadStyleDefault = callRaylibFunction "_GuiLoadStyleDefault_"
 
+c'guiLoadStyleAshes :: IO ()
+c'guiLoadStyleAshes = callRaylibFunction "_GuiLoadStyleAshes_"
+
+c'guiLoadStyleBluish :: IO ()
+c'guiLoadStyleBluish = callRaylibFunction "_GuiLoadStyleBluish_"
+
+c'guiLoadStyleCandy :: IO ()
+c'guiLoadStyleCandy = callRaylibFunction "_GuiLoadStyleCandy_"
+
+c'guiLoadStyleCherry :: IO ()
+c'guiLoadStyleCherry = callRaylibFunction "_GuiLoadStyleCherry_"
+
+c'guiLoadStyleCyber :: IO ()
+c'guiLoadStyleCyber = callRaylibFunction "_GuiLoadStyleCyber_"
+
+c'guiLoadStyleDark :: IO ()
+c'guiLoadStyleDark = callRaylibFunction "_GuiLoadStyleDark_"
+
+c'guiLoadStyleEnefete :: IO ()
+c'guiLoadStyleEnefete = callRaylibFunction "_GuiLoadStyleEnefete_"
+
+c'guiLoadStyleJungle :: IO ()
+c'guiLoadStyleJungle = callRaylibFunction "_GuiLoadStyleJungle_"
+
+c'guiLoadStyleLavanda :: IO ()
+c'guiLoadStyleLavanda = callRaylibFunction "_GuiLoadStyleLavanda_"
+
+c'guiLoadStyleSunny :: IO ()
+c'guiLoadStyleSunny = callRaylibFunction "_GuiLoadStyleSunny_"
+
+c'guiLoadStyleTerminal :: IO ()
+c'guiLoadStyleTerminal = callRaylibFunction "_GuiLoadStyleTerminal_"
+
 c'guiEnableTooltip :: IO ()
 guiEnableTooltip = callRaylibFunction "_GuiEnableTooltip_"
 
@@ -4117,6 +4150,28 @@ foreign import ccall safe "rgui_bindings.h GuiLoadStyle_"
 foreign import ccall safe "rgui_bindings.h GuiLoadStyleDefault_"
   c'guiLoadStyleDefault ::
     IO ()
+
+foreign import ccall safe "rgui_bindings.h GuiLoadStyleAshes_" c'guiLoadStyleAshes :: IO ()
+
+foreign import ccall safe "rgui_bindings.h GuiLoadStyleBluish_" c'guiLoadStyleBluish :: IO ()
+
+foreign import ccall safe "rgui_bindings.h GuiLoadStyleCandy_" c'guiLoadStyleCandy :: IO ()
+
+foreign import ccall safe "rgui_bindings.h GuiLoadStyleCherry_" c'guiLoadStyleCherry :: IO ()
+
+foreign import ccall safe "rgui_bindings.h GuiLoadStyleCyber_" c'guiLoadStyleCyber :: IO ()
+
+foreign import ccall safe "rgui_bindings.h GuiLoadStyleDark_" c'guiLoadStyleDark :: IO ()
+
+foreign import ccall safe "rgui_bindings.h GuiLoadStyleEnefete_" c'guiLoadStyleEnefete :: IO ()
+
+foreign import ccall safe "rgui_bindings.h GuiLoadStyleJungle_" c'guiLoadStyleJungle :: IO ()
+
+foreign import ccall safe "rgui_bindings.h GuiLoadStyleLavanda_" c'guiLoadStyleLavanda :: IO ()
+
+foreign import ccall safe "rgui_bindings.h GuiLoadStyleSunny_" c'guiLoadStyleSunny :: IO ()
+
+foreign import ccall safe "rgui_bindings.h GuiLoadStyleTerminal_" c'guiLoadStyleTerminal :: IO ()
 
 foreign import ccall safe "rgui_bindings.h GuiEnableTooltip_"
   c'guiEnableTooltip ::

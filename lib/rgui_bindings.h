@@ -5,6 +5,17 @@
  */
 
 #include "rl_common.h"
+#include <style_ashes.h>
+#include <style_bluish.h>
+#include <style_candy.h>
+#include <style_cherry.h>
+#include <style_cyber.h>
+#include <style_dark.h>
+#include <style_enefete.h>
+#include <style_jungle.h>
+#include <style_lavanda.h>
+#include <style_sunny.h>
+#include <style_terminal.h>
 
 void GuiEnable_(void);
 
@@ -33,6 +44,28 @@ int GuiGetStyle_(int control, int property);
 void GuiLoadStyle_(const char *fileName);
 
 void GuiLoadStyleDefault_(void);
+
+void GuiLoadStyleAshes_(void);
+
+void GuiLoadStyleBluish_(void);
+
+void GuiLoadStyleCandy_(void);
+
+void GuiLoadStyleCherry_(void);
+
+void GuiLoadStyleCyber_(void);
+
+void GuiLoadStyleDark_(void);
+
+void GuiLoadStyleEnefete_(void);
+
+void GuiLoadStyleJungle_(void);
+
+void GuiLoadStyleLavanda_(void);
+
+void GuiLoadStyleSunny_(void);
+
+void GuiLoadStyleTerminal_(void);
 
 void GuiEnableTooltip_(void);
 
