@@ -56,6 +56,8 @@ Functions that took a pointer as an argument in C were changed to take a regular
 
 This is a binding module for [raygui](https://github.com/raysan5/raygui), an immediate-mode GUI library built on top of raylib. The C version of raygui involves a lot of pointers because of the way it is designed. Unfortunately, this is problematic when binding it to Haskell, as Haskell's immutability makes it difficult to represent pointers properly. This means many functions will take the previous state of a control as an argument, and return the updated state of that control. You should use the Haddock documentation as a reference to make your life easier.
 
+Keep in mind that raygui is an immediate mode GUI, so it is designed mostly for debugging and development and not for actual game GUIs. To this end, it is not very customizable and the features are quite limited. For a real game, you should make your own retained mode GUI.
+
 ### Private modules
 
 h-raylib has 5 modules that are not exposed for external use: `Raylib.Native`, `Raylib.Internal`, `Raylib.ForeignUtil`, `Raylib.Web.Native`, and `Raylib.Web.Processable`.
