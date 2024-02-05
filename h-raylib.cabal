@@ -245,7 +245,7 @@ library
       if impl(ghc <9.4.1)
         extra-libraries: gcc_eh
 
-  elif ((flag(platform-linux) || (flag(detect-platform) && os(linux))) || flag(platform-nixos))
+  elif (flag(platform-linux) || (flag(detect-platform) && os(linux)))
     extra-libraries:
       GL
       c
@@ -270,13 +270,15 @@ library
       GL
       pthread
 
-  elif flag(platform-nixos)
-    pkgconfig-depends: raylib, raygui
-
   else
 
   -- Unsupported OS, do nothing. If you can get it working on an
   -- OS that isn't listed here, please add it here.
+
+
+  if flag(platform-nixos)
+    extra-libraries: raylib
+
   include-dirs:     lib
 
   if flag(platform-web)

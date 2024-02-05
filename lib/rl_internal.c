@@ -2,19 +2,22 @@
  * See rl_internal.h
  */
 
-#pragma GCC diagnostic ignored "-Wimplicit-function-declaration"
 #include "rl_internal.h"
 
 RLBIND void UnloadAudioBuffer_(rAudioBuffer *buffer)
 {
-    UnloadAudioBuffer(buffer);
+    Sound sound = { 0 };
+    AudioStream stream = { 0 };
+    sound.stream = stream;
+    stream.buffer = buffer;
+    UnloadSound(sound);
 }
 
 RLBIND void UnloadAudioBufferAlias(rAudioBuffer *alias)
 {
     unsigned char **dataPtr = (unsigned char **)((char *)alias + 368); // Hack to get a pointer to alias.data (the struct definition is not in scope)
     *dataPtr = 0;                                                      // Set alias.data to NULL so the data is not cleared
-    UnloadAudioBuffer(alias);
+    UnloadAudioBuffer_(alias);
 }
 
 RLBIND void UnloadMusicStreamData(int ctxType, void *ctxData)

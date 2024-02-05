@@ -163,8 +163,8 @@ if (process.argv.includes("-u") || process.argv.includes("--nix-update")) {
       path.join(__dirname, "flake.nix")
     );
 
-    const flakeUpdatedRaylib = flakeNixRaw.includes(`rev = "${raylibRevision}"`);
-    const flakeUpdatedRaygui = flakeNixRaw.includes(`rev = "${rayguiRevision}"`);
+    const flakeUpdatedRaylib = flakeNixRaw.includes(`raylibRev = "${raylibRevision}"`);
+    const flakeUpdatedRaygui = flakeNixRaw.includes(`rayguiRev = "${rayguiRevision}"`);
     const defaultUpdated = readFileSync(
       path.join(__dirname, "default.nix")
     ).includes(`version = "${hraylibVersion}"`);
@@ -196,37 +196,38 @@ if (process.argv.includes("-u") || process.argv.includes("--nix-update")) {
       );
 
       log(logLevel.INFO, "Prefetched successfully");
-      log(logLevel.VERB, "Deleting flake.nix");
 
-      rmSync(path.join(__dirname, "flake.nix"));
-
-      log(logLevel.VERB, "Preparing new flake.nix from template");
+      log(logLevel.VERB, "Preparing new flake.nix");
 
       const flakeTemplate = readFileSync(
-        path.join(__dirname, "flake.nix.template")
+        path.join(__dirname, "flake.nix")
       )
         .toString()
-        .replace("RAYLIB_REVISION", raylibRevision)
-        .replace("RAYLIB_HASH", raylibHash)
-        .replace("RAYGUI_REVISION", rayguiRevision)
-        .replace("RAYGUI_HASH", rayguiHash);
+        .replace(/raylibRev = "[^"]*"/, `raylibRev = "${raylibRevision}"`)
+        .replace(/raylibHash = "[^"]*"/, `raylibHash = "${raylibHash}"`)
+        .replace(/rayguiRev = "[^"]*"/, `rayguiRev = "${rayguiRevision}"`)
+        .replace(/rayguiHash = "[^"]*"/, `rayguiHash = "${rayguiHash}"`)
+      
+      log(logLevel.VERB, "Replacing flake.nix");
+
+      rmSync(path.join(__dirname, "flake.nix"));
       writeFileSync(path.join(__dirname, "flake.nix"), flakeTemplate);
 
       log(logLevel.INFO, "Successfully updated flake.nix");
     }
 
     if (!defaultUpdated) {
-      log(logLevel.VERB, "Deleting default.nix");
-
-      rmSync(path.join(__dirname, "default.nix"));
-
-      log(logLevel.VERB, "Preparing new default.nix from template");
+      log(logLevel.VERB, "Preparing new default.nix");
 
       const defaultTemplate = readFileSync(
-        path.join(__dirname, "default.nix.template")
+        path.join(__dirname, "default.nix")
       )
         .toString()
-        .replace("VERSION", hraylibVersion);
+        .replace(/version = "[^"]*"/, `version = "${hraylibVersion}"`);
+
+      log(logLevel.VERB, "Replacing default.nix");
+
+      rmSync(path.join(__dirname, "default.nix"));
       writeFileSync(path.join(__dirname, "default.nix"), defaultTemplate);
 
       log(logLevel.INFO, "Successfully updated default.nix");
