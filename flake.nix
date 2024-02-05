@@ -62,13 +62,15 @@
             raygui
           ]
         else if pkgs.lib.hasSuffix "darwin" system then
-          with pkgs.darwin.apple_sdk.frameworks; [
+          with pkgs.darwin.apple_sdk.frameworks; with pkgs; [
             OpenGL
             Cocoa
             IOKit
             CoreVideo
             CoreAudio
             CoreFoundation
+            raylib
+            raygui
           ]
         else [];
     in
