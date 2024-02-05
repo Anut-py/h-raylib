@@ -1,6 +1,6 @@
 # h-raylib: Haskell bindings for Raylib
 
-[![build](https://github.com/Anut-py/h-raylib/actions/workflows/haskell.yml/badge.svg)](https://github.com/Anut-py/h-raylib/actions/workflows/haskell.yml) ![Hackage Version](https://img.shields.io/hackage/v/h-raylib)
+[![cabal-build](https://github.com/Anut-py/h-raylib/actions/workflows/cabal-build.yml/badge.svg)](https://github.com/Anut-py/h-raylib/actions/workflows/cabal-build.yml) [![nix-build](https://github.com/Anut-py/h-raylib/actions/workflows/nix-build.yml/badge.svg)](https://github.com/Anut-py/h-raylib/actions/workflows/nix-build.yml) ![Hackage Version](https://img.shields.io/hackage/v/h-raylib)
 
 
 This library includes Haskell bindings to the [Raylib](https://www.raylib.com/) library.
