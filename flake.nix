@@ -16,9 +16,9 @@
 
       pkgsForSystem =
         system:
-        import nixpkgs { 
-          inherit system; 
-          overlays = [  
+        import nixpkgs {
+          inherit system;
+          overlays = [
             (self: super: {
               raylib = super.raylib.overrideAttrs (old: {
                 patches = [];
@@ -44,7 +44,7 @@
                 postFixup = "mkdir -p $out/include/ && cp ./src/raygui.h $out/include/ && cp ./examples/styles/*.h $out/include/";
               };
             })
-          ]; 
+          ];
         };
       depsForSystem =
         system:
@@ -70,8 +70,10 @@
         );
         packages = forAllSystems (system: let
           pkgs = pkgsForSystem system;
+          baseInputs = pkgs // pkgs.xorg // pkgs.haskellPackages // rec { systemDeps = depsForSystem system pkgs; buildExamples = false; };
         in {
-          default = import ./default.nix (pkgs // pkgs.xorg // pkgs.haskellPackages // rec { systemDeps = depsForSystem system pkgs; });
+          default = import ./default.nix baseInputs;
+          examples = import ./default.nix (baseInputs // rec { buildExamples = true; });
         });
       };
 }
