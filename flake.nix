@@ -49,30 +49,11 @@
       depsForSystem =
         system:
         pkgs:
-        if pkgs.lib.hasSuffix "linux" system then
-          with pkgs; [
-            libGL
-            xorg.libX11
-            xorg.libXcursor
-            xorg.libXext
-            xorg.libXi
-            xorg.libXinerama
-            xorg.libXrandr
-            raylib
-            raygui
-          ]
-        else if pkgs.lib.hasSuffix "darwin" system then
-          with pkgs.darwin.apple_sdk.frameworks; with pkgs; [
-            OpenGL
-            Cocoa
-            IOKit
-            CoreVideo
-            CoreAudio
-            CoreFoundation
-            raylib
-            raygui
-          ]
-        else [];
+        with pkgs; (
+          [raylib raygui]
+          ++ lib.optionals stdenv.isLinux (with xorg; [libGL libX11 libXcursor libXext libXi libXinerama libXrandr])
+          ++ lib.optionals stdenv.isDarwin (with darwin.apple_sdk.frameworks; [OpenGL Cocoa IOKit CoreVideo CoreAudio CoreFoundation])
+        );
     in
       {
         devShells = forAllSystems (system:
