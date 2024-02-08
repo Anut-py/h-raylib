@@ -1,14 +1,27 @@
 # h-raylib roadmap
 
-Items higher on the list have higher priority.
+## Pending
 
-## Uncompleted
-- Bind `raygui`
-- Add web build support
+Items which have not yet been worked on. Feel free to work on one of these.
 
-## Completed
-- Make it easier to pass shader parameters (Added in `4.5.3.0`)
-- Allow manual unloading of assets for larger projects (Added in `4.5.3.1`)
-- Bind `rlgl` (Added in `4.5.3.2`)
-- Bind `rcamera` (Added in `4.6.0.1`)
-- Bind `raymath` (Added in `4.6.0.1`)
+(None)
+
+## In progress
+
+- Add web build support \[[#4](https://github.com/Anut-py/h-raylib/issues/4)\]
+
+## Implemented
+
+Items which have been completed but not published to hackage.
+
+- Bind `raygui` \[[#34](https://github.com/Anut-py/h-raylib/issues/34)\]
+
+## Published
+
+Items which have been published to hackage.
+
+- Bind `raymath` (`4.6.0.1`)
+- Bind `rcamera` (`4.6.0.1`)
+- Bind `rlgl` (`4.5.3.2`)
+- Allow manual unloading of assets for larger projects (`4.5.3.1`)
+- Make it easier to pass shader parameters (`4.5.3.0`)
