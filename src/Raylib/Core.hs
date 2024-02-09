@@ -503,7 +503,6 @@ getShaderLocation shader uniformName wr = do
   let sId = shader'id shader
   let sLocs = shaderLocations wr
   locs <- readIORef sLocs
-  -- TODO: Clean this up if possible
   case Map.lookup sId locs of
     Nothing -> do
       idx <- locIdx

@@ -957,7 +957,7 @@ quaternionFromAxisAngle ::
   -- | Angle in radians
   Float ->
   Quaternion
-quaternionFromAxisAngle axis angle = quaternionNormalize $ Vector4 (x * s) (y * s) (z * s) c -- I'm pretty sure normalizing the quaternion here is redundant
+quaternionFromAxisAngle axis angle = Vector4 (x * s) (y * s) (z * s) c
   where
     (Vector3 x y z) = vectorNormalize axis
     s = sin (angle / 2)

@@ -579,7 +579,6 @@ data ShaderUniformDataV
   | ShaderUniformSampler2DV [Texture]
   deriving (Eq, Show)
 
--- TODO: clean up if possible
 unpackShaderUniformData :: ShaderUniformData -> IO (ShaderUniformDataType, Ptr ())
 unpackShaderUniformData u = do
   case u of

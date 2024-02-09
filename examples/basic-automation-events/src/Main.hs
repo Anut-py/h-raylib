@@ -49,7 +49,6 @@ main =
           ( \(mState, playback, playing, recording, lRef) ->
               drawing
                 ( do
-                    -- TODO: clean up
                     toggleRec <- (&& not playing) <$> isKeyPressed KeyR
                     let recording' = if toggleRec then not recording else recording
                     lRef' <-

@@ -4360,8 +4360,6 @@ foreign import ccall safe "rgui_bindings.h GuiColorPanelHSV_"
 
 #endif
 
--- TODO: redesign this
-
 -- foreign import ccall safe "wrapper"
 --   mk'TraceLogCallback ::
 --     (CInt -> CString -> __builtin_va_list -> IO ()) -> IO TraceLogCallback
