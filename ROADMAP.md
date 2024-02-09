@@ -4,7 +4,8 @@
 
 Items which have not yet been worked on. Feel free to work on one of these.
 
-(None)
+- Split Raylib.Types into multiple modules
+- Implement automatic memory management for callbacks
 
 ## In progress
 

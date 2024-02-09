@@ -672,15 +672,15 @@ void SetAudioStreamPitch_(AudioStream *a, float b);
 
 void SetAudioStreamPan_(AudioStream *a, float b);
 
-void SetAudioStreamCallback_(AudioStream *a, AudioCallback *b);
+void SetAudioStreamCallback_(AudioStream *a, AudioCallback b);
 
-void AttachAudioStreamProcessor_(AudioStream *a, AudioCallback *b);
+void AttachAudioStreamProcessor_(AudioStream *a, AudioCallback b);
 
-void DetachAudioStreamProcessor_(AudioStream *a, AudioCallback *b);
+void DetachAudioStreamProcessor_(AudioStream *a, AudioCallback b);
 
-void AttachAudioMixedProcessor_(AudioCallback *a);
+void AttachAudioMixedProcessor_(AudioCallback a);
 
-void DetachAudioMixedProcessor_(AudioCallback *a);
+void DetachAudioMixedProcessor_(AudioCallback a);
 
 void InitWindow_(int a, int b, const char *c);
 

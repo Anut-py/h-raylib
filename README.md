@@ -5,9 +5,9 @@
 
 This library includes Haskell bindings to the [Raylib](https://www.raylib.com/) library.
 
-[Usage](#usage) | [Platform specific requirements](#platform-specific-requirements) | [GHCi](#running-in-ghci) | [Documentation](#documentation) | [FAQ](#faq)
+[Basic usage](#basic-usage) | [Platform specific requirements](#platform-specific-requirements) | [Advanced usage](#advanced-usage) | [GHCi](#running-in-ghci) | [Documentation](#documentation) | [FAQ](#faq)
 
-## Usage
+## Basic usage
 
 To use this package, include it as a dependency in your cabal file.
 
@@ -18,25 +18,7 @@ build-depends:
   h-raylib
 ```
 
-Your platform-specific dependencies will automatically be built by default. You
-may want to disable this behavior. You can disable the `detect-platform` flag to
-achieve this.
-
-You can do this through the command line when running your project, like so
-
-```sh
-cabal run --constraint="h-raylib -detect-platform"
-```
-
-Or you can add it to your `cabal.project` file.
-
-```
-package h-raylib
-  flags: -detect-platform
-```
-
-The flags `platform-windows`, `platform-mac`, `platform-linux`, and `platform-bsd` are also
-supported if you want to build for a different platform.
+It should work out of the box. See [Advanced usage](#advanced-usage) for more complex use cases.
 
 ## Platform specific requirements
 
@@ -68,10 +50,34 @@ h-raylib should automatically work if you do not disable the `detect-platform` f
 
 ### Other platforms
 
-This library has not yet been tested on other platforms. Anybody willing to try is welcome. Cross-compiling has not been tried at all.
+This library has not yet been tested on other platforms (raylib supports
+Android, Raspberry Pi, and DRM, all of which have not been implemented in
+h-raylib). Anybody willing to try is welcome.
 
 If you get it working on other platforms, please create a pull request in the
 GitHub repository and update `h-raylib.cabal` with the relevant config.
+
+### Advanced usage
+
+Your platform-specific dependencies will automatically be built by default. You
+may want to disable this behavior. You can disable the `detect-platform` flag to
+achieve this.
+
+You can do this through the command line when running your project, like so
+
+```sh
+cabal run --constraint="h-raylib -detect-platform"
+```
+
+Or you can add it to your `cabal.project` file.
+
+```
+package h-raylib
+  flags: -detect-platform
+```
+
+The flags `platform-windows`, `platform-mac`, `platform-linux`, and `platform-bsd` are also
+supported if you want to build for a different platform.
 
 ## Running in GHCi
 

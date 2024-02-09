@@ -5,7 +5,7 @@
 
 module Raylib.Native where
 
-import Foreign (Ptr)
+import Foreign (Ptr, Storable (poke), castPtr, fromBool, newArray)
 import Foreign.C
   ( CBool (..),
     CDouble (..),
@@ -15,6 +15,8 @@ import Foreign.C
     CString,
     CUChar (..),
     CUInt (..),
+    newCString,
+    peekCString,
   )
 import Raylib.Types
   ( AudioCallback,
@@ -22,6 +24,11 @@ import Raylib.Types
     AutomationEvent,
     AutomationEventList,
     BoundingBox,
+    C'AudioCallback,
+    C'LoadFileDataCallback,
+    C'LoadFileTextCallback,
+    C'SaveFileDataCallback,
+    C'SaveFileTextCallback,
     Camera2D,
     Camera3D,
     Color,
@@ -389,16 +396,16 @@ c'memFree = callRaylibFunction "_MemFree_"
 c'openURL :: CString -> IO ()
 c'openURL = callRaylibFunction "_OpenURL_"
 
-c'setLoadFileDataCallback :: LoadFileDataCallback -> IO ()
+c'setLoadFileDataCallback :: C'LoadFileDataCallback -> IO ()
 c'setLoadFileDataCallback = callRaylibFunction "_SetLoadFileDataCallback_"
 
-c'setSaveFileDataCallback :: SaveFileDataCallback -> IO ()
+c'setSaveFileDataCallback :: C'SaveFileDataCallback -> IO ()
 c'setSaveFileDataCallback = callRaylibFunction "_SetSaveFileDataCallback_"
 
-c'setLoadFileTextCallback :: LoadFileTextCallback -> IO ()
+c'setLoadFileTextCallback :: C'LoadFileTextCallback -> IO ()
 c'setLoadFileTextCallback = callRaylibFunction "_SetLoadFileTextCallback_"
 
-c'setSaveFileTextCallback :: SaveFileTextCallback -> IO ()
+c'setSaveFileTextCallback :: C'SaveFileTextCallback -> IO ()
 c'setSaveFileTextCallback = callRaylibFunction "_SetSaveFileTextCallback_"
 
 c'loadFileData :: CString -> Ptr CInt -> IO (Ptr CUChar)
@@ -1650,19 +1657,19 @@ c'setAudioStreamPan = callRaylibFunction "_SetAudioStreamPan_"
 c'setAudioStreamBufferSizeDefault :: CInt -> IO ()
 c'setAudioStreamBufferSizeDefault = callRaylibFunction "_SetAudioStreamBufferSizeDefault_"
 
-c'setAudioStreamCallback :: Ptr AudioStream -> Ptr AudioCallback -> IO ()
+c'setAudioStreamCallback :: Ptr AudioStream -> C'AudioCallback -> IO ()
 c'setAudioStreamCallback = callRaylibFunction "_SetAudioStreamCallback_"
 
-c'attachAudioStreamProcessor :: Ptr AudioStream -> Ptr AudioCallback -> IO ()
+c'attachAudioStreamProcessor :: Ptr AudioStream -> C'AudioCallback -> IO ()
 c'attachAudioStreamProcessor = callRaylibFunction "_AttachAudioStreamProcessor_"
 
-c'detachAudioStreamProcessor :: Ptr AudioStream -> Ptr AudioCallback -> IO ()
+c'detachAudioStreamProcessor :: Ptr AudioStream -> C'AudioCallback -> IO ()
 c'detachAudioStreamProcessor = callRaylibFunction "_DetachAudioStreamProcessor_"
 
-c'attachAudioMixedProcessor :: Ptr AudioCallback -> IO ()
+c'attachAudioMixedProcessor :: C'AudioCallback -> IO ()
 c'attachAudioMixedProcessor = callRaylibFunction "_AttachAudioMixedProcessor_"
 
-c'detachAudioMixedProcessor :: Ptr AudioCallback -> IO ()
+c'detachAudioMixedProcessor :: C'AudioCallback -> IO ()
 c'detachAudioMixedProcessor = callRaylibFunction "_DetachAudioMixedProcessor_"
 
 ---- rlgl.h
@@ -1913,7 +1920,7 @@ c'rlReadTexturePixels = callRaylibFunction "_rlReadTexturePixels_"
 c'rlReadScreenPixels :: CInt -> CInt -> IO (Ptr CUChar)
 c'rlReadScreenPixels = callRaylibFunction "_rlReadScreenPixels_"
 
-c'rlLoadFramebuffer :: CInt -> CInt -> IO CUInt
+c'rlLoadFramebuffer :: IO CUInt
 c'rlLoadFramebuffer = callRaylibFunction "_rlLoadFramebuffer_"
 
 c'rlFramebufferAttach :: CUInt -> CUInt -> CInt -> CInt -> CInt -> IO ()
@@ -2123,46 +2130,46 @@ c'rlLoadDrawQuad = callRaylibFunction "_rlLoadDrawQuad_"
 ---- raygui.h
 
 c'guiEnable :: IO ()
-guiEnable = callRaylibFunction "_GuiEnable_"
+c'guiEnable = callRaylibFunction "_GuiEnable_"
 
 c'guiDisable :: IO ()
-guiDisable = callRaylibFunction "_GuiDisable_"
+c'guiDisable = callRaylibFunction "_GuiDisable_"
 
 c'guiLock :: IO ()
-guiLock = callRaylibFunction "_GuiLock_"
+c'guiLock = callRaylibFunction "_GuiLock_"
 
 c'guiUnlock :: IO ()
-guiUnlock = callRaylibFunction "_GuiUnlock_"
+c'guiUnlock = callRaylibFunction "_GuiUnlock_"
 
 c'guiIsLocked :: IO CBool
-guiIsLocked = callRaylibFunction "_GuiIsLocked_"
+c'guiIsLocked = callRaylibFunction "_GuiIsLocked_"
 
 c'guiSetAlpha :: CFloat -> IO ()
-guiSetAlpha = callRaylibFunction "_GuiSetAlpha_"
+c'guiSetAlpha = callRaylibFunction "_GuiSetAlpha_"
 
 c'guiSetState :: CInt -> IO ()
-guiSetState = callRaylibFunction "_GuiSetState_"
+c'guiSetState = callRaylibFunction "_GuiSetState_"
 
 c'guiGetState :: IO CInt
-guiGetState = callRaylibFunction "_GuiGetState_"
+c'guiGetState = callRaylibFunction "_GuiGetState_"
 
 c'guiSetFont :: Ptr Font -> IO ()
-guiSetFont = callRaylibFunction "_GuiSetFont_"
+c'guiSetFont = callRaylibFunction "_GuiSetFont_"
 
 c'guiGetFont :: IO (Ptr Font)
-guiGetFont = callRaylibFunction "_GuiGetFont_"
+c'guiGetFont = callRaylibFunction "_GuiGetFont_"
 
 c'guiSetStyle :: CInt -> CInt -> CInt -> IO ()
-guiSetStyle = callRaylibFunction "_GuiSetStyle_"
+c'guiSetStyle = callRaylibFunction "_GuiSetStyle_"
 
 c'guiGetStyle :: CInt -> CInt -> IO CInt
-guiGetStyle = callRaylibFunction "_GuiGetStyle_"
+c'guiGetStyle = callRaylibFunction "_GuiGetStyle_"
 
 c'guiLoadStyle :: CString -> IO ()
-guiLoadStyle = callRaylibFunction "_GuiLoadStyle_"
+c'guiLoadStyle = callRaylibFunction "_GuiLoadStyle_"
 
 c'guiLoadStyleDefault :: IO ()
-guiLoadStyleDefault = callRaylibFunction "_GuiLoadStyleDefault_"
+c'guiLoadStyleDefault = callRaylibFunction "_GuiLoadStyleDefault_"
 
 c'guiLoadStyleAshes :: IO ()
 c'guiLoadStyleAshes = callRaylibFunction "_GuiLoadStyleAshes_"
@@ -2198,130 +2205,130 @@ c'guiLoadStyleTerminal :: IO ()
 c'guiLoadStyleTerminal = callRaylibFunction "_GuiLoadStyleTerminal_"
 
 c'guiEnableTooltip :: IO ()
-guiEnableTooltip = callRaylibFunction "_GuiEnableTooltip_"
+c'guiEnableTooltip = callRaylibFunction "_GuiEnableTooltip_"
 
 c'guiDisableTooltip :: IO ()
-guiDisableTooltip = callRaylibFunction "_GuiDisableTooltip_"
+c'guiDisableTooltip = callRaylibFunction "_GuiDisableTooltip_"
 
 c'guiSetTooltip :: CString -> IO ()
-guiSetTooltip = callRaylibFunction "_GuiSetTooltip_"
+c'guiSetTooltip = callRaylibFunction "_GuiSetTooltip_"
 
 c'guiIconText :: CInt -> CString -> IO CString
-guiIconText = callRaylibFunction "_GuiIconText_"
+c'guiIconText = callRaylibFunction "_GuiIconText_"
 
 c'guiSetIconScale :: CInt -> IO ()
-guiSetIconScale = callRaylibFunction "_GuiSetIconScale_"
+c'guiSetIconScale = callRaylibFunction "_GuiSetIconScale_"
 
 c'guiGetIcons :: IO (Ptr CUInt)
-guiGetIcons = callRaylibFunction "_GuiGetIcons_"
+c'guiGetIcons = callRaylibFunction "_GuiGetIcons_"
 
 c'guiLoadIcons :: CString -> CBool -> IO (Ptr CString)
-guiLoadIcons = callRaylibFunction "_GuiLoadIcons_"
+c'guiLoadIcons = callRaylibFunction "_GuiLoadIcons_"
 
 c'guiDrawIcon :: CInt -> CInt -> CInt -> CInt -> Ptr Color -> IO ()
-guiDrawIcon = callRaylibFunction "_GuiDrawIcon_"
+c'guiDrawIcon = callRaylibFunction "_GuiDrawIcon_"
 
 c'guiWindowBox :: Ptr Rectangle -> CString -> IO CInt
-guiWindowBox = callRaylibFunction "_GuiWindowBox_"
+c'guiWindowBox = callRaylibFunction "_GuiWindowBox_"
 
 c'guiGroupBox :: Ptr Rectangle -> CString -> IO CInt
-guiGroupBox = callRaylibFunction "_GuiGroupBox_"
+c'guiGroupBox = callRaylibFunction "_GuiGroupBox_"
 
 c'guiLine :: Ptr Rectangle -> CString -> IO CInt
-guiLine = callRaylibFunction "_GuiLine_"
+c'guiLine = callRaylibFunction "_GuiLine_"
 
 c'guiPanel :: Ptr Rectangle -> CString -> IO CInt
-guiPanel = callRaylibFunction "_GuiPanel_"
+c'guiPanel = callRaylibFunction "_GuiPanel_"
 
 c'guiTabBar :: Ptr Rectangle -> Ptr CString -> CInt -> Ptr CInt -> IO CInt
-guiTabBar = callRaylibFunction "_GuiTabBar_"
+c'guiTabBar = callRaylibFunction "_GuiTabBar_"
 
 c'guiScrollPanel :: Ptr Rectangle -> CString -> Ptr Rectangle -> Ptr Vector2 -> Ptr Rectangle -> IO CInt
-guiScrollPanel = callRaylibFunction "_GuiScrollPanel_"
+c'guiScrollPanel = callRaylibFunction "_GuiScrollPanel_"
 
 c'guiLabel :: Ptr Rectangle -> CString -> IO CInt
-guiLabel = callRaylibFunction "_GuiLabel_"
+c'guiLabel = callRaylibFunction "_GuiLabel_"
 
 c'guiButton :: Ptr Rectangle -> CString -> IO CInt
-guiButton = callRaylibFunction "_GuiButton_"
+c'guiButton = callRaylibFunction "_GuiButton_"
 
 c'guiLabelButton :: Ptr Rectangle -> CString -> IO CInt
-guiLabelButton = callRaylibFunction "_GuiLabelButton_"
+c'guiLabelButton = callRaylibFunction "_GuiLabelButton_"
 
 c'guiToggle :: Ptr Rectangle -> CString -> Ptr CBool -> IO CInt
-guiToggle = callRaylibFunction "_GuiToggle_"
+c'guiToggle = callRaylibFunction "_GuiToggle_"
 
 c'guiToggleGroup :: Ptr Rectangle -> CString -> Ptr CInt -> IO CInt
-guiToggleGroup = callRaylibFunction "_GuiToggleGroup_"
+c'guiToggleGroup = callRaylibFunction "_GuiToggleGroup_"
 
 c'guiToggleSlider :: Ptr Rectangle -> CString -> Ptr CInt -> IO CInt
-guiToggleSlider = callRaylibFunction "_GuiToggleSlider_"
+c'guiToggleSlider = callRaylibFunction "_GuiToggleSlider_"
 
 c'guiCheckBox :: Ptr Rectangle -> CString -> Ptr CBool -> IO CInt
-guiCheckBox = callRaylibFunction "_GuiCheckBox_"
+c'guiCheckBox = callRaylibFunction "_GuiCheckBox_"
 
 c'guiComboBox :: Ptr Rectangle -> CString -> Ptr CInt -> IO CInt
-guiComboBox = callRaylibFunction "_GuiComboBox_"
+c'guiComboBox = callRaylibFunction "_GuiComboBox_"
 
 c'guiDropdownBox :: Ptr Rectangle -> CString -> Ptr CInt -> CBool -> IO CInt
-guiDropdownBox = callRaylibFunction "_GuiDropdownBox_"
+c'guiDropdownBox = callRaylibFunction "_GuiDropdownBox_"
 
 c'guiSpinner :: Ptr Rectangle -> CString -> Ptr CInt -> CInt -> CInt -> CBool -> IO CInt
-guiSpinner = callRaylibFunction "_GuiSpinner_"
+c'guiSpinner = callRaylibFunction "_GuiSpinner_"
 
 c'guiValueBox :: Ptr Rectangle -> CString -> Ptr CInt -> CInt -> CInt -> CBool -> IO CInt
-guiValueBox = callRaylibFunction "_GuiValueBox_"
+c'guiValueBox = callRaylibFunction "_GuiValueBox_"
 
 c'guiTextBox :: Ptr Rectangle -> CString -> CInt -> CBool -> IO CInt
-guiTextBox = callRaylibFunction "_GuiTextBox_"
+c'guiTextBox = callRaylibFunction "_GuiTextBox_"
 
 c'guiSlider :: Ptr Rectangle -> CString -> CString -> Ptr CFloat -> CFloat -> CFloat -> IO CInt
-guiSlider = callRaylibFunction "_GuiSlider_"
+c'guiSlider = callRaylibFunction "_GuiSlider_"
 
 c'guiSliderBar :: Ptr Rectangle -> CString -> CString -> Ptr CFloat -> CFloat -> CFloat -> IO CInt
-guiSliderBar = callRaylibFunction "_GuiSliderBar_"
+c'guiSliderBar = callRaylibFunction "_GuiSliderBar_"
 
 c'guiProgressBar :: Ptr Rectangle -> CString -> CString -> Ptr CFloat -> CFloat -> CFloat -> IO CInt
-guiProgressBar = callRaylibFunction "_GuiProgressBar_"
+c'guiProgressBar = callRaylibFunction "_GuiProgressBar_"
 
 c'guiStatusBar :: Ptr Rectangle -> CString -> IO CInt
-guiStatusBar = callRaylibFunction "_GuiStatusBar_"
+c'guiStatusBar = callRaylibFunction "_GuiStatusBar_"
 
 c'guiDummyRec :: Ptr Rectangle -> CString -> IO CInt
-guiDummyRec = callRaylibFunction "_GuiDummyRec_"
+c'guiDummyRec = callRaylibFunction "_GuiDummyRec_"
 
 c'guiGrid :: Ptr Rectangle -> CString -> CFloat -> CInt -> Ptr Vector2 -> IO CInt
-guiGrid = callRaylibFunction "_GuiGrid_"
+c'guiGrid = callRaylibFunction "_GuiGrid_"
 
 c'guiListView :: Ptr Rectangle -> CString -> Ptr CInt -> Ptr CInt -> IO CInt
-guiListView = callRaylibFunction "_GuiListView_"
+c'guiListView = callRaylibFunction "_GuiListView_"
 
 c'guiListViewEx :: Ptr Rectangle -> Ptr CString -> CInt -> Ptr CInt -> Ptr CInt -> Ptr CInt -> IO CInt
-guiListViewEx = callRaylibFunction "_GuiListViewEx_"
+c'guiListViewEx = callRaylibFunction "_GuiListViewEx_"
 
 c'guiMessageBox :: Ptr Rectangle -> CString -> CString -> CString -> IO CInt
-guiMessageBox = callRaylibFunction "_GuiMessageBox_"
+c'guiMessageBox = callRaylibFunction "_GuiMessageBox_"
 
 c'guiTextInputBox :: Ptr Rectangle -> CString -> CString -> CString -> CString -> CInt -> Ptr CBool -> IO CInt
-guiTextInputBox = callRaylibFunction "_GuiTextInputBox_"
+c'guiTextInputBox = callRaylibFunction "_GuiTextInputBox_"
 
 c'guiColorPicker :: Ptr Rectangle -> CString -> Ptr Color -> IO CInt
-guiColorPicker = callRaylibFunction "_GuiColorPicker_"
+c'guiColorPicker = callRaylibFunction "_GuiColorPicker_"
 
 c'guiColorPanel :: Ptr Rectangle -> CString -> Ptr Color -> IO CInt
-guiColorPanel = callRaylibFunction "_GuiColorPanel_"
+c'guiColorPanel = callRaylibFunction "_GuiColorPanel_"
 
 c'guiColorBarAlpha :: Ptr Rectangle -> CString -> Ptr CFloat -> IO CInt
-guiColorBarAlpha = callRaylibFunction "_GuiColorBarAlpha_"
+c'guiColorBarAlpha = callRaylibFunction "_GuiColorBarAlpha_"
 
 c'guiColorBarHue :: Ptr Rectangle -> CString -> Ptr CFloat -> IO CInt
-guiColorBarHue = callRaylibFunction "_GuiColorBarHue_"
+c'guiColorBarHue = callRaylibFunction "_GuiColorBarHue_"
 
 c'guiColorPickerHSV :: Ptr Rectangle -> CString -> Ptr Vector3 -> IO CInt
-guiColorPickerHSV = callRaylibFunction "_GuiColorPickerHSV_"
+c'guiColorPickerHSV = callRaylibFunction "_GuiColorPickerHSV_"
 
 c'guiColorPanelHSV :: Ptr Rectangle -> CString -> Ptr Vector3 -> IO CInt
-guiColorPanelHSV = callRaylibFunction "_GuiColorPanelHSV_"
+c'guiColorPanelHSV = callRaylibFunction "_GuiColorPanelHSV_"
 
 #else
 
@@ -2703,19 +2710,19 @@ foreign import ccall safe "rl_bindings.h OpenURL_"
 
 foreign import ccall safe "rl_bindings.h SetLoadFileDataCallback_"
   c'setLoadFileDataCallback ::
-    LoadFileDataCallback -> IO ()
+    C'LoadFileDataCallback -> IO ()
 
 foreign import ccall safe "rl_bindings.h SetSaveFileDataCallback_"
   c'setSaveFileDataCallback ::
-    SaveFileDataCallback -> IO ()
+    C'SaveFileDataCallback -> IO ()
 
 foreign import ccall safe "rl_bindings.h SetLoadFileTextCallback_"
   c'setLoadFileTextCallback ::
-    LoadFileTextCallback -> IO ()
+    C'LoadFileTextCallback -> IO ()
 
 foreign import ccall safe "rl_bindings.h SetSaveFileTextCallback_"
   c'setSaveFileTextCallback ::
-    SaveFileTextCallback -> IO ()
+    C'SaveFileTextCallback -> IO ()
 
 foreign import ccall safe "rl_bindings.h LoadFileData_"
   c'loadFileData ::
@@ -3789,15 +3796,15 @@ foreign import ccall safe "rl_bindings.h SetAudioStreamBufferSizeDefault_"
   c'setAudioStreamBufferSizeDefault ::
     CInt -> IO ()
 
-foreign import ccall safe "rl_bindings.h SetAudioStreamCallback_" c'setAudioStreamCallback :: Ptr AudioStream -> Ptr AudioCallback -> IO ()
+foreign import ccall safe "rl_bindings.h SetAudioStreamCallback_" c'setAudioStreamCallback :: Ptr AudioStream -> C'AudioCallback -> IO ()
 
-foreign import ccall safe "rl_bindings.h AttachAudioStreamProcessor_" c'attachAudioStreamProcessor :: Ptr AudioStream -> Ptr AudioCallback -> IO ()
+foreign import ccall safe "rl_bindings.h AttachAudioStreamProcessor_" c'attachAudioStreamProcessor :: Ptr AudioStream -> C'AudioCallback -> IO ()
 
-foreign import ccall safe "rl_bindings.h DetachAudioStreamProcessor_" c'detachAudioStreamProcessor :: Ptr AudioStream -> Ptr AudioCallback -> IO ()
+foreign import ccall safe "rl_bindings.h DetachAudioStreamProcessor_" c'detachAudioStreamProcessor :: Ptr AudioStream -> C'AudioCallback -> IO ()
 
-foreign import ccall safe "rl_bindings.h AttachAudioMixedProcessor_" c'attachAudioMixedProcessor :: Ptr AudioCallback -> IO ()
+foreign import ccall safe "rl_bindings.h AttachAudioMixedProcessor_" c'attachAudioMixedProcessor :: C'AudioCallback -> IO ()
 
-foreign import ccall safe "rl_bindings.h DetachAudioMixedProcessor_" c'detachAudioMixedProcessor :: Ptr AudioCallback -> IO ()
+foreign import ccall safe "rl_bindings.h DetachAudioMixedProcessor_" c'detachAudioMixedProcessor :: C'AudioCallback -> IO ()
 
 ---- rlgl.h
 
@@ -4364,40 +4371,79 @@ foreign import ccall safe "rgui_bindings.h GuiColorPanelHSV_"
 
 foreign import ccall safe "wrapper"
   mk'loadFileDataCallback ::
-    (CString -> Ptr CUInt -> IO (Ptr CUChar)) -> IO LoadFileDataCallback
+    (CString -> Ptr CUInt -> IO (Ptr CUChar)) -> IO C'LoadFileDataCallback
 
 foreign import ccall safe "dynamic"
   mK'loadFileDataCallback ::
-    LoadFileDataCallback -> (CString -> Ptr CUInt -> IO (Ptr CUChar))
+    C'LoadFileDataCallback -> (CString -> Ptr CUInt -> IO (Ptr CUChar))
 
 foreign import ccall safe "wrapper"
   mk'saveFileDataCallback ::
-    (CString -> Ptr () -> CUInt -> IO CInt) -> IO SaveFileDataCallback
+    (CString -> Ptr () -> CUInt -> IO CInt) -> IO C'SaveFileDataCallback
 
 foreign import ccall safe "dynamic"
   mK'saveFileDataCallback ::
-    SaveFileDataCallback -> (CString -> Ptr () -> CUInt -> IO CInt)
+    C'SaveFileDataCallback -> (CString -> Ptr () -> CUInt -> IO CInt)
 
 foreign import ccall safe "wrapper"
   mk'loadFileTextCallback ::
-    (CString -> IO CString) -> IO LoadFileTextCallback
+    (CString -> IO CString) -> IO C'LoadFileTextCallback
 
 foreign import ccall safe "dynamic"
   mK'loadFileTextCallback ::
-    LoadFileTextCallback -> (CString -> IO CString)
+    C'LoadFileTextCallback -> (CString -> IO CString)
 
 foreign import ccall safe "wrapper"
   mk'saveFileTextCallback ::
-    (CString -> CString -> IO CInt) -> IO SaveFileTextCallback
+    (CString -> CString -> IO CInt) -> IO C'SaveFileTextCallback
 
 foreign import ccall safe "dynamic"
   mK'saveFileTextCallback ::
-    SaveFileTextCallback -> (CString -> CString -> IO CInt)
+    C'SaveFileTextCallback -> (CString -> CString -> IO CInt)
 
 foreign import ccall safe "wrapper"
   mk'audioCallback ::
-    (Ptr () -> CUInt -> IO ()) -> IO AudioCallback
+    (Ptr () -> CUInt -> IO ()) -> IO C'AudioCallback
 
 foreign import ccall safe "dynamic"
   mK'audioCallback ::
-    AudioCallback -> (Ptr () -> CUInt -> IO ())
+    C'AudioCallback -> (Ptr () -> CUInt -> IO ())
+
+createLoadFileDataCallback :: LoadFileDataCallback -> IO C'LoadFileDataCallback
+createLoadFileDataCallback callback =
+  mk'loadFileDataCallback
+    ( \fileName dataSize ->
+        do
+          fn <- peekCString fileName
+          arr <- callback fn
+          poke dataSize (fromIntegral (length arr) :: CUInt)
+          newArray (map fromIntegral arr :: [CUChar])
+    )
+
+createSaveFileDataCallback :: (Storable a) => SaveFileDataCallback a -> IO C'SaveFileDataCallback
+createSaveFileDataCallback callback =
+  mk'saveFileDataCallback
+    ( \fileName contents bytesToWrite ->
+        do
+          fn <- peekCString fileName
+          fromBool <$> callback fn (castPtr contents) (fromIntegral bytesToWrite)
+    )
+
+createLoadFileTextCallback :: LoadFileTextCallback -> IO C'LoadFileTextCallback
+createLoadFileTextCallback callback =
+  mk'loadFileTextCallback
+    (\fileName -> peekCString fileName >>= callback >>= newCString)
+
+createSaveFileTextCallback :: SaveFileTextCallback -> IO C'SaveFileTextCallback
+createSaveFileTextCallback callback =
+  mk'saveFileTextCallback
+    ( \fileName content -> do
+        fn <- peekCString fileName
+        c <- peekCString content
+        fromBool <$> callback fn c
+    )
+
+createAudioCallback :: AudioCallback -> IO C'AudioCallback
+createAudioCallback callback =
+  mk'audioCallback
+    (\bufferData frames -> callback bufferData (fromIntegral frames))

@@ -90,7 +90,6 @@ import Raylib.Native
     c'getMouseDelta,
     c'getMousePosition,
     c'getMouseRay,
-    c'getViewRay,
     c'getMouseWheelMove,
     c'getMouseWheelMoveV,
     c'getMouseX,
@@ -110,6 +109,7 @@ import Raylib.Native
     c'getTouchPosition,
     c'getTouchX,
     c'getTouchY,
+    c'getViewRay,
     c'getWindowHandle,
     c'getWindowPosition,
     c'getWindowScaleDPI,
@@ -173,11 +173,15 @@ import Raylib.Native
     c'setExitKey,
     c'setGamepadMappings,
     c'setGesturesEnabled,
+    c'setLoadFileDataCallback,
+    c'setLoadFileTextCallback,
     c'setMouseCursor,
     c'setMouseOffset,
     c'setMousePosition,
     c'setMouseScale,
     c'setRandomSeed,
+    c'setSaveFileDataCallback,
+    c'setSaveFileTextCallback,
     c'setShaderValue,
     c'setShaderValueMatrix,
     c'setShaderValueTexture,
@@ -204,7 +208,11 @@ import Raylib.Native
     c'toggleFullscreen,
     c'traceLog,
     c'waitTime,
-    c'windowShouldClose, c'setLoadFileDataCallback, c'setSaveFileDataCallback, c'setLoadFileTextCallback, c'setSaveFileTextCallback,
+    c'windowShouldClose,
+    createLoadFileDataCallback,
+    createLoadFileTextCallback,
+    createSaveFileDataCallback,
+    createSaveFileTextCallback,
   )
 import Raylib.Types
   ( AutomationEvent,
@@ -240,7 +248,7 @@ import Raylib.Types
     VrDeviceInfo,
     VrStereoConfig,
     unpackShaderUniformData,
-    unpackShaderUniformDataV,
+    unpackShaderUniformDataV, C'LoadFileDataCallback, C'SaveFileDataCallback, C'LoadFileTextCallback, C'SaveFileTextCallback,
   )
 
 initWindow :: Int -> Int -> String -> IO WindowResources
@@ -610,17 +618,29 @@ setTraceLogLevel = c'setTraceLogLevel . fromIntegral . fromEnum
 openURL :: String -> IO ()
 openURL url = withCString url c'openURL
 
-setLoadFileDataCallback :: LoadFileDataCallback -> IO ()
-setLoadFileDataCallback = c'setLoadFileDataCallback
+setLoadFileDataCallback :: LoadFileDataCallback -> IO C'LoadFileDataCallback
+setLoadFileDataCallback callback = do
+  c <- createLoadFileDataCallback callback
+  c'setLoadFileDataCallback c
+  return c
 
-setSaveFileDataCallback :: SaveFileDataCallback -> IO ()
-setSaveFileDataCallback = c'setSaveFileDataCallback
+setSaveFileDataCallback :: (Storable a) => SaveFileDataCallback a -> IO C'SaveFileDataCallback
+setSaveFileDataCallback callback = do
+  c <- createSaveFileDataCallback callback
+  c'setSaveFileDataCallback c
+  return c
 
-setLoadFileTextCallback :: LoadFileTextCallback -> IO ()
-setLoadFileTextCallback = c'setLoadFileTextCallback
+setLoadFileTextCallback :: LoadFileTextCallback -> IO C'LoadFileTextCallback
+setLoadFileTextCallback callback = do
+  c <- createLoadFileTextCallback callback
+  c'setLoadFileTextCallback c
+  return c
 
-setSaveFileTextCallback :: SaveFileTextCallback -> IO ()
-setSaveFileTextCallback = c'setSaveFileTextCallback
+setSaveFileTextCallback :: SaveFileTextCallback -> IO C'SaveFileTextCallback
+setSaveFileTextCallback callback = do
+  c <- createSaveFileTextCallback callback
+  c'setSaveFileTextCallback c
+  return c
 
 loadFileData :: String -> IO [Integer]
 loadFileData fileName =

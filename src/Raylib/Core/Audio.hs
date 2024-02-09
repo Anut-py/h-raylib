@@ -17,12 +17,14 @@ import Raylib.ForeignUtil
   )
 import Raylib.Internal (WindowResources, addAudioBuffer, addAudioBufferAlias, addCtxData, unloadAudioBuffers, unloadCtxData, unloadSingleAudioBuffer, unloadSingleAudioBufferAlias, unloadSingleCtxDataPtr)
 import Raylib.Native
-  ( c'closeAudioDevice,
+  ( c'attachAudioStreamProcessor,
+    c'closeAudioDevice,
     c'exportWave,
     c'exportWaveAsCode,
     c'getMasterVolume,
     c'getMusicTimeLength,
     c'getMusicTimePlayed,
+    c'initAudioDevice,
     c'isAudioDeviceReady,
     c'isAudioStreamPlaying,
     c'isAudioStreamProcessed,
@@ -51,6 +53,8 @@ import Raylib.Native
     c'resumeMusicStream,
     c'resumeSound,
     c'seekMusicStream,
+    c'setAudioStreamBufferSizeDefault,
+    c'setAudioStreamCallback,
     c'setAudioStreamPan,
     c'setAudioStreamPitch,
     c'setAudioStreamVolume,
@@ -69,10 +73,13 @@ import Raylib.Native
     c'updateSound,
     c'waveCopy,
     c'waveCrop,
-    c'waveFormat, c'initAudioDevice,
+    c'waveFormat,
+    createAudioCallback, c'detachAudioStreamProcessor, c'attachAudioMixedProcessor, c'detachAudioMixedProcessor,
   )
 import Raylib.Types
-  ( AudioStream (audioStream'buffer),
+  ( AudioCallback,
+    AudioStream (audioStream'buffer),
+    C'AudioCallback,
     Music (music'ctxData, music'ctxType, music'stream),
     Sound (sound'stream),
     Wave (wave'channels, wave'frameCount),
@@ -296,4 +303,40 @@ setAudioStreamPan :: AudioStream -> Float -> IO ()
 setAudioStreamPan stream pan = withFreeable stream (\s -> c'setAudioStreamPan s (realToFrac pan))
 
 setAudioStreamBufferSizeDefault :: Int -> IO ()
-setAudioStreamBufferSizeDefault = setAudioStreamBufferSizeDefault . fromIntegral
+setAudioStreamBufferSizeDefault = c'setAudioStreamBufferSizeDefault . fromIntegral
+
+setAudioStreamCallback :: AudioStream -> AudioCallback -> IO C'AudioCallback
+setAudioStreamCallback stream callback =
+  withFreeable
+    stream
+    ( \s ->
+        do
+          c <- createAudioCallback callback
+          c'setAudioStreamCallback s c
+          return c
+    )
+
+attachAudioStreamProcessor :: AudioStream -> AudioCallback -> IO C'AudioCallback
+attachAudioStreamProcessor stream callback =
+  withFreeable
+  stream
+  ( \s ->
+      do
+        c <- createAudioCallback callback
+        c'attachAudioStreamProcessor s c
+        return c
+  )
+
+detachAudioStreamProcessor :: AudioStream -> C'AudioCallback -> IO ()
+detachAudioStreamProcessor stream callback =
+  withFreeable stream (`c'detachAudioStreamProcessor` callback)
+
+attachAudioMixedProcessor :: AudioCallback -> IO C'AudioCallback
+attachAudioMixedProcessor callback =
+  do
+    c <- createAudioCallback callback
+    c'attachAudioMixedProcessor c
+    return c
+
+detachAudioMixedProcessor :: C'AudioCallback -> IO ()
+detachAudioMixedProcessor = c'detachAudioMixedProcessor

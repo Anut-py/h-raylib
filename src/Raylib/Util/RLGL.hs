@@ -989,7 +989,7 @@ rlBindShaderBuffer :: Integer -> Integer -> IO ()
 rlBindShaderBuffer ssboId index = c'rlBindShaderBuffer (fromIntegral ssboId) (fromIntegral index)
 
 -- Read SSBO buffer data (GPU->CPU)
--- Skipped because I'm not sure how to bind this correctly
+-- TODO: bind; skipped because I'm not sure how to bind this correctly
 -- rlReadShaderBuffer :: Integer -> Integer -> Integer -> IO (Ptr ())
 -- rlReadShaderBuffer ssboId count offset = undefined
 

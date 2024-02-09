@@ -539,7 +539,7 @@ _rAudioBuffer'converter f buffer =
     (\converter' -> buffer { RL.rAudioBuffer'converter = converter' }) <$>
     f (RL.rAudioBuffer'converter buffer)
 {-# INLINE _rAudioBuffer'converter #-}
-_rAudioBuffer'callback :: Lens' RL.RAudioBuffer RL.AudioCallback
+_rAudioBuffer'callback :: Lens' RL.RAudioBuffer RL.C'AudioCallback
 _rAudioBuffer'callback f buffer =
     (\callback' -> buffer { RL.rAudioBuffer'callback = callback' }) <$>
     f (RL.rAudioBuffer'callback buffer)
@@ -621,7 +621,7 @@ _rAudioBuffer'prev f buffer =
 {-# INLINE _rAudioBuffer'prev #-}
 
 
-_rAudioProcessor'process :: Lens' RL.RAudioProcessor (Maybe RL.AudioCallback)
+_rAudioProcessor'process :: Lens' RL.RAudioProcessor (Maybe RL.C'AudioCallback)
 _rAudioProcessor'process f (RL.RAudioProcessor process next prev) =
     (\process' -> RL.RAudioProcessor process' next prev) <$> f process
 {-# INLINE _rAudioProcessor'process #-}

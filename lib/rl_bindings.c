@@ -1900,29 +1900,29 @@ RLBIND void SetAudioStreamPan_(AudioStream *a, float b)
     SetAudioStreamPan(*a, b);
 }
 
-RLBIND void SetAudioStreamCallback_(AudioStream *a, AudioCallback *b)
+RLBIND void SetAudioStreamCallback_(AudioStream *a, AudioCallback b)
 {
-    SetAudioStreamCallback(*a, *b);
+    SetAudioStreamCallback(*a, b);
 }
 
-RLBIND void AttachAudioStreamProcessor_(AudioStream *a, AudioCallback *b)
+RLBIND void AttachAudioStreamProcessor_(AudioStream *a, AudioCallback b)
 {
-    AttachAudioStreamProcessor(*a, *b);
+    AttachAudioStreamProcessor(*a, b);
 }
 
-RLBIND void DetachAudioStreamProcessor_(AudioStream *a, AudioCallback *b)
+RLBIND void DetachAudioStreamProcessor_(AudioStream *a, AudioCallback b)
 {
-    DetachAudioStreamProcessor(*a, *b);
+    DetachAudioStreamProcessor(*a, b);
 }
 
-RLBIND void AttachAudioMixedProcessor_(AudioCallback *a)
+RLBIND void AttachAudioMixedProcessor_(AudioCallback a)
 {
-    AttachAudioMixedProcessor(*a);
+    AttachAudioMixedProcessor(a);
 }
 
-RLBIND void DetachAudioMixedProcessor_(AudioCallback *a)
+RLBIND void DetachAudioMixedProcessor_(AudioCallback a)
 {
-    DetachAudioMixedProcessor(*a);
+    DetachAudioMixedProcessor(a);
 }
 
 RLBIND void InitWindow_(int a, int b, const char *c)

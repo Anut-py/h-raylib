@@ -10,10 +10,10 @@ import Foreign
     Storable (alignment, peek, peekByteOff, poke, pokeByteOff, sizeOf),
     Word16,
     Word8,
+    callocBytes,
     castPtr,
     fromBool,
     malloc,
-    callocBytes,
     newArray,
     newForeignPtr,
     nullFunPtr,
@@ -441,7 +441,7 @@ instance Enum KeyboardKey where
     336 -> KeyKpEqual
     -- Android buttons
     4 -> KeyBack
-    5  -> KeyMenu
+    5 -> KeyMenu
     24 -> KeyVolumeUp
     25 -> KeyVolumeDown
     x -> error $ "(KeyboardKey.toEnum) Invalid value: " ++ show x
@@ -579,7 +579,7 @@ data ShaderUniformDataV
   | ShaderUniformSampler2DV [Texture]
   deriving (Eq, Show)
 
--- I don't know if there's a cleaner way to do this
+-- TODO: clean up if possible
 unpackShaderUniformData :: ShaderUniformData -> IO (ShaderUniformDataType, Ptr ())
 unpackShaderUniformData u = do
   case u of
@@ -663,7 +663,7 @@ unpackShaderUniformDataV xs = do
         ptr <- newArray (map (fromIntegral . texture'id) textures :: [CInt])
         return (ShaderUniformSampler2DType, castPtr ptr, length textures)
 
--- I genuinely have no idea where this is used.
+-- Unused
 data ShaderAttributeDataType
   = ShaderAttribFloat
   | ShaderAttribVec2
@@ -721,7 +721,7 @@ instance Enum PixelFormat where
     PixelFormatUncompressedR32 -> 8
     PixelFormatUncompressedR32G32B32 -> 9
     PixelFormatUncompressedR32G32B32A32 -> 10
-    PixelFormatUncompressedR16  -> 11
+    PixelFormatUncompressedR16 -> 11
     PixelFormatUncompressedR16G16B16 -> 12
     PixelFormatUncompressedR16G16B16A16 -> 13
     PixelFormatCompressedDxt1Rgb -> 14
@@ -748,7 +748,7 @@ instance Enum PixelFormat where
     8 -> PixelFormatUncompressedR32
     9 -> PixelFormatUncompressedR32G32B32
     10 -> PixelFormatUncompressedR32G32B32A32
-    11 -> PixelFormatUncompressedR16 
+    11 -> PixelFormatUncompressedR16
     12 -> PixelFormatUncompressedR16G16B16
     13 -> PixelFormatUncompressedR16G16B16A16
     14 -> PixelFormatCompressedDxt1Rgb
@@ -816,7 +816,6 @@ data Gesture
   | GesturePinchOut
   deriving (Show, Eq)
 
--- NOTE: This is not the ideal solution, I need to make this unjanky
 instance Enum Gesture where
   fromEnum n = case n of
     GestureNone -> 0
@@ -1367,12 +1366,12 @@ instance Storable RLCullMode where
 
 -- | Matrix modes (equivalent to OpenGL)
 data RLMatrixMode
-  -- | GL_MODELVIEW
-  = RLModelView
-  -- | GL_PROJECTION
-  | RLProjection
-  -- | GL_TEXTURE
-  | RLTexture
+  = -- | GL_MODELVIEW
+    RLModelView
+  | -- | GL_PROJECTION
+    RLProjection
+  | -- | GL_TEXTURE
+    RLTexture
   deriving (Eq, Show)
 
 instance Enum RLMatrixMode where
@@ -1397,12 +1396,12 @@ instance Storable RLMatrixMode where
 
 -- | Primitive assembly draw modes
 data RLDrawMode
-  -- | GL_LINES
-  = RLLines
-  -- | GL_TRIANGLES
-  | RLTriangles
-  -- | GL_QUADS
-  | RLQuads
+  = -- | GL_LINES
+    RLLines
+  | -- | GL_TRIANGLES
+    RLTriangles
+  | -- | GL_QUADS
+    RLQuads
   deriving (Eq, Show)
 
 instance Enum RLDrawMode where
@@ -1427,30 +1426,30 @@ instance Storable RLDrawMode where
 
 -- | Texture parameters (equivalent to OpenGL defines)
 data RLTextureParam
-  -- | GL_TEXTURE_WRAP_S
-  = RLTextureParamWrapS
-  -- | GL_TEXTURE_WRAP_T
-  | RLTextureParamWrapT
-  -- | GL_TEXTURE_MAG_FILTER
-  | RLTextureParamMagFilter
-  -- | GL_TEXTURE_MIN_FILTER
-  | RLTextureParamMinFilter
-  -- | GL_NEAREST
-  | RLTextureParamFilterNearest
-  -- | GL_LINEAR
-  | RLTextureParamFilterLinear
-  -- | GL_NEAREST_MIPMAP_NEAREST
-  | RLTextureParamFilterMipNearest
-  -- | GL_NEAREST_MIPMAP_LINEAR
-  | RLTextureParamFilterNearestMipLinear
-  -- | GL_LINEAR_MIPMAP_NEAREST
-  | RLTextureParamFilterLinearMipNearest
-  -- | GL_LINEAR_MIPMAP_LINEAR
-  | RLTextureParamFilterMipLinear
-  -- | Anisotropic filter (custom identifier)
-  | RLTextureParamFilterAnisotropic
-  -- | Texture mipmap bias, percentage ratio (custom identifier)
-  | RLTextureParamMipmapBiasRatio
+  = -- | GL_TEXTURE_WRAP_S
+    RLTextureParamWrapS
+  | -- | GL_TEXTURE_WRAP_T
+    RLTextureParamWrapT
+  | -- | GL_TEXTURE_MAG_FILTER
+    RLTextureParamMagFilter
+  | -- | GL_TEXTURE_MIN_FILTER
+    RLTextureParamMinFilter
+  | -- | GL_NEAREST
+    RLTextureParamFilterNearest
+  | -- | GL_LINEAR
+    RLTextureParamFilterLinear
+  | -- | GL_NEAREST_MIPMAP_NEAREST
+    RLTextureParamFilterMipNearest
+  | -- | GL_NEAREST_MIPMAP_LINEAR
+    RLTextureParamFilterNearestMipLinear
+  | -- | GL_LINEAR_MIPMAP_NEAREST
+    RLTextureParamFilterLinearMipNearest
+  | -- | GL_LINEAR_MIPMAP_LINEAR
+    RLTextureParamFilterMipLinear
+  | -- | Anisotropic filter (custom identifier)
+    RLTextureParamFilterAnisotropic
+  | -- | Texture mipmap bias, percentage ratio (custom identifier)
+    RLTextureParamMipmapBiasRatio
   deriving (Eq, Show)
 
 instance Enum RLTextureParam where
@@ -1493,12 +1492,12 @@ instance Storable RLTextureParam where
 
 -- | OpenGL shader type
 data RLShaderType
-  -- | GL_FRAGMENT_SHADER
-  = RLFragmentShader
-  -- | GL_VERTEX_SHADER
-  | RLVertexShader
-  -- | GL_COMPUTE_SHADER
-  | RLComputeShader
+  = -- | GL_FRAGMENT_SHADER
+    RLFragmentShader
+  | -- | GL_VERTEX_SHADER
+    RLVertexShader
+  | -- | GL_COMPUTE_SHADER
+    RLComputeShader
   deriving (Eq, Show)
 
 instance Enum RLShaderType where
@@ -1523,24 +1522,24 @@ instance Storable RLShaderType where
 
 -- | GL buffer usage hint
 data RLBufferHint
-  -- | GL_STREAM_DRAW
-  = RLBufferHintStreamDraw
-  -- | GL_STREAM_READ
-  | RLBufferHintStreamRead
-  -- | GL_STREAM_COPY
-  | RLBufferHintStreamCopy
-  -- | GL_STATIC_DRAW
-  | RLBufferHintStaticDraw
-  -- | GL_STATIC_READ
-  | RLBufferHintStaticRead
-  -- | GL_STATIC_COPY
-  | RLBufferHintStaticCopy
-  -- | GL_DYNAMIC_DRAW
-  | RLBufferHintDynamicDraw
-  -- | GL_DYNAMIC_READ
-  | RLBufferHintDynamicRead
-  -- | GL_DYNAMIC_COPY
-  | RLBufferHintDynamicCopy
+  = -- | GL_STREAM_DRAW
+    RLBufferHintStreamDraw
+  | -- | GL_STREAM_READ
+    RLBufferHintStreamRead
+  | -- | GL_STREAM_COPY
+    RLBufferHintStreamCopy
+  | -- | GL_STATIC_DRAW
+    RLBufferHintStaticDraw
+  | -- | GL_STATIC_READ
+    RLBufferHintStaticRead
+  | -- | GL_STATIC_COPY
+    RLBufferHintStaticCopy
+  | -- | GL_DYNAMIC_DRAW
+    RLBufferHintDynamicDraw
+  | -- | GL_DYNAMIC_READ
+    RLBufferHintDynamicRead
+  | -- | GL_DYNAMIC_COPY
+    RLBufferHintDynamicCopy
   deriving (Eq, Show)
 
 instance Enum RLBufferHint where
@@ -1577,12 +1576,12 @@ instance Storable RLBufferHint where
 
 -- | GL buffer mask
 data RLBitField
-  -- | GL_COLOR_BUFFER_BIT
-  = RLGLColorBuffer
-  -- | GL_DEPTH_BUFFER_BIT
-  | RLGLDepthBuffer
-  -- | GL_STENCIL_BUFFER_BIT
-  | RLGLStencilBuffer
+  = -- | GL_COLOR_BUFFER_BIT
+    RLGLColorBuffer
+  | -- | GL_DEPTH_BUFFER_BIT
+    RLGLDepthBuffer
+  | -- | GL_STENCIL_BUFFER_BIT
+    RLGLStencilBuffer
   deriving (Eq, Show)
 
 instance Enum RLBitField where
@@ -1590,7 +1589,7 @@ instance Enum RLBitField where
     RLGLColorBuffer -> 0x00004000
     RLGLDepthBuffer -> 0x00000100
     RLGLStencilBuffer -> 0x00000400
-  
+
   toEnum n = case n of
     0x00004000 -> RLGLColorBuffer
     0x00000100 -> RLGLDepthBuffer
@@ -1717,22 +1716,22 @@ instance Storable GuiTextWrapMode where
 -- | Gui controls
 data GuiControl
   = Default
-  -- | Used also for: LABELBUTTON
-  | Label
+  | -- | Used also for: LABELBUTTON
+    Label
   | Button
-  -- | Used also for: TOGGLEGROUP
-  | Toggle
-  -- | Used also for: SLIDERBAR, TOGGLESLIDER
-  | Slider
+  | -- | Used also for: TOGGLEGROUP
+    Toggle
+  | -- | Used also for: SLIDERBAR, TOGGLESLIDER
+    Slider
   | Progressbar
   | Checkbox
   | Combobox
   | Dropdownbox
-  -- | Used also for: TEXTBOXMULTI
-  | Textbox
+  | -- | Used also for: TEXTBOXMULTI
+    Textbox
   | Valuebox
-  -- | Uses: BUTTON, VALUEBOX
-  | Spinner
+  | -- | Uses: BUTTON, VALUEBOX
+    Spinner
   | Listview
   | Colorpicker
   | Scrollbar
@@ -1786,36 +1785,36 @@ instance Storable GuiControl where
 
 -- | Gui base properties for every control
 data GuiControlProperty
-  -- | Control border color in STATE_NORMAL
-  = BorderColorNormal
-  -- | Control base color in STATE_NORMAL
-  | BaseColorNormal
-  -- | Control text color in STATE_NORMAL
-  | TextColorNormal
-  -- | Control border color in STATE_FOCUSED
-  | BorderColorFocused
-  -- | Control base color in STATE_FOCUSED
-  | BaseColorFocused
-  -- | Control text color in STATE_FOCUSED
-  | TextColorFocused
-  -- | Control border color in STATE_PRESSED
-  | BorderColorPressed
-  -- | Control base color in STATE_PRESSED
-  | BaseColorPressed
-  -- | Control text color in STATE_PRESSED
-  | TextColorPressed
-  -- | Control border color in STATE_DISABLED
-  | BorderColorDisabled
-  -- | Control base color in STATE_DISABLED
-  | BaseColorDisabled
-  -- | Control text color in STATE_DISABLED
-  | TextColorDisabled
-  -- | Control border size, 0 for no border
-  | BorderWidth
-  -- | Control text padding, not considering border
-  | TextPadding
-  -- | Control text horizontal alignment inside control text bound (after border and padding)
-  | TextAlignment
+  = -- | Control border color in STATE_NORMAL
+    BorderColorNormal
+  | -- | Control base color in STATE_NORMAL
+    BaseColorNormal
+  | -- | Control text color in STATE_NORMAL
+    TextColorNormal
+  | -- | Control border color in STATE_FOCUSED
+    BorderColorFocused
+  | -- | Control base color in STATE_FOCUSED
+    BaseColorFocused
+  | -- | Control text color in STATE_FOCUSED
+    TextColorFocused
+  | -- | Control border color in STATE_PRESSED
+    BorderColorPressed
+  | -- | Control base color in STATE_PRESSED
+    BaseColorPressed
+  | -- | Control text color in STATE_PRESSED
+    TextColorPressed
+  | -- | Control border color in STATE_DISABLED
+    BorderColorDisabled
+  | -- | Control base color in STATE_DISABLED
+    BaseColorDisabled
+  | -- | Control text color in STATE_DISABLED
+    TextColorDisabled
+  | -- | Control border size, 0 for no border
+    BorderWidth
+  | -- | Control text padding, not considering border
+    TextPadding
+  | -- | Control text horizontal alignment inside control text bound (after border and padding)
+    TextAlignment
   deriving (Eq, Show)
 
 instance Enum GuiControlProperty where
@@ -1863,20 +1862,20 @@ instance Storable GuiControlProperty where
 
 -- | DEFAULT extended properties
 data GuiDefaultProperty
-  -- | Text size (glyphs max height)
-  = TextSize
-  -- | Text spacing between glyphs
-  | TextSpacing
-  -- | Line control color
-  | LineColor
-  -- | Background color
-  | BackgroundColor
-  -- | Text spacing between lines
-  | TextLineSpacing
-  -- | Text vertical alignment inside text bounds (after border and padding)
-  | TextAlignmentVertical
-  -- | Text wrap-mode inside text bounds
-  | TextWrapMode
+  = -- | Text size (glyphs max height)
+    TextSize
+  | -- | Text spacing between glyphs
+    TextSpacing
+  | -- | Line control color
+    LineColor
+  | -- | Background color
+    BackgroundColor
+  | -- | Text spacing between lines
+    TextLineSpacing
+  | -- | Text vertical alignment inside text bounds (after border and padding)
+    TextAlignmentVertical
+  | -- | Text wrap-mode inside text bounds
+    TextWrapMode
   deriving (Eq, Show)
 
 instance Enum GuiDefaultProperty where
@@ -1908,8 +1907,8 @@ instance Storable GuiDefaultProperty where
 
 -- | Toggle/ToggleGroup
 data GuiToggleProperty
-  -- | ToggleGroup separation between toggles
-  = GroupPadding
+  = -- | ToggleGroup separation between toggles
+    GroupPadding
   deriving (Eq, Show)
 
 instance Enum GuiToggleProperty where
@@ -1929,10 +1928,10 @@ instance Storable GuiToggleProperty where
 
 -- | Slider/SliderBar
 data GuiSliderProperty
-  -- | Slider size of internal bar
-  = SliderWidth
-  -- | Slider/SliderBar internal bar padding
-  | SliderPadding
+  = -- | Slider size of internal bar
+    SliderWidth
+  | -- | Slider/SliderBar internal bar padding
+    SliderPadding
   deriving (Eq, Show)
 
 instance Enum GuiSliderProperty where
@@ -1954,8 +1953,8 @@ instance Storable GuiSliderProperty where
 
 -- | ProgressBar
 data GuiProgressBarProperty
-  -- | ProgressBar internal padding
-  = ProgressPadding
+  = -- | ProgressBar internal padding
+    ProgressPadding
   deriving (Eq, Show)
 
 instance Enum GuiProgressBarProperty where
@@ -1975,18 +1974,18 @@ instance Storable GuiProgressBarProperty where
 
 -- | ScrollBar
 data GuiScrollBarProperty
-  -- | ScrollBar arrows size
-  = ArrowsSize
-  -- | ScrollBar arrows visible
-  | ArrowsVisible
-  -- | ScrollBar slider internal padding
-  | ScrollSliderPadding
-  -- | ScrollBar slider size
-  | ScrollSliderSize
-  -- | ScrollBar scroll padding from arrows
-  | ScrollPadding
-  -- | ScrollBar scrolling speed
-  | ScrollSpeed
+  = -- | ScrollBar arrows size
+    ArrowsSize
+  | -- | ScrollBar arrows visible
+    ArrowsVisible
+  | -- | ScrollBar slider internal padding
+    ScrollSliderPadding
+  | -- | ScrollBar slider size
+    ScrollSliderSize
+  | -- | ScrollBar scroll padding from arrows
+    ScrollPadding
+  | -- | ScrollBar scrolling speed
+    ScrollSpeed
   deriving (Eq, Show)
 
 instance Enum GuiScrollBarProperty where
@@ -2016,8 +2015,8 @@ instance Storable GuiScrollBarProperty where
 
 -- | CheckBox
 data GuiCheckBoxProperty
-  -- | CheckBox internal check padding
-  = CheckPadding
+  = -- | CheckBox internal check padding
+    CheckPadding
   deriving (Eq, Show)
 
 instance Enum GuiCheckBoxProperty where
@@ -2037,10 +2036,10 @@ instance Storable GuiCheckBoxProperty where
 
 -- | ComboBox
 data GuiComboBoxProperty
-  -- | ComboBox right button width
-  = ComboButtonWidth
-  -- | ComboBox button separation
-  | ComboButtonSpacing
+  = -- | ComboBox right button width
+    ComboButtonWidth
+  | -- | ComboBox button separation
+    ComboButtonSpacing
   deriving (Eq, Show)
 
 instance Enum GuiComboBoxProperty where
@@ -2062,10 +2061,10 @@ instance Storable GuiComboBoxProperty where
 
 -- | DropdownBox
 data GuiDropdownBoxProperty
-  -- | DropdownBox arrow separation from border and items
-  = ArrowPadding
-  -- | DropdownBox items separation
-  | DropdownItemsSpacing
+  = -- | DropdownBox arrow separation from border and items
+    ArrowPadding
+  | -- | DropdownBox items separation
+    DropdownItemsSpacing
   deriving (Eq, Show)
 
 instance Enum GuiDropdownBoxProperty where
@@ -2087,8 +2086,8 @@ instance Storable GuiDropdownBoxProperty where
 
 -- | TextBox/TextBoxMulti/ValueBox/Spinner
 data GuiTextBoxProperty
-  -- | TextBox in read-only mode: 0-text editable, 1-text no-editable
-  = TextReadonly
+  = -- | TextBox in read-only mode: 0-text editable, 1-text no-editable
+    TextReadonly
   deriving (Eq, Show)
 
 instance Enum GuiTextBoxProperty where
@@ -2108,10 +2107,10 @@ instance Storable GuiTextBoxProperty where
 
 -- | Spinner
 data GuiSpinnerProperty
-  -- | Spinner left/right buttons width
-  = SpinButtonWidth
-  -- | Spinner buttons separation
-  | SpinButtonSpacing
+  = -- | Spinner left/right buttons width
+    SpinButtonWidth
+  | -- | Spinner buttons separation
+    SpinButtonSpacing
   deriving (Eq, Show)
 
 instance Enum GuiSpinnerProperty where
@@ -2133,14 +2132,14 @@ instance Storable GuiSpinnerProperty where
 
 -- | ListView
 data GuiListViewProperty
-  -- | ListView items height
-  = ListItemsHeight
-  -- | ListView items separation
-  | ListItemsSpacing
-  -- | ListView scrollbar size (usually width)
-  | ScrollbarWidth
-  -- | ListView scrollbar side (0-SCROLLBAR_LEFT_SIDE, 1-SCROLLBAR_RIGHT_SIDE)
-  | ScrollbarSide
+  = -- | ListView items height
+    ListItemsHeight
+  | -- | ListView items separation
+    ListItemsSpacing
+  | -- | ListView scrollbar size (usually width)
+    ScrollbarWidth
+  | -- | ListView scrollbar side (0-SCROLLBAR_LEFT_SIDE, 1-SCROLLBAR_RIGHT_SIDE)
+    ScrollbarSide
   deriving (Eq, Show)
 
 instance Enum GuiListViewProperty where
@@ -2167,14 +2166,14 @@ instance Storable GuiListViewProperty where
 -- | ColorPicker
 data GuiColorPickerProperty
   = ColorSelectorSize
-  -- | ColorPicker right hue bar width
-  | HuebarWidth
-  -- | ColorPicker right hue bar separation from panel
-  | HuebarPadding
-  -- | ColorPicker right hue bar selector height
-  | HuebarSelectorHeight
-  -- | ColorPicker right hue bar selector overflow
-  | HuebarSelectorOverflow
+  | -- | ColorPicker right hue bar width
+    HuebarWidth
+  | -- | ColorPicker right hue bar separation from panel
+    HuebarPadding
+  | -- | ColorPicker right hue bar selector height
+    HuebarSelectorHeight
+  | -- | ColorPicker right hue bar selector overflow
+    HuebarSelectorOverflow
   deriving (Eq, Show)
 
 instance Enum GuiColorPickerProperty where
@@ -2199,7 +2198,6 @@ instance Storable GuiColorPickerProperty where
     val <- peek (castPtr ptr)
     return $ toEnum $ fromEnum (val :: CInt)
   poke ptr v = poke (castPtr ptr) (fromIntegral (fromEnum v) :: CInt)
-
 
 data GuiIconName
   = IconNone
@@ -3814,13 +3812,16 @@ instance Freeable Wave where
     dataPtr <- peekByteOff ptr 16 :: IO (Ptr CShort)
     c'free $ castPtr dataPtr
 
--- RAudioBuffer/Processor don't work perfectly right now, I need to fix them later on.
--- They are currently used as `Ptr`s because peeking/poking them every time
--- an audio function is called doesn't work properly (they are stored in a
--- linked list in C, which makes it very difficult to properly marshal them)
+-- RAudioBuffer/Processor are bound weirdly. They are currently used as `Ptr`s
+-- because peeking/poking them every time an audio function is called doesn't
+-- work properly (they are stored in a linked list in C, which makes it very
+-- difficult to properly marshal them).
+--
+-- The types defined here are actually unnecessary because the pointers are
+-- never dereferenced.
 data RAudioBuffer = RAudioBuffer
-  { rAudioBuffer'converter :: [Int], -- Implemented as an array of 39 integers because binding the entire `ma_data_converter` type is too painful
-    rAudioBuffer'callback :: AudioCallback,
+  { rAudioBuffer'converter :: [Int], -- Implemented as an array of 39 integers because the entire `ma_data_converter` type is too complex
+    rAudioBuffer'callback :: C'AudioCallback,
     rAudioBuffer'processor :: Maybe RAudioProcessor,
     rAudioBuffer'volume :: Float,
     rAudioBuffer'pitch :: Float,
@@ -3946,7 +3947,7 @@ instance Storable RAudioBuffer where
             pokeByteOff basePtr 384 prevPtr
 
 data RAudioProcessor = RAudioProcessor
-  { rAudioProcessor'process :: Maybe AudioCallback,
+  { rAudioProcessor'process :: Maybe C'AudioCallback,
     rAudioProcessor'next :: Maybe RAudioProcessor,
     rAudioProcessor'prev :: Maybe RAudioProcessor
   }
@@ -4162,7 +4163,7 @@ data FilePathList = FilePathList
     filePathList'paths :: [String]
   }
   deriving (Eq, Show)
-  
+
 instance Storable FilePathList where
   sizeOf _ = 16
   alignment _ = 4
@@ -4188,8 +4189,7 @@ instance Freeable FilePathList where
     c'free $ castPtr pathsPtr
 
 data AutomationEvent = AutomationEvent
-  {
-    automationEvent'frame :: Integer,
+  { automationEvent'frame :: Integer,
     automationEvent'type :: Integer,
     automationEvent'params :: [Int]
   }
@@ -4210,10 +4210,10 @@ instance Storable AutomationEvent where
     return ()
 
 data AutomationEventList = AutomationEventList
-  {
-    automationEventList'capacity :: Integer,
+  { automationEventList'capacity :: Integer,
     automationEventList'events :: [AutomationEvent]
-  } deriving (Eq, Show)
+  }
+  deriving (Eq, Show)
 
 instance Storable AutomationEventList where
   sizeOf _ = 16
@@ -4379,13 +4379,14 @@ instance Freeable RLRenderBatch where
 -- | Style property.
 -- NOTE: Used when exporting style as code for convenience.
 data GuiStyleProp = GuiStyleProp
- { -- | Control identifier
-   guiStyleProp'controlId :: Word16,
-   -- | Property identifier
-   guiStyleProp'propertyId :: Word16,
-   -- | Property value
-   guiStyleProp'propertyValue :: Int
- } deriving (Eq, Show, Freeable)
+  { -- | Control identifier
+    guiStyleProp'controlId :: Word16,
+    -- | Property identifier
+    guiStyleProp'propertyId :: Word16,
+    -- | Property value
+    guiStyleProp'propertyValue :: Int
+  }
+  deriving (Eq, Show, Freeable)
 
 instance Storable GuiStyleProp where
   sizeOf _ = 8
@@ -4405,12 +4406,24 @@ instance Storable GuiStyleProp where
 -- Raylib callbacks ----------------------------
 ------------------------------------------------
 
-type LoadFileDataCallback = FunPtr (CString -> Ptr CUInt -> IO (Ptr CUChar))
+type LoadFileDataCallback = String -> IO [Integer]
 
-type SaveFileDataCallback = FunPtr (CString -> Ptr () -> CUInt -> IO CInt)
+type SaveFileDataCallback a = String -> Ptr a -> Integer -> IO Bool
 
-type LoadFileTextCallback = FunPtr (CString -> IO CString)
+type LoadFileTextCallback = String -> IO String
 
-type SaveFileTextCallback = FunPtr (CString -> CString -> IO CInt)
+type SaveFileTextCallback = String -> String -> IO Bool
 
-type AudioCallback = FunPtr (Ptr () -> CUInt -> IO ())
+type AudioCallback = Ptr () -> Integer -> IO ()
+
+-- TODO: Add FunPtrs to WindowResources for automatic memory management
+
+type C'LoadFileDataCallback = FunPtr (CString -> Ptr CUInt -> IO (Ptr CUChar))
+
+type C'SaveFileDataCallback = FunPtr (CString -> Ptr () -> CUInt -> IO CInt)
+
+type C'LoadFileTextCallback = FunPtr (CString -> IO CString)
+
+type C'SaveFileTextCallback = FunPtr (CString -> CString -> IO CInt)
+
+type C'AudioCallback = FunPtr (Ptr () -> CUInt -> IO ())
