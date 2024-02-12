@@ -4,25 +4,34 @@ This file only contains h-raylib specific information. For documentation on indi
 
 ## Project structure
 
-h-raylib contains bindings for raylib.h, rlgl.h, and raygui.h.
+h-raylib contains bindings for raylib.h, raymath.h, rcamera.h, rlgl.h, and raygui.h.
 
 ### Public modules
 
-`Raylib.Types` contains all of raylib's types and low-level code to convert them to and from raw bytes (i.e. from C to Haskell and vice versa). `Raylib.Util` contains miscellaneous utility functions. `Raylib.Util.Colors` contains some colors defined by raylib. `Raylib.Util.Lenses` provides lenses for the raylib types. The other public modules, `Raylib.Core`, `Raylib.Core.\*`, and `Raylib.Util.\*`, correspond to their respective raylib modules.
+- `Raylib.Types`, `Raylib.Types.Core.*`, `Raylib.Types.Util.*`: provide all of raylib's types and implement low-level code to convert them to and from raw bytes (i.e. from C to Haskell and vice versa)
+- `Raylib.Util`: provides miscellaneous utility functions
+- `Raylib.Util.Colors`: provides some colors defined by raylib
+- `Raylib.Util.GUI.Styles`: provides some styles defined by raygui
+- `Raylib.Util.Lenses`: provides lenses for the raylib types
+- `Raylib.Util.Camera`: Binds `rcamera.h` in pure Haskell
+- `Raylib.Util.Lenses`: Binds `raymath.h` in pure Haskell
+- `Raylib.Core`, `Raylib.Core.\*`, `Raylib.Util.\*`: correspond to their respective raylib modules
 
 The binding functions in h-raylib are an almost one-to-one mapping to their corresponding raylib functions. The types and functions are, in some cases, slightly modified if it is possible to utilize Haskell features.
 
 Below are some descriptions of these public modules and their purposes.
 
-#### Raylib.Types
+#### Raylib.Types.*.*
 
-`Raylib.Types` has 3 sections: one for enumerations, one for structures, and one for callbacks.
+Each `Types` module has up to 3 sections: one for enumerations, one for structures, and one for callbacks. Any one of these may be omitted if not needed (for example, most of the `Types` modules do not have a callback section).
 
-The enumerations section contains Haskell sum types that are instances of `Enum`. Each of these types corresponds to a raylib `enum` or set of `define`s. The `fromEnum` and `toEnum` functions for these types use the numbers associated with these values in the C `enum`s. Most of these types are instances of `Storable` so they can be converted to raw bytes and passed to a C function. _NOTE: Some of these Haskell types correspond to C `enum`s that are in C source files, rather than header files._
+The enumerations section contains Haskell sum types that are instances of `Enum`. Each of these types corresponds to a raylib (C) `enum` or set of `define`s. The `fromEnum` and `toEnum` functions for these types use the numbers associated with these values in the C `enum`s. Most of these types are instances of `Storable` so they can be converted to raw bytes and passed to a C function. _NOTE: Some of these Haskell types correspond to C `enum`s that are in C source files, rather than header files._
 
 The structures section contains Haskell types that correspond to each of raylib's `structs`. Each field in these types is named `typeName'fieldName` (e.g. the C struct `Vector2`'s `x` field is called `vector2'x` in Haskell). These structs also all derive the typeclass `Freeable` (declared in the internal `Raylib.ForeignUtil` module). This typeclass allows types to describe how to properly free all the data associated with a pointer to that type. For example, `Image`'s implementation of `Freeable` also frees the pointer stored in the `Image.data` field in C. Finally, all of these types derive `Storable`, obviously, to convert them to and from pointers.
 
-The callbacks section contains `FunPtr` types that are passed to some functions.
+The callbacks section contains `FunPtr` types, along with higher-level Haskell wrappers. When you pass one of these wrappers (e.g. `LoadFileDataCallback`) to a function that takes one as an argument (e.g. `setLoadFileDataCallback`), the function will return a `FunPtr` type (e.g. `C'LoadFileDataCallback`). You will have to manually free this with `freeHaskellFunPtr` at the end of your program to avoid memory leaks (TODO: implement automatic memory management for `FunPtr`s).
+
+`Raylib.Types` re-exports all of these types for convenience.
 
 #### Raylib.Util
 
@@ -31,6 +40,10 @@ The callbacks section contains `FunPtr` types that are passed to some functions.
 #### Raylib.Util.Colors
 
 `Raylib.Util.Colors` is very simple: it declares 26 colors defined in `raylib.h`, namely `lightGray`, `gray`, `darkGray`, `yellow`, `gold`, `orange`, `pink`, `red`, `maroon`, `green`, `lime`, `darkGreen`, `skyBlue`, `blue`, `darkBlue`, `purple`, `violet`, `darkPurple`, `beige`, `brown`, `darkBrown`, `white`, `black`, `blank`, `magenta`, and `rayWhite`.
+
+#### Raylib.Util.GUI.Styles
+
+`Raylib.Util.GUI.Styles` binds predefined styles that are in `raygui/styles`. Calling one of these functions will activate that style. To return to the default style, simply call `guiLoadStyleDefault`.
 
 #### Raylib.Util.Camera, Raylib.Util.Math
 
@@ -50,7 +63,7 @@ The `unload*` functions are optional; even if you do not call them, all assets u
 
 These changes are for automatic memory management. See the "Memory management" section for details.
 
-Functions that took a pointer as an argument in C were changed to take a regular type as an argument and return an updated version of the argument.
+(Most) functions that took a pointer as an argument in C were changed to take a regular type as an argument and return an updated version of the argument (there are a few exceptions, because `Ptr`s are difficult to avoid in some cases).
 
 ##### Raylib.Util.GUI
 
@@ -59,8 +72,6 @@ This is a binding module for [raygui](https://github.com/raysan5/raygui), an imm
 Keep in mind that raygui is an immediate mode GUI, so it is designed mostly for debugging and development and not for actual game GUIs. To this end, it is not very customizable and the features are quite limited. For a real game, you should make your own retained mode GUI.
 
 ### Private modules
-
-h-raylib has 5 modules that are not exposed for external use: `Raylib.Native`, `Raylib.Internal`, `Raylib.ForeignUtil`, `Raylib.Web.Native`, and `Raylib.Web.Processable`.
 
 #### Raylib.Native
 

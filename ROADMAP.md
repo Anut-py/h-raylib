@@ -4,8 +4,10 @@
 
 Items which have not yet been worked on. Feel free to work on one of these.
 
-- Split Raylib.Types into multiple modules
 - Implement automatic memory management for callbacks
+- Move Raylib.Native functions into the modules where they are called
+  - Use Template Haskell to clean up boilerplate
+- Bind `rgestures`
 
 ## In progress
 
@@ -15,6 +17,7 @@ Items which have not yet been worked on. Feel free to work on one of these.
 
 Items which have been completed but not published to hackage.
 
+- Split Raylib.Types into multiple modules
 - Bind `raygui` \[[#34](https://github.com/Anut-py/h-raylib/issues/34)\]
 
 ## Published
