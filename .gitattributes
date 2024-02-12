@@ -1,0 +1,3 @@
+devtools.js          eol=lf
+run-all-examples.sh  eol=lf
+*.nix                eol=lf
