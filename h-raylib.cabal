@@ -188,6 +188,14 @@ library
     Raylib.Core.Text
     Raylib.Core.Textures
     Raylib.Types
+    Raylib.Types.Core
+    Raylib.Types.Core.Audio
+    Raylib.Types.Core.Camera
+    Raylib.Types.Core.Models
+    Raylib.Types.Core.Text
+    Raylib.Types.Core.Textures
+    Raylib.Types.Util.GUI
+    Raylib.Types.Util.RLGL
     Raylib.Util
     Raylib.Util.Camera
     Raylib.Util.Colors

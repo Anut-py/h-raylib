@@ -18,6 +18,7 @@ import Raylib.ForeignUtil
     withFreeableArrayLen, withFreeableArray,
   )
 import Raylib.Internal (WindowResources, addFrameBuffer, addTextureId, unloadSingleFrameBuffer, unloadSingleTexture)
+import qualified Raylib.Internal as I
 import Raylib.Native
   ( c'colorAlpha,
     c'colorAlphaBlend,
@@ -537,3 +538,6 @@ getPixelColor srcPtr format = c'getPixelColor srcPtr (fromIntegral $ fromEnum fo
 
 setPixelColor :: Ptr () -> Color -> PixelFormat -> IO ()
 setPixelColor dstPtr color format = withFreeable color (\c -> c'setPixelColor dstPtr c (fromIntegral $ fromEnum format))
+
+getPixelDataSize :: Int -> Int -> PixelFormat -> Int
+getPixelDataSize width height format = I.getPixelDataSize width height (fromEnum format)
