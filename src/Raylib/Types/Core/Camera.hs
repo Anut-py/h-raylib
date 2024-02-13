@@ -1,9 +1,12 @@
 {-# LANGUAGE DeriveAnyClass #-}
-{-# OPTIONS_GHC -Wall #-}
+{-# OPTIONS -Wall #-}
 
+-- | Bindings for camera-related types
 module Raylib.Types.Core.Camera
-  ( CameraMode (..),
+  ( -- * Enumerations
+    CameraMode (..),
     CameraProjection (..),
+    -- * Structures
     Camera3D (..),
     Camera2D (..),
     Camera,

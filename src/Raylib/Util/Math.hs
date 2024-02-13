@@ -1,5 +1,11 @@
 {-# OPTIONS -Wall #-}
 
+-- | Bindings to @raymath@
+--
+--   These were rewritten in Haskell instead of binding to C. All the functions
+--   are pure. This may not be an exact one-to-one mapping to the C code; some
+--   of the functions and high-level structures have been changed to be more
+--   idiomatic Haskell.
 module Raylib.Util.Math
   ( -- * Utility constants
     epsilon,
@@ -14,17 +20,17 @@ module Raylib.Util.Math
     wrap,
     floatEquals,
 
-    -- * General vector math
+    -- * Vector math
     Vector (..),
 
-    -- * Vector2 math
+    -- ** Vector2 math
     vector2Angle,
     vector2LineAngle,
     vector2Transform,
     vector2Reflect,
     vector2Rotate,
 
-    -- * Vector3 math
+    -- ** Vector3 math
     vector3CrossProduct,
     vector3Perpendicular,
     vector3Angle,
@@ -100,7 +106,8 @@ rad2Deg = 180 / pi
 -- Float math ----------------------------------
 ------------------------------------------------
 
--- | Clamp float to range
+-- | Clamp float to range (WARNING: this does not use the same argument order
+--   as raymath)
 clamp ::
   -- | Lower bound
   Float ->

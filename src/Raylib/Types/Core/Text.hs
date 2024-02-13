@@ -1,8 +1,10 @@
-{-# LANGUAGE DeriveAnyClass #-}
-{-# OPTIONS_GHC -Wall #-}
+{-# OPTIONS -Wall #-}
 
+-- | Bindings for types used in @rtext@
 module Raylib.Types.Core.Text
-  ( FontType (..),
+  ( -- * Enumerations
+    FontType (..),
+    -- * Structures
     GlyphInfo (..),
     Font (..),
   )

@@ -1,6 +1,37 @@
 {-# OPTIONS -Wall #-}
 
-module Raylib.Core.Text where
+-- | Bindings to @rtext@
+module Raylib.Core.Text
+  ( getFontDefault,
+    loadFont,
+    loadFontEx,
+    loadFontFromImage,
+    loadFontFromMemory,
+    loadFontData,
+    genImageFontAtlas,
+    unloadFont,
+    isFontReady,
+    exportFontAsCode,
+    drawFPS,
+    drawText,
+    drawTextEx,
+    drawTextPro,
+    drawTextCodepoint,
+    drawTextCodepoints,
+    setTextLineSpacing,
+    measureText,
+    measureTextEx,
+    getGlyphIndex,
+    getGlyphInfo,
+    getGlyphAtlasRec,
+    loadUTF8,
+    loadCodepoints,
+    getCodepointCount,
+    getCodepointNext,
+    getCodepointPrevious,
+    codepointToUTF8,
+  )
+where
 
 import Foreign
   ( Storable (peek, sizeOf),
@@ -11,6 +42,7 @@ import Foreign.C
     peekCString,
     withCString,
   )
+import Raylib.Internal (WindowResources, addTextureId, unloadSingleTexture)
 import Raylib.Internal.Foreign
   ( pop,
     popCArray,
@@ -20,7 +52,6 @@ import Raylib.Internal.Foreign
     withFreeableArray2D,
     withFreeableArrayLen,
   )
-import Raylib.Internal (WindowResources, addTextureId, unloadSingleTexture)
 import Raylib.Internal.Native
   ( c'codepointToUTF8,
     c'drawFPS,

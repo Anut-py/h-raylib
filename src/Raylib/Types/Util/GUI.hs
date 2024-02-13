@@ -1,8 +1,10 @@
 {-# OPTIONS -Wall #-}
 {-# LANGUAGE DeriveAnyClass #-}
 
+-- | Bindings for types used in @raygui@
 module Raylib.Types.Util.GUI
-  ( GuiState (..),
+  ( -- * Enumerations
+    GuiState (..),
     GuiTextAlignment (..),
     GuiTextAlignmentVertical (..),
     GuiTextWrapMode (..),
@@ -21,6 +23,7 @@ module Raylib.Types.Util.GUI
     GuiListViewProperty (..),
     GuiColorPickerProperty (..),
     GuiIconName (..),
+    -- * Structures
     GuiStyleProp (..),
   )
 where
@@ -1421,8 +1424,9 @@ instance Storable GuiIconName where
 -- raygui structures ------------------
 ---------------------------------------
 
--- | Style property.
--- NOTE: Used when exporting style as code for convenience.
+-- | Style property
+--
+-- NOTE: Used when exporting style as code for convenience
 data GuiStyleProp = GuiStyleProp
   { -- | Control identifier
     guiStyleProp'controlId :: Word16,

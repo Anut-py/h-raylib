@@ -1,8 +1,10 @@
 {-# LANGUAGE DeriveAnyClass #-}
-{-# OPTIONS_GHC -Wall #-}
+{-# OPTIONS -Wall #-}
 
+-- | Bindings for types used in @rlgl@
 module Raylib.Types.Util.RLGL
-  ( RLGLVersion (..),
+  ( -- * Enumerations
+    RLGLVersion (..),
     RLTraceLogLevel (..),
     RLPixelFormat (..),
     RLTextureFilter (..),
@@ -19,6 +21,7 @@ module Raylib.Types.Util.RLGL
     RLShaderType (..),
     RLBufferHint (..),
     RLBitField (..),
+    -- * Structures
     RLVertexBuffer (..),
     RLDrawCall (..),
     RLRenderBatch (..),

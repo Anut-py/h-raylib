@@ -1,14 +1,18 @@
 {-# LANGUAGE DeriveAnyClass #-}
-{-# OPTIONS_GHC -Wall #-}
+{-# OPTIONS -Wall #-}
 
+-- | Bindings for types used in @raudio@
 module Raylib.Types.Core.Audio
-  ( MusicContextType (..),
+  ( -- * Enumerations
+    MusicContextType (..),
+    -- * Structures
     Wave (..),
     RAudioBuffer (..),
     RAudioProcessor (..),
     AudioStream (..),
     Sound (..),
     Music (..),
+    -- * Callbacks
     AudioCallback,
     C'AudioCallback,
   )

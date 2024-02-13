@@ -3,6 +3,11 @@
 
 {-# OPTIONS -Wall #-}
 
+{-|
+This module consists solely of @foreign import@ statements. When compiling for
+the web, the @foreign import@s are replaced with @callRaylibFunction@ calls
+(see "Raylib.Internal.Web.Native" for details).
+-}
 module Raylib.Internal.Native where
 
 import Foreign (Ptr, Storable (poke), castPtr, fromBool, newArray)

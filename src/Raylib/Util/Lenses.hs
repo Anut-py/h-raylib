@@ -1,5 +1,6 @@
 {-# OPTIONS -Wall #-}
 
+-- | Lenses for raylib types
 module Raylib.Util.Lenses where
 
 import Control.Lens (Lens')
@@ -7,7 +8,7 @@ import Data.Word (Word8, Word16)
 import Foreign.Ptr (Ptr)
 import qualified Raylib.Types as RL
 
-
+-- TODO: generate with TH
 
 _vector2'x :: Lens' RL.Vector2 Float
 _vector2'x f (RL.Vector2 x y) = (\x' -> RL.Vector2 x' y) <$> f x

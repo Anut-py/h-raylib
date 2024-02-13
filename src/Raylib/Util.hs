@@ -2,6 +2,7 @@
 {-# LANGUAGE CPP #-}
 {-# LANGUAGE TemplateHaskellQuotes #-}
 
+-- | Utility functions that may be useful for an h-raylib application
 module Raylib.Util
   ( -- * Bracket functions
     withWindow,
@@ -34,8 +35,8 @@ import Control.Monad (void)
 import Control.Monad.Catch (MonadMask, bracket, bracket_)
 import Control.Monad.IO.Class (MonadIO (liftIO))
 import Raylib.Core (beginBlendMode, beginDrawing, beginMode2D, beginMode3D, beginScissorMode, beginShaderMode, beginTextureMode, beginVrStereoMode, closeWindow, endBlendMode, endDrawing, endMode2D, endMode3D, endScissorMode, endShaderMode, endTextureMode, endVrStereoMode, initWindow, setTargetFPS, windowShouldClose)
-import Raylib.Internal.Foreign (Freeable (..))
 import Raylib.Internal (WindowResources)
+import Raylib.Internal.Foreign (Freeable (..))
 import Raylib.Types
   ( BlendMode,
     Camera2D,
@@ -62,7 +63,20 @@ import Language.Haskell.TH.Syntax (Name (Name), OccName (OccName))
 
 #endif
 
-withWindow :: (MonadIO m, MonadMask m) => Int -> Int -> String -> Int -> (WindowResources -> m b) -> m b
+-- | NOTE: Only for native targets. If your program is intended to
+--         run on the web, use `raylibApplication` instead.
+withWindow ::
+  (MonadIO m, MonadMask m) =>
+  -- | Window width
+  Int ->
+  -- | Window height
+  Int ->
+  -- | Window title
+  String ->
+  -- | Target FPS
+  Int ->
+  (WindowResources -> m b) ->
+  m b
 withWindow w h title fps = bracket (liftIO $ initWindow w h title <* setTargetFPS fps) (liftIO . closeWindow)
 
 drawing :: (MonadIO m, MonadMask m) => m b -> m b
@@ -93,7 +107,18 @@ vrStereoMode config = bracket_ (liftIO (beginVrStereoMode config)) (liftIO endVr
 cameraDirectionRay :: Camera3D -> Ray
 cameraDirectionRay camera = Ray (camera3D'position camera) (vectorNormalize $ camera3D'target camera |-| camera3D'position camera)
 
--- | Creates a raylib application using the given program functions
+-- | Creates a raylib application using the given program functions. Supports
+--   both native and web targets, so it is recommended for all programs. If
+--   your program is intended only for native use, you may manually write a
+--   @main@ function.
+--
+--   On a native (non-web) target, it simply creates a @main@ function that
+--   uses the startup, mainLoop, shouldClose, and teardown functions. When
+--   building with @platform-web@ enabled, it creates four @foreign export@
+--   statements (@startup@, @mainLoop@, @shouldClose@, and @teardown@), which
+--   will be called through the browser.
+--
+--   See @raygui-suite@ for an example of how to use it.
 raylibApplication ::
   -- | The startup function, should be of type @IO AppState@
   Name ->
@@ -235,7 +260,7 @@ assertTypes startup mainLoop shouldClose teardown = do
 
   tdt <- reifyType teardown
   assertType teardown ((ArrowT `AppT` state) `AppT` (ConT ''IO `AppT` TupleT 0)) tdt
-  
+
 assertType :: Name -> Type -> Type -> Q ()
 assertType n expected actual = if expected == actual then return () else typeErr n expected actual
 
@@ -244,8 +269,11 @@ typeErr (Name (OccName n) _) expected actual =
   error (n ++ " was not the expected type\n\nexpected " ++ show (ppr expected) ++ "\n\ngot " ++ show (ppr actual) ++ "\n")
 
 -- | Calls the game loop every frame as long as the window is open.
---  For larger projects, instead of using this function, consider
---  making a custom game loop for flexibility.
+--   For larger projects, instead of using this function, consider
+--   making a custom game loop for flexibility.
+--
+--   NOTE: Only for native targets. If your program is intended to
+--         run on the web, use `raylibApplication` instead.
 whileWindowOpen ::
   (MonadIO m) =>
   -- | The game loop. Its only argument should be the current application state, and it should return a new state.

@@ -1,6 +1,113 @@
 {-# OPTIONS -Wall #-}
 
-module Raylib.Core.Textures where
+-- | Bindings to @rtextures@
+module Raylib.Core.Textures
+  ( loadImage,
+    loadImageRaw,
+    loadImageSvg,
+    loadImageAnim,
+    loadImageAnimFromMemory,
+    loadImageFromMemory,
+    loadImageFromTexture,
+    loadImageFromScreen,
+    isImageReady,
+    exportImage,
+    exportImageToMemory,
+    exportImageAsCode,
+    genImageColor,
+    genImageGradientLinear,
+    genImageGradientRadial,
+    genImageGradientSquare,
+    genImageChecked,
+    genImageWhiteNoise,
+    genImagePerlinNoise,
+    genImageCellular,
+    genImageText,
+    imageCopy,
+    imageFromImage,
+    imageText,
+    imageTextEx,
+    imageFormat,
+    imageToPOT,
+    imageCrop,
+    imageAlphaCrop,
+    imageAlphaClear,
+    imageAlphaMask,
+    imageAlphaPremultiply,
+    imageBlurGaussian,
+    imageKernelConvolution,
+    imageResize,
+    imageResizeNN,
+    imageResizeCanvas,
+    imageMipmaps,
+    imageDither,
+    imageFlipVertical,
+    imageFlipHorizontal,
+    imageRotate,
+    imageRotateCW,
+    imageRotateCCW,
+    imageColorTint,
+    imageColorInvert,
+    imageColorGrayscale,
+    imageColorContrast,
+    imageColorBrightness,
+    imageColorReplace,
+    loadImageColors,
+    loadImagePalette,
+    getImageAlphaBorder,
+    getImageColor,
+    imageClearBackground,
+    imageDrawPixel,
+    imageDrawPixelV,
+    imageDrawLine,
+    imageDrawLineV,
+    imageDrawCircle,
+    imageDrawCircleV,
+    imageDrawCircleLines,
+    imageDrawCircleLinesV,
+    imageDrawRectangle,
+    imageDrawRectangleV,
+    imageDrawRectangleRec,
+    imageDrawRectangleLines,
+    imageDraw,
+    imageDrawText,
+    imageDrawTextEx,
+    loadTexture,
+    loadTextureFromImage,
+    loadTextureCubemap,
+    loadRenderTexture,
+    isTextureReady,
+    isRenderTextureReady,
+    unloadTexture,
+    unloadRenderTexture,
+    updateTexture,
+    updateTextureRec,
+    genTextureMipmaps,
+    setTextureFilter,
+    setTextureWrap,
+    drawTexture,
+    drawTextureV,
+    drawTextureEx,
+    drawTextureRec,
+    drawTexturePro,
+    drawTextureNPatch,
+    fade,
+    colorToInt,
+    colorNormalize,
+    colorFromNormalized,
+    colorToHSV,
+    colorFromHSV,
+    colorTint,
+    colorBrightness,
+    colorContrast,
+    colorAlpha,
+    colorAlphaBlend,
+    getColor,
+    getPixelColor,
+    setPixelColor,
+    getPixelDataSize,
+  )
+where
 
 import Control.Monad ((<=<))
 import Data.Word (Word8)
@@ -9,16 +116,17 @@ import Foreign
     Storable (peek, sizeOf),
     toBool,
   )
-import Foreign.C (CUChar (CUChar), withCString, CInt, CFloat)
+import Foreign.C (CFloat, CInt, CUChar (CUChar), withCString)
 import GHC.IO (unsafePerformIO)
+import Raylib.Internal (WindowResources, addFrameBuffer, addTextureId, unloadSingleFrameBuffer, unloadSingleTexture)
+import qualified Raylib.Internal as I
 import Raylib.Internal.Foreign
   ( pop,
     popCArray,
     withFreeable,
-    withFreeableArrayLen, withFreeableArray,
+    withFreeableArray,
+    withFreeableArrayLen,
   )
-import Raylib.Internal (WindowResources, addFrameBuffer, addTextureId, unloadSingleFrameBuffer, unloadSingleTexture)
-import qualified Raylib.Internal as I
 import Raylib.Internal.Native
   ( c'colorAlpha,
     c'colorAlphaBlend,
@@ -88,6 +196,7 @@ import Raylib.Internal.Native
     c'imageFlipVertical,
     c'imageFormat,
     c'imageFromImage,
+    c'imageKernelConvolution,
     c'imageMipmaps,
     c'imageResize,
     c'imageResizeCanvas,
@@ -103,6 +212,7 @@ import Raylib.Internal.Native
     c'isTextureReady,
     c'loadImage,
     c'loadImageAnim,
+    c'loadImageAnimFromMemory,
     c'loadImageColors,
     c'loadImageFromMemory,
     c'loadImageFromScreen,
@@ -118,7 +228,7 @@ import Raylib.Internal.Native
     c'setTextureFilter,
     c'setTextureWrap,
     c'updateTexture,
-    c'updateTextureRec, c'loadImageAnimFromMemory, c'imageKernelConvolution,
+    c'updateTextureRec,
   )
 import Raylib.Types
   ( Color,
@@ -162,20 +272,22 @@ loadImageAnim fileName =
           )
     )
 
-
 loadImageAnimFromMemory :: String -> [Integer] -> IO (Image, Int)
 loadImageAnimFromMemory fileType fileData =
-  withCString fileType
-    (\ft ->
-      withFreeableArrayLen (map fromIntegral fileData)
-        (\size fd ->
-          withFreeable (0 :: CInt)
-            (\frames -> do
-                img <- c'loadImageAnimFromMemory ft fd (fromIntegral $ size * sizeOf (0 :: CUChar)) frames >>= pop
-                frameNum <- fromIntegral <$> peek frames
-                return (img, frameNum)
-            )
-        )
+  withCString
+    fileType
+    ( \ft ->
+        withFreeableArrayLen
+          (map fromIntegral fileData)
+          ( \size fd ->
+              withFreeable
+                (0 :: CInt)
+                ( \frames -> do
+                    img <- c'loadImageAnimFromMemory ft fd (fromIntegral $ size * sizeOf (0 :: CUChar)) frames >>= pop
+                    frameNum <- fromIntegral <$> peek frames
+                    return (img, frameNum)
+                )
+          )
     )
 
 loadImageFromMemory :: String -> [Integer] -> IO Image

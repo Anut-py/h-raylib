@@ -1,14 +1,17 @@
 {-# LANGUAGE DeriveAnyClass #-}
-{-# OPTIONS_GHC -Wall #-}
+{-# OPTIONS -Wall #-}
 
+-- | Bindings for types used mainly in @rmodels@
 module Raylib.Types.Core.Models
-  ( MaterialMapIndex (..),
+  ( -- * Enumerations
+    MaterialMapIndex (..),
     ShaderLocationIndex (..),
     ShaderUniformDataType (..),
     ShaderUniformData (..),
     ShaderUniformDataV (..),
     unpackShaderUniformData,
     unpackShaderUniformDataV,
+    -- * Structures
     ShaderAttributeDataType (..),
     Mesh (..),
     Shader (..),
@@ -138,6 +141,7 @@ data ShaderUniformDataV
   | ShaderUniformSampler2DV [Texture]
   deriving (Eq, Show)
 
+-- | Internal use
 unpackShaderUniformData :: ShaderUniformData -> IO (ShaderUniformDataType, Ptr ())
 unpackShaderUniformData u = do
   case u of
@@ -181,6 +185,7 @@ unpackShaderUniformData u = do
         poke ptr (fromIntegral $ texture'id texture :: CInt)
         return (ShaderUniformSampler2DType, castPtr ptr)
 
+-- | Internal use
 unpackShaderUniformDataV :: ShaderUniformDataV -> IO (ShaderUniformDataType, Ptr (), Int)
 unpackShaderUniformDataV xs = do
   case xs of

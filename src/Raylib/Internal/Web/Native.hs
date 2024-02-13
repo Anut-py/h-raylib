@@ -4,26 +4,44 @@
 
 {-# HLINT ignore "Redundant lambda" #-}
 
-#ifdef WEB_FFI
+-- | Internal functions for running in a browser
+--
+--   /NOTE: This module is only used when building for the web/
+module Raylib.Internal.Web.Native
+  ( callRaylibFunction,
+    jslog,
+    jsfree,
+    p'jsfree,
+    CallRaylibType (..),
+  )
+where
 
-module Raylib.Internal.Web.Native (ParamType (..), ProcessedParam (..), processParam, callRaylibFunction, jslog, jsfree, p'jsfree) where
-
-import Foreign (Ptr, FunPtr, Storable (peek, sizeOf), castPtr, free, mallocArray, pokeArray)
+import Foreign (FunPtr, Ptr, Storable (peek, sizeOf), castPtr, free, mallocArray, pokeArray)
 import Foreign.C (CChar, CString, CUChar (..), CUInt (..), castCharToCChar, withCStringLen)
 import Raylib.Internal.Web.Processable
-  ( ParamType (..),
-    Processable (processableType),
+  ( Processable (processableType),
     ProcessedParam (..),
     processParam,
   )
 
-foreign import ccall "main.h jslog" c'jslog :: CString -> CUInt -> IO ()
+-- | For \"varargs\" function calls, based on https://wiki.haskell.org/Varargs
+class CallRaylibType t where
+  callRaylibFunction' :: String -> IO [ProcessedParam] -> t
 
-foreign import ccall "main.h jsfree" jsfree :: Ptr () -> IO ()
+instance (Storable a, Processable a) => CallRaylibType (IO a) where
+  callRaylibFunction' func params' = do
+    params <- params'
+    callRaylibFunctionRaw func params
 
-foreign import ccall "main.h &jsfree" p'jsfree :: FunPtr (Ptr a -> IO ())
-
-foreign import ccall "main.h callRaylibFunction" c'callRaylibFunction :: CString -> CUInt -> Ptr (Ptr ()) -> Ptr CUInt -> Ptr CUChar -> CUInt -> CUInt -> CUChar -> IO (Ptr ())
+instance (Storable a, Processable a, CallRaylibType r) => CallRaylibType (a -> r) where
+  callRaylibFunction' func params' = \x ->
+    callRaylibFunction'
+      func
+      ( do
+          params <- params'
+          param <- processParam x
+          return $ params ++ [param]
+      )
 
 callRaylibFunctionRaw :: forall a. (Storable a, Processable a) => String -> [ProcessedParam] -> IO a
 callRaylibFunctionRaw func params = do
@@ -61,30 +79,36 @@ callRaylibFunctionRaw func params = do
 jslog :: String -> IO ()
 jslog str = withCStringLen str (\(s, len) -> c'jslog s (fromIntegral len))
 
--- For "varargs" function calls, based on https://wiki.haskell.org/Varargs
-class CallRaylibType t where
-  callRaylibFunction' :: String -> IO [ProcessedParam] -> t
-
-instance (Storable a, Processable a) => CallRaylibType (IO a) where
-  callRaylibFunction' func params' = do
-    params <- params'
-    callRaylibFunctionRaw func params
-
-instance (Storable a, Processable a, CallRaylibType r) => CallRaylibType (a -> r) where
-  callRaylibFunction' func params' = \x ->
-    callRaylibFunction'
-      func
-      ( do
-          params <- params'
-          param <- processParam x
-          return $ params ++ [param]
-      )
-
+-- | This is an interfacing function that allows Haskell to call raylib
+--   functions that have been compiled with emscripten. This has to be done in
+--   a roundabout way because we cannot directly call these functions through
+--   Haskell; we have to call a JS proxy function that calls the actual raylib
+--   functions.
 callRaylibFunction :: (CallRaylibType t) => String -> t
 callRaylibFunction func = callRaylibFunction' func (return [])
 
+#ifdef WEB_FFI
+
+foreign import ccall "main.h jslog" c'jslog :: CString -> CUInt -> IO ()
+
+foreign import ccall "main.h jsfree" jsfree :: Ptr () -> IO ()
+
+foreign import ccall "main.h &jsfree" p'jsfree :: FunPtr (Ptr a -> IO ())
+
+foreign import ccall "main.h callRaylibFunction" c'callRaylibFunction :: CString -> CUInt -> Ptr (Ptr ()) -> Ptr CUInt -> Ptr CUChar -> CUInt -> CUInt -> CUChar -> IO (Ptr ())
+
 #else
 
-module Raylib.Internal.Web.Native where
+c'jslog :: CString -> CUInt -> IO ()
+c'jslog = error "(h-raylib | Raylib.Internal.Web.Native.c'jslog): not running in the web!"
+
+jsfree :: Ptr () -> IO ()
+jsfree = error "(h-raylib | Raylib.Internal.Web.Native.jsfree): not running in the web!"
+
+p'jsfree :: FunPtr (Ptr a -> IO ())
+p'jsfree = error "(h-raylib | Raylib.Internal.Web.Native.p'jsfree): not running in the web!"
+
+c'callRaylibFunction :: CString -> CUInt -> Ptr (Ptr ()) -> Ptr CUInt -> Ptr CUChar -> CUInt -> CUInt -> CUChar -> IO (Ptr ())
+c'callRaylibFunction = error "(h-raylib | Raylib.Internal.Web.Native.c'callRaylibFunction): not running in the web!"
 
 #endif

@@ -1,3 +1,6 @@
+{-# OPTIONS -Wall #-}
+
+-- | Bindings to @rcamera@ (raylib.h)
 module Raylib.Core.Camera (updateCamera, updateCameraPro) where
 
 import Foreign (Storable (peek))

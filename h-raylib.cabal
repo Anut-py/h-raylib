@@ -104,17 +104,19 @@ common example-options
       , base
       , h-raylib
 
+    other-extensions: TemplateHaskell
+
+    if flag(platform-web)
+      ghc-options:
+        -no-hs-main -optl-mexec-model=reactor
+        "-optl-Wl,--export=hs_init,--import-memory,--shared-memory,--max-memory=67108864,--no-check-features"
+        "-optl-Wl,--export=startup,--export=mainLoop,--export=shouldClose,--export=teardown"
+
 -- core
 executable basic-window
   import:         example-options
   hs-source-dirs: examples/basic-window/src
   main-is:        Main.hs
-
-  if flag(platform-web)
-    ghc-options:
-      -no-hs-main -optl-mexec-model=reactor
-      "-optl-Wl,--export=hs_init,--import-memory,--shared-memory,--max-memory=67108864,--no-check-features"
-      "-optl-Wl,--export=startup,--export=mainLoop,--export=shouldClose,--export=teardown"
 
 executable basic-automation-events
   import:         example-options
@@ -227,9 +229,10 @@ library
     CPP
     ConstrainedClassMethods
     DeriveAnyClass
+    FlexibleInstances
     ForeignFunctionInterface
     ScopedTypeVariables
-    TemplateHaskell
+    TemplateHaskellQuotes
 
   if (flag(platform-windows) || (flag(detect-platform) && os(windows)))
     if flag(mingw-cross)

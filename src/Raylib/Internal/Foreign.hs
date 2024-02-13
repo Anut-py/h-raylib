@@ -2,6 +2,10 @@
 {-# LANGUAGE CPP #-}
 {-# LANGUAGE FlexibleInstances #-}
 
+{-|
+Miscellaneous utility functions for marshalling values to/from C. The most
+notable thing in this module is the `Freeable` typeclass.
+-}
 module Raylib.Internal.Foreign
   ( c'free,
     p'free,
@@ -67,10 +71,18 @@ foreign import ccall "stdlib.h &free" p'free :: FunPtr (Ptr a -> IO ())
 freeMaybePtr :: Ptr () -> IO ()
 freeMaybePtr ptr = unless (ptr == nullPtr) (c'free ptr)
 
+-- | A typeclass used internally to free complex data types. You will most
+--   likely not have to use this directly. If you do need to implement it, you
+--   can probably just stick with the default definitions of `rlFree` and
+--   `rlFreeDependents`.
 class Freeable a where
+  -- | Frees the data \"dependent\" on a pointer, which usually means dynamic
+  --   C arrays, i.e. more pointers
   rlFreeDependents :: a -> Ptr a -> IO ()
   rlFreeDependents _ _ = return ()
 
+  -- | Receives a pointer and frees all of the data associated with it,
+  --   including the pointer itself
   rlFree :: a -> Ptr a -> IO ()
   rlFree val ptr = rlFreeDependents val ptr >> c'free (castPtr ptr)
 

@@ -1,7 +1,9 @@
 {-# OPTIONS -Wall #-}
 
+-- | Bindings to @rlgl@
 module Raylib.Util.RLGL
-  ( rlMatrixMode,
+  ( -- * Matrix operations
+    rlMatrixMode,
     rlPushMatrix,
     rlPopMatrix,
     rlLoadIdentity,
@@ -12,6 +14,8 @@ module Raylib.Util.RLGL
     rlFrustum,
     rlOrtho,
     rlViewport,
+
+    -- * Vertex level operations
     rlBegin,
     rlEnd,
     rlVertex2i,
@@ -22,6 +26,13 @@ module Raylib.Util.RLGL
     rlColor4ub,
     rlColor3f,
     rlColor4f,
+
+    -- * OpenGL style functions (common to 1.1, 3.3+, ES2)
+
+    -- | NOTE: These functions are used to completely abstract raylib code from OpenGL layer,
+    --   some of them are direct wrappers over OpenGL calls, some others are custom
+
+    -- ** Vertex buffers state
     rlEnableVertexArray,
     rlDisableVertexArray,
     rlEnableVertexBuffer,
@@ -30,6 +41,8 @@ module Raylib.Util.RLGL
     rlDisableVertexBufferElement,
     rlEnableVertexAttribute,
     rlDisableVertexAttribute,
+
+    -- ** Textures state
     rlActiveTextureSlot,
     rlEnableTexture,
     rlDisableTexture,
@@ -37,12 +50,20 @@ module Raylib.Util.RLGL
     rlDisableTextureCubemap,
     rlTextureParameters,
     rlCubemapParameters,
+
+    -- ** Shader state
     rlEnableShader,
     rlDisableShader,
+
+    -- ** Framebuffer state
     rlEnableFramebuffer,
     rlDisableFramebuffer,
     rlGetActiveFramebuffer,
     rlActiveDrawBuffers,
+    rlBlitFramebuffer,
+    rlBindFramebuffer,
+
+    -- ** General render state
     rlEnableColorBlend,
     rlDisableColorBlend,
     rlEnableDepthTest,
@@ -51,11 +72,13 @@ module Raylib.Util.RLGL
     rlDisableDepthMask,
     rlEnableBackfaceCulling,
     rlDisableBackfaceCulling,
+    rlColorMask,
     rlSetCullFace,
     rlEnableScissorTest,
     rlDisableScissorTest,
     rlScissor,
     rlEnableWireMode,
+    rlEnablePointMode,
     rlDisableWireMode,
     rlSetLineWidth,
     rlGetLineWidth,
@@ -70,6 +93,10 @@ module Raylib.Util.RLGL
     rlSetBlendMode,
     rlSetBlendFactors,
     rlSetBlendFactorsSeparate,
+
+    -- * rlgl functionality
+
+    -- ** rlgl initialization functions
     rlglInit,
     rlglClose,
     rlLoadExtensions,
@@ -81,6 +108,11 @@ module Raylib.Util.RLGL
     rlGetTextureIdDefault,
     rlGetShaderIdDefault,
     rlGetShaderLocsDefault,
+
+    -- ** Render batch management
+
+    -- | NOTE: rlgl provides a default render batch to behave like OpenGL 1.1 immediate mode
+    --   but this render batch API is exposed in case custom batches are required
     rlLoadRenderBatch,
     rlUnloadRenderBatch,
     rlDrawRenderBatch,
@@ -88,6 +120,8 @@ module Raylib.Util.RLGL
     rlDrawRenderBatchActive,
     rlCheckRenderBatchLimit,
     rlSetTexture,
+
+    -- ** Vertex buffers management
     rlLoadVertexArray,
     rlLoadVertexBuffer,
     rlLoadVertexBufferElement,
@@ -102,6 +136,8 @@ module Raylib.Util.RLGL
     rlDrawVertexArrayElements,
     rlDrawVertexArrayInstanced,
     rlDrawVertexArrayElementsInstanced,
+
+    -- ** Textures management
     rlLoadTexture,
     rlLoadTextureDepth,
     rlLoadTextureCubemap,
@@ -112,10 +148,14 @@ module Raylib.Util.RLGL
     rlGenTextureMipmaps,
     rlReadTexturePixels,
     rlReadScreenPixels,
+
+    -- ** Framebuffer management (fbo)
     rlLoadFramebuffer,
     rlFramebufferAttach,
     rlFramebufferComplete,
     rlUnloadFramebuffer,
+
+    -- ** Shaders management
     rlLoadShaderCode,
     rlCompileShader,
     rlLoadShaderProgram,
@@ -126,15 +166,23 @@ module Raylib.Util.RLGL
     rlSetUniformMatrix,
     rlSetUniformSampler,
     rlSetShader,
+
+    -- ** Compute shader management
     rlLoadComputeShaderProgram,
     rlComputeShaderDispatch,
+
+    -- ** Shader buffer storage object management (ssbo)
     rlLoadShaderBuffer,
     rlUnloadShaderBuffer,
     rlUpdateShaderBuffer,
     rlBindShaderBuffer,
     rlCopyShaderBuffer,
     rlGetShaderBufferSize,
+
+    -- ** Buffer management
     rlBindImageTexture,
+
+    -- ** Matrix state management
     rlGetMatrixModelview,
     rlGetMatrixProjection,
     rlGetMatrixTransform,
@@ -144,12 +192,10 @@ module Raylib.Util.RLGL
     rlSetMatrixModelview,
     rlSetMatrixProjectionStereo,
     rlSetMatrixViewOffsetStereo,
+
+    -- ** Quick and dirty cube/quad buffers load->draw->unload
     rlLoadDrawCube,
     rlLoadDrawQuad,
-    rlBlitFramebuffer,
-    rlBindFramebuffer,
-    rlColorMask,
-    rlEnablePointMode
   )
 where
 
@@ -181,8 +227,10 @@ import Raylib.Internal.Native
     c'rlBindImageTexture,
     c'rlBindShaderBuffer,
     c'rlBlitFramebuffer,
+    c'rlCheckErrors,
     c'rlCheckRenderBatchLimit,
     c'rlClearColor,
+    c'rlClearScreenBuffers,
     c'rlColor3f,
     c'rlColor4f,
     c'rlColor4ub,
@@ -191,24 +239,51 @@ import Raylib.Internal.Native
     c'rlComputeShaderDispatch,
     c'rlCopyShaderBuffer,
     c'rlCubemapParameters,
+    c'rlDisableBackfaceCulling,
+    c'rlDisableColorBlend,
+    c'rlDisableDepthMask,
+    c'rlDisableDepthTest,
+    c'rlDisableFramebuffer,
+    c'rlDisableScissorTest,
+    c'rlDisableShader,
+    c'rlDisableSmoothLines,
+    c'rlDisableStereoRender,
+    c'rlDisableTexture,
+    c'rlDisableTextureCubemap,
+    c'rlDisableVertexArray,
     c'rlDisableVertexAttribute,
+    c'rlDisableVertexBuffer,
+    c'rlDisableVertexBufferElement,
+    c'rlDisableWireMode,
     c'rlDrawRenderBatch,
+    c'rlDrawRenderBatchActive,
     c'rlDrawVertexArray,
     c'rlDrawVertexArrayElements,
     c'rlDrawVertexArrayElementsInstanced,
     c'rlDrawVertexArrayInstanced,
+    c'rlEnableBackfaceCulling,
+    c'rlEnableColorBlend,
+    c'rlEnableDepthMask,
+    c'rlEnableDepthTest,
     c'rlEnableFramebuffer,
+    c'rlEnablePointMode,
+    c'rlEnableScissorTest,
     c'rlEnableShader,
+    c'rlEnableSmoothLines,
+    c'rlEnableStereoRender,
     c'rlEnableTexture,
     c'rlEnableTextureCubemap,
     c'rlEnableVertexArray,
     c'rlEnableVertexAttribute,
     c'rlEnableVertexBuffer,
     c'rlEnableVertexBufferElement,
+    c'rlEnableWireMode,
+    c'rlEnd,
     c'rlFramebufferAttach,
     c'rlFramebufferComplete,
     c'rlFrustum,
     c'rlGenTextureMipmaps,
+    c'rlGetActiveFramebuffer,
     c'rlGetFramebufferHeight,
     c'rlGetFramebufferWidth,
     c'rlGetGlTextureFormats,
@@ -228,8 +303,11 @@ import Raylib.Internal.Native
     c'rlGetVersion,
     c'rlIsStereoRenderEnabled,
     c'rlLoadComputeShaderProgram,
+    c'rlLoadDrawCube,
+    c'rlLoadDrawQuad,
     c'rlLoadExtensions,
     c'rlLoadFramebuffer,
+    c'rlLoadIdentity,
     c'rlLoadRenderBatch,
     c'rlLoadShaderBuffer,
     c'rlLoadShaderCode,
@@ -244,6 +322,8 @@ import Raylib.Internal.Native
     c'rlMultMatrixf,
     c'rlNormal3f,
     c'rlOrtho,
+    c'rlPopMatrix,
+    c'rlPushMatrix,
     c'rlReadScreenPixels,
     c'rlReadTexturePixels,
     c'rlRotatef,
@@ -287,42 +367,8 @@ import Raylib.Internal.Native
     c'rlVertex2i,
     c'rlVertex3f,
     c'rlViewport,
-    c'rlglInit,
-    c'rlPushMatrix,
-    c'rlPopMatrix,
-    c'rlLoadIdentity,
-    c'rlEnd,
-    c'rlDisableVertexArray,
-    c'rlDisableVertexBuffer,
-    c'rlDisableVertexBufferElement,
-    c'rlDisableTexture,
-    c'rlDisableTextureCubemap,
-    c'rlDisableShader,
-    c'rlDisableFramebuffer,
-    c'rlGetActiveFramebuffer,
-    c'rlEnableColorBlend,
-    c'rlDisableColorBlend,
-    c'rlEnableDepthTest,
-    c'rlDisableDepthTest,
-    c'rlEnableDepthMask,
-    c'rlDisableDepthMask,
-    c'rlEnableBackfaceCulling,
-    c'rlDisableBackfaceCulling,
-    c'rlEnableScissorTest,
-    c'rlDisableScissorTest,
-    c'rlEnableWireMode,
-    c'rlEnablePointMode,
-    c'rlDisableWireMode,
-    c'rlEnableSmoothLines,
-    c'rlDisableSmoothLines,
-    c'rlEnableStereoRender,
-    c'rlDisableStereoRender,
-    c'rlClearScreenBuffers,
-    c'rlCheckErrors,
     c'rlglClose,
-    c'rlDrawRenderBatchActive,
-    c'rlLoadDrawCube,
-    c'rlLoadDrawQuad
+    c'rlglInit,
   )
 import Raylib.Types
   ( Matrix,
@@ -1048,4 +1094,3 @@ rlLoadDrawCube = c'rlLoadDrawCube
 -- | Load and draw a quad
 rlLoadDrawQuad :: IO ()
 rlLoadDrawQuad = c'rlLoadDrawQuad
-

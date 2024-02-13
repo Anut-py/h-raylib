@@ -1,6 +1,80 @@
 {-# OPTIONS -Wall #-}
 
-module Raylib.Core.Models where
+-- | Bindings to @rmodels@
+module Raylib.Core.Models
+  ( drawLine3D,
+    drawPoint3D,
+    drawCircle3D,
+    drawTriangle3D,
+    drawTriangleStrip3D,
+    drawCube,
+    drawCubeV,
+    drawCubeWires,
+    drawCubeWiresV,
+    drawSphere,
+    drawSphereEx,
+    drawSphereWires,
+    drawCylinder,
+    drawCylinderEx,
+    drawCylinderWires,
+    drawCylinderWiresEx,
+    drawCapsule,
+    drawCapsuleWires,
+    drawPlane,
+    drawRay,
+    drawGrid,
+    loadModel,
+    loadModelFromMesh,
+    unloadModel,
+    isModelReady,
+    getModelBoundingBox,
+    drawModel,
+    drawModelEx,
+    drawModelWires,
+    drawModelWiresEx,
+    drawBoundingBox,
+    drawBillboard,
+    drawBillboardRec,
+    drawBillboardPro,
+    uploadMesh,
+    updateMeshBuffer,
+    unloadMesh,
+    drawMesh,
+    drawMeshInstanced,
+    exportMesh,
+    exportMeshAsCode,
+    getMeshBoundingBox,
+    genMeshTangents,
+    genMeshPoly,
+    genMeshPlane,
+    genMeshCube,
+    genMeshSphere,
+    genMeshHemiSphere,
+    genMeshCylinder,
+    genMeshCone,
+    genMeshTorus,
+    genMeshKnot,
+    genMeshHeightmap,
+    genMeshCubicmap,
+    loadMaterials,
+    unloadMaterial,
+    loadMaterialDefault,
+    isMaterialReady,
+    setMaterialTexture,
+    setModelMeshMaterial,
+    loadModelAnimations,
+    updateModelAnimation,
+    isModelAnimationValid,
+    checkCollisionSpheres,
+    checkCollisionBoxes,
+    checkCollisionBoxSphere,
+    getRayCollisionSphere,
+    getRayCollisionBox,
+    getRayCollisionMesh,
+    getRayCollisionTriangle,
+    getRayCollisionQuad,
+  )
+where
 
 import Control.Monad (forM_)
 import Foreign
@@ -14,6 +88,7 @@ import Foreign
   )
 import Foreign.C (withCString)
 import GHC.IO (unsafePerformIO)
+import Raylib.Internal (WindowResources, addShaderId, addTextureId, addVaoId, addVboIds, unloadSingleShader, unloadSingleTexture, unloadSingleVaoId, unloadSingleVboIdList)
 import Raylib.Internal.Foreign
   ( c'free,
     pop,
@@ -22,7 +97,6 @@ import Raylib.Internal.Foreign
     withFreeableArray,
     withFreeableArrayLen,
   )
-import Raylib.Internal (WindowResources, addShaderId, addTextureId, addVaoId, addVboIds, unloadSingleShader, unloadSingleTexture, unloadSingleVaoId, unloadSingleVboIdList)
 import Raylib.Internal.Native
   ( c'checkCollisionBoxSphere,
     c'checkCollisionBoxes,
@@ -59,6 +133,7 @@ import Raylib.Internal.Native
     c'drawTriangle3D,
     c'drawTriangleStrip3D,
     c'exportMesh,
+    c'exportMeshAsCode,
     c'genMeshCone,
     c'genMeshCube,
     c'genMeshCubicmap,
@@ -90,7 +165,7 @@ import Raylib.Internal.Native
     c'setModelMeshMaterial,
     c'updateMeshBuffer,
     c'updateModelAnimation,
-    c'uploadMesh, c'exportMeshAsCode,
+    c'uploadMesh,
   )
 import Raylib.Types
   ( BoundingBox,

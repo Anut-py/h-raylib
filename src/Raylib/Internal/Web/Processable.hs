@@ -2,8 +2,9 @@
 {-# OPTIONS -Wall #-}
 {-# LANGUAGE ConstrainedClassMethods #-}
 
-#ifdef WEB_FFI
-
+-- | Internal code to convert Haskell types to raw bytes
+--
+--   /NOTE: This module is only used when building for the web/
 module Raylib.Internal.Web.Processable (ProcessedParam (..), ParamType (..), Processable (..)) where
 
 import Foreign (Ptr, FunPtr, Storable (poke, sizeOf), castPtr, malloc)
@@ -57,9 +58,3 @@ processParamRaw val pType = do
   ptr <- malloc
   poke ptr val
   return $ ProcessedParam (castPtr ptr) (sizeOf val) (fromEnum pType)
-
-#else
-
-module Raylib.Internal.Web.Processable where
-
-#endif

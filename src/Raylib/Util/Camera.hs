@@ -1,5 +1,9 @@
 {-# OPTIONS -Wall #-}
 
+-- | Bindings to @rcamera@ (rcamera.h)
+--
+--   These were rewritten in Haskell instead of binding to C. All the functions
+--   are pure.
 module Raylib.Util.Camera
   ( getCameraForward,
     getCameraUp,

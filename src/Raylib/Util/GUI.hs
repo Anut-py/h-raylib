@@ -1,5 +1,20 @@
 {-# OPTIONS -Wall #-}
 
+{- |
+Bindings to @raygui@
+
+[raygui](https://github.com/raysan5/raygui) is an immediate-mode GUI library
+built on top of raylib. The C version of raygui involves a lot of pointers
+because of the way it is designed. Unfortunately, this is problematic when
+binding it to Haskell, as Haskell's immutability makes it difficult to
+represent pointers properly. This means many functions will take the previous
+state of a control as an argument and return the updated state of that control.
+
+Keep in mind that raygui is an immediate mode GUI, so it is designed mostly for
+debugging and development and not for actual game GUIs. To this end, it is not
+very customizable and the features are quite limited. For a real game, you
+should make your own retained mode GUI.
+-}
 module Raylib.Util.GUI
   ( -- * Global gui state control functions
     guiEnable,

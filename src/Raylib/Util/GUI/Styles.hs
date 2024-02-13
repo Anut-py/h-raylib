@@ -1,4 +1,8 @@
 {-# OPTIONS -Wall #-}
+
+-- | Predefined styles that come with raygui. Calling one of these functions
+--   will activate that style. To return to the default style, simply call
+--   `Raylib.Util.GUI.guiLoadStyleDefault`.
 module Raylib.Util.GUI.Styles
   ( guiLoadStyleAshes,
     guiLoadStyleBluish,

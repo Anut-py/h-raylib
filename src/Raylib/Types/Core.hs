@@ -1,8 +1,10 @@
 {-# LANGUAGE DeriveAnyClass #-}
-{-# OPTIONS_GHC -Wall #-}
+{-# OPTIONS -Wall #-}
 
+-- | Bindings for types used in all raylib modules
 module Raylib.Types.Core
-  ( ConfigFlag (..),
+  ( -- * Enumerations
+    ConfigFlag (..),
     TraceLogLevel (..),
     KeyboardKey (..),
     MouseButton (..),
@@ -10,6 +12,7 @@ module Raylib.Types.Core
     GamepadButton (..),
     GamepadAxis (..),
     BlendMode (..),
+    -- * Structures
     Gesture (..),
     Vector2 (..),
     Vector3 (..),
@@ -25,6 +28,7 @@ module Raylib.Types.Core
     AutomationEventList (..),
     Quaternion,
     AutomationEventListRef,
+    -- * Callbacks
     LoadFileDataCallback,
     SaveFileDataCallback,
     LoadFileTextCallback,

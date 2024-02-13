@@ -1,6 +1,73 @@
 {-# OPTIONS -Wall #-}
 
-module Raylib.Core.Audio where
+-- | Bindings to @raudio@
+module Raylib.Core.Audio
+  ( initAudioDevice,
+    closeAudioDevice,
+    isAudioDeviceReady,
+    setMasterVolume,
+    getMasterVolume,
+    loadWave,
+    loadWaveFromMemory,
+    loadSound,
+    loadSoundFromWave,
+    loadSoundAlias,
+    unloadSoundAlias,
+    updateSound,
+    unloadSound,
+    isWaveReady,
+    isSoundReady,
+    exportWave,
+    exportWaveAsCode,
+    playSound,
+    stopSound,
+    pauseSound,
+    resumeSound,
+    isSoundPlaying,
+    setSoundVolume,
+    setSoundPitch,
+    setSoundPan,
+    waveCopy,
+    waveCrop,
+    waveFormat,
+    loadWaveSamples,
+    loadMusicStream,
+    loadMusicStreamFromMemory,
+    unloadMusicStream,
+    isMusicReady,
+    playMusicStream,
+    isMusicStreamPlaying,
+    updateMusicStream,
+    stopMusicStream,
+    pauseMusicStream,
+    resumeMusicStream,
+    seekMusicStream,
+    setMusicVolume,
+    setMusicPitch,
+    setMusicPan,
+    getMusicTimeLength,
+    getMusicTimePlayed,
+    loadAudioStream,
+    unloadAudioStream,
+    isAudioStreamReady,
+    updateAudioStream,
+    isAudioStreamProcessed,
+    playAudioStream,
+    pauseAudioStream,
+    resumeAudioStream,
+    isAudioStreamPlaying,
+    stopAudioStream,
+    setAudioStreamVolume,
+    setAudioStreamPitch,
+    setAudioStreamPan,
+    setAudioStreamBufferSizeDefault,
+    setAudioStreamCallback,
+    attachAudioStreamProcessor,
+    detachAudioStreamProcessor,
+    attachAudioMixedProcessor,
+    detachAudioMixedProcessor,
+  )
+where
 
 import Foreign
   ( Ptr,
@@ -9,16 +76,19 @@ import Foreign
     toBool,
   )
 import Foreign.C (CUChar, withCString)
+import Raylib.Internal (WindowResources, addAudioBuffer, addAudioBufferAlias, addCtxData, unloadAudioBuffers, unloadCtxData, unloadSingleAudioBuffer, unloadSingleAudioBufferAlias, unloadSingleCtxDataPtr)
 import Raylib.Internal.Foreign
   ( pop,
     popCArray,
     withFreeable,
     withFreeableArrayLen,
   )
-import Raylib.Internal (WindowResources, addAudioBuffer, addAudioBufferAlias, addCtxData, unloadAudioBuffers, unloadCtxData, unloadSingleAudioBuffer, unloadSingleAudioBufferAlias, unloadSingleCtxDataPtr)
 import Raylib.Internal.Native
-  ( c'attachAudioStreamProcessor,
+  ( c'attachAudioMixedProcessor,
+    c'attachAudioStreamProcessor,
     c'closeAudioDevice,
+    c'detachAudioMixedProcessor,
+    c'detachAudioStreamProcessor,
     c'exportWave,
     c'exportWaveAsCode,
     c'getMasterVolume,
@@ -74,7 +144,7 @@ import Raylib.Internal.Native
     c'waveCopy,
     c'waveCrop,
     c'waveFormat,
-    createAudioCallback, c'detachAudioStreamProcessor, c'attachAudioMixedProcessor, c'detachAudioMixedProcessor,
+    createAudioCallback,
   )
 import Raylib.Types
   ( AudioCallback,
@@ -319,13 +389,13 @@ setAudioStreamCallback stream callback =
 attachAudioStreamProcessor :: AudioStream -> AudioCallback -> IO C'AudioCallback
 attachAudioStreamProcessor stream callback =
   withFreeable
-  stream
-  ( \s ->
-      do
-        c <- createAudioCallback callback
-        c'attachAudioStreamProcessor s c
-        return c
-  )
+    stream
+    ( \s ->
+        do
+          c <- createAudioCallback callback
+          c'attachAudioStreamProcessor s c
+          return c
+    )
 
 detachAudioStreamProcessor :: AudioStream -> C'AudioCallback -> IO ()
 detachAudioStreamProcessor stream callback =

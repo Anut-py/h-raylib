@@ -2,9 +2,12 @@
 {-# LANGUAGE ForeignFunctionInterface #-}
 {-# LANGUAGE CPP #-}
 
+-- | Internal h-raylib utilities for automatic memory management
 module Raylib.Internal
   ( WindowResources (..),
     defaultWindowResources,
+
+    -- * Unloading individual resources
     unloadSingleShader,
     unloadSingleTexture,
     unloadSingleFrameBuffer,
@@ -14,6 +17,8 @@ module Raylib.Internal
     unloadSingleAudioBuffer,
     unloadSingleAudioBufferAlias,
     unloadSingleAutomationEventList,
+
+    -- * Unloading all resources
     unloadShaders,
     unloadTextures,
     unloadFrameBuffers,
@@ -23,6 +28,8 @@ module Raylib.Internal
     unloadAudioBuffers,
     unloadAudioBufferAliases,
     unloadAutomationEventLists,
+
+    -- * Adding resources
     addShaderId,
     addTextureId,
     addFrameBuffer,
@@ -32,6 +39,8 @@ module Raylib.Internal
     addAudioBuffer,
     addAudioBufferAlias,
     addAutomationEventList,
+
+    -- * Miscellaneous
     c'rlGetShaderIdDefault,
     getPixelDataSize,
   )
@@ -52,6 +61,10 @@ import Raylib.Internal.Web.Native (callRaylibFunction)
 
 #endif
 
+-- | Tracks all raylib resources which cannot be immediately freed.
+--
+--   Each field is an `IORef` to a list, and the list contains the data to be
+--   tracked. Typically, data allocated on the GPU is stored here.
 data WindowResources = WindowResources
   { shaderIds :: IORef [CUInt],
     shaderLocations :: IORef (Map Integer (Map String Int)),

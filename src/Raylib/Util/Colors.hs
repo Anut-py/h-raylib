@@ -1,4 +1,6 @@
 {-# OPTIONS -Wall #-}
+
+-- | Simple color palette defined in raylib.h
 module Raylib.Util.Colors
   ( lightGray,
     gray,
@@ -30,8 +32,6 @@ module Raylib.Util.Colors
 where
 
 import Raylib.Types (Color (Color))
-
--- Simple color palette defined in raylib.h
 
 lightGray :: Color
 lightGray = Color 200 200 200 255

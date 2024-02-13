@@ -1,12 +1,15 @@
 {-# LANGUAGE DeriveAnyClass #-}
-{-# OPTIONS_GHC -Wall #-}
+{-# OPTIONS -Wall #-}
 
+-- | Bindings for types used mainly in @rtextures@
 module Raylib.Types.Core.Textures
-  ( PixelFormat (..),
+  ( -- * Enumerations
+    PixelFormat (..),
     TextureFilter (..),
     TextureWrap (..),
     CubemapLayout (..),
     NPatchLayout (..),
+    -- * Structures
     Image (..),
     Texture (..),
     RenderTexture (..),
