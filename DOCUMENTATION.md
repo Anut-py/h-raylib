@@ -6,6 +6,8 @@ This file only contains h-raylib specific information. For documentation on indi
 
 h-raylib contains bindings for raylib.h, raymath.h, rcamera.h, rlgl.h, and raygui.h.
 
+TODO: move this documentation into Haddock
+
 ### Public modules
 
 - `Raylib.Types`, `Raylib.Types.Core.*`, `Raylib.Types.Util.*`: provide all of raylib's types and implement low-level code to convert them to and from raw bytes (i.e. from C to Haskell and vice versa)
@@ -27,7 +29,7 @@ Each `Types` module has up to 3 sections: one for enumerations, one for structur
 
 The enumerations section contains Haskell sum types that are instances of `Enum`. Each of these types corresponds to a raylib (C) `enum` or set of `define`s. The `fromEnum` and `toEnum` functions for these types use the numbers associated with these values in the C `enum`s. Most of these types are instances of `Storable` so they can be converted to raw bytes and passed to a C function. _NOTE: Some of these Haskell types correspond to C `enum`s that are in C source files, rather than header files._
 
-The structures section contains Haskell types that correspond to each of raylib's `structs`. Each field in these types is named `typeName'fieldName` (e.g. the C struct `Vector2`'s `x` field is called `vector2'x` in Haskell). These structs also all derive the typeclass `Freeable` (declared in the internal `Raylib.ForeignUtil` module). This typeclass allows types to describe how to properly free all the data associated with a pointer to that type. For example, `Image`'s implementation of `Freeable` also frees the pointer stored in the `Image.data` field in C. Finally, all of these types derive `Storable`, obviously, to convert them to and from pointers.
+The structures section contains Haskell types that correspond to each of raylib's `structs`. Each field in these types is named `typeName'fieldName` (e.g. the C struct `Vector2`'s `x` field is called `vector2'x` in Haskell). These structs also all derive the typeclass `Freeable` (declared in the internal `Raylib.Internal.Foreign` module). This typeclass allows types to describe how to properly free all the data associated with a pointer to that type. For example, `Image`'s implementation of `Freeable` also frees the pointer stored in the `Image.data` field in C. Finally, all of these types derive `Storable`, obviously, to convert them to and from pointers.
 
 The callbacks section contains `FunPtr` types, along with higher-level Haskell wrappers. When you pass one of these wrappers (e.g. `LoadFileDataCallback`) to a function that takes one as an argument (e.g. `setLoadFileDataCallback`), the function will return a `FunPtr` type (e.g. `C'LoadFileDataCallback`). You will have to manually free this with `freeHaskellFunPtr` at the end of your program to avoid memory leaks (TODO: implement automatic memory management for `FunPtr`s).
 
@@ -73,27 +75,27 @@ Keep in mind that raygui is an immediate mode GUI, so it is designed mostly for 
 
 ### Private modules
 
-#### Raylib.Native
-
-`Raylib.Native` consists solely of `foreign import` functions. These are used in the 6 public modules mentioned above. When compiling for the web, the `foreign import`s are replaced with `callRaylibFunction` calls (see the documentation for `Raylib.Web.Native` for details).
-
 #### Raylib.Internal
 
 `Raylib.Internal` contains some functions used for automatic memory management. The automatic memory management flow is summarized in the "Memory management" section.
 
-#### Raylib.ForeignUtil
+#### Raylib.Internal.Native
 
-`Raylib.ForeignUtil` contains miscellaneous utility functions for marshalling values to/from C. The most notable thing in this module is the `Freeable` typeclass.
+`Raylib.Internal.Native` consists solely of `foreign import` functions. These are used in the 6 public modules mentioned above. When compiling for the web, the `foreign import`s are replaced with `callRaylibFunction` calls (see the documentation for `Raylib.Internal.Web.Native` for details).
+
+#### Raylib.Internal.Foreign
+
+`Raylib.Internal.Foreign` contains miscellaneous utility functions for marshalling values to/from C. The most notable thing in this module is the `Freeable` typeclass.
 
 The `Freeable` typeclass contains two methods, `rlFreeDependents` and `rlFree`. `rlFree` receives a pointer and frees all of the data associated with it, including the pointer itself. `rlFreeDependents` only frees the data "dependent" on the pointer, which usually means dynamic C arrays, i.e. pointers.
 
-#### Raylib.Web.Native, Raylib.Web.Processable
+#### Raylib.Internal.Web.Native, Raylib.Internal.Web.Processable
 
 _NOTE: These modules are only used when building for the web._
 
-`Raylib.Web.Native` exports `callRaylibFunction`. This is an interfacing function that allows Haskell to call raylib functions that have been compiled with emscripten. This has to be done in a roundabout way because we cannot directly call these functions through Haskell; we have to call a JS function that calls the actual raylib functions.
+`Raylib.Internal.Web.Native` exports `callRaylibFunction`. This is an interfacing function that allows Haskell to call raylib functions that have been compiled with emscripten. This has to be done in a roundabout way because we cannot directly call these functions through Haskell; we have to call a JS function that calls the actual raylib functions.
 
-`Raylib.Web.Processable` contains internal code to convert Haskell types to raw bytes.
+`Raylib.Internal.Web.Processable` contains internal code to convert Haskell types to raw bytes.
 
 ## Memory management
 

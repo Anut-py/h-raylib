@@ -5,7 +5,7 @@
 Items which have not yet been worked on. Feel free to work on one of these.
 
 - Implement automatic memory management for callbacks
-- Move Raylib.Native functions into the modules where they are called
+- Move Raylib.Internal.Native functions into the modules where they are called
   - Use Template Haskell to clean up boilerplate
 - Bind `rgestures`
 

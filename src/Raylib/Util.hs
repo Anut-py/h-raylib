@@ -95,13 +95,13 @@ cameraDirectionRay camera = Ray (camera3D'position camera) (vectorNormalize $ ca
 
 -- | Creates a raylib application using the given program functions
 raylibApplication ::
-  -- | The startup function, should be of type `IO AppState`
+  -- | The startup function, should be of type @IO AppState@
   Name ->
-  -- | The mainLoop function, should be of type `AppState -> IO AppState`
+  -- | The mainLoop function, should be of type @AppState -> IO AppState@
   Name ->
-  -- | The shouldClose function, should be of type `AppState -> IO Bool`
+  -- | The shouldClose function, should be of type @AppState -> IO Bool@
   Name ->
-  -- | The teardown function, should be of type `AppState -> IO ()`
+  -- | The teardown function, should be of type @AppState -> IO ()@
   Name ->
   DecsQ
 
