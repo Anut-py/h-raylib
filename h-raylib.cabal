@@ -206,11 +206,11 @@ library
     Raylib.Util.RLGL
 
   other-modules:
-    Raylib.ForeignUtil
     Raylib.Internal
-    Raylib.Native
-    Raylib.Web.Native
-    Raylib.Web.Processable
+    Raylib.Internal.Foreign
+    Raylib.Internal.Native
+    Raylib.Internal.Web.Native
+    Raylib.Internal.Web.Processable
 
   build-depends:
     , base              >=4.0      && <4.20
@@ -282,8 +282,6 @@ library
 
   -- Unsupported OS, do nothing. If you can get it working on an
   -- OS that isn't listed here, please add it here.
-
-
   if flag(platform-nixos)
     extra-libraries: raylib
 

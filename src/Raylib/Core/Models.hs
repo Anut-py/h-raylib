@@ -14,7 +14,7 @@ import Foreign
   )
 import Foreign.C (withCString)
 import GHC.IO (unsafePerformIO)
-import Raylib.ForeignUtil
+import Raylib.Internal.Foreign
   ( c'free,
     pop,
     popCArray,
@@ -23,7 +23,7 @@ import Raylib.ForeignUtil
     withFreeableArrayLen,
   )
 import Raylib.Internal (WindowResources, addShaderId, addTextureId, addVaoId, addVboIds, unloadSingleShader, unloadSingleTexture, unloadSingleVaoId, unloadSingleVboIdList)
-import Raylib.Native
+import Raylib.Internal.Native
   ( c'checkCollisionBoxSphere,
     c'checkCollisionBoxes,
     c'checkCollisionSpheres,

@@ -36,7 +36,7 @@ import Foreign.C
     CUChar,
     CUInt,
   )
-import Raylib.ForeignUtil (Freeable (rlFreeDependents), c'free, peekStaticArray, peekStaticArrayOff, pokeMaybeOff, pokeStaticArray, pokeStaticArrayOff)
+import Raylib.Internal.Foreign (Freeable (rlFreeDependents), c'free, peekStaticArray, peekStaticArrayOff, pokeMaybeOff, pokeStaticArray, pokeStaticArrayOff)
 
 ---------------------------------------
 -- audio enums ------------------------

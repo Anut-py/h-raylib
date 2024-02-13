@@ -48,7 +48,7 @@ import GHC.IO (unsafePerformIO)
 
 #ifdef WEB_FFI
 
-import Raylib.Web.Native (callRaylibFunction)
+import Raylib.Internal.Web.Native (callRaylibFunction)
 
 #endif
 

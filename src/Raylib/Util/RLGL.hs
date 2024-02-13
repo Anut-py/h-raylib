@@ -164,7 +164,7 @@ import Foreign
     toBool,
   )
 import Foreign.C (CInt, CUChar, CUInt, CUShort, withCString)
-import Raylib.ForeignUtil
+import Raylib.Internal.Foreign
   ( Freeable,
     configsToBitflag,
     pop,
@@ -173,7 +173,7 @@ import Raylib.ForeignUtil
     withFreeableArray,
     withFreeableArrayLen,
   )
-import Raylib.Native
+import Raylib.Internal.Native
   ( c'rlActiveDrawBuffers,
     c'rlActiveTextureSlot,
     c'rlBegin,

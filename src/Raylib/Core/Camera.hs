@@ -2,8 +2,8 @@ module Raylib.Core.Camera (updateCamera, updateCameraPro) where
 
 import Foreign (Storable (peek))
 import GHC.IO (unsafePerformIO)
-import Raylib.ForeignUtil (withFreeable)
-import Raylib.Native (c'updateCamera, c'updateCameraPro)
+import Raylib.Internal.Foreign (withFreeable)
+import Raylib.Internal.Native (c'updateCamera, c'updateCameraPro)
 import Raylib.Types (Camera3D, CameraMode, Vector3)
 
 updateCamera :: Camera3D -> CameraMode -> IO Camera3D

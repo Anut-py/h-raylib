@@ -11,7 +11,7 @@ import Foreign
   )
 import Foreign.C (CUChar (CUChar), withCString, CInt, CFloat)
 import GHC.IO (unsafePerformIO)
-import Raylib.ForeignUtil
+import Raylib.Internal.Foreign
   ( pop,
     popCArray,
     withFreeable,
@@ -19,7 +19,7 @@ import Raylib.ForeignUtil
   )
 import Raylib.Internal (WindowResources, addFrameBuffer, addTextureId, unloadSingleFrameBuffer, unloadSingleTexture)
 import qualified Raylib.Internal as I
-import Raylib.Native
+import Raylib.Internal.Native
   ( c'colorAlpha,
     c'colorAlphaBlend,
     c'colorBrightness,

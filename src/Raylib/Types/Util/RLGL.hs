@@ -37,7 +37,7 @@ import Foreign.C
     CInt (..),
     CUInt,
   )
-import Raylib.ForeignUtil (Freeable (rlFreeDependents), c'free, peekStaticArrayOff, pokeStaticArrayOff, rlFreeArray)
+import Raylib.Internal.Foreign (Freeable (rlFreeDependents), c'free, peekStaticArrayOff, pokeStaticArrayOff, rlFreeArray)
 import Raylib.Types.Core (Color, Vector2, Vector3)
 
 ---------------------------------------

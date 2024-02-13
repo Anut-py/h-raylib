@@ -30,7 +30,7 @@ import Foreign.C
     CUChar,
     CUInt,
   )
-import Raylib.ForeignUtil (Freeable (rlFreeDependents), c'free)
+import Raylib.Internal.Foreign (Freeable (rlFreeDependents), c'free)
 import Raylib.Internal (getPixelDataSize)
 import Raylib.Types.Core (Rectangle)
 

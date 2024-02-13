@@ -5,8 +5,8 @@ module Raylib.Core.Shapes where
 import Data.List (genericLength)
 import Foreign (Storable (peek), toBool)
 import GHC.IO (unsafePerformIO)
-import Raylib.ForeignUtil (pop, withFreeable, withFreeableArray, withFreeableArrayLen)
-import Raylib.Native
+import Raylib.Internal.Foreign (pop, withFreeable, withFreeableArray, withFreeableArrayLen)
+import Raylib.Internal.Native
   ( c'checkCollisionCircleRec,
     c'checkCollisionCircles,
     c'checkCollisionLines,

@@ -6,11 +6,11 @@
 
 #ifdef WEB_FFI
 
-module Raylib.Web.Native (ParamType (..), ProcessedParam (..), processParam, callRaylibFunction, jslog, jsfree, p'jsfree) where
+module Raylib.Internal.Web.Native (ParamType (..), ProcessedParam (..), processParam, callRaylibFunction, jslog, jsfree, p'jsfree) where
 
 import Foreign (Ptr, FunPtr, Storable (peek, sizeOf), castPtr, free, mallocArray, pokeArray)
 import Foreign.C (CChar, CString, CUChar (..), CUInt (..), castCharToCChar, withCStringLen)
-import Raylib.Web.Processable
+import Raylib.Internal.Web.Processable
   ( ParamType (..),
     Processable (processableType),
     ProcessedParam (..),
@@ -85,6 +85,6 @@ callRaylibFunction func = callRaylibFunction' func (return [])
 
 #else
 
-module Raylib.Web.Native where
+module Raylib.Internal.Web.Native where
 
 #endif

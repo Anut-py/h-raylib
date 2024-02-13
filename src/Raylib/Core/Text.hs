@@ -11,7 +11,7 @@ import Foreign.C
     peekCString,
     withCString,
   )
-import Raylib.ForeignUtil
+import Raylib.Internal.Foreign
   ( pop,
     popCArray,
     popCString,
@@ -21,7 +21,7 @@ import Raylib.ForeignUtil
     withFreeableArrayLen,
   )
 import Raylib.Internal (WindowResources, addTextureId, unloadSingleTexture)
-import Raylib.Native
+import Raylib.Internal.Native
   ( c'codepointToUTF8,
     c'drawFPS,
     c'drawText,

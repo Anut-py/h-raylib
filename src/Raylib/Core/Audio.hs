@@ -9,14 +9,14 @@ import Foreign
     toBool,
   )
 import Foreign.C (CUChar, withCString)
-import Raylib.ForeignUtil
+import Raylib.Internal.Foreign
   ( pop,
     popCArray,
     withFreeable,
     withFreeableArrayLen,
   )
 import Raylib.Internal (WindowResources, addAudioBuffer, addAudioBufferAlias, addCtxData, unloadAudioBuffers, unloadCtxData, unloadSingleAudioBuffer, unloadSingleAudioBufferAlias, unloadSingleCtxDataPtr)
-import Raylib.Native
+import Raylib.Internal.Native
   ( c'attachAudioStreamProcessor,
     c'closeAudioDevice,
     c'exportWave,

@@ -55,7 +55,7 @@ import Foreign.C
     newCString,
     peekCString,
   )
-import Raylib.ForeignUtil (Freeable (rlFreeDependents), c'free, peekStaticArrayOff, pokeStaticArrayOff)
+import Raylib.Internal.Foreign (Freeable (rlFreeDependents), c'free, peekStaticArrayOff, pokeStaticArrayOff)
 
 ---------------------------------------
 -- core enums -------------------------

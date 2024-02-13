@@ -2,7 +2,7 @@
 {-# LANGUAGE CPP #-}
 {-# LANGUAGE FlexibleInstances #-}
 
-module Raylib.ForeignUtil
+module Raylib.Internal.Foreign
   ( c'free,
     p'free,
     freeMaybePtr,
@@ -48,7 +48,7 @@ import Data.Maybe (fromMaybe)
 
 #ifdef WEB_FFI
 
-import Raylib.Web.Native (jsfree, p'jsfree)
+import Raylib.Internal.Web.Native (jsfree, p'jsfree)
 
 c'free :: Ptr () -> IO ()
 c'free = jsfree

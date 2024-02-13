@@ -4,7 +4,7 @@
 
 #ifdef WEB_FFI
 
-module Raylib.Web.Processable (ProcessedParam (..), ParamType (..), Processable (..)) where
+module Raylib.Internal.Web.Processable (ProcessedParam (..), ParamType (..), Processable (..)) where
 
 import Foreign (Ptr, FunPtr, Storable (poke, sizeOf), castPtr, malloc)
 import Foreign.C (CChar, CDouble, CFloat, CInt, CLong, CUChar, CUInt, CBool)
@@ -60,6 +60,6 @@ processParamRaw val pType = do
 
 #else
 
-module Raylib.Web.Processable where
+module Raylib.Internal.Web.Processable where
 
 #endif

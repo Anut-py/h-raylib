@@ -14,7 +14,7 @@ module Raylib.Util.GUI.Styles
   )
 where
 
-import Raylib.Native
+import Raylib.Internal.Native
   ( c'guiLoadStyleAshes,
     c'guiLoadStyleBluish,
     c'guiLoadStyleCandy,

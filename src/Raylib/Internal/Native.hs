@@ -3,7 +3,7 @@
 
 {-# OPTIONS -Wall #-}
 
-module Raylib.Native where
+module Raylib.Internal.Native where
 
 import Foreign (Ptr, Storable (poke), castPtr, fromBool, newArray)
 import Foreign.C
@@ -65,7 +65,7 @@ import Raylib.Types
 
 #ifdef WEB_FFI
 
-import Raylib.Web.Native (callRaylibFunction)
+import Raylib.Internal.Web.Native (callRaylibFunction)
 
 ---- raylib.h
 

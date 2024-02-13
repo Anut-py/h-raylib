@@ -34,7 +34,7 @@ import Foreign.C
   ( CInt (..),
     CUShort,
   )
-import Raylib.ForeignUtil (Freeable)
+import Raylib.Internal.Foreign (Freeable)
 
 ---------------------------------------
 -- raygui enums -----------------------

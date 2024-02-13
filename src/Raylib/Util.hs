@@ -34,7 +34,7 @@ import Control.Monad (void)
 import Control.Monad.Catch (MonadMask, bracket, bracket_)
 import Control.Monad.IO.Class (MonadIO (liftIO))
 import Raylib.Core (beginBlendMode, beginDrawing, beginMode2D, beginMode3D, beginScissorMode, beginShaderMode, beginTextureMode, beginVrStereoMode, closeWindow, endBlendMode, endDrawing, endMode2D, endMode3D, endScissorMode, endShaderMode, endTextureMode, endVrStereoMode, initWindow, setTargetFPS, windowShouldClose)
-import Raylib.ForeignUtil (Freeable (..))
+import Raylib.Internal.Foreign (Freeable (..))
 import Raylib.Internal (WindowResources)
 import Raylib.Types
   ( BlendMode,

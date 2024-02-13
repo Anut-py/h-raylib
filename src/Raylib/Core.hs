@@ -19,9 +19,9 @@ import Foreign.C
     withCString,
   )
 import Foreign.Ptr (nullPtr)
-import Raylib.ForeignUtil (c'free, configsToBitflag, pop, popCArray, popCString, withFreeable, withFreeableArray, withFreeableArrayLen, withMaybeCString)
+import Raylib.Internal.Foreign (c'free, configsToBitflag, pop, popCArray, popCString, withFreeable, withFreeableArray, withFreeableArrayLen, withMaybeCString)
 import Raylib.Internal (WindowResources, addAutomationEventList, addShaderId, defaultWindowResources, shaderLocations, unloadAutomationEventLists, unloadFrameBuffers, unloadShaders, unloadSingleAutomationEventList, unloadSingleShader, unloadTextures, unloadVaoIds, unloadVboIds)
-import Raylib.Native
+import Raylib.Internal.Native
   ( c'beginBlendMode,
     c'beginDrawing,
     c'beginMode2D,

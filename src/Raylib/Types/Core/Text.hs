@@ -19,7 +19,7 @@ import Foreign.C
   ( CInt (..),
     CUChar,
   )
-import Raylib.ForeignUtil (Freeable (rlFreeDependents), c'free, rlFreeArray)
+import Raylib.Internal.Foreign (Freeable (rlFreeDependents), c'free, rlFreeArray)
 import Raylib.Types.Core (Rectangle)
 import Raylib.Types.Core.Textures (Image, Texture)
 

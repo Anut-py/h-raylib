@@ -18,7 +18,7 @@ import Foreign.C
   ( CFloat,
     CInt (..),
   )
-import Raylib.ForeignUtil (Freeable)
+import Raylib.Internal.Foreign (Freeable)
 import Raylib.Types.Core (Vector2, Vector3)
 
 ---------------------------------------

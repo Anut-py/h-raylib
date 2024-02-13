@@ -50,7 +50,7 @@ import Foreign.C
     castCharToCChar,
   )
 import Foreign.C.String (castCCharToChar)
-import Raylib.ForeignUtil (Freeable (rlFreeDependents), c'free, freeMaybePtr, newMaybeArray, p'free, peekMaybeArray, peekStaticArray, peekStaticArrayOff, pokeStaticArray, pokeStaticArrayOff, rightPad, rlFreeArray, rlFreeMaybeArray)
+import Raylib.Internal.Foreign (Freeable (rlFreeDependents), c'free, freeMaybePtr, newMaybeArray, p'free, peekMaybeArray, peekStaticArray, peekStaticArrayOff, pokeStaticArray, pokeStaticArrayOff, rightPad, rlFreeArray, rlFreeMaybeArray)
 import Raylib.Internal (c'rlGetShaderIdDefault)
 import Raylib.Types.Core (Color, Matrix, Quaternion, Vector2 (Vector2), Vector3 (Vector3), Vector4 (Vector4))
 import Raylib.Types.Core.Textures (Texture (texture'id))
