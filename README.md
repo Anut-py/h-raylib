@@ -5,7 +5,7 @@
 
 This library includes Haskell bindings to the [Raylib](https://www.raylib.com/) library.
 
-[Basic usage](#basic-usage) | [Platform specific requirements](#platform-specific-requirements) | [Advanced usage](#advanced-usage) | [GHCi](#running-in-ghci) | [Documentation](#documentation) | [FAQ](#faq)
+[Basic usage](#basic-usage) | [Platform specific requirements](#platform-specific-requirements) | [Advanced usage](#advanced-usage) | [GHCi](#running-in-ghci) | [Documentation](#documentation) | [FAQ and help](#faq-and-help)
 
 ## Basic usage
 
@@ -99,7 +99,7 @@ For contributors: [CONTRIBUTING.md](https://github.com/Anut-py/h-raylib/blob/mas
 
 If you want to request a feature, create an issue in the GitHub repo. Please check [ROADMAP.md](https://github.com/Anut-py/h-raylib/blob/master/ROADMAP.md) to see if the feature has already been planned.
 
-## FAQ
+## FAQ and help
 
 - When I try to run an h-raylib program I get the error `The code execution cannot proceed because libwinpthread-1.dll was not found. Reinstalling the program may fix this problem.`
   - See [#14](https://github.com/Anut-py/h-raylib/issues/14)

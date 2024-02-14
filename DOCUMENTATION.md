@@ -2,7 +2,7 @@
 
 This file only contains h-raylib specific information. For documentation on individual functions, check the [raylib cheatsheet](https://www.raylib.com/cheatsheet/cheatsheet.html) and the [h-raylib Haddock documentation](https://hackage.haskell.org/package/h-raylib). You can also look at the examples included here in the `examples` directory (written in Haskell), or you can look at the more extensive set of examples [on the raylib website](https://www.raylib.com/examples.html) (written in C). For information about raylib in general, view the [raylib wiki](https://github.com/raysan5/raylib/wiki).
 
-For regular users of the library, the Haddock documentation should be more than enough. The documentation included here is more useful for contributors or anyone who wants to learn about how h-raylib works internally.
+For regular users of the library, the Haddock documentation should be more than enough (although much of it is auto-generated, so make sure to create an issue if you find anything that seems wrong). The documentation included here is more useful for contributors or anyone who wants to learn about how h-raylib works internally.
 
 ## Project structure
 
