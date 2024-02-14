@@ -12,8 +12,8 @@ module Raylib.Types.Core
     GamepadButton (..),
     GamepadAxis (..),
     BlendMode (..),
-    -- * Structures
     Gesture (..),
+    -- * Structures
     Vector2 (..),
     Vector3 (..),
     Vector4 (..),

@@ -100,15 +100,15 @@ foreign import ccall "main.h callRaylibFunction" c'callRaylibFunction :: CString
 #else
 
 c'jslog :: CString -> CUInt -> IO ()
-c'jslog = error "(h-raylib | Raylib.Internal.Web.Native.c'jslog): not running in the web!"
+c'jslog = error "(c'jslog) Not running in the web!"
 
 jsfree :: Ptr () -> IO ()
-jsfree = error "(h-raylib | Raylib.Internal.Web.Native.jsfree): not running in the web!"
+jsfree = error "(jsfree) Not running in the web!"
 
 p'jsfree :: FunPtr (Ptr a -> IO ())
-p'jsfree = error "(h-raylib | Raylib.Internal.Web.Native.p'jsfree): not running in the web!"
+p'jsfree = error "(p'jsfree) Not running in the web!"
 
 c'callRaylibFunction :: CString -> CUInt -> Ptr (Ptr ()) -> Ptr CUInt -> Ptr CUChar -> CUInt -> CUInt -> CUChar -> IO (Ptr ())
-c'callRaylibFunction = error "(h-raylib | Raylib.Internal.Web.Native.c'callRaylibFunction): not running in the web!"
+c'callRaylibFunction = error "(c'callRaylibFunction): Not running in the web!"
 
 #endif

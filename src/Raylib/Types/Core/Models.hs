@@ -11,8 +11,8 @@ module Raylib.Types.Core.Models
     ShaderUniformDataV (..),
     unpackShaderUniformData,
     unpackShaderUniformDataV,
-    -- * Structures
     ShaderAttributeDataType (..),
+    -- * Structures
     Mesh (..),
     Shader (..),
     MaterialMap (..),

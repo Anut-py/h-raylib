@@ -211,6 +211,7 @@ library
     Raylib.Internal
     Raylib.Internal.Foreign
     Raylib.Internal.Native
+    Raylib.Internal.TH
     Raylib.Internal.Web.Native
     Raylib.Internal.Web.Processable
 
