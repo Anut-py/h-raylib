@@ -233,6 +233,7 @@ library
     FlexibleInstances
     ForeignFunctionInterface
     ScopedTypeVariables
+    TemplateHaskell
     TemplateHaskellQuotes
 
   if (flag(platform-windows) || (flag(detect-platform) && os(windows)))

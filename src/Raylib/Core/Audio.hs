@@ -1,4 +1,5 @@
 {-# OPTIONS -Wall #-}
+{-# LANGUAGE ForeignFunctionInterface #-}
 
 -- | Bindings to @raudio@
 module Raylib.Core.Audio
@@ -75,7 +76,7 @@ import Foreign
     castPtr,
     toBool,
   )
-import Foreign.C (CUChar, withCString)
+import Foreign.C (CUChar, CUInt (..), withCString)
 import Raylib.Internal (WindowResources, addAudioBuffer, addAudioBufferAlias, addCtxData, unloadAudioBuffers, unloadCtxData, unloadSingleAudioBuffer, unloadSingleAudioBufferAlias, unloadSingleCtxDataPtr)
 import Raylib.Internal.Foreign
   ( pop,
@@ -144,7 +145,6 @@ import Raylib.Internal.Native
     c'waveCopy,
     c'waveCrop,
     c'waveFormat,
-    createAudioCallback,
   )
 import Raylib.Types
   ( AudioCallback,
@@ -410,3 +410,16 @@ attachAudioMixedProcessor callback =
 
 detachAudioMixedProcessor :: C'AudioCallback -> IO ()
 detachAudioMixedProcessor = c'detachAudioMixedProcessor
+
+foreign import ccall safe "wrapper"
+  mk'audioCallback ::
+    (Ptr () -> CUInt -> IO ()) -> IO C'AudioCallback
+
+-- foreign import ccall safe "dynamic"
+--   mK'audioCallback ::
+--     C'AudioCallback -> (Ptr () -> CUInt -> IO ())
+
+createAudioCallback :: AudioCallback -> IO C'AudioCallback
+createAudioCallback callback =
+  mk'audioCallback
+    (\bufferData frames -> callback bufferData (fromIntegral frames))

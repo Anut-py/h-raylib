@@ -1,4 +1,5 @@
 {-# OPTIONS -Wall #-}
+{-# LANGUAGE ForeignFunctionInterface #-}
 
 -- | Bindings to @rcore@
 module Raylib.Core
@@ -206,11 +207,16 @@ import Foreign
     castPtr,
     fromBool,
     malloc,
+    newArray,
     peekArray,
     toBool,
   )
 import Foreign.C
-  ( CUChar,
+  ( CInt (..),
+    CString,
+    CUChar (..),
+    CUInt (..),
+    newCString,
     peekCString,
     withCString,
   )
@@ -405,10 +411,6 @@ import Raylib.Internal.Native
     c'traceLog,
     c'waitTime,
     c'windowShouldClose,
-    createLoadFileDataCallback,
-    createLoadFileTextCallback,
-    createSaveFileDataCallback,
-    createSaveFileTextCallback,
   )
 import Raylib.Types
   ( AutomationEvent,
@@ -456,7 +458,7 @@ initWindow ::
   Int ->
   String ->
   -- | This value must be passed to some @load*@ and @unload*@ functions for
-  --   automatic memory management. 
+  --   automatic memory management.
   IO WindowResources
 initWindow width height title = withCString title (c'initWindow (fromIntegral width) (fromIntegral height)) >> defaultWindowResources
 
@@ -1159,3 +1161,69 @@ getGesturePinchVector = c'getGesturePinchVector >>= pop
 
 getGesturePinchAngle :: IO Float
 getGesturePinchAngle = realToFrac <$> c'getGesturePinchAngle
+
+foreign import ccall safe "wrapper"
+  mk'loadFileDataCallback ::
+    (CString -> Ptr CUInt -> IO (Ptr CUChar)) -> IO C'LoadFileDataCallback
+
+-- foreign import ccall safe "dynamic"
+--   mK'loadFileDataCallback ::
+--     C'LoadFileDataCallback -> (CString -> Ptr CUInt -> IO (Ptr CUChar))
+
+foreign import ccall safe "wrapper"
+  mk'saveFileDataCallback ::
+    (CString -> Ptr () -> CUInt -> IO CInt) -> IO C'SaveFileDataCallback
+
+-- foreign import ccall safe "dynamic"
+--   mK'saveFileDataCallback ::
+--     C'SaveFileDataCallback -> (CString -> Ptr () -> CUInt -> IO CInt)
+
+foreign import ccall safe "wrapper"
+  mk'loadFileTextCallback ::
+    (CString -> IO CString) -> IO C'LoadFileTextCallback
+
+-- foreign import ccall safe "dynamic"
+--   mK'loadFileTextCallback ::
+--     C'LoadFileTextCallback -> (CString -> IO CString)
+
+foreign import ccall safe "wrapper"
+  mk'saveFileTextCallback ::
+    (CString -> CString -> IO CInt) -> IO C'SaveFileTextCallback
+
+-- foreign import ccall safe "dynamic"
+--   mK'saveFileTextCallback ::
+--     C'SaveFileTextCallback -> (CString -> CString -> IO CInt)
+
+createLoadFileDataCallback :: LoadFileDataCallback -> IO C'LoadFileDataCallback
+createLoadFileDataCallback callback =
+  mk'loadFileDataCallback
+    ( \fileName dataSize ->
+        do
+          fn <- peekCString fileName
+          arr <- callback fn
+          poke dataSize (fromIntegral (length arr) :: CUInt)
+          newArray (map fromIntegral arr :: [CUChar])
+    )
+
+createSaveFileDataCallback :: (Storable a) => SaveFileDataCallback a -> IO C'SaveFileDataCallback
+createSaveFileDataCallback callback =
+  mk'saveFileDataCallback
+    ( \fileName contents bytesToWrite ->
+        do
+          fn <- peekCString fileName
+          fromBool <$> callback fn (castPtr contents) (fromIntegral bytesToWrite)
+    )
+
+createLoadFileTextCallback :: LoadFileTextCallback -> IO C'LoadFileTextCallback
+createLoadFileTextCallback callback =
+  mk'loadFileTextCallback
+    (\fileName -> peekCString fileName >>= callback >>= newCString)
+
+createSaveFileTextCallback :: SaveFileTextCallback -> IO C'SaveFileTextCallback
+createSaveFileTextCallback callback =
+  mk'saveFileTextCallback
+    ( \fileName content -> do
+        fn <- peekCString fileName
+        c <- peekCString content
+        fromBool <$> callback fn c
+    )
