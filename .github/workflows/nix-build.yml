@@ -34,4 +34,4 @@ jobs:
           sudo apt install -y x11proto-xext-dev libx11-dev xorg-dev freeglut3-dev
 
       - name: Build
-        run: nix build
+        run: nix build .#examples
