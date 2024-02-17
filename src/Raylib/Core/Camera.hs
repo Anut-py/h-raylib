@@ -1,13 +1,21 @@
 {-# OPTIONS -Wall #-}
+{-# LANGUAGE TemplateHaskell #-}
 
 -- | Bindings to @rcamera@ (raylib.h)
 module Raylib.Core.Camera (updateCamera, updateCameraPro) where
 
-import Foreign (Storable (peek))
+import Foreign (Ptr, Storable (peek))
+import Foreign.C (CFloat (..), CInt (..))
 import GHC.IO (unsafePerformIO)
 import Raylib.Internal.Foreign (withFreeable)
-import Raylib.Internal.Native (c'updateCamera, c'updateCameraPro)
+import Raylib.Internal.TH (genNative)
 import Raylib.Types (Camera3D, CameraMode, Vector3)
+
+$( genNative
+     [ ("c'updateCamera", "UpdateCamera_", "rl_bindings.h", [t|Ptr Camera3D -> CInt -> IO ()|]),
+       ("c'updateCameraPro", "UpdateCameraPro_", "rl_bindings.h", [t|Ptr Camera3D -> Ptr Vector3 -> Ptr Vector3 -> CFloat -> IO ()|])
+     ]
+ )
 
 updateCamera :: Camera3D -> CameraMode -> IO Camera3D
 updateCamera camera mode =

@@ -10,13 +10,13 @@ Items which have not yet been worked on. Feel free to work on one of these.
 ## In progress
 
 - Add web build support \[[#4](https://github.com/Anut-py/h-raylib/issues/4)\]
-- Move Raylib.Internal.Native functions into the modules where they are called
-  - Use Template Haskell to clean up boilerplate
 
 ## Implemented
 
 Items which have been completed but not published to hackage.
 
+- Move Raylib.Internal.Native functions into the modules where they are called
+  - Use Template Haskell to clean up boilerplate
 - Split Raylib.Types into multiple modules
 - Bind `raygui` \[[#34](https://github.com/Anut-py/h-raylib/issues/34)\]
 

@@ -1,4 +1,5 @@
 {-# OPTIONS -Wall #-}
+{-# LANGUAGE TemplateHaskell #-}
 
 -- | Bindings to @rtext@
 module Raylib.Core.Text
@@ -33,12 +34,13 @@ module Raylib.Core.Text
   )
 where
 
-import Foreign
-  ( Storable (peek, sizeOf),
-    toBool,
-  )
+import Foreign (Ptr, Storable (peek, sizeOf), toBool)
 import Foreign.C
-  ( CUChar,
+  ( CBool (..),
+    CFloat (..),
+    CInt (..),
+    CString,
+    CUChar,
     peekCString,
     withCString,
   )
@@ -52,35 +54,7 @@ import Raylib.Internal.Foreign
     withFreeableArray2D,
     withFreeableArrayLen,
   )
-import Raylib.Internal.Native
-  ( c'codepointToUTF8,
-    c'drawFPS,
-    c'drawText,
-    c'drawTextCodepoint,
-    c'drawTextCodepoints,
-    c'drawTextEx,
-    c'drawTextPro,
-    c'exportFontAsCode,
-    c'genImageFontAtlas,
-    c'getCodepointCount,
-    c'getCodepointNext,
-    c'getCodepointPrevious,
-    c'getFontDefault,
-    c'getGlyphAtlasRec,
-    c'getGlyphIndex,
-    c'getGlyphInfo,
-    c'isFontReady,
-    c'loadCodepoints,
-    c'loadFont,
-    c'loadFontData,
-    c'loadFontEx,
-    c'loadFontFromImage,
-    c'loadFontFromMemory,
-    c'loadUTF8,
-    c'measureText,
-    c'measureTextEx,
-    c'setTextLineSpacing,
-  )
+import Raylib.Internal.TH (genNative)
 import Raylib.Types
   ( Color,
     Font (font'texture),
@@ -91,6 +65,39 @@ import Raylib.Types
     Texture (texture'id),
     Vector2,
   )
+
+$( genNative
+     [ ("c'getFontDefault", "GetFontDefault_", "rl_bindings.h", [t|IO (Ptr Font)|]),
+       ("c'loadFont", "LoadFont_", "rl_bindings.h", [t|CString -> IO (Ptr Font)|]),
+       ("c'loadFontEx", "LoadFontEx_", "rl_bindings.h", [t|CString -> CInt -> Ptr CInt -> CInt -> IO (Ptr Font)|]),
+       ("c'loadFontFromImage", "LoadFontFromImage_", "rl_bindings.h", [t|Ptr Image -> Ptr Color -> CInt -> IO (Ptr Font)|]),
+       ("c'loadFontFromMemory", "LoadFontFromMemory_", "rl_bindings.h", [t|CString -> Ptr CUChar -> CInt -> CInt -> Ptr CInt -> CInt -> IO (Ptr Font)|]),
+       ("c'loadFontData", "LoadFontData_", "rl_bindings.h", [t|Ptr CUChar -> CInt -> CInt -> Ptr CInt -> CInt -> CInt -> IO (Ptr GlyphInfo)|]),
+       ("c'genImageFontAtlas", "GenImageFontAtlas_", "rl_bindings.h", [t|Ptr GlyphInfo -> Ptr (Ptr Rectangle) -> CInt -> CInt -> CInt -> CInt -> IO (Ptr Image)|]),
+       --  ("c'unloadFontData", "UnloadFontData_", "rl_bindings.h", [t|Ptr GlyphInfo -> CInt -> IO ()|]),
+       ("c'isFontReady", "IsFontReady_", "rl_bindings.h", [t|Ptr Font -> IO CBool|]),
+       --  ("c'unloadFont", "UnloadFont_", "rl_bindings.h", [t|Ptr Font -> IO ()|]),
+       ("c'exportFontAsCode", "ExportFontAsCode_", "rl_bindings.h", [t|Ptr Font -> CString -> IO CBool|]),
+       ("c'drawFPS", "DrawFPS_", "rl_bindings.h", [t|CInt -> CInt -> IO ()|]),
+       ("c'drawText", "DrawText_", "rl_bindings.h", [t|CString -> CInt -> CInt -> CInt -> Ptr Color -> IO ()|]),
+       ("c'drawTextEx", "DrawTextEx_", "rl_bindings.h", [t|Ptr Font -> CString -> Ptr Vector2 -> CFloat -> CFloat -> Ptr Color -> IO ()|]),
+       ("c'drawTextPro", "DrawTextPro_", "rl_bindings.h", [t|Ptr Font -> CString -> Ptr Vector2 -> Ptr Vector2 -> CFloat -> CFloat -> CFloat -> Ptr Color -> IO ()|]),
+       ("c'drawTextCodepoint", "DrawTextCodepoint_", "rl_bindings.h", [t|Ptr Font -> CInt -> Ptr Vector2 -> CFloat -> Ptr Color -> IO ()|]),
+       ("c'drawTextCodepoints", "DrawTextCodepoints_", "rl_bindings.h", [t|Ptr Font -> Ptr CInt -> CInt -> Ptr Vector2 -> CFloat -> CFloat -> Ptr Color -> IO ()|]),
+       ("c'setTextLineSpacing", "SetTextLineSpacing_", "rl_bindings.h", [t|CInt -> IO ()|]),
+       ("c'measureText", "MeasureText_", "rl_bindings.h", [t|CString -> CInt -> IO CInt|]),
+       ("c'measureTextEx", "MeasureTextEx_", "rl_bindings.h", [t|Ptr Font -> CString -> CFloat -> CFloat -> IO (Ptr Vector2)|]),
+       ("c'getGlyphIndex", "GetGlyphIndex_", "rl_bindings.h", [t|Ptr Font -> CInt -> IO CInt|]),
+       ("c'getGlyphInfo", "GetGlyphInfo_", "rl_bindings.h", [t|Ptr Font -> CInt -> IO (Ptr GlyphInfo)|]),
+       ("c'getGlyphAtlasRec", "GetGlyphAtlasRec_", "rl_bindings.h", [t|Ptr Font -> CInt -> IO (Ptr Rectangle)|]),
+       ("c'loadUTF8", "LoadUTF8_", "rl_bindings.h", [t|Ptr CInt -> CInt -> IO CString|]),
+       ("c'loadCodepoints", "LoadCodepoints_", "rl_bindings.h", [t|CString -> Ptr CInt -> IO (Ptr CInt)|]),
+       ("c'getCodepointCount", "GetCodepointCount_", "rl_bindings.h", [t|CString -> IO CInt|]),
+       ("c'getCodepointNext", "GetCodepointNext_", "rl_bindings.h", [t|CString -> Ptr CInt -> IO CInt|]),
+       ("c'getCodepointPrevious", "GetCodepointPrevious_", "rl_bindings.h", [t|CString -> Ptr CInt -> IO CInt|]),
+       ("c'codepointToUTF8", "CodepointToUTF8_", "rl_bindings.h", [t|CInt -> Ptr CInt -> IO CString|])
+     ]
+ )
 
 getFontDefault :: IO Font
 getFontDefault = c'getFontDefault >>= pop

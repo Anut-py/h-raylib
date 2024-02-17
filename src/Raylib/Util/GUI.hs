@@ -1,20 +1,20 @@
 {-# OPTIONS -Wall #-}
+{-# LANGUAGE TemplateHaskell #-}
 
-{- |
-Bindings to @raygui@
-
-[raygui](https://github.com/raysan5/raygui) is an immediate-mode GUI library
-built on top of raylib. The C version of raygui involves a lot of pointers
-because of the way it is designed. Unfortunately, this is problematic when
-binding it to Haskell, as Haskell's immutability makes it difficult to
-represent pointers properly. This means many functions will take the previous
-state of a control as an argument and return the updated state of that control.
-
-Keep in mind that raygui is an immediate mode GUI, so it is designed mostly for
-debugging and development and not for actual game GUIs. To this end, it is not
-very customizable and the features are quite limited. For a real game, you
-should make your own retained mode GUI.
--}
+-- |
+-- Bindings to @raygui@
+--
+-- [raygui](https://github.com/raysan5/raygui) is an immediate-mode GUI library
+-- built on top of raylib. The C version of raygui involves a lot of pointers
+-- because of the way it is designed. Unfortunately, this is problematic when
+-- binding it to Haskell, as Haskell's immutability makes it difficult to
+-- represent pointers properly. This means many functions will take the previous
+-- state of a control as an argument and return the updated state of that control.
+--
+-- Keep in mind that raygui is an immediate mode GUI, so it is designed mostly for
+-- debugging and development and not for actual game GUIs. To this end, it is not
+-- very customizable and the features are quite limited. For a real game, you
+-- should make your own retained mode GUI.
 module Raylib.Util.GUI
   ( -- * Global gui state control functions
     guiEnable,
@@ -159,11 +159,80 @@ where
 import Control.Monad (void, (>=>))
 import Data.Maybe (fromMaybe)
 import Foreign (Ptr, Storable (peek), fromBool, nullPtr, toBool)
-import Foreign.C (CBool, CUInt, newCString, withCString, peekCString)
+import Foreign.C
+  ( CBool (..),
+    CFloat (..),
+    CInt (..),
+    CString,
+    CUInt (..),
+    newCString,
+    peekCString,
+    withCString,
+  )
 import Raylib.Core.Textures (colorToInt, getColor)
 import Raylib.Internal.Foreign (pop, popCArray, popCString, withCStringBuffer, withFreeable, withFreeableArrayLen, withMaybe, withMaybeCString)
-import Raylib.Internal.Native (c'guiButton, c'guiCheckBox, c'guiColorBarAlpha, c'guiColorBarHue, c'guiColorPanel, c'guiColorPanelHSV, c'guiColorPicker, c'guiColorPickerHSV, c'guiComboBox, c'guiDisable, c'guiDisableTooltip, c'guiDrawIcon, c'guiDropdownBox, c'guiDummyRec, c'guiEnable, c'guiEnableTooltip, c'guiGetFont, c'guiGetIcons, c'guiGetState, c'guiGetStyle, c'guiGrid, c'guiGroupBox, c'guiIconText, c'guiIsLocked, c'guiLabel, c'guiLabelButton, c'guiLine, c'guiListView, c'guiListViewEx, c'guiLoadIcons, c'guiLoadStyle, c'guiLoadStyleDefault, c'guiLock, c'guiMessageBox, c'guiPanel, c'guiScrollPanel, c'guiSetAlpha, c'guiSetFont, c'guiSetIconScale, c'guiSetState, c'guiSetStyle, c'guiSetTooltip, c'guiSlider, c'guiSliderBar, c'guiSpinner, c'guiStatusBar, c'guiTabBar, c'guiTextBox, c'guiTextInputBox, c'guiToggle, c'guiToggleGroup, c'guiToggleSlider, c'guiUnlock, c'guiValueBox, c'guiWindowBox)
+import Raylib.Internal.TH (genNative)
 import Raylib.Types (Color (Color), Font, GuiControl (Default), GuiControlProperty (..), GuiDefaultProperty (..), GuiIconName, GuiState, GuiTextAlignment, GuiTextAlignmentVertical, GuiTextWrapMode, Rectangle (Rectangle), Vector2 (Vector2), Vector3 (Vector3))
+
+$( genNative
+     [ ("c'guiEnable", "GuiEnable_", "rgui_bindings.h", [t|IO ()|]),
+       ("c'guiDisable", "GuiDisable_", "rgui_bindings.h", [t|IO ()|]),
+       ("c'guiLock", "GuiLock_", "rgui_bindings.h", [t|IO ()|]),
+       ("c'guiUnlock", "GuiUnlock_", "rgui_bindings.h", [t|IO ()|]),
+       ("c'guiIsLocked", "GuiIsLocked_", "rgui_bindings.h", [t|IO CBool|]),
+       ("c'guiSetAlpha", "GuiSetAlpha_", "rgui_bindings.h", [t|CFloat -> IO ()|]),
+       ("c'guiSetState", "GuiSetState_", "rgui_bindings.h", [t|CInt -> IO ()|]),
+       ("c'guiGetState", "GuiGetState_", "rgui_bindings.h", [t|IO CInt|]),
+       ("c'guiSetFont", "GuiSetFont_", "rgui_bindings.h", [t|Ptr Font -> IO ()|]),
+       ("c'guiGetFont", "GuiGetFont_", "rgui_bindings.h", [t|IO (Ptr Font)|]),
+       ("c'guiSetStyle", "GuiSetStyle_", "rgui_bindings.h", [t|CInt -> CInt -> CInt -> IO ()|]),
+       ("c'guiGetStyle", "GuiGetStyle_", "rgui_bindings.h", [t|CInt -> CInt -> IO CInt|]),
+       ("c'guiLoadStyle", "GuiLoadStyle_", "rgui_bindings.h", [t|CString -> IO ()|]),
+       ("c'guiLoadStyleDefault", "GuiLoadStyleDefault_", "rgui_bindings.h", [t|IO ()|]),
+       ("c'guiEnableTooltip", "GuiEnableTooltip_", "rgui_bindings.h", [t|IO ()|]),
+       ("c'guiDisableTooltip", "GuiDisableTooltip_", "rgui_bindings.h", [t|IO ()|]),
+       ("c'guiSetTooltip", "GuiSetTooltip_", "rgui_bindings.h", [t|CString -> IO ()|]),
+       ("c'guiIconText", "GuiIconText_", "rgui_bindings.h", [t|CInt -> CString -> IO CString|]),
+       ("c'guiSetIconScale", "GuiSetIconScale_", "rgui_bindings.h", [t|CInt -> IO ()|]),
+       ("c'guiGetIcons", "GuiGetIcons_", "rgui_bindings.h", [t|IO (Ptr CUInt)|]),
+       ("c'guiLoadIcons", "GuiLoadIcons_", "rgui_bindings.h", [t|CString -> CBool -> IO (Ptr CString)|]),
+       ("c'guiDrawIcon", "GuiDrawIcon_", "rgui_bindings.h", [t|CInt -> CInt -> CInt -> CInt -> Ptr Color -> IO ()|]),
+       ("c'guiWindowBox", "GuiWindowBox_", "rgui_bindings.h", [t|Ptr Rectangle -> CString -> IO CInt|]),
+       ("c'guiGroupBox", "GuiGroupBox_", "rgui_bindings.h", [t|Ptr Rectangle -> CString -> IO CInt|]),
+       ("c'guiLine", "GuiLine_", "rgui_bindings.h", [t|Ptr Rectangle -> CString -> IO CInt|]),
+       ("c'guiPanel", "GuiPanel_", "rgui_bindings.h", [t|Ptr Rectangle -> CString -> IO CInt|]),
+       ("c'guiTabBar", "GuiTabBar_", "rgui_bindings.h", [t|Ptr Rectangle -> Ptr CString -> CInt -> Ptr CInt -> IO CInt|]),
+       ("c'guiScrollPanel", "GuiScrollPanel_", "rgui_bindings.h", [t|Ptr Rectangle -> CString -> Ptr Rectangle -> Ptr Vector2 -> Ptr Rectangle -> IO CInt|]),
+       ("c'guiLabel", "GuiLabel_", "rgui_bindings.h", [t|Ptr Rectangle -> CString -> IO CInt|]),
+       ("c'guiButton", "GuiButton_", "rgui_bindings.h", [t|Ptr Rectangle -> CString -> IO CInt|]),
+       ("c'guiLabelButton", "GuiLabelButton_", "rgui_bindings.h", [t|Ptr Rectangle -> CString -> IO CInt|]),
+       ("c'guiToggle", "GuiToggle_", "rgui_bindings.h", [t|Ptr Rectangle -> CString -> Ptr CBool -> IO CInt|]),
+       ("c'guiToggleGroup", "GuiToggleGroup_", "rgui_bindings.h", [t|Ptr Rectangle -> CString -> Ptr CInt -> IO CInt|]),
+       ("c'guiToggleSlider", "GuiToggleSlider_", "rgui_bindings.h", [t|Ptr Rectangle -> CString -> Ptr CInt -> IO CInt|]),
+       ("c'guiCheckBox", "GuiCheckBox_", "rgui_bindings.h", [t|Ptr Rectangle -> CString -> Ptr CBool -> IO CInt|]),
+       ("c'guiComboBox", "GuiComboBox_", "rgui_bindings.h", [t|Ptr Rectangle -> CString -> Ptr CInt -> IO CInt|]),
+       ("c'guiDropdownBox", "GuiDropdownBox_", "rgui_bindings.h", [t|Ptr Rectangle -> CString -> Ptr CInt -> CBool -> IO CInt|]),
+       ("c'guiSpinner", "GuiSpinner_", "rgui_bindings.h", [t|Ptr Rectangle -> CString -> Ptr CInt -> CInt -> CInt -> CBool -> IO CInt|]),
+       ("c'guiValueBox", "GuiValueBox_", "rgui_bindings.h", [t|Ptr Rectangle -> CString -> Ptr CInt -> CInt -> CInt -> CBool -> IO CInt|]),
+       ("c'guiTextBox", "GuiTextBox_", "rgui_bindings.h", [t|Ptr Rectangle -> CString -> CInt -> CBool -> IO CInt|]),
+       ("c'guiSlider", "GuiSlider_", "rgui_bindings.h", [t|Ptr Rectangle -> CString -> CString -> Ptr CFloat -> CFloat -> CFloat -> IO CInt|]),
+       ("c'guiSliderBar", "GuiSliderBar_", "rgui_bindings.h", [t|Ptr Rectangle -> CString -> CString -> Ptr CFloat -> CFloat -> CFloat -> IO CInt|]),
+       ("c'guiProgressBar", "GuiProgressBar_", "rgui_bindings.h", [t|Ptr Rectangle -> CString -> CString -> Ptr CFloat -> CFloat -> CFloat -> IO CInt|]),
+       ("c'guiStatusBar", "GuiStatusBar_", "rgui_bindings.h", [t|Ptr Rectangle -> CString -> IO CInt|]),
+       ("c'guiDummyRec", "GuiDummyRec_", "rgui_bindings.h", [t|Ptr Rectangle -> CString -> IO CInt|]),
+       ("c'guiGrid", "GuiGrid_", "rgui_bindings.h", [t|Ptr Rectangle -> CString -> CFloat -> CInt -> Ptr Vector2 -> IO CInt|]),
+       ("c'guiListView", "GuiListView_", "rgui_bindings.h", [t|Ptr Rectangle -> CString -> Ptr CInt -> Ptr CInt -> IO CInt|]),
+       ("c'guiListViewEx", "GuiListViewEx_", "rgui_bindings.h", [t|Ptr Rectangle -> Ptr CString -> CInt -> Ptr CInt -> Ptr CInt -> Ptr CInt -> IO CInt|]),
+       ("c'guiMessageBox", "GuiMessageBox_", "rgui_bindings.h", [t|Ptr Rectangle -> CString -> CString -> CString -> IO CInt|]),
+       ("c'guiTextInputBox", "GuiTextInputBox_", "rgui_bindings.h", [t|Ptr Rectangle -> CString -> CString -> CString -> CString -> CInt -> Ptr CBool -> IO CInt|]),
+       ("c'guiColorPicker", "GuiColorPicker_", "rgui_bindings.h", [t|Ptr Rectangle -> CString -> Ptr Color -> IO CInt|]),
+       ("c'guiColorPanel", "GuiColorPanel_", "rgui_bindings.h", [t|Ptr Rectangle -> CString -> Ptr Color -> IO CInt|]),
+       ("c'guiColorBarAlpha", "GuiColorBarAlpha_", "rgui_bindings.h", [t|Ptr Rectangle -> CString -> Ptr CFloat -> IO CInt|]),
+       ("c'guiColorBarHue", "GuiColorBarHue_", "rgui_bindings.h", [t|Ptr Rectangle -> CString -> Ptr CFloat -> IO CInt|]),
+       ("c'guiColorPickerHSV", "GuiColorPickerHSV_", "rgui_bindings.h", [t|Ptr Rectangle -> CString -> Ptr Vector3 -> IO CInt|]),
+       ("c'guiColorPanelHSV", "GuiColorPanelHSV_", "rgui_bindings.h", [t|Ptr Rectangle -> CString -> Ptr Vector3 -> IO CInt|])
+     ]
+ )
 
 -- | Enable gui controls (global state)
 guiEnable :: IO ()
@@ -870,7 +939,7 @@ guiProgressBar bounds textLeft textRight value minValue maxValue =
                       withFreeable
                         (realToFrac value)
                         ( \v -> do
-                            c'guiSliderBar b l r v (realToFrac minValue) (realToFrac maxValue) >> peek v
+                            c'guiProgressBar b l r v (realToFrac minValue) (realToFrac maxValue) >> peek v
                         )
                   )
             )
