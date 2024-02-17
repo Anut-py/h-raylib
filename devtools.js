@@ -52,22 +52,26 @@ const findCommandPathOnPath = (commandName) => {
 };
 const findCommandPath = (commandName, longForm, shortForm) => {
   log(logLevel.VERB, `Looking for ${commandName} path on command line`);
-  const longPath = process.argv.find((arg) => arg.startsWith(longForm + "="));
-  if (longPath !== undefined) {
-    log(logLevel.VERB, `${commandName} path found on command line!`);
-    return withQuotes(np.substring((longForm + "=").length));
-  }
-  const idx = process.argv.indexOf(shortForm);
-  if (idx !== -1) {
-    if (process.argv.length >= idx + 2) {
+  if (longForm !== undefined && longForm !== null) {
+    const longPath = process.argv.find((arg) => arg.startsWith(longForm + "="));
+    if (longPath !== undefined) {
       log(logLevel.VERB, `${commandName} path found on command line!`);
-      return withQuotes(process.argv[idx + 1]);
-    } else {
-      log(
-        logLevel.ERR,
-        `${shortForm} was passed but no ${commandName} path was provided!`
-      );
-      process.exit(1);
+      return withQuotes(np.substring((longForm + "=").length));
+    }
+  }
+  if (shortForm !== undefined && shortForm !== null) {
+    const idx = process.argv.indexOf(shortForm);
+    if (idx !== -1) {
+      if (process.argv.length >= idx + 2) {
+        log(logLevel.VERB, `${commandName} path found on command line!`);
+        return withQuotes(process.argv[idx + 1]);
+      } else {
+        log(
+          logLevel.ERR,
+          `${shortForm} was passed but no ${commandName} path was provided!`
+        );
+        process.exit(1);
+      }
     }
   }
   log(logLevel.VERB, `${commandName} path not found on command line`);
@@ -86,7 +90,7 @@ const findCommandPath = (commandName, longForm, shortForm) => {
 };
 const diffWithRemote = (module) => {
   const modulePath = withQuotes(path.join(__dirname, module));
-  const gitPath = findCommandPath("git", "--git-path", "-g");
+  const gitPath = findCommandPath("git", "--git-path", null);
 
   log(logLevel.VERB, "Using git path: " + gitPath);
   log(logLevel.VERB, "Running `git fetch`");
@@ -140,7 +144,7 @@ const diffWithRemote = (module) => {
 if (process.argv.includes("-u") || process.argv.includes("--nix-update")) {
   (() => {
     const nixPath = findCommandPath("nix", "--nix-path", "-n");
-    const gitPath = findCommandPath("git", "--git-path", "-g");
+    const gitPath = findCommandPath("git", "--git-path", null);
 
     log(logLevel.INFO, "Using nix path: " + nixPath);
     log(logLevel.INFO, "Using git path: " + gitPath);
@@ -255,7 +259,7 @@ if (process.argv.includes("-u") || process.argv.includes("--nix-update")) {
 ) {
   diffWithRemote("raylib");
 } else if (
-  process.argv.includes("-gd") ||
+  process.argv.includes("-g") ||
   process.argv.includes("--raygui-diff")
 ) {
   diffWithRemote("raygui");
@@ -332,7 +336,7 @@ This script contains useful tools for h-raylib development
     --raylib-diff
     --nix-update
 
-    -gd               Diff the local raygui source with the latest remote code
+    -g                Diff the local raygui source with the latest remote code
     --raygui-diff
 
     -p                Package the cabal project and run the examples
@@ -343,8 +347,7 @@ This script contains useful tools for h-raylib development
     -n <NIX-PATH>          Manually provide the path to nix; if not provided, the PATH environment variable will be searched
     --nix-path=<NIX-PATH>
 
-    -g <GIT-PATH>          Manually provide the path to git; if not provided, the PATH environment variable will be searched
-    --git-path=<GIT-PATH>
+    --git-path=<GIT-PATH>  Manually provide the path to git; if not provided, the PATH environment variable will be searched
 
     -c <CABAL-PATH>        Manually provide the path to cabal; if not provided, the PATH environment variable will be searched
     --cabal-path=<CABAL-PATH>

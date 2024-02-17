@@ -34,7 +34,7 @@ getCameraUp cam = vectorNormalize $ camera3D'up cam
 
 -- | The camera's right vector (normalized)
 getCameraRight :: Camera -> Vector3
-getCameraRight cam = vector3CrossProduct (getCameraForward cam) (getCameraUp cam)
+getCameraRight cam = vectorNormalize $ vector3CrossProduct (getCameraForward cam) (getCameraUp cam)
 
 -- | Move the camera by a specific vector
 cameraMove :: Camera -> Vector3 -> Camera
