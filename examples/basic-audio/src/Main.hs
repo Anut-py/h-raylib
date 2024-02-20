@@ -10,7 +10,7 @@ import Raylib.Util (drawing, inGHCi, whileWindowOpen0, withWindow)
 import Raylib.Util.Colors (lightGray, rayWhite)
 
 musicPath :: String
-musicPath = (if not inGHCi then "../../../../../../../../../" else "./") ++ "examples/basic-audio/assets/mini1111.xm"
+musicPath = (if not inGHCi then "../../../../../../../../../../" else "./") ++ "examples/basic-audio/assets/mini1111.xm"
 
 main :: IO ()
 main = do

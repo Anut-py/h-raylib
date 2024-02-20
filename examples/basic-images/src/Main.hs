@@ -21,7 +21,7 @@ import Raylib.Util (drawing, inGHCi, textureMode, whileWindowOpen0, withWindow)
 import Raylib.Util.Colors (black, lightGray, orange, white)
 
 logoPath :: String
-logoPath = (if not inGHCi then "../../../../../../../../../" else "./") ++ "examples/basic-images/assets/raylib-logo.png"
+logoPath = (if not inGHCi then "../../../../../../../../../../" else "./") ++ "examples/basic-images/assets/raylib-logo.png"
 
 main :: IO ()
 main = do

@@ -13,7 +13,7 @@ import Raylib.Util (inGHCi, mode3D, textureMode, whileWindowOpen_, withWindow, d
 import Raylib.Util.Colors (black, blue, darkBlue, darkGreen, green, maroon, orange, red, white)
 
 assetsPath :: String
-assetsPath = (if not inGHCi then "../../../../../../../../../" else "./") ++ "examples/postprocessing-effects/assets/"
+assetsPath = (if not inGHCi then "../../../../../../../../../../" else "./") ++ "examples/postprocessing-effects/assets/"
 
 main :: IO ()
 main = do

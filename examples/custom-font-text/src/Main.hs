@@ -15,7 +15,7 @@ import Raylib.Util (inGHCi, whileWindowOpen_, withWindow, drawing)
 import Raylib.Util.Colors (black, rayWhite)
 
 mainFontPath :: String
-mainFontPath = (if not inGHCi then "../../../../../../../../../" else "./") ++ "examples/custom-font-text/assets/Lato-Regular.ttf"
+mainFontPath = (if not inGHCi then "../../../../../../../../../../" else "./") ++ "examples/custom-font-text/assets/Lato-Regular.ttf"
 
 main :: IO ()
 main = do
