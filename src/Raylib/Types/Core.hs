@@ -897,9 +897,7 @@ instance Storable AutomationEventList where
   poke _p (AutomationEventList capacity events) = do
     pokeByteOff _p 0 (fromIntegral capacity :: CUInt)
     pokeByteOff _p 4 (fromIntegral (length events) :: CUInt)
-    ptr <- callocBytes $ case events of
-      [] -> 0
-      (x:_) -> fromIntegral capacity * sizeOf x
+    ptr <- callocBytes (fromIntegral capacity * sizeOf (undefined :: AutomationEvent))
     pokeByteOff _p 8 ptr
     return ()
 
