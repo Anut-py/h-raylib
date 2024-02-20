@@ -104,7 +104,7 @@ common example-options
       , base
       , h-raylib
 
-    other-extensions: TemplateHaskell, Strict
+    other-extensions: TemplateHaskell, BangPatterns
 
     if flag(platform-web)
       ghc-options:

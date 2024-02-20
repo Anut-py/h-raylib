@@ -25,6 +25,7 @@ cabal run camera-ray-collision
 
 # textures
 cabal run basic-images
+cabal run bunnymark
 
 # text
 cabal run custom-font-text
