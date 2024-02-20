@@ -3,7 +3,8 @@
 
 -- | Bindings to @rtext@
 module Raylib.Core.Text
-  ( getFontDefault,
+  ( -- * High level
+    getFontDefault,
     loadFont,
     loadFontEx,
     loadFontFromImage,
@@ -31,6 +32,37 @@ module Raylib.Core.Text
     getCodepointNext,
     getCodepointPrevious,
     codepointToUTF8,
+
+    -- * Native
+    c'getFontDefault,
+    c'loadFont,
+    c'loadFontEx,
+    c'loadFontFromImage,
+    c'loadFontFromMemory,
+    c'loadFontData,
+    c'genImageFontAtlas,
+    c'unloadFontData,
+    c'isFontReady,
+    c'unloadFont,
+    c'exportFontAsCode,
+    c'drawFPS,
+    c'drawText,
+    c'drawTextEx,
+    c'drawTextPro,
+    c'drawTextCodepoint,
+    c'drawTextCodepoints,
+    c'setTextLineSpacing,
+    c'measureText,
+    c'measureTextEx,
+    c'getGlyphIndex,
+    c'getGlyphInfo,
+    c'getGlyphAtlasRec,
+    c'loadUTF8,
+    c'loadCodepoints,
+    c'getCodepointCount,
+    c'getCodepointNext,
+    c'getCodepointPrevious,
+    c'codepointToUTF8
   )
 where
 
@@ -74,9 +106,9 @@ $( genNative
        ("c'loadFontFromMemory", "LoadFontFromMemory_", "rl_bindings.h", [t|CString -> Ptr CUChar -> CInt -> CInt -> Ptr CInt -> CInt -> IO (Ptr Font)|]),
        ("c'loadFontData", "LoadFontData_", "rl_bindings.h", [t|Ptr CUChar -> CInt -> CInt -> Ptr CInt -> CInt -> CInt -> IO (Ptr GlyphInfo)|]),
        ("c'genImageFontAtlas", "GenImageFontAtlas_", "rl_bindings.h", [t|Ptr GlyphInfo -> Ptr (Ptr Rectangle) -> CInt -> CInt -> CInt -> CInt -> IO (Ptr Image)|]),
-       --  ("c'unloadFontData", "UnloadFontData_", "rl_bindings.h", [t|Ptr GlyphInfo -> CInt -> IO ()|]),
+       ("c'unloadFontData", "UnloadFontData_", "rl_bindings.h", [t|Ptr GlyphInfo -> CInt -> IO ()|]),
        ("c'isFontReady", "IsFontReady_", "rl_bindings.h", [t|Ptr Font -> IO CBool|]),
-       --  ("c'unloadFont", "UnloadFont_", "rl_bindings.h", [t|Ptr Font -> IO ()|]),
+       ("c'unloadFont", "UnloadFont_", "rl_bindings.h", [t|Ptr Font -> IO ()|]),
        ("c'exportFontAsCode", "ExportFontAsCode_", "rl_bindings.h", [t|Ptr Font -> CString -> IO CBool|]),
        ("c'drawFPS", "DrawFPS_", "rl_bindings.h", [t|CInt -> CInt -> IO ()|]),
        ("c'drawText", "DrawText_", "rl_bindings.h", [t|CString -> CInt -> CInt -> CInt -> Ptr Color -> IO ()|]),

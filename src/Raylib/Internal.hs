@@ -1,6 +1,7 @@
+{-# LANGUAGE CPP #-}
 {-# OPTIONS -Wall #-}
 {-# LANGUAGE ForeignFunctionInterface #-}
-{-# LANGUAGE CPP #-}
+{-# LANGUAGE TemplateHaskell #-}
 
 -- | Internal h-raylib utilities for automatic memory management
 module Raylib.Internal
@@ -54,6 +55,7 @@ import qualified Data.Map as Map
 import Foreign (Ptr, Storable (peekByteOff), free)
 import Foreign.C (CInt (..), CUInt (..))
 import GHC.IO (unsafePerformIO)
+import Raylib.Internal.TH (genNative)
 
 #ifdef WEB_FFI
 
@@ -103,6 +105,20 @@ defaultWindowResources = do
         audioBufferAliases = aliases,
         automationEventLists = eventLists
       }
+
+$( genNative
+     [ ("c'rlGetShaderIdDefault", "rlGetShaderIdDefault_", "rlgl_bindings.h", [t|IO CUInt|]),
+       ("c'rlUnloadShaderProgram", "rlUnloadShaderProgram_", "rlgl_bindings.h", [t|CUInt -> IO ()|]),
+       ("c'rlUnloadTexture", "rlUnloadTexture_", "rlgl_bindings.h", [t|CUInt -> IO ()|]),
+       ("c'rlUnloadFramebuffer", "rlUnloadFramebuffer_", "rlgl_bindings.h", [t|CUInt -> IO ()|]),
+       ("c'rlUnloadVertexArray", "rlUnloadVertexArray_", "rlgl_bindings.h", [t|CUInt -> IO ()|]),
+       ("c'rlUnloadVertexBuffer", "rlUnloadVertexBuffer_", "rlgl_bindings.h", [t|CUInt -> IO ()|]),
+       ("c'unloadMusicStreamData", "UnloadMusicStreamData", "rl_internal.h", [t|CInt -> Ptr () -> IO ()|]),
+       ("c'unloadAudioBuffer", "UnloadAudioBuffer_", "rl_internal.h", [t|Ptr () -> IO ()|]),
+       ("c'unloadAudioBufferAlias", "UnloadAudioBufferAlias", "rl_internal.h", [t|Ptr () -> IO ()|]),
+       ("c'getPixelDataSize", "GetPixelDataSize_", "rl_bindings.h", [t|CInt -> CInt -> CInt -> IO CInt|])
+     ]
+ )
 
 unloadSingleShader :: (Integral a) => a -> WindowResources -> IO ()
 unloadSingleShader sId' wr = do
@@ -318,62 +334,6 @@ addAutomationEventList eventList wr = do
 
 _unloadAutomationEventList :: Ptr () -> IO ()
 _unloadAutomationEventList ptr = (free =<< (peekByteOff ptr 8 :: IO (Ptr ()))) >> free ptr
-
-#ifdef WEB_FFI
-
-c'rlGetShaderIdDefault :: IO CUInt
-c'rlGetShaderIdDefault = callRaylibFunction "_rlGetShaderIdDefault_"
-
-c'rlUnloadShaderProgram :: CUInt -> IO ()
-c'rlUnloadShaderProgram = callRaylibFunction "_rlUnloadShaderProgram_"
-
-c'rlUnloadTexture :: CUInt -> IO ()
-c'rlUnloadTexture = callRaylibFunction "_rlUnloadTexture_"
-
-c'rlUnloadFramebuffer :: CUInt -> IO ()
-c'rlUnloadFramebuffer = callRaylibFunction "_rlUnloadFramebuffer_"
-
-c'rlUnloadVertexArray :: CUInt -> IO ()
-c'rlUnloadVertexArray = callRaylibFunction "_rlUnloadVertexArray_"
-
-c'rlUnloadVertexBuffer :: CUInt -> IO ()
-c'rlUnloadVertexBuffer = callRaylibFunction "_rlUnloadVertexBuffer_"
-
-c'unloadMusicStreamData :: CInt -> Ptr () -> IO ()
-c'unloadMusicStreamData = callRaylibFunction "_UnloadMusicStreamData"
-
-c'unloadAudioBuffer :: Ptr () -> IO ()
-c'unloadAudioBuffer = callRaylibFunction "_UnloadAudioBuffer_"
-
-c'unloadAudioBufferAlias :: Ptr () -> IO ()
-c'unloadAudioBufferAlias = callRaylibFunction "_UnloadAudioBufferAlias"
-
-c'getPixelDataSize :: CInt -> CInt -> CInt -> IO CInt
-c'getPixelDataSize = callRaylibFunction "_GetPixelDataSize_"
-
-#else
-
-foreign import ccall safe "rlgl_bindings.h rlGetShaderIdDefault_" c'rlGetShaderIdDefault :: IO CUInt
-
-foreign import ccall safe "rlgl_bindings.h rlUnloadShaderProgram_" c'rlUnloadShaderProgram :: CUInt -> IO ()
-
-foreign import ccall safe "rlgl_bindings.h rlUnloadTexture_" c'rlUnloadTexture :: CUInt -> IO ()
-
-foreign import ccall safe "rlgl_bindings.h rlUnloadFramebuffer_" c'rlUnloadFramebuffer :: CUInt -> IO ()
-
-foreign import ccall safe "rlgl_bindings.h rlUnloadVertexArray_" c'rlUnloadVertexArray :: CUInt -> IO ()
-
-foreign import ccall safe "rlgl_bindings.h rlUnloadVertexBuffer_" c'rlUnloadVertexBuffer :: CUInt -> IO ()
-
-foreign import ccall safe "rl_internal.h UnloadMusicStreamData" c'unloadMusicStreamData :: CInt -> Ptr () -> IO ()
-
-foreign import ccall safe "rl_internal.h UnloadAudioBuffer_" c'unloadAudioBuffer :: Ptr () -> IO ()
-
-foreign import ccall safe "rl_internal.h UnloadAudioBufferAlias" c'unloadAudioBufferAlias :: Ptr () -> IO ()
-
-foreign import ccall safe "rl_bindings.h GetPixelDataSize_" c'getPixelDataSize :: CInt -> CInt -> CInt -> IO CInt
-
-#endif
 
 getPixelDataSize :: Int -> Int -> Int -> Int
 getPixelDataSize width height format = unsafePerformIO (fromIntegral <$> c'getPixelDataSize (fromIntegral width) (fromIntegral height) (fromIntegral format))

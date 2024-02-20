@@ -4,7 +4,8 @@
 
 -- | Bindings to @raudio@
 module Raylib.Core.Audio
-  ( initAudioDevice,
+  ( -- * High level
+    initAudioDevice,
     closeAudioDevice,
     isAudioDeviceReady,
     setMasterVolume,
@@ -68,6 +69,74 @@ module Raylib.Core.Audio
     detachAudioStreamProcessor,
     attachAudioMixedProcessor,
     detachAudioMixedProcessor,
+
+    -- * Native
+    c'initAudioDevice,
+    c'closeAudioDevice,
+    c'isAudioDeviceReady,
+    c'setMasterVolume,
+    c'getMasterVolume,
+    c'loadWave,
+    c'loadWaveFromMemory,
+    c'loadSound,
+    c'loadSoundFromWave,
+    c'loadSoundAlias,
+    c'updateSound,
+    c'isWaveReady,
+    c'unloadWave,
+    c'isSoundReady,
+    c'unloadSound,
+    c'unloadSoundAlias,
+    c'exportWave,
+    c'exportWaveAsCode,
+    c'playSound,
+    c'stopSound,
+    c'pauseSound,
+    c'resumeSound,
+    c'isSoundPlaying,
+    c'setSoundVolume,
+    c'setSoundPitch,
+    c'setSoundPan,
+    c'waveCopy,
+    c'waveCrop,
+    c'waveFormat,
+    c'loadWaveSamples,
+    c'unloadWaveSamples,
+    c'loadMusicStream,
+    c'loadMusicStreamFromMemory,
+    c'isMusicReady,
+    c'unloadMusicStream,
+    c'playMusicStream,
+    c'isMusicStreamPlaying,
+    c'updateMusicStream,
+    c'stopMusicStream,
+    c'pauseMusicStream,
+    c'resumeMusicStream,
+    c'seekMusicStream,
+    c'setMusicVolume,
+    c'setMusicPitch,
+    c'setMusicPan,
+    c'getMusicTimeLength,
+    c'getMusicTimePlayed,
+    c'loadAudioStream,
+    c'isAudioStreamReady,
+    c'unloadAudioStream,
+    c'updateAudioStream,
+    c'isAudioStreamProcessed,
+    c'playAudioStream,
+    c'pauseAudioStream,
+    c'resumeAudioStream,
+    c'isAudioStreamPlaying,
+    c'stopAudioStream,
+    c'setAudioStreamVolume,
+    c'setAudioStreamPitch,
+    c'setAudioStreamPan,
+    c'setAudioStreamBufferSizeDefault,
+    c'setAudioStreamCallback,
+    c'attachAudioStreamProcessor,
+    c'detachAudioStreamProcessor,
+    c'attachAudioMixedProcessor,
+    c'detachAudioMixedProcessor,
   )
 where
 
@@ -111,10 +180,10 @@ $( genNative
        ("c'loadSoundAlias", "LoadSoundAlias_", "rl_bindings.h", [t|Ptr Sound -> IO (Ptr Sound)|]),
        ("c'updateSound", "UpdateSound_", "rl_bindings.h", [t|Ptr Sound -> Ptr () -> CInt -> IO ()|]),
        ("c'isWaveReady", "IsWaveReady_", "rl_bindings.h", [t|Ptr Wave -> IO CBool|]),
-       --  ("c'unloadWave", "UnloadWave_", "rl_bindings.h", [t|Ptr Wave -> IO ()|]),
+       ("c'unloadWave", "UnloadWave_", "rl_bindings.h", [t|Ptr Wave -> IO ()|]),
        ("c'isSoundReady", "IsSoundReady_", "rl_bindings.h", [t|Ptr Sound -> IO CBool|]),
-       --  ("c'unloadSound", "UnloadSound_", "rl_bindings.h", [t|Ptr Sound -> IO ()|]),
-       --  ("c'unloadSoundAlias", "UnloadSoundAlias_", "rl_bindings.h", [t|Ptr Sound -> IO ()|]),
+       ("c'unloadSound", "UnloadSound_", "rl_bindings.h", [t|Ptr Sound -> IO ()|]),
+       ("c'unloadSoundAlias", "UnloadSoundAlias_", "rl_bindings.h", [t|Ptr Sound -> IO ()|]),
        ("c'exportWave", "ExportWave_", "rl_bindings.h", [t|Ptr Wave -> CString -> IO CBool|]),
        ("c'exportWaveAsCode", "ExportWaveAsCode_", "rl_bindings.h", [t|Ptr Wave -> CString -> IO CBool|]),
        ("c'playSound", "PlaySound_", "rl_bindings.h", [t|Ptr Sound -> IO ()|]),
@@ -129,11 +198,11 @@ $( genNative
        ("c'waveCrop", "WaveCrop_", "rl_bindings.h", [t|Ptr Wave -> CInt -> CInt -> IO ()|]),
        ("c'waveFormat", "WaveFormat_", "rl_bindings.h", [t|Ptr Wave -> CInt -> CInt -> CInt -> IO ()|]),
        ("c'loadWaveSamples", "LoadWaveSamples_", "rl_bindings.h", [t|Ptr Wave -> IO (Ptr CFloat)|]),
-       --  ("c'unloadWaveSamples", "UnloadWaveSamples_", "rl_bindings.h", [t|Ptr CFloat -> IO ()|]),
+       ("c'unloadWaveSamples", "UnloadWaveSamples_", "rl_bindings.h", [t|Ptr CFloat -> IO ()|]),
        ("c'loadMusicStream", "LoadMusicStream_", "rl_bindings.h", [t|CString -> IO (Ptr Music)|]),
        ("c'loadMusicStreamFromMemory", "LoadMusicStreamFromMemory_", "rl_bindings.h", [t|CString -> Ptr CUChar -> CInt -> IO (Ptr Music)|]),
        ("c'isMusicReady", "IsMusicReady_", "rl_bindings.h", [t|Ptr Music -> IO CBool|]),
-       --  ("c'unloadMusicStream", "UnloadMusicStream_", "rl_bindings.h", [t|Ptr Music -> IO ()|]),
+       ("c'unloadMusicStream", "UnloadMusicStream_", "rl_bindings.h", [t|Ptr Music -> IO ()|]),
        ("c'playMusicStream", "PlayMusicStream_", "rl_bindings.h", [t|Ptr Music -> IO ()|]),
        ("c'isMusicStreamPlaying", "IsMusicStreamPlaying_", "rl_bindings.h", [t|Ptr Music -> IO CBool|]),
        ("c'updateMusicStream", "UpdateMusicStream_", "rl_bindings.h", [t|Ptr Music -> IO ()|]),
@@ -148,7 +217,7 @@ $( genNative
        ("c'getMusicTimePlayed", "GetMusicTimePlayed_", "rl_bindings.h", [t|Ptr Music -> IO CFloat|]),
        ("c'loadAudioStream", "LoadAudioStream_", "rl_bindings.h", [t|CUInt -> CUInt -> CUInt -> IO (Ptr AudioStream)|]),
        ("c'isAudioStreamReady", "IsAudioStreamReady_", "rl_bindings.h", [t|Ptr AudioStream -> IO CBool|]),
-       --  ("c'unloadAudioStream", "UnloadAudioStream_", "rl_bindings.h", [t|Ptr AudioStream -> IO ()|]),
+       ("c'unloadAudioStream", "UnloadAudioStream_", "rl_bindings.h", [t|Ptr AudioStream -> IO ()|]),
        ("c'updateAudioStream", "UpdateAudioStream_", "rl_bindings.h", [t|Ptr AudioStream -> Ptr () -> CInt -> IO ()|]),
        ("c'isAudioStreamProcessed", "IsAudioStreamProcessed_", "rl_bindings.h", [t|Ptr AudioStream -> IO CBool|]),
        ("c'playAudioStream", "PlayAudioStream_", "rl_bindings.h", [t|Ptr AudioStream -> IO ()|]),
@@ -424,11 +493,11 @@ attachAudioMixedProcessor callback =
 detachAudioMixedProcessor :: C'AudioCallback -> IO ()
 detachAudioMixedProcessor = c'detachAudioMixedProcessor
 
-foreign import ccall safe "wrapper"
+foreign import ccall unsafe "wrapper"
   mk'audioCallback ::
     (Ptr () -> CUInt -> IO ()) -> IO C'AudioCallback
 
--- foreign import ccall safe "dynamic"
+-- foreign import ccall unsafe "dynamic"
 --   mK'audioCallback ::
 --     C'AudioCallback -> (Ptr () -> CUInt -> IO ())
 

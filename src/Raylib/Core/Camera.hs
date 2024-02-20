@@ -2,7 +2,16 @@
 {-# LANGUAGE TemplateHaskell #-}
 
 -- | Bindings to @rcamera@ (raylib.h)
-module Raylib.Core.Camera (updateCamera, updateCameraPro) where
+module Raylib.Core.Camera
+  ( -- * High level
+    updateCamera,
+    updateCameraPro,
+
+    -- * Native
+    c'updateCamera,
+    c'updateCameraPro,
+  )
+where
 
 import Foreign (Ptr, Storable (peek))
 import Foreign.C (CFloat (..), CInt (..))

@@ -9,11 +9,11 @@
 #ifdef __EMSCRIPTEN__
 
 #include <emscripten.h>
-#define RLBIND EMSCRIPTEN_KEEPALIVE
+#define RLBIND EMSCRIPTEN_KEEPALIVE __attribute__((always_inline))
 
 #else
 
-#define RLBIND
+#define RLBIND __attribute__((always_inline))
 
 #endif
 

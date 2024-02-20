@@ -1,5 +1,5 @@
-{-# LANGUAGE DeriveAnyClass #-}
 {-# OPTIONS -Wall #-}
+{-# LANGUAGE DeriveAnyClass #-}
 
 -- | Bindings for types used in all raylib modules
 module Raylib.Types.Core
@@ -13,6 +13,7 @@ module Raylib.Types.Core
     GamepadAxis (..),
     BlendMode (..),
     Gesture (..),
+
     -- * Structures
     Vector2 (..),
     Vector3 (..),
@@ -28,6 +29,7 @@ module Raylib.Types.Core
     AutomationEventList (..),
     Quaternion,
     AutomationEventListRef,
+
     -- * Callbacks
     LoadFileDataCallback,
     SaveFileDataCallback,
@@ -895,7 +897,9 @@ instance Storable AutomationEventList where
   poke _p (AutomationEventList capacity events) = do
     pokeByteOff _p 0 (fromIntegral capacity :: CUInt)
     pokeByteOff _p 4 (fromIntegral (length events) :: CUInt)
-    ptr <- callocBytes (fromIntegral capacity * sizeOf (undefined :: AutomationEvent))
+    ptr <- callocBytes $ case events of
+      [] -> 0
+      (x:_) -> fromIntegral capacity * sizeOf x
     pokeByteOff _p 8 ptr
     return ()
 

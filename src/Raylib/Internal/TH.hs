@@ -40,7 +40,7 @@ import Language.Haskell.TH
     TypeQ,
     mkName,
     nameBase,
-    reify, Foreign (ImportF), Callconv (CCall), Safety (Safe),
+    reify, Foreign (ImportF), Callconv (CCall), Safety (Unsafe),
   )
 
 #endif
@@ -83,6 +83,6 @@ genNative funs = do
         name = mkName hsName
 #else
     genNative' ((hsName, cName, cFile, funType) : xs) =
-      -- foreign import ccall safe "cFile cName" hsName :: funType
-      ForeignD (ImportF CCall Safe (cFile ++ " " ++ cName) (mkName hsName) funType) : genNative' xs
+      -- foreign import ccall unsafe "cFile cName" hsName :: funType
+      ForeignD (ImportF CCall Unsafe (cFile ++ " " ++ cName) (mkName hsName) funType) : genNative' xs
 #endif
