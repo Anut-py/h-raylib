@@ -52,3 +52,5 @@ import Raylib.Types.Core.Text
 import Raylib.Types.Core.Textures
 import Raylib.Types.Util.GUI
 import Raylib.Types.Util.RLGL
+
+-- TODO: Add pointer advancing functions (p'field) for all records

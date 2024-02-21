@@ -3,7 +3,9 @@
 
 -- | Bindings to @rlgl@
 module Raylib.Util.RLGL
-  ( -- * Matrix operations
+  ( -- * High level
+
+    -- ** Matrix operations
     rlMatrixMode,
     rlPushMatrix,
     rlPopMatrix,
@@ -16,7 +18,7 @@ module Raylib.Util.RLGL
     rlOrtho,
     rlViewport,
 
-    -- * Vertex level operations
+    -- ** Vertex level operations
     rlBegin,
     rlEnd,
     rlVertex2i,
@@ -28,12 +30,12 @@ module Raylib.Util.RLGL
     rlColor3f,
     rlColor4f,
 
-    -- * OpenGL style functions (common to 1.1, 3.3+, ES2)
+    -- ** OpenGL style functions (common to 1.1, 3.3+, ES2)
 
     -- | NOTE: These functions are used to completely abstract raylib code from OpenGL layer,
     --   some of them are direct wrappers over OpenGL calls, some others are custom
 
-    -- ** Vertex buffers state
+    -- *** Vertex buffers state
     rlEnableVertexArray,
     rlDisableVertexArray,
     rlEnableVertexBuffer,
@@ -43,7 +45,7 @@ module Raylib.Util.RLGL
     rlEnableVertexAttribute,
     rlDisableVertexAttribute,
 
-    -- ** Textures state
+    -- *** Textures state
     rlActiveTextureSlot,
     rlEnableTexture,
     rlDisableTexture,
@@ -52,11 +54,11 @@ module Raylib.Util.RLGL
     rlTextureParameters,
     rlCubemapParameters,
 
-    -- ** Shader state
+    -- *** Shader state
     rlEnableShader,
     rlDisableShader,
 
-    -- ** Framebuffer state
+    -- *** Framebuffer state
     rlEnableFramebuffer,
     rlDisableFramebuffer,
     rlGetActiveFramebuffer,
@@ -64,7 +66,7 @@ module Raylib.Util.RLGL
     rlBlitFramebuffer,
     rlBindFramebuffer,
 
-    -- ** General render state
+    -- *** General render state
     rlEnableColorBlend,
     rlDisableColorBlend,
     rlEnableDepthTest,
@@ -95,9 +97,9 @@ module Raylib.Util.RLGL
     rlSetBlendFactors,
     rlSetBlendFactorsSeparate,
 
-    -- * rlgl functionality
+    -- ** rlgl functionality
 
-    -- ** rlgl initialization functions
+    -- *** rlgl initialization functions
     rlglInit,
     rlglClose,
     rlLoadExtensions,
@@ -110,7 +112,7 @@ module Raylib.Util.RLGL
     rlGetShaderIdDefault,
     rlGetShaderLocsDefault,
 
-    -- ** Render batch management
+    -- *** Render batch management
 
     -- | NOTE: rlgl provides a default render batch to behave like OpenGL 1.1 immediate mode
     --   but this render batch API is exposed in case custom batches are required
@@ -122,7 +124,7 @@ module Raylib.Util.RLGL
     rlCheckRenderBatchLimit,
     rlSetTexture,
 
-    -- ** Vertex buffers management
+    -- *** Vertex buffers management
     rlLoadVertexArray,
     rlLoadVertexBuffer,
     rlLoadVertexBufferElement,
@@ -138,7 +140,7 @@ module Raylib.Util.RLGL
     rlDrawVertexArrayInstanced,
     rlDrawVertexArrayElementsInstanced,
 
-    -- ** Textures management
+    -- *** Textures management
     rlLoadTexture,
     rlLoadTextureDepth,
     rlLoadTextureCubemap,
@@ -150,13 +152,13 @@ module Raylib.Util.RLGL
     rlReadTexturePixels,
     rlReadScreenPixels,
 
-    -- ** Framebuffer management (fbo)
+    -- *** Framebuffer management (fbo)
     rlLoadFramebuffer,
     rlFramebufferAttach,
     rlFramebufferComplete,
     rlUnloadFramebuffer,
 
-    -- ** Shaders management
+    -- *** Shaders management
     rlLoadShaderCode,
     rlCompileShader,
     rlLoadShaderProgram,
@@ -168,11 +170,11 @@ module Raylib.Util.RLGL
     rlSetUniformSampler,
     rlSetShader,
 
-    -- ** Compute shader management
+    -- *** Compute shader management
     rlLoadComputeShaderProgram,
     rlComputeShaderDispatch,
 
-    -- ** Shader buffer storage object management (ssbo)
+    -- *** Shader buffer storage object management (ssbo)
     rlLoadShaderBuffer,
     rlUnloadShaderBuffer,
     rlUpdateShaderBuffer,
@@ -180,10 +182,10 @@ module Raylib.Util.RLGL
     rlCopyShaderBuffer,
     rlGetShaderBufferSize,
 
-    -- ** Buffer management
+    -- *** Buffer management
     rlBindImageTexture,
 
-    -- ** Matrix state management
+    -- *** Matrix state management
     rlGetMatrixModelview,
     rlGetMatrixProjection,
     rlGetMatrixTransform,
@@ -194,9 +196,162 @@ module Raylib.Util.RLGL
     rlSetMatrixProjectionStereo,
     rlSetMatrixViewOffsetStereo,
 
-    -- ** Quick and dirty cube/quad buffers load->draw->unload
+    -- *** Quick and dirty cube/quad buffers load->draw->unload
     rlLoadDrawCube,
     rlLoadDrawQuad,
+
+    -- * Native
+    c'rlMatrixMode,
+    c'rlTranslatef,
+    c'rlRotatef,
+    c'rlScalef,
+    c'rlMultMatrixf,
+    c'rlFrustum,
+    c'rlOrtho,
+    c'rlViewport,
+    c'rlBegin,
+    c'rlVertex2i,
+    c'rlVertex2f,
+    c'rlVertex3f,
+    c'rlTexCoord2f,
+    c'rlNormal3f,
+    c'rlColor4ub,
+    c'rlColor3f,
+    c'rlColor4f,
+    c'rlEnableVertexArray,
+    c'rlEnableVertexBuffer,
+    c'rlEnableVertexBufferElement,
+    c'rlEnableVertexAttribute,
+    c'rlDisableVertexAttribute,
+    c'rlActiveTextureSlot,
+    c'rlEnableTexture,
+    c'rlEnableTextureCubemap,
+    c'rlTextureParameters,
+    c'rlCubemapParameters,
+    c'rlEnableShader,
+    c'rlEnableFramebuffer,
+    c'rlActiveDrawBuffers,
+    c'rlBlitFramebuffer,
+    c'rlBindFramebuffer,
+    c'rlColorMask,
+    c'rlSetCullFace,
+    c'rlScissor,
+    c'rlSetLineWidth,
+    c'rlGetLineWidth,
+    c'rlIsStereoRenderEnabled,
+    c'rlClearColor,
+    c'rlSetBlendMode,
+    c'rlSetBlendFactors,
+    c'rlSetBlendFactorsSeparate,
+    c'rlglInit,
+    c'rlLoadExtensions,
+    c'rlGetVersion,
+    c'rlSetFramebufferWidth,
+    c'rlGetFramebufferWidth,
+    c'rlSetFramebufferHeight,
+    c'rlGetFramebufferHeight,
+    c'rlGetTextureIdDefault,
+    c'rlGetShaderIdDefault,
+    c'rlGetShaderLocsDefault,
+    c'rlLoadRenderBatch,
+    c'rlUnloadRenderBatch,
+    c'rlDrawRenderBatch,
+    c'rlSetRenderBatchActive,
+    c'rlCheckRenderBatchLimit,
+    c'rlSetTexture,
+    c'rlLoadVertexArray,
+    c'rlLoadVertexBuffer,
+    c'rlLoadVertexBufferElement,
+    c'rlUpdateVertexBuffer,
+    c'rlUpdateVertexBufferElements,
+    c'rlUnloadVertexArray,
+    c'rlUnloadVertexBuffer,
+    c'rlSetVertexAttribute,
+    c'rlSetVertexAttributeDivisor,
+    c'rlSetVertexAttributeDefault,
+    c'rlDrawVertexArray,
+    c'rlDrawVertexArrayElements,
+    c'rlDrawVertexArrayInstanced,
+    c'rlDrawVertexArrayElementsInstanced,
+    c'rlLoadTexture,
+    c'rlLoadTextureDepth,
+    c'rlLoadTextureCubemap,
+    c'rlUpdateTexture,
+    c'rlGetGlTextureFormats,
+    c'rlGetPixelFormatName,
+    c'rlUnloadTexture,
+    c'rlGenTextureMipmaps,
+    c'rlReadTexturePixels,
+    c'rlReadScreenPixels,
+    c'rlLoadFramebuffer,
+    c'rlFramebufferAttach,
+    c'rlFramebufferComplete,
+    c'rlUnloadFramebuffer,
+    c'rlLoadShaderCode,
+    c'rlCompileShader,
+    c'rlLoadShaderProgram,
+    c'rlUnloadShaderProgram,
+    c'rlGetLocationUniform,
+    c'rlGetLocationAttrib,
+    c'rlSetUniform,
+    c'rlSetUniformMatrix,
+    c'rlSetUniformSampler,
+    c'rlSetShader,
+    c'rlLoadComputeShaderProgram,
+    c'rlComputeShaderDispatch,
+    c'rlLoadShaderBuffer,
+    c'rlUnloadShaderBuffer,
+    c'rlUpdateShaderBuffer,
+    c'rlBindShaderBuffer,
+    c'rlReadShaderBuffer,
+    c'rlCopyShaderBuffer,
+    c'rlGetShaderBufferSize,
+    c'rlBindImageTexture,
+    c'rlGetMatrixModelview,
+    c'rlGetMatrixProjection,
+    c'rlGetMatrixTransform,
+    c'rlGetMatrixProjectionStereo,
+    c'rlGetMatrixViewOffsetStereo,
+    c'rlSetMatrixProjection,
+    c'rlSetMatrixModelview,
+    c'rlSetMatrixProjectionStereo,
+    c'rlSetMatrixViewOffsetStereo,
+    c'rlGetPixelDataSize,
+    c'rlPushMatrix,
+    c'rlPopMatrix,
+    c'rlLoadIdentity,
+    c'rlEnd,
+    c'rlDisableVertexArray,
+    c'rlDisableVertexBuffer,
+    c'rlDisableVertexBufferElement,
+    c'rlDisableTexture,
+    c'rlDisableTextureCubemap,
+    c'rlDisableShader,
+    c'rlDisableFramebuffer,
+    c'rlGetActiveFramebuffer,
+    c'rlEnableColorBlend,
+    c'rlDisableColorBlend,
+    c'rlEnableDepthTest,
+    c'rlDisableDepthTest,
+    c'rlEnableDepthMask,
+    c'rlDisableDepthMask,
+    c'rlEnableBackfaceCulling,
+    c'rlDisableBackfaceCulling,
+    c'rlEnableScissorTest,
+    c'rlDisableScissorTest,
+    c'rlEnableWireMode,
+    c'rlEnablePointMode,
+    c'rlDisableWireMode,
+    c'rlEnableSmoothLines,
+    c'rlDisableSmoothLines,
+    c'rlEnableStereoRender,
+    c'rlDisableStereoRender,
+    c'rlClearScreenBuffers,
+    c'rlCheckErrors,
+    c'rlglClose,
+    c'rlDrawRenderBatchActive,
+    c'rlLoadDrawCube,
+    c'rlLoadDrawQuad
   )
 where
 
@@ -327,7 +482,7 @@ $( genNative
        ("c'rlLoadTextureCubemap", "rlLoadTextureCubemap_", "rlgl_bindings.h", [t|Ptr () -> CInt -> CInt -> IO CUInt|]),
        ("c'rlUpdateTexture", "rlUpdateTexture_", "rlgl_bindings.h", [t|CUInt -> CInt -> CInt -> CInt -> CInt -> CInt -> Ptr () -> IO ()|]),
        ("c'rlGetGlTextureFormats", "rlGetGlTextureFormats_", "rlgl_bindings.h", [t|CInt -> Ptr CUInt -> Ptr CUInt -> Ptr CUInt -> IO ()|]),
-       --  ("c'rlGetPixelFormatName", "rlGetPixelFormatName_", "rlgl_bindings.h", [t|CUInt -> IO CString|]),
+       ("c'rlGetPixelFormatName", "rlGetPixelFormatName_", "rlgl_bindings.h", [t|CUInt -> IO CString|]),
        ("c'rlUnloadTexture", "rlUnloadTexture_", "rlgl_bindings.h", [t|CUInt -> IO ()|]),
        ("c'rlGenTextureMipmaps", "rlGenTextureMipmaps_", "rlgl_bindings.h", [t|CUInt -> CInt -> CInt -> CInt -> Ptr CInt -> IO ()|]),
        ("c'rlReadTexturePixels", "rlReadTexturePixels_", "rlgl_bindings.h", [t|CUInt -> CInt -> CInt -> CInt -> IO (Ptr ())|]),
@@ -352,7 +507,7 @@ $( genNative
        ("c'rlUnloadShaderBuffer", "rlUnloadShaderBuffer_", "rlgl_bindings.h", [t|CUInt -> IO ()|]),
        ("c'rlUpdateShaderBuffer", "rlUpdateShaderBuffer_", "rlgl_bindings.h", [t|CUInt -> Ptr () -> CUInt -> CUInt -> IO ()|]),
        ("c'rlBindShaderBuffer", "rlBindShaderBuffer_", "rlgl_bindings.h", [t|CUInt -> CUInt -> IO ()|]),
-       --  ("c'rlReadShaderBuffer", "rlReadShaderBuffer_", "rlgl_bindings.h", [t|CUInt -> Ptr () -> CUInt -> CUInt -> IO ()|]),
+       ("c'rlReadShaderBuffer", "rlReadShaderBuffer_", "rlgl_bindings.h", [t|CUInt -> Ptr () -> CUInt -> CUInt -> IO ()|]),
        ("c'rlCopyShaderBuffer", "rlCopyShaderBuffer_", "rlgl_bindings.h", [t|CUInt -> CUInt -> CUInt -> CUInt -> CUInt -> IO ()|]),
        ("c'rlGetShaderBufferSize", "rlGetShaderBufferSize_", "rlgl_bindings.h", [t|CUInt -> IO CUInt|]),
        ("c'rlBindImageTexture", "rlBindImageTexture_", "rlgl_bindings.h", [t|CUInt -> CUInt -> CInt -> CBool -> IO ()|]),

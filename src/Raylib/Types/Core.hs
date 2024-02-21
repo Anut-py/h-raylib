@@ -1,5 +1,5 @@
-{-# LANGUAGE DeriveAnyClass #-}
 {-# OPTIONS -Wall #-}
+{-# LANGUAGE DeriveAnyClass #-}
 
 -- | Bindings for types used in all raylib modules
 module Raylib.Types.Core
@@ -13,6 +13,7 @@ module Raylib.Types.Core
     GamepadAxis (..),
     BlendMode (..),
     Gesture (..),
+
     -- * Structures
     Vector2 (..),
     Vector3 (..),
@@ -28,6 +29,7 @@ module Raylib.Types.Core
     AutomationEventList (..),
     Quaternion,
     AutomationEventListRef,
+
     -- * Callbacks
     LoadFileDataCallback,
     SaveFileDataCallback,

@@ -12,7 +12,7 @@ import Raylib.Util.RLGL (rlBegin, rlColor4ub, rlEnd, rlNormal3f, rlPopMatrix, rl
 import Prelude hiding (length)
 
 texturePath :: String
-texturePath = (if not inGHCi then "../../../../../../../../../" else "./") ++ "examples/basic-rlgl/assets/cubicmap_atlas.png"
+texturePath = (if not inGHCi then "../../../../../../../../../../" else "./") ++ "examples/basic-rlgl/assets/cubicmap_atlas.png"
 
 main :: IO ()
 main = do

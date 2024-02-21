@@ -40,8 +40,6 @@ main =
     "raylib [core] example - basic automation events"
     60
     ( \window -> do
-        el <- newAutomationEventList
-        listRef <- setAutomationEventList el window
         rWidth <- measureText "REC" 30
         pWidth <- measureText "PLAY" 30
 
@@ -56,16 +54,18 @@ main =
                         then
                           ( do
                               l <- newAutomationEventList
-                              setAutomationEventList l window
+                              Just <$> setAutomationEventList l window
                           )
                         else return lRef
                     when toggleRec $ if recording' then setAutomationEventBaseFrame 60 >> startAutomationEventRecording else stopAutomationEventRecording
                     when recording' $ drawText "REC" (790 - rWidth) 10 30 red
 
-                    list <- peekAutomationEventList lRef'
+                    lEvents <- case lRef' of
+                      Nothing -> return []
+                      Just l -> automationEventList'events <$> peekAutomationEventList l
                     let playback' =
                           if toggleRec && not recording'
-                            then Just (automationEventList'events list, 0)
+                            then Just (lEvents, 0)
                             else playback
                     startPlay <- isKeyPressed KeyP
                     let playing' = isJust playback' && not recording' && (startPlay || playing)
@@ -85,7 +85,7 @@ main =
                         else return playback'
                     let (playback''', playing'') =
                           case playback'' of
-                            Nothing -> let e = automationEventList'events list in if null e then (Nothing, False) else (Just (e, 0), False)
+                            Nothing -> if null lEvents then (Nothing, False) else (Just (lEvents, 0), False)
                             v -> (v, playing')
 
                     clearBackground white
@@ -100,7 +100,7 @@ main =
                       Nothing -> drawText "Click somewhere or press the arrow keys" 10 10 20 black >> drawText "Press 'R' to start or stop recording, and 'P' to play the recording" 10 40 20 black
                       Just (p@(Vector2 x y), t) ->
                         ( do
-                            when (t < 1.0) $ drawCircleV p (sin ((realToFrac t) * pi / 1.0) * 10) red
+                            when (t < 1.0) $ drawCircleV p (sin (realToFrac t * pi / 1.0) * 10) red
                             drawText ("Mouse clicked at (" ++ show x ++ ", " ++ show y ++ ")") 10 (if y < 50 && t < 1.0 then 570 else 10) 20 black
                         )
 
@@ -112,7 +112,7 @@ main =
                     let shiftLeft =
                           case mState'' of
                             Nothing -> 0
-                            Just ((Vector2 x y), t) -> if x > 580 && y > 490 && t < 1.0 then -580 else 0
+                            Just (Vector2 x y, t) -> if x > 580 && y > 490 && t < 1.0 then -580 else 0
 
                     (if uDown then drawRectangle else drawRectangleLines) (660 + shiftLeft) 500 60 40 lb
                     (if dDown then drawRectangle else drawRectangleLines) (660 + shiftLeft) 550 60 40 lb
@@ -122,5 +122,5 @@ main =
                     return (mState'', playback''', playing'', recording', lRef')
                 )
           )
-          (Nothing, Nothing, False, False, listRef)
+          (Nothing, Nothing, False, False, Nothing)
     )

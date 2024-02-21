@@ -11,7 +11,7 @@ import Raylib.Util (drawing, inGHCi, mode3D, whileWindowOpen_, withWindow)
 import Raylib.Util.Colors (orange, white)
 
 modelPath :: String
-modelPath = (if not inGHCi then "../../../../../../../../../" else "./") ++ "examples/basic-models/assets/Model.obj"
+modelPath = (if not inGHCi then "../../../../../../../../../../" else "./") ++ "examples/basic-models/assets/Model.obj"
 
 main :: IO ()
 main = do

@@ -16,7 +16,8 @@
 -- very customizable and the features are quite limited. For a real game, you
 -- should make your own retained mode GUI.
 module Raylib.Util.GUI
-  ( -- * Global gui state control functions
+  ( -- * High level
+    -- ** Global gui state control functions
     guiEnable,
     guiDisable,
     guiLock,
@@ -26,7 +27,7 @@ module Raylib.Util.GUI
     guiSetState,
     guiGetState,
 
-    -- * Font set/get functions
+    -- ** Font set/get functions
     guiSetFont,
     guiGetFont,
 
@@ -42,7 +43,7 @@ module Raylib.Util.GUI
     --   `Enum`s. There are also a bunch of specialized getters and setters for
     --   commonly used properties.
 
-    -- ** Set style
+    -- *** Set style
     guiSetStyle,
     guiSetStyleC,
     guiSetStyleE,
@@ -69,7 +70,7 @@ module Raylib.Util.GUI
     guiSetStyleTextAlignmentVertical,
     guiSetStyleTextWrapMode,
 
-    -- ** Get style
+    -- *** Get style
     guiGetStyle,
     guiGetStyleC,
     guiGetStyleE,
@@ -96,25 +97,25 @@ module Raylib.Util.GUI
     guiGetStyleTextAlignmentVertical,
     guiGetStyleTextWrapMode,
 
-    -- * Styles loading functions
+    -- ** Styles loading functions
     guiLoadStyle,
     guiLoadStyleDefault,
 
-    -- * Tooltips management functions
+    -- ** Tooltips management functions
     guiEnableTooltip,
     guiDisableTooltip,
     guiSetTooltip,
 
-    -- * Icons functionality
+    -- ** Icons functionality
     guiIconText,
     guiSetIconScale,
     guiGetIcons,
     guiLoadIcons,
     guiDrawIcon,
 
-    -- * Controls
+    -- ** Controls
 
-    -- ** Container/separator controls, useful for controls organization
+    -- *** Container/separator controls, useful for controls organization
     guiWindowBox,
     guiGroupBox,
     guiLine,
@@ -122,7 +123,7 @@ module Raylib.Util.GUI
     guiTabBar,
     guiScrollPanel,
 
-    -- ** Basic controls set
+    -- *** Basic controls set
     guiLabel,
     guiButton,
     guiLabelButton,
@@ -142,7 +143,7 @@ module Raylib.Util.GUI
     guiDummyRec,
     guiGrid,
 
-    -- ** Advanced controls set
+    -- *** Advanced controls set
     guiListView,
     guiListViewEx,
     guiMessageBox,
@@ -153,6 +154,64 @@ module Raylib.Util.GUI
     guiColorBarHue,
     guiColorPickerHSV,
     guiColorPanelHSV,
+
+    -- * Native
+    c'guiEnable,
+    c'guiDisable,
+    c'guiLock,
+    c'guiUnlock,
+    c'guiIsLocked,
+    c'guiSetAlpha,
+    c'guiSetState,
+    c'guiGetState,
+    c'guiSetFont,
+    c'guiGetFont,
+    c'guiSetStyle,
+    c'guiGetStyle,
+    c'guiLoadStyle,
+    c'guiLoadStyleDefault,
+    c'guiEnableTooltip,
+    c'guiDisableTooltip,
+    c'guiSetTooltip,
+    c'guiIconText,
+    c'guiSetIconScale,
+    c'guiGetIcons,
+    c'guiLoadIcons,
+    c'guiDrawIcon,
+    c'guiWindowBox,
+    c'guiGroupBox,
+    c'guiLine,
+    c'guiPanel,
+    c'guiTabBar,
+    c'guiScrollPanel,
+    c'guiLabel,
+    c'guiButton,
+    c'guiLabelButton,
+    c'guiToggle,
+    c'guiToggleGroup,
+    c'guiToggleSlider,
+    c'guiCheckBox,
+    c'guiComboBox,
+    c'guiDropdownBox,
+    c'guiSpinner,
+    c'guiValueBox,
+    c'guiTextBox,
+    c'guiSlider,
+    c'guiSliderBar,
+    c'guiProgressBar,
+    c'guiStatusBar,
+    c'guiDummyRec,
+    c'guiGrid,
+    c'guiListView,
+    c'guiListViewEx,
+    c'guiMessageBox,
+    c'guiTextInputBox,
+    c'guiColorPicker,
+    c'guiColorPanel,
+    c'guiColorBarAlpha,
+    c'guiColorBarHue,
+    c'guiColorPickerHSV,
+    c'guiColorPanelHSV
   )
 where
 

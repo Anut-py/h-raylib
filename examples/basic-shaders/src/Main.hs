@@ -42,7 +42,7 @@ import Raylib.Util (inGHCi, setMaterialShader, whileWindowOpen_)
 import Raylib.Util.Colors (black, blue, lightGray, orange, white)
 
 assetsPath :: String
-assetsPath = (if not inGHCi then "../../../../../../../../../" else "./") ++ "examples/basic-shaders/assets/"
+assetsPath = (if not inGHCi then "../../../../../../../../../../" else "./") ++ "examples/basic-shaders/assets/"
 
 main :: IO ()
 main = do

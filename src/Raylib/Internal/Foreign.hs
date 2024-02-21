@@ -208,7 +208,10 @@ peekMaybeOff ptr off = do
 pokeMaybe :: (Storable a) => Ptr (Ptr a) -> Maybe a -> IO ()
 pokeMaybe ptr val = case val of
   Nothing -> poke ptr nullPtr
-  Just a -> with a $ poke ptr
+  Just a -> do
+    nested <- malloc
+    poke nested a
+    poke ptr nested
 
 pokeMaybeOff :: (Storable a) => Ptr (Ptr a) -> Int -> Maybe a -> IO ()
 pokeMaybeOff ptr off = pokeMaybe (plusPtr ptr off)

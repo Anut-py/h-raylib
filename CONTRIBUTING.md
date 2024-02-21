@@ -2,7 +2,9 @@
 
 Anybody willing to contribute to the project is welcome to do so. Please use the GitHub issue tracker to report any bugs you find.
 
-You can run the examples by using `cabal run {example name}` in the project directory.
+You can run the examples by using `cabal run [example-name]` in the project directory.
+
+You can run an example with profiling by using `cabal run [example-name] --ghc-options="-fprof-auto -rtsopts -threaded" --enable-library-profiling --enable-profiling -- +RTS -N -P`. This will generate a file `example-name.prof` with the profiling info.
 
 You can use `run-all-examples.sh` to run all of the examples in one go.
 
