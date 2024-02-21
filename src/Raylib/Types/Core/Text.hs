@@ -4,22 +4,36 @@
 module Raylib.Types.Core.Text
   ( -- * Enumerations
     FontType (..),
+
     -- * Structures
     GlyphInfo (..),
     Font (..),
+
+    -- * Pointer utilities
+    p'glyphInfo'value,
+    p'glyphInfo'offsetX,
+    p'glyphInfo'offsetY,
+    p'glyphInfo'advanceX,
+    p'glyphInfo'image,
+    p'font'baseSize,
+    p'font'glyphCount,
+    p'font'glyphPadding,
+    p'font'texture,
+    p'font'recs,
+    p'font'glyphs,
   )
 where
 
 import Foreign
   ( Ptr,
-    Storable (alignment, peek, peekByteOff, poke, pokeByteOff, sizeOf),
+    Storable (alignment, peek, poke, sizeOf),
     castPtr,
     newArray,
     peekArray,
+    plusPtr,
   )
 import Foreign.C
   ( CInt (..),
-    CUChar,
   )
 import Raylib.Internal.Foreign (Freeable (rlFreeDependents), c'free, rlFreeArray)
 import Raylib.Types.Core (Rectangle)
@@ -48,24 +62,39 @@ instance Storable GlyphInfo where
   sizeOf _ = 40
   alignment _ = 4
   peek _p = do
-    value <- fromIntegral <$> (peekByteOff _p 0 :: IO CInt)
-    offsetX <- fromIntegral <$> (peekByteOff _p 4 :: IO CInt)
-    offsetY <- fromIntegral <$> (peekByteOff _p 8 :: IO CInt)
-    advanceX <- fromIntegral <$> (peekByteOff _p 12 :: IO CInt)
-    image <- peekByteOff _p 16
+    value <- fromIntegral <$> peek (p'glyphInfo'value _p)
+    offsetX <- fromIntegral <$> peek (p'glyphInfo'offsetX _p)
+    offsetY <- fromIntegral <$> peek (p'glyphInfo'offsetY _p)
+    advanceX <- fromIntegral <$> peek (p'glyphInfo'advanceX _p)
+    image <- peek (p'glyphInfo'image _p)
     return $ GlyphInfo value offsetX offsetY advanceX image
   poke _p (GlyphInfo value offsetX offsetY advanceX image) = do
-    pokeByteOff _p 0 (fromIntegral value :: CInt)
-    pokeByteOff _p 4 (fromIntegral offsetX :: CInt)
-    pokeByteOff _p 8 (fromIntegral offsetY :: CInt)
-    pokeByteOff _p 12 (fromIntegral advanceX :: CInt)
-    pokeByteOff _p 16 image
+    poke (p'glyphInfo'value _p) (fromIntegral value)
+    poke (p'glyphInfo'offsetX _p) (fromIntegral offsetX)
+    poke (p'glyphInfo'offsetY _p) (fromIntegral offsetY)
+    poke (p'glyphInfo'advanceX _p) (fromIntegral advanceX)
+    poke (p'glyphInfo'image _p) image
     return ()
+
+p'glyphInfo'value :: Ptr GlyphInfo -> Ptr CInt
+p'glyphInfo'value = (`plusPtr` 0)
+
+p'glyphInfo'offsetX :: Ptr GlyphInfo -> Ptr CInt
+p'glyphInfo'offsetX = (`plusPtr` 4)
+
+p'glyphInfo'offsetY :: Ptr GlyphInfo -> Ptr CInt
+p'glyphInfo'offsetY = (`plusPtr` 8)
+
+p'glyphInfo'advanceX :: Ptr GlyphInfo -> Ptr CInt
+p'glyphInfo'advanceX = (`plusPtr` 12)
+
+p'glyphInfo'image :: Ptr GlyphInfo -> Ptr Image
+p'glyphInfo'image = (`plusPtr` 16)
 
 instance Freeable GlyphInfo where
   rlFreeDependents _ ptr = do
-    dataPtr <- (peekByteOff ptr 16 :: IO (Ptr CUChar))
-    c'free $ castPtr dataPtr
+    dataPtr <- peek (castPtr (p'glyphInfo'image ptr) :: Ptr (Ptr ())) -- TODO: Use p'image'data
+    c'free dataPtr
 
 data Font = Font
   { font'baseSize :: Int,
@@ -81,27 +110,43 @@ instance Storable Font where
   sizeOf _ = 48
   alignment _ = 4
   peek _p = do
-    baseSize <- fromIntegral <$> (peekByteOff _p 0 :: IO CInt)
-    glyphCount <- fromIntegral <$> (peekByteOff _p 4 :: IO CInt)
-    glyphPadding <- fromIntegral <$> (peekByteOff _p 8 :: IO CInt)
-    texture <- peekByteOff _p 12
-    recPtr <- (peekByteOff _p 32 :: IO (Ptr Rectangle))
-    recs <- peekArray glyphCount recPtr
-    glyphPtr <- (peekByteOff _p 40 :: IO (Ptr GlyphInfo))
-    glyphs <- peekArray glyphCount glyphPtr
+    baseSize <- fromIntegral <$> peek (p'font'baseSize _p)
+    glyphCount <- fromIntegral <$> peek (p'font'glyphCount _p)
+    glyphPadding <- fromIntegral <$> peek (p'font'glyphPadding _p)
+    texture <- peek (p'font'texture _p)
+    recs <- peekArray glyphCount =<< peek (p'font'recs _p)
+    glyphs <- peekArray glyphCount =<< peek (p'font'glyphs _p)
     return $ Font baseSize glyphCount glyphPadding texture recs glyphs
   poke _p (Font baseSize glyphCount glyphPadding texture recs glyphs) = do
-    pokeByteOff _p 0 (fromIntegral baseSize :: CInt)
-    pokeByteOff _p 4 (fromIntegral glyphCount :: CInt)
-    pokeByteOff _p 8 (fromIntegral glyphPadding :: CInt)
-    pokeByteOff _p 12 texture
-    pokeByteOff _p 32 =<< newArray recs
-    pokeByteOff _p 40 =<< newArray glyphs
+    poke (p'font'baseSize _p) (fromIntegral baseSize)
+    poke (p'font'glyphCount _p) (fromIntegral glyphCount)
+    poke (p'font'glyphPadding _p) (fromIntegral glyphPadding)
+    poke (p'font'texture _p) texture
+    poke (p'font'recs _p) =<< newArray recs
+    poke (p'font'glyphs _p) =<< newArray glyphs
     return ()
+
+p'font'baseSize :: Ptr Font -> Ptr CInt
+p'font'baseSize = (`plusPtr` 0)
+
+p'font'glyphCount :: Ptr Font -> Ptr CInt
+p'font'glyphCount = (`plusPtr` 4)
+
+p'font'glyphPadding :: Ptr Font -> Ptr CInt
+p'font'glyphPadding = (`plusPtr` 8)
+
+p'font'texture :: Ptr Font -> Ptr Texture
+p'font'texture = (`plusPtr` 12)
+
+-- array (font'glyphCount)
+p'font'recs :: Ptr Font -> Ptr (Ptr Rectangle)
+p'font'recs = (`plusPtr` 32)
+
+-- array (font'glyphCount)
+p'font'glyphs :: Ptr Font -> Ptr (Ptr GlyphInfo)
+p'font'glyphs = (`plusPtr` 40)
 
 instance Freeable Font where
   rlFreeDependents val ptr = do
-    recsPtr <- (peekByteOff ptr 32 :: IO (Ptr Rectangle))
-    c'free $ castPtr recsPtr
-    glyphsPtr <- (peekByteOff ptr 40 :: IO (Ptr GlyphInfo))
-    rlFreeArray (font'glyphs val) glyphsPtr
+    c'free . castPtr =<< peek (p'font'recs ptr)
+    rlFreeArray (font'glyphs val) =<< peek (p'font'glyphs ptr)

@@ -1,4 +1,5 @@
 {-# LANGUAGE DeriveAnyClass #-}
+
 {-# OPTIONS -Wall #-}
 
 -- | Bindings for types used mainly in @rmodels@
@@ -12,6 +13,7 @@ module Raylib.Types.Core.Models
     unpackShaderUniformData,
     unpackShaderUniformDataV,
     ShaderAttributeDataType (..),
+
     -- * Structures
     Mesh (..),
     Shader (..),
@@ -24,13 +26,64 @@ module Raylib.Types.Core.Models
     Ray (..),
     RayCollision (..),
     BoundingBox (..),
+
+    -- * Pointer utilities
+    p'mesh'vertexCount,
+    p'mesh'triangleCount,
+    p'mesh'vertices,
+    p'mesh'texcoords,
+    p'mesh'texcoords2,
+    p'mesh'normals,
+    p'mesh'tangents,
+    p'mesh'colors,
+    p'mesh'indices,
+    p'mesh'animVertices,
+    p'mesh'animNormals,
+    p'mesh'boneIds,
+    p'mesh'boneWeights,
+    p'mesh'vaoId,
+    p'mesh'vboId,
+    p'shader'id,
+    p'shader'locs,
+    p'materialMap'texture,
+    p'materialMap'color,
+    p'materialMap'value,
+    p'material'shader,
+    p'material'maps,
+    p'material'params,
+    p'transform'translation,
+    p'transform'rotation,
+    p'transform'scale,
+    p'boneInfo'name,
+    p'boneInfo'parent,
+    p'model'transform,
+    p'model'meshCount,
+    p'model'materialCount,
+    p'model'meshes,
+    p'model'materials,
+    p'model'meshMaterial,
+    p'model'boneCount,
+    p'model'bones,
+    p'model'bindPose,
+    p'modelAnimation'boneCount,
+    p'modelAnimation'bones,
+    p'modelAnimation'framePoses,
+    p'modelAnimation'name,
+    p'ray'position,
+    p'ray'direction,
+    p'rayCollision'hit,
+    p'rayCollision'distance,
+    p'rayCollision'point,
+    p'rayCollision'normal,
+    p'boundingBox'min,
+    p'boundingBox'max,
   )
 where
 
 import Control.Monad (forM_, unless)
 import Foreign
   ( Ptr,
-    Storable (alignment, peek, peekByteOff, poke, pokeByteOff, sizeOf),
+    Storable (alignment, peek, poke, sizeOf),
     Word16,
     Word8,
     castPtr,
@@ -39,6 +92,7 @@ import Foreign
     newArray,
     newForeignPtr,
     peekArray,
+    plusPtr,
     toBool,
     withForeignPtr,
   )
@@ -51,10 +105,10 @@ import Foreign.C
     CUInt,
     CUShort,
     castCharToCChar,
+    peekCString,
   )
-import Foreign.C.String (castCCharToChar)
-import Raylib.Internal.Foreign (Freeable (rlFreeDependents), c'free, freeMaybePtr, newMaybeArray, p'free, peekMaybeArray, peekStaticArray, peekStaticArrayOff, pokeStaticArray, pokeStaticArrayOff, rightPad, rlFreeArray, rlFreeMaybeArray)
 import Raylib.Internal (c'rlGetShaderIdDefault)
+import Raylib.Internal.Foreign (Freeable (rlFreeDependents), c'free, freeMaybePtr, newMaybeArray, p'free, peekMaybeArray, peekStaticArray, pokeStaticArray, rightPad, rlFreeArray, rlFreeMaybeArray)
 import Raylib.Types.Core (Color, Matrix, Quaternion, Vector2 (Vector2), Vector3 (Vector3), Vector4 (Vector4))
 import Raylib.Types.Core.Textures (Texture (texture'id))
 
@@ -261,77 +315,122 @@ instance Storable Mesh where
   sizeOf _ = 112
   alignment _ = 8
   peek _p = do
-    vertexCount <- fromIntegral <$> (peekByteOff _p 0 :: IO CInt)
-    triangleCount <- fromIntegral <$> (peekByteOff _p 4 :: IO CInt)
-    verticesPtr <- (peekByteOff _p 8 :: IO (Ptr Vector3))
-    vertices <- peekArray vertexCount verticesPtr
-    texcoordsPtr <- (peekByteOff _p 16 :: IO (Ptr Vector2))
-    texcoords <- peekArray vertexCount texcoordsPtr
-    texcoords2Ptr <- (peekByteOff _p 24 :: IO (Ptr Vector2))
-    texcoords2 <- peekMaybeArray vertexCount texcoords2Ptr
-    normalsPtr <- (peekByteOff _p 32 :: IO (Ptr Vector3))
-    normals <- peekArray vertexCount normalsPtr
-    tangentsPtr <- (peekByteOff _p 40 :: IO (Ptr Vector4))
-    tangents <- peekMaybeArray vertexCount tangentsPtr
-    colorsPtr <- (peekByteOff _p 48 :: IO (Ptr Color))
-    colors <- peekMaybeArray vertexCount colorsPtr
-    indicesPtr <- (peekByteOff _p 56 :: IO (Ptr CUShort))
-    indices <- (\m -> map fromIntegral <$> m) <$> peekMaybeArray vertexCount indicesPtr
-    animVerticesPtr <- (peekByteOff _p 64 :: IO (Ptr Vector3))
-    animVertices <- peekMaybeArray vertexCount animVerticesPtr
-    animNormalsPtr <- (peekByteOff _p 72 :: IO (Ptr Vector3))
-    animNormals <- peekMaybeArray vertexCount animNormalsPtr
-    boneIdsPtr <- (peekByteOff _p 80 :: IO (Ptr CUChar))
-    boneIds <- (\m -> map fromIntegral <$> m) <$> peekMaybeArray (vertexCount * 4) boneIdsPtr
-    boneWeightsPtr <- (peekByteOff _p 88 :: IO (Ptr CFloat))
-    boneWeights <- (map realToFrac <$>) <$> peekMaybeArray (vertexCount * 4) boneWeightsPtr
-    vaoId <- fromIntegral <$> (peekByteOff _p 96 :: IO CUInt)
-    vboIdPtr <- (peekByteOff _p 104 :: IO (Ptr CUInt))
-    vboId <- (\m -> map fromIntegral <$> m) <$> peekMaybeArray 7 vboIdPtr
+    vertexCount <- fromIntegral <$> peek (p'mesh'vertexCount _p)
+    triangleCount <- fromIntegral <$> peek (p'mesh'triangleCount _p)
+    vertices <- peekArray vertexCount =<< peek (p'mesh'vertices _p)
+    texcoords <- peekArray vertexCount =<< peek (p'mesh'texcoords _p)
+    texcoords2 <- peekMaybeArray vertexCount =<< peek (p'mesh'texcoords2 _p)
+    normals <- peekArray vertexCount =<< peek (p'mesh'normals _p)
+    tangents <- peekMaybeArray vertexCount =<< peek (p'mesh'tangents _p)
+    colors <- peekMaybeArray vertexCount =<< peek (p'mesh'colors _p)
+    indices <- (map fromIntegral <$>) <$> (peekMaybeArray vertexCount =<< peek (p'mesh'indices _p))
+    animVertices <- peekMaybeArray vertexCount =<< peek (p'mesh'animVertices _p)
+    animNormals <- peekMaybeArray vertexCount =<< peek (p'mesh'animNormals _p)
+    boneIds <- (map fromIntegral <$>) <$> (peekMaybeArray (vertexCount * 4) =<< peek (p'mesh'boneIds _p))
+    boneWeights <- (map realToFrac <$>) <$> (peekMaybeArray (vertexCount * 4) =<< peek (p'mesh'boneWeights _p))
+    vaoId <- fromIntegral <$> peek (p'mesh'vaoId _p)
+    vboId <- (map fromIntegral <$>) <$> (peekMaybeArray 7 =<< peek (p'mesh'vboId _p))
     return $ Mesh vertexCount triangleCount vertices texcoords texcoords2 normals tangents colors indices animVertices animNormals boneIds boneWeights vaoId vboId
   poke _p (Mesh vertexCount triangleCount vertices texcoords texcoords2 normals tangents colors indices animVertices animNormals boneIds boneWeights vaoId vboId) = do
-    pokeByteOff _p 0 (fromIntegral vertexCount :: CInt)
-    pokeByteOff _p 4 (fromIntegral triangleCount :: CInt)
-    pokeByteOff _p 8 =<< newArray vertices
-    pokeByteOff _p 16 =<< newArray texcoords
-    newMaybeArray texcoords2 >>= pokeByteOff _p 24
-    pokeByteOff _p 32 =<< newArray normals
-    newMaybeArray tangents >>= pokeByteOff _p 40
-    newMaybeArray colors >>= pokeByteOff _p 48
-    newMaybeArray (map fromIntegral <$> indices :: Maybe [CUShort]) >>= pokeByteOff _p 56
-    newMaybeArray animVertices >>= pokeByteOff _p 64
-    newMaybeArray animNormals >>= pokeByteOff _p 72
-    newMaybeArray (map fromIntegral <$> boneIds :: Maybe [CUChar]) >>= pokeByteOff _p 80
-    newMaybeArray (map realToFrac <$> boneWeights :: Maybe [CFloat]) >>= pokeByteOff _p 88
-    pokeByteOff _p 96 (fromIntegral vaoId :: CUInt)
-    newMaybeArray (map fromIntegral <$> vboId :: Maybe [CUInt]) >>= pokeByteOff _p 104
+    poke (p'mesh'vertexCount _p) (fromIntegral vertexCount)
+    poke (p'mesh'triangleCount _p) (fromIntegral triangleCount)
+    poke (p'mesh'vertices _p) =<< newArray vertices
+    poke (p'mesh'texcoords _p) =<< newArray texcoords
+    poke (p'mesh'texcoords2 _p) =<< newMaybeArray texcoords2
+    poke (p'mesh'normals _p) =<< newArray normals
+    poke (p'mesh'tangents _p) =<< newMaybeArray tangents
+    poke (p'mesh'colors _p) =<< newMaybeArray colors
+    poke (p'mesh'indices _p) =<< newMaybeArray (map fromIntegral <$> indices)
+    poke (p'mesh'animVertices _p) =<< newMaybeArray animVertices
+    poke (p'mesh'animNormals _p) =<< newMaybeArray animNormals
+    poke (p'mesh'boneIds _p) =<< newMaybeArray (map fromIntegral <$> boneIds)
+    poke (p'mesh'boneWeights _p) =<< newMaybeArray (map realToFrac <$> boneWeights)
+    poke (p'mesh'vaoId _p) (fromIntegral vaoId)
+    poke (p'mesh'vboId _p) =<< newMaybeArray (map fromIntegral <$> vboId)
     return ()
+
+p'mesh'vertexCount :: Ptr Mesh -> Ptr CInt
+p'mesh'vertexCount = (`plusPtr` 0)
+
+p'mesh'triangleCount :: Ptr Mesh -> Ptr CInt
+p'mesh'triangleCount = (`plusPtr` 4)
+
+-- array (mesh'vertexCount)
+p'mesh'vertices :: Ptr Mesh -> Ptr (Ptr Vector3)
+p'mesh'vertices = (`plusPtr` 8)
+
+-- array (mesh'vertexCount)
+p'mesh'texcoords :: Ptr Mesh -> Ptr (Ptr Vector2)
+p'mesh'texcoords = (`plusPtr` 16)
+
+-- maybe array (mesh'vertexCount)
+p'mesh'texcoords2 :: Ptr Mesh -> Ptr (Ptr Vector2)
+p'mesh'texcoords2 = (`plusPtr` 24)
+
+-- array (mesh'vertexCount)
+p'mesh'normals :: Ptr Mesh -> Ptr (Ptr Vector3)
+p'mesh'normals = (`plusPtr` 32)
+
+-- maybe array (mesh'vertexCount)
+p'mesh'tangents :: Ptr Mesh -> Ptr (Ptr Vector4)
+p'mesh'tangents = (`plusPtr` 40)
+
+-- maybe array (mesh'vertexCount)
+p'mesh'colors :: Ptr Mesh -> Ptr (Ptr Color)
+p'mesh'colors = (`plusPtr` 48)
+
+-- maybe array (mesh'vertexCount)
+p'mesh'indices :: Ptr Mesh -> Ptr (Ptr CUShort)
+p'mesh'indices = (`plusPtr` 56)
+
+-- maybe array (mesh'vertexCount)
+p'mesh'animVertices :: Ptr Mesh -> Ptr (Ptr Vector3)
+p'mesh'animVertices = (`plusPtr` 64)
+
+-- maybe array (mesh'vertexCount)
+p'mesh'animNormals :: Ptr Mesh -> Ptr (Ptr Vector3)
+p'mesh'animNormals = (`plusPtr` 72)
+
+-- maybe array (mesh'vertexCount * 4)
+p'mesh'boneIds :: Ptr Mesh -> Ptr (Ptr CUChar)
+p'mesh'boneIds = (`plusPtr` 80)
+
+-- maybe array (mesh'vertexCount * 4)
+p'mesh'boneWeights :: Ptr Mesh -> Ptr (Ptr CFloat)
+p'mesh'boneWeights = (`plusPtr` 88)
+
+p'mesh'vaoId :: Ptr Mesh -> Ptr CUInt
+p'mesh'vaoId = (`plusPtr` 96)
+
+-- maybe array (7)
+p'mesh'vboId :: Ptr Mesh -> Ptr (Ptr CUInt)
+p'mesh'vboId = (`plusPtr` 104)
 
 instance Freeable Mesh where
   rlFreeDependents _ ptr = do
-    verticesPtr <- (peekByteOff ptr 8 :: IO (Ptr Float))
+    verticesPtr <- peek (p'mesh'vertices ptr)
     c'free $ castPtr verticesPtr
-    texcoordsPtr <- (peekByteOff ptr 16 :: IO (Ptr Vector2))
+    texcoordsPtr <- peek (p'mesh'texcoords ptr)
     c'free $ castPtr texcoordsPtr
-    texcoords2Ptr <- (peekByteOff ptr 24 :: IO (Ptr Vector2))
+    texcoords2Ptr <- peek (p'mesh'texcoords2 ptr)
     freeMaybePtr $ castPtr texcoords2Ptr
-    normalsPtr <- (peekByteOff ptr 32 :: IO (Ptr Vector3))
+    normalsPtr <- peek (p'mesh'normals ptr)
     c'free $ castPtr normalsPtr
-    tangentsPtr <- (peekByteOff ptr 40 :: IO (Ptr Vector4))
+    tangentsPtr <- peek (p'mesh'tangents ptr)
     freeMaybePtr $ castPtr tangentsPtr
-    colorsPtr <- (peekByteOff ptr 48 :: IO (Ptr Color))
+    colorsPtr <- peek (p'mesh'colors ptr)
     freeMaybePtr $ castPtr colorsPtr
-    indicesPtr <- (peekByteOff ptr 56 :: IO (Ptr CUShort))
+    indicesPtr <- peek (p'mesh'indices ptr)
     freeMaybePtr $ castPtr indicesPtr
-    animVerticesPtr <- (peekByteOff ptr 64 :: IO (Ptr Vector3))
+    animVerticesPtr <- peek (p'mesh'animVertices ptr)
     freeMaybePtr $ castPtr animVerticesPtr
-    animNormalsPtr <- (peekByteOff ptr 72 :: IO (Ptr Vector3))
+    animNormalsPtr <- peek (p'mesh'animNormals ptr)
     freeMaybePtr $ castPtr animNormalsPtr
-    boneIdsPtr <- (peekByteOff ptr 80 :: IO (Ptr CUChar))
+    boneIdsPtr <- peek (p'mesh'boneIds ptr)
     freeMaybePtr $ castPtr boneIdsPtr
-    boneWeightsPtr <- (peekByteOff ptr 88 :: IO (Ptr CFloat))
+    boneWeightsPtr <- peek (p'mesh'boneWeights ptr)
     freeMaybePtr $ castPtr boneWeightsPtr
-    vboIdPtr <- (peekByteOff ptr 104 :: IO (Ptr CUInt))
+    vboIdPtr <- peek (p'mesh'vboId ptr)
     c'free $ castPtr vboIdPtr
 
 data Shader = Shader
@@ -344,20 +443,26 @@ instance Storable Shader where
   sizeOf _ = 16
   alignment _ = 8
   peek _p = do
-    sId <- fromIntegral <$> (peekByteOff _p 0 :: IO CUInt)
-    locsPtr <- (peekByteOff _p 8 :: IO (Ptr CInt))
-    locs <- map fromIntegral <$> peekArray 32 locsPtr
+    sId <- fromIntegral <$> peek (p'shader'id _p)
+    locs <- map fromIntegral <$> (peekArray 32 =<< peek (p'shader'locs _p))
     return $ Shader sId locs
   poke _p (Shader sId locs) = do
-    pokeByteOff _p 0 (fromIntegral sId :: CUInt)
+    poke (p'shader'id _p) (fromIntegral sId)
     defaultShaderId <- c'rlGetShaderIdDefault
-    locsArr <- newArray (map fromIntegral locs :: [CInt])
+    locsArr <- newArray (map fromIntegral locs)
     if sId == fromIntegral defaultShaderId
       then do
         locsPtr <- newForeignPtr p'free locsArr
-        withForeignPtr locsPtr $ pokeByteOff _p 8
-      else pokeByteOff _p 8 locsArr
+        withForeignPtr locsPtr $ poke (p'shader'locs _p)
+      else poke (p'shader'locs _p) locsArr
     return ()
+
+p'shader'id :: Ptr Shader -> Ptr CUInt
+p'shader'id = (`plusPtr` 0)
+
+-- array (32)
+p'shader'locs :: Ptr Shader -> Ptr (Ptr CInt)
+p'shader'locs = (`plusPtr` 8)
 
 instance Freeable Shader where
   rlFreeDependents val ptr = do
@@ -365,7 +470,7 @@ instance Freeable Shader where
     unless
       (shader'id val == fromIntegral defaultShaderId)
       ( do
-          locsPtr <- (peekByteOff ptr 8 :: IO (Ptr CInt))
+          locsPtr <- peek (p'shader'locs ptr)
           c'free $ castPtr locsPtr
       )
 
@@ -380,15 +485,24 @@ instance Storable MaterialMap where
   sizeOf _ = 28
   alignment _ = 4
   peek _p = do
-    texture <- peekByteOff _p 0
-    color <- peekByteOff _p 20
-    value <- realToFrac <$> (peekByteOff _p 24 :: IO CFloat)
+    texture <- peek (p'materialMap'texture _p)
+    color <- peek (p'materialMap'color _p)
+    value <- realToFrac <$> peek (p'materialMap'value _p)
     return $ MaterialMap texture color value
   poke _p (MaterialMap texture color value) = do
-    pokeByteOff _p 0 texture
-    pokeByteOff _p 20 color
-    pokeByteOff _p 24 (realToFrac value :: CFloat)
+    poke (p'materialMap'texture _p) texture
+    poke (p'materialMap'color _p) color
+    poke (p'materialMap'value _p) (realToFrac value)
     return ()
+
+p'materialMap'texture :: Ptr MaterialMap -> Ptr Texture
+p'materialMap'texture = (`plusPtr` 0)
+
+p'materialMap'color :: Ptr MaterialMap -> Ptr Color
+p'materialMap'color = (`plusPtr` 20)
+
+p'materialMap'value :: Ptr MaterialMap -> Ptr CFloat
+p'materialMap'value = (`plusPtr` 24)
 
 data Material = Material
   { material'shader :: Shader,
@@ -401,22 +515,31 @@ instance Storable Material where
   sizeOf _ = 40
   alignment _ = 8
   peek _p = do
-    shader <- peekByteOff _p 0
-    mapsPtr <- (peekByteOff _p 16 :: IO (Ptr MaterialMap))
-    maps <- peekMaybeArray 12 mapsPtr
-    params <- map realToFrac <$> peekStaticArrayOff 4 (castPtr _p :: Ptr CFloat) 24
+    shader <- peek (p'material'shader _p)
+    maps <- peekMaybeArray 12 =<< peek (p'material'maps _p)
+    params <- map realToFrac <$> peekStaticArray 4 (p'material'params _p)
     return $ Material shader maps params
   poke _p (Material shader maps params) = do
-    pokeByteOff _p 0 shader
-    pokeByteOff _p 16 =<< newMaybeArray maps
-    pokeStaticArrayOff (castPtr _p :: Ptr CFloat) 24 (map realToFrac params :: [CFloat])
+    poke (p'material'shader _p) shader
+    poke (p'material'maps _p) =<< newMaybeArray maps
+    pokeStaticArray (p'material'params _p) (map realToFrac params)
     return ()
+
+p'material'shader :: Ptr Material -> Ptr Shader
+p'material'shader = (`plusPtr` 0)
+
+-- maybe array (12)
+p'material'maps :: Ptr Material -> Ptr (Ptr MaterialMap)
+p'material'maps = (`plusPtr` 16)
+
+-- static array (4)
+p'material'params :: Ptr Material -> Ptr CFloat
+p'material'params = (`plusPtr` 24)
 
 instance Freeable Material where
   rlFreeDependents val ptr = do
     rlFreeDependents (material'shader val) (castPtr ptr :: Ptr Shader)
-    mapsPtr <- (peekByteOff ptr 16 :: IO (Ptr MaterialMap))
-    rlFreeMaybeArray (material'maps val) mapsPtr
+    rlFreeMaybeArray (material'maps val) =<< peek (p'material'maps ptr)
 
 data Transform = Transform
   { transform'translation :: Vector3,
@@ -429,19 +552,28 @@ instance Storable Transform where
   sizeOf _ = 40
   alignment _ = 4
   peek _p = do
-    translation <- peekByteOff _p 0
-    rotation <- peekByteOff _p 12
-    scale <- peekByteOff _p 28
+    translation <- peek (p'transform'translation _p)
+    rotation <- peek (p'transform'rotation _p)
+    scale <- peek (p'transform'scale _p)
     return $ Transform translation rotation scale
   poke _p (Transform translation rotation scale) = do
-    pokeByteOff _p 0 translation
-    pokeByteOff _p 12 rotation
-    pokeByteOff _p 28 scale
+    poke (p'transform'translation _p) translation
+    poke (p'transform'rotation _p) rotation
+    poke (p'transform'scale _p) scale
     return ()
+
+p'transform'translation :: Ptr Transform -> Ptr Vector3
+p'transform'translation = (`plusPtr` 0)
+
+p'transform'rotation :: Ptr Transform -> Ptr Quaternion
+p'transform'rotation = (`plusPtr` 12)
+
+p'transform'scale :: Ptr Transform -> Ptr Vector3
+p'transform'scale = (`plusPtr` 28)
 
 data BoneInfo = BoneInfo
   { boneInfo'name :: String,
-    boneinfo'parent :: Int
+    boneInfo'parent :: Int
   }
   deriving (Eq, Show, Freeable)
 
@@ -449,13 +581,20 @@ instance Storable BoneInfo where
   sizeOf _ = 36
   alignment _ = 4
   peek _p = do
-    name <- map castCCharToChar . takeWhile (/= 0) <$> peekStaticArray 32 (castPtr _p :: Ptr CChar)
-    parent <- fromIntegral <$> (peekByteOff _p 32 :: IO CInt)
+    name <- peekCString (p'boneInfo'name _p)
+    parent <- fromIntegral <$> peek (p'boneInfo'parent _p)
     return $ BoneInfo name parent
   poke _p (BoneInfo name parent) = do
-    pokeStaticArray (castPtr _p :: Ptr CChar) (rightPad 32 0 $ map castCharToCChar name)
-    pokeByteOff _p 32 (fromIntegral parent :: CInt)
+    pokeStaticArray (p'boneInfo'name _p) (rightPad 32 0 $ map castCharToCChar name)
+    poke (p'boneInfo'parent _p) (fromIntegral parent)
     return ()
+
+-- static string (32)
+p'boneInfo'name :: Ptr BoneInfo -> Ptr CChar
+p'boneInfo'name = (`plusPtr` 0)
+
+p'boneInfo'parent :: Ptr BoneInfo -> Ptr CInt
+p'boneInfo'parent = (`plusPtr` 32)
 
 data Model = Model
   { model'transform :: Matrix,
@@ -472,45 +611,67 @@ instance Storable Model where
   sizeOf _ = 120
   alignment _ = 4
   peek _p = do
-    transform <- peekByteOff _p 0
-    meshCount <- fromIntegral <$> (peekByteOff _p 64 :: IO CInt)
-    materialCount <- fromIntegral <$> (peekByteOff _p 68 :: IO CInt)
-    meshesPtr <- (peekByteOff _p 72 :: IO (Ptr Mesh))
-    meshes <- peekArray meshCount meshesPtr
-    materialsPtr <- (peekByteOff _p 80 :: IO (Ptr Material))
-    materials <- peekArray materialCount materialsPtr
-    meshMaterialPtr <- (peekByteOff _p 88 :: IO (Ptr CInt))
-    meshMaterial <- map fromIntegral <$> peekArray meshCount meshMaterialPtr
-    boneCount <- fromIntegral <$> (peekByteOff _p 96 :: IO CInt)
-    bonesPtr <- (peekByteOff _p 104 :: IO (Ptr BoneInfo))
-    bones <- peekMaybeArray boneCount bonesPtr
-    bindPosePtr <- (peekByteOff _p 112 :: IO (Ptr Transform))
-    bindPose <- peekMaybeArray boneCount bindPosePtr
+    transform <- peek (p'model'transform _p)
+    meshCount <- fromIntegral <$> peek (p'model'meshCount _p)
+    materialCount <- fromIntegral <$> peek (p'model'materialCount _p)
+    meshes <- peekArray meshCount =<< peek (p'model'meshes _p)
+    materials <- peekArray materialCount =<< peek (p'model'materials _p)
+    meshMaterial <- map fromIntegral <$> (peekArray meshCount =<< peek (p'model'meshMaterial _p))
+    boneCount <- fromIntegral <$> peek (p'model'boneCount _p)
+    bones <- peekMaybeArray boneCount =<< peek (p'model'bones _p)
+    bindPose <- peekMaybeArray boneCount =<< peek (p'model'bindPose _p)
     return $ Model transform meshes materials meshMaterial boneCount bones bindPose
   poke _p (Model transform meshes materials meshMaterial boneCount bones bindPose) = do
-    pokeByteOff _p 0 transform
-    pokeByteOff _p 64 (fromIntegral $ length meshes :: CInt)
-    pokeByteOff _p 68 (fromIntegral $ length materials :: CInt)
-    pokeByteOff _p 72 =<< newArray meshes
-    pokeByteOff _p 80 =<< newArray materials
-    pokeByteOff _p 88 =<< newArray (map fromIntegral meshMaterial :: [CInt])
-    pokeByteOff _p 96 (fromIntegral boneCount :: CInt)
-    newMaybeArray bones >>= pokeByteOff _p 104
-    newMaybeArray bindPose >>= pokeByteOff _p 112
+    poke (p'model'transform _p) transform
+    poke (p'model'meshCount _p) (fromIntegral (length meshes))
+    poke (p'model'materialCount _p) (fromIntegral (length materials))
+    poke (p'model'meshes _p) =<< newArray meshes
+    poke (p'model'materials _p) =<< newArray materials
+    poke (p'model'meshMaterial _p) =<< newArray (map fromIntegral meshMaterial)
+    poke (p'model'boneCount _p) (fromIntegral boneCount)
+    poke (p'model'bones _p) =<< newMaybeArray bones
+    poke (p'model'bindPose _p) =<< newMaybeArray bindPose
     return ()
+
+p'model'transform :: Ptr Model -> Ptr Matrix
+p'model'transform = (`plusPtr` 0)
+
+p'model'meshCount :: Ptr Model -> Ptr CInt
+p'model'meshCount = (`plusPtr` 64)
+
+p'model'materialCount :: Ptr Model -> Ptr CInt
+p'model'materialCount = (`plusPtr` 68)
+
+-- array (model'meshCount)
+p'model'meshes :: Ptr Model -> Ptr (Ptr Mesh)
+p'model'meshes = (`plusPtr` 72)
+
+-- array (model'materialCount)
+p'model'materials :: Ptr Model -> Ptr (Ptr Material)
+p'model'materials = (`plusPtr` 80)
+
+-- array (model'meshCount)
+p'model'meshMaterial :: Ptr Model -> Ptr (Ptr CInt)
+p'model'meshMaterial = (`plusPtr` 88)
+
+p'model'boneCount :: Ptr Model -> Ptr CInt
+p'model'boneCount = (`plusPtr` 96)
+
+-- maybe array (model'boneCount)
+p'model'bones :: Ptr Model -> Ptr (Ptr BoneInfo)
+p'model'bones = (`plusPtr` 104)
+
+-- maybe array (model'boneCount)
+p'model'bindPose :: Ptr Model -> Ptr (Ptr Transform)
+p'model'bindPose = (`plusPtr` 112)
 
 instance Freeable Model where
   rlFreeDependents val ptr = do
-    meshesPtr <- (peekByteOff ptr 72 :: IO (Ptr Mesh))
-    rlFreeArray (model'meshes val) meshesPtr
-    materialsPtr <- (peekByteOff ptr 80 :: IO (Ptr Material))
-    rlFreeArray (model'materials val) materialsPtr
-    meshMaterialPtr <- (peekByteOff ptr 88 :: IO (Ptr CInt))
-    c'free $ castPtr meshMaterialPtr
-    bonesPtr <- (peekByteOff ptr 104 :: IO (Ptr BoneInfo))
-    freeMaybePtr $ castPtr bonesPtr
-    bindPosePtr <- (peekByteOff ptr 112 :: IO (Ptr Transform))
-    freeMaybePtr $ castPtr bindPosePtr
+    rlFreeArray (model'meshes val) =<< peek (p'model'meshes ptr)
+    rlFreeArray (model'materials val) =<< peek (p'model'materials ptr)
+    c'free . castPtr =<< peek (p'model'meshMaterial ptr)
+    freeMaybePtr . castPtr =<< peek (p'model'bones ptr)
+    freeMaybePtr . castPtr =<< peek (p'model'bindPose ptr)
 
 data ModelAnimation = ModelAnimation
   { modelAnimation'boneCount :: Int,
@@ -525,28 +686,44 @@ instance Storable ModelAnimation where
   sizeOf _ = 56
   alignment _ = 4
   peek _p = do
-    boneCount <- fromIntegral <$> (peekByteOff _p 0 :: IO CInt)
-    frameCount <- fromIntegral <$> (peekByteOff _p 4 :: IO CInt)
-    bonesPtr <- (peekByteOff _p 8 :: IO (Ptr BoneInfo))
-    bones <- peekArray boneCount bonesPtr
-    framePosesPtr <- (peekByteOff _p 16 :: IO (Ptr (Ptr Transform)))
+    boneCount <- fromIntegral <$> peek (p'modelAnimation'boneCount _p)
+    frameCount <- fromIntegral <$> peek (p'modelAnimation'frameCount _p)
+    bones <- peekArray boneCount =<< peek (p'modelAnimation'bones _p)
+    framePosesPtr <- peek (p'modelAnimation'framePoses _p)
     framePosesPtrArr <- peekArray frameCount framePosesPtr
     framePoses <- mapM (peekArray boneCount) framePosesPtrArr
-    name <- map castCCharToChar <$> peekStaticArrayOff 32 (castPtr _p) 24
+    name <- peekCString (p'modelAnimation'name _p)
     return $ ModelAnimation boneCount frameCount bones framePoses name
   poke _p (ModelAnimation boneCount frameCount bones framePoses name) = do
-    pokeByteOff _p 0 (fromIntegral boneCount :: CInt)
-    pokeByteOff _p 4 (fromIntegral frameCount :: CInt)
-    pokeByteOff _p 8 =<< newArray bones
-    mapM newArray framePoses >>= newArray >>= pokeByteOff _p 16
-    pokeStaticArrayOff (castPtr _p) 24 (map castCharToCChar name)
+    poke (p'modelAnimation'boneCount _p) (fromIntegral boneCount)
+    poke (p'modelAnimation'frameCount _p) (fromIntegral frameCount)
+    poke (p'modelAnimation'bones _p) =<< newArray bones
+    poke (p'modelAnimation'framePoses _p) =<< newArray =<< mapM newArray framePoses
+    pokeStaticArray (p'modelAnimation'name _p) (rightPad 32 0 $ map castCharToCChar name)
     return ()
+
+p'modelAnimation'boneCount :: Ptr ModelAnimation -> Ptr CInt
+p'modelAnimation'boneCount = (`plusPtr` 0)
+
+p'modelAnimation'frameCount :: Ptr ModelAnimation -> Ptr CInt
+p'modelAnimation'frameCount = (`plusPtr` 4)
+
+-- array (modelAnimation'boneCount)
+p'modelAnimation'bones :: Ptr ModelAnimation -> Ptr (Ptr BoneInfo)
+p'modelAnimation'bones = (`plusPtr` 8)
+
+-- array 2d (rows: modelAnimation'frameCount, cols: modelAnimation'boneCount)
+p'modelAnimation'framePoses :: Ptr ModelAnimation -> Ptr (Ptr (Ptr Transform))
+p'modelAnimation'framePoses = (`plusPtr` 16)
+
+-- static string (32)
+p'modelAnimation'name :: Ptr ModelAnimation -> Ptr CChar
+p'modelAnimation'name = (`plusPtr` 24)
 
 instance Freeable ModelAnimation where
   rlFreeDependents val ptr = do
-    bonesPtr <- (peekByteOff ptr 8 :: IO (Ptr BoneInfo))
-    c'free $ castPtr bonesPtr
-    framePosesPtr <- (peekByteOff ptr 16 :: IO (Ptr (Ptr Transform)))
+    c'free . castPtr =<< peek (p'modelAnimation'bones ptr)
+    framePosesPtr <- peek (p'modelAnimation'framePoses ptr)
     framePosesPtrArr <- peekArray (modelAnimation'frameCount val) framePosesPtr
     forM_ framePosesPtrArr (c'free . castPtr)
     c'free $ castPtr framePosesPtr
@@ -561,13 +738,19 @@ instance Storable Ray where
   sizeOf _ = 24
   alignment _ = 4
   peek _p = do
-    position <- peekByteOff _p 0
-    direction <- peekByteOff _p 12
+    position <- peek (p'ray'position _p)
+    direction <- peek (p'ray'direction _p)
     return $ Ray position direction
   poke _p (Ray position direction) = do
-    pokeByteOff _p 0 position
-    pokeByteOff _p 12 direction
+    poke (p'ray'position _p) position
+    poke (p'ray'direction _p) direction
     return ()
+
+p'ray'position :: Ptr Ray -> Ptr Vector3
+p'ray'position = (`plusPtr` 0)
+
+p'ray'direction :: Ptr Ray -> Ptr Vector3
+p'ray'direction = (`plusPtr` 12)
 
 data RayCollision = RayCollision
   { rayCollision'hit :: Bool,
@@ -581,17 +764,29 @@ instance Storable RayCollision where
   sizeOf _ = 32
   alignment _ = 4
   peek _p = do
-    hit <- toBool <$> (peekByteOff _p 0 :: IO CBool)
-    distance <- realToFrac <$> (peekByteOff _p 4 :: IO CFloat)
-    point <- peekByteOff _p 8
-    normal <- peekByteOff _p 20
+    hit <- toBool <$> peek (p'rayCollision'hit _p)
+    distance <- realToFrac <$> peek (p'rayCollision'distance _p)
+    point <- peek (p'rayCollision'point _p)
+    normal <- peek (p'rayCollision'normal _p)
     return $ RayCollision hit distance point normal
   poke _p (RayCollision hit distance point normal) = do
-    pokeByteOff _p 0 (fromBool hit :: CInt)
-    pokeByteOff _p 4 (realToFrac distance :: CFloat)
-    pokeByteOff _p 8 point
-    pokeByteOff _p 20 normal
+    poke (p'rayCollision'hit _p) (fromBool hit)
+    poke (p'rayCollision'distance _p) (realToFrac distance)
+    poke (p'rayCollision'point _p) point
+    poke (p'rayCollision'normal _p) normal
     return ()
+
+p'rayCollision'hit :: Ptr RayCollision -> Ptr CBool
+p'rayCollision'hit = (`plusPtr` 0)
+
+p'rayCollision'distance :: Ptr RayCollision -> Ptr CFloat
+p'rayCollision'distance = (`plusPtr` 4)
+
+p'rayCollision'point :: Ptr RayCollision -> Ptr Vector3
+p'rayCollision'point = (`plusPtr` 8)
+
+p'rayCollision'normal :: Ptr RayCollision -> Ptr Vector3
+p'rayCollision'normal = (`plusPtr` 20)
 
 data BoundingBox = BoundingBox
   { boundingBox'min :: Vector3,
@@ -603,10 +798,16 @@ instance Storable BoundingBox where
   sizeOf _ = 24
   alignment _ = 4
   peek _p = do
-    bMin <- peekByteOff _p 0
-    bMax <- peekByteOff _p 12
+    bMin <- peek (p'boundingBox'min _p)
+    bMax <- peek (p'boundingBox'max _p)
     return $ BoundingBox bMin bMax
   poke _p (BoundingBox bMin bMax) = do
-    pokeByteOff _p 0 bMin
-    pokeByteOff _p 12 bMax
+    poke (p'boundingBox'min _p) bMin
+    poke (p'boundingBox'max _p) bMax
     return ()
+
+p'boundingBox'min :: Ptr BoundingBox -> Ptr Vector3
+p'boundingBox'min = (`plusPtr` 0)
+
+p'boundingBox'max :: Ptr BoundingBox -> Ptr Vector3
+p'boundingBox'max = (`plusPtr` 12)

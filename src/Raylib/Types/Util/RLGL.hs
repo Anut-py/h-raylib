@@ -1,4 +1,5 @@
 {-# LANGUAGE DeriveAnyClass #-}
+
 {-# OPTIONS -Wall #-}
 
 -- | Bindings for types used in @rlgl@
@@ -21,26 +22,47 @@ module Raylib.Types.Util.RLGL
     RLShaderType (..),
     RLBufferHint (..),
     RLBitField (..),
+
     -- * Structures
     RLVertexBuffer (..),
     RLDrawCall (..),
     RLRenderBatch (..),
+
+    -- * Pointer utilities
+    p'rlVertexBuffer'elementCount,
+    p'rlVertexBuffer'vertices,
+    p'rlVertexBuffer'texcoords,
+    p'rlVertexBuffer'colors,
+    p'rlVertexBuffer'indices,
+    p'rlVertexBuffer'vaoId,
+    p'rlVertexBuffer'vboId,
+    p'rlDrawCall'mode,
+    p'rlDrawCall'vertexCount,
+    p'rlDrawCall'vertexAlignment,
+    p'rlDrawCall'textureId,
+    p'rlRenderBatch'bufferCount,
+    p'rlRenderBatch'currentBuffer,
+    p'rlRenderBatch'vertexBuffers,
+    p'rlRenderBatch'draws,
+    p'rlRenderBatch'drawCounter,
+    p'rlRenderBatch'currentDepth,
   )
 where
 
 import Foreign
   ( Ptr,
-    Storable (alignment, peek, peekByteOff, poke, pokeByteOff, sizeOf),
+    Storable (alignment, peek, poke, sizeOf),
     castPtr,
     newArray,
     peekArray,
+    plusPtr,
   )
 import Foreign.C
   ( CFloat,
     CInt (..),
     CUInt,
   )
-import Raylib.Internal.Foreign (Freeable (rlFreeDependents), c'free, peekStaticArrayOff, pokeStaticArrayOff, rlFreeArray)
+import Raylib.Internal.Foreign (Freeable (rlFreeDependents), c'free, peekStaticArray, pokeStaticArray, rlFreeArray)
 import Raylib.Types.Core (Color, Vector2, Vector3)
 
 ---------------------------------------
@@ -786,40 +808,59 @@ instance Storable RLVertexBuffer where
   sizeOf _ = 64
   alignment _ = 8
   peek _p = do
-    elementCount <- fromIntegral <$> (peekByteOff _p 0 :: IO CInt)
-    verticesPtr <- (peekByteOff _p 8 :: IO (Ptr Vector3))
-    vertices <- peekArray elementCount verticesPtr
-    texcoordsPtr <- (peekByteOff _p 16 :: IO (Ptr Vector2))
-    texcoords <- peekArray elementCount texcoordsPtr
-    colorsPtr <- (peekByteOff _p 24 :: IO (Ptr Color))
-    colors <- peekArray elementCount colorsPtr
-    indicesPtr <- (peekByteOff _p 32 :: IO (Ptr CUInt))
-    indices <- map fromIntegral <$> peekArray elementCount indicesPtr
-    vaoId <- fromIntegral <$> (peekByteOff _p 40 :: IO CUInt)
-    vboId <- map fromIntegral <$> peekStaticArrayOff 4 (castPtr _p :: Ptr CUInt) 44
+    elementCount <- fromIntegral <$> peek (p'rlVertexBuffer'elementCount _p)
+    vertices <- peekArray elementCount =<< peek (p'rlVertexBuffer'vertices _p)
+    texcoords <- peekArray elementCount =<< peek (p'rlVertexBuffer'texcoords _p)
+    colors <- peekArray elementCount =<< peek (p'rlVertexBuffer'colors _p)
+    indices <- map fromIntegral <$> (peekArray elementCount =<< peek (p'rlVertexBuffer'indices _p))
+    vaoId <- fromIntegral <$> peek (p'rlVertexBuffer'vaoId _p)
+    vboId <- map fromIntegral <$> peekStaticArray 4 (p'rlVertexBuffer'vboId _p)
     return $ RLVertexBuffer elementCount vertices texcoords colors indices vaoId vboId
   poke _p (RLVertexBuffer elementCount vertices texcoords colors indices vaoId vboId) = do
-    pokeByteOff _p 0 (fromIntegral elementCount :: CInt)
-    pokeByteOff _p 8 =<< newArray vertices
-    pokeByteOff _p 16 =<< newArray texcoords
-    pokeByteOff _p 24 =<< newArray colors
-    pokeByteOff _p 32 =<< newArray (map fromIntegral indices :: [CUInt])
-    pokeByteOff _p 40 (fromIntegral vaoId :: CUInt)
-    pokeStaticArrayOff (castPtr _p) 44 (map fromIntegral vboId :: [CUInt])
+    poke (p'rlVertexBuffer'elementCount _p) (fromIntegral elementCount)
+    poke (p'rlVertexBuffer'vertices _p) =<< newArray vertices
+    poke (p'rlVertexBuffer'texcoords _p) =<< newArray texcoords
+    poke (p'rlVertexBuffer'colors _p) =<< newArray colors
+    poke (p'rlVertexBuffer'indices _p) =<< newArray (map fromIntegral indices)
+    poke (p'rlVertexBuffer'vaoId _p) (fromIntegral vaoId)
+    pokeStaticArray (p'rlVertexBuffer'vboId _p) (map fromIntegral vboId)
     return ()
+
+p'rlVertexBuffer'elementCount :: Ptr RLVertexBuffer -> Ptr CInt
+p'rlVertexBuffer'elementCount = (`plusPtr` 0)
+
+-- array (rlVertexBuffer'elementCount)
+p'rlVertexBuffer'vertices :: Ptr RLVertexBuffer -> Ptr (Ptr Vector3)
+p'rlVertexBuffer'vertices = (`plusPtr` 8)
+
+-- array (rlVertexBuffer'elementCount)
+p'rlVertexBuffer'texcoords :: Ptr RLVertexBuffer -> Ptr (Ptr Vector2)
+p'rlVertexBuffer'texcoords = (`plusPtr` 16)
+
+-- array (rlVertexBuffer'elementCount)
+p'rlVertexBuffer'colors :: Ptr RLVertexBuffer -> Ptr (Ptr Color)
+p'rlVertexBuffer'colors = (`plusPtr` 24)
+
+-- array (rlVertexBuffer'elementCount)
+p'rlVertexBuffer'indices :: Ptr RLVertexBuffer -> Ptr (Ptr CUInt)
+p'rlVertexBuffer'indices = (`plusPtr` 32)
+
+p'rlVertexBuffer'vaoId :: Ptr RLVertexBuffer -> Ptr CUInt
+p'rlVertexBuffer'vaoId = (`plusPtr` 40)
+
+-- static array (4)
+p'rlVertexBuffer'vboId :: Ptr RLVertexBuffer -> Ptr CUInt
+p'rlVertexBuffer'vboId = (`plusPtr` 44)
 
 instance Freeable RLVertexBuffer where
   rlFreeDependents _ ptr = do
-    verticesPtr <- (peekByteOff ptr 8 :: IO (Ptr Vector3))
-    c'free $ castPtr verticesPtr
-    texcoordsPtr <- (peekByteOff ptr 16 :: IO (Ptr Vector2))
-    c'free $ castPtr texcoordsPtr
-    colorsPtr <- (peekByteOff ptr 24 :: IO (Ptr Color))
-    c'free $ castPtr colorsPtr
-    indicesPtr <- (peekByteOff ptr 32 :: IO (Ptr CUInt))
-    c'free $ castPtr indicesPtr
+    c'free . castPtr =<< peek (p'rlVertexBuffer'vertices ptr)
+    c'free . castPtr =<< peek (p'rlVertexBuffer'texcoords ptr)
+    c'free . castPtr =<< peek (p'rlVertexBuffer'colors ptr)
+    c'free . castPtr =<< peek (p'rlVertexBuffer'indices ptr)
 
 -- | Draw call type.
+--
 -- NOTE: Only texture changes register a new draw, other state-change-related elements are not
 -- used at this moment (vaoId, shaderId, matrices), raylib just forces a batch draw call if any
 -- of those state changes happen (this is done in the core module).
@@ -839,17 +880,29 @@ instance Storable RLDrawCall where
   sizeOf _ = 16
   alignment _ = 8
   peek _p = do
-    mode <- peekByteOff _p 0
-    vertexCount <- fromIntegral <$> (peekByteOff _p 4 :: IO CInt)
-    vertexAlignment <- fromIntegral <$> (peekByteOff _p 8 :: IO CInt)
-    textureId <- fromIntegral <$> (peekByteOff _p 12 :: IO CUInt)
+    mode <- peek (p'rlDrawCall'mode _p)
+    vertexCount <- fromIntegral <$> peek (p'rlDrawCall'vertexCount _p)
+    vertexAlignment <- fromIntegral <$> peek (p'rlDrawCall'vertexAlignment _p)
+    textureId <- fromIntegral <$> peek (p'rlDrawCall'textureId _p)
     return $ RLDrawCall mode vertexCount vertexAlignment textureId
   poke _p (RLDrawCall mode vertexCount vertexAlignment textureId) = do
-    pokeByteOff _p 0 mode
-    pokeByteOff _p 4 (fromIntegral vertexCount :: CInt)
-    pokeByteOff _p 8 (fromIntegral vertexAlignment :: CInt)
-    pokeByteOff _p 12 (fromIntegral textureId :: CUInt)
+    poke (p'rlDrawCall'mode _p) mode
+    poke (p'rlDrawCall'vertexCount _p) (fromIntegral vertexCount)
+    poke (p'rlDrawCall'vertexAlignment _p) (fromIntegral vertexAlignment)
+    poke (p'rlDrawCall'textureId _p) (fromIntegral textureId)
     return ()
+
+p'rlDrawCall'mode :: Ptr RLDrawCall -> Ptr RLDrawMode
+p'rlDrawCall'mode = (`plusPtr` 0)
+
+p'rlDrawCall'vertexCount :: Ptr RLDrawCall -> Ptr CInt
+p'rlDrawCall'vertexCount = (`plusPtr` 4)
+
+p'rlDrawCall'vertexAlignment :: Ptr RLDrawCall -> Ptr CInt
+p'rlDrawCall'vertexAlignment = (`plusPtr` 8)
+
+p'rlDrawCall'textureId :: Ptr RLDrawCall -> Ptr CUInt
+p'rlDrawCall'textureId = (`plusPtr` 12)
 
 -- rlRenderBatch type
 data RLRenderBatch = RLRenderBatch
@@ -872,27 +925,43 @@ instance Storable RLRenderBatch where
   sizeOf _ = 32
   alignment _ = 8
   peek _p = do
-    bufferCount <- fromIntegral <$> (peekByteOff _p 0 :: IO CInt)
-    currentBuffer <- fromIntegral <$> (peekByteOff _p 4 :: IO CInt)
-    vertexBuffersPtr <- (peekByteOff _p 8 :: IO (Ptr RLVertexBuffer))
-    vertexBuffers <- peekArray bufferCount vertexBuffersPtr
-    drawsPtr <- (peekByteOff _p 16 :: IO (Ptr RLDrawCall))
-    draws <- peekArray 256 drawsPtr
-    drawCounter <- fromIntegral <$> (peekByteOff _p 24 :: IO CInt)
-    currentDepth <- realToFrac <$> (peekByteOff _p 28 :: IO CFloat)
+    bufferCount <- fromIntegral <$> peek (p'rlRenderBatch'bufferCount _p)
+    currentBuffer <- fromIntegral <$> peek (p'rlRenderBatch'currentBuffer _p)
+    vertexBuffers <- peekArray bufferCount =<< peek (p'rlRenderBatch'vertexBuffers _p)
+    draws <- peekArray 256 =<< peek (p'rlRenderBatch'draws _p)
+    drawCounter <- fromIntegral <$> peek (p'rlRenderBatch'drawCounter _p)
+    currentDepth <- realToFrac <$> peek (p'rlRenderBatch'currentDepth _p)
     return $ RLRenderBatch bufferCount currentBuffer vertexBuffers draws drawCounter currentDepth
   poke _p (RLRenderBatch bufferCount currentBuffer vertexBuffers draws drawCounter currentDepth) = do
-    pokeByteOff _p 0 (fromIntegral bufferCount :: CInt)
-    pokeByteOff _p 4 (fromIntegral currentBuffer :: CInt)
-    pokeByteOff _p 8 =<< newArray vertexBuffers
-    pokeByteOff _p 16 =<< newArray draws
-    pokeByteOff _p 24 (fromIntegral drawCounter :: CInt)
-    pokeByteOff _p 28 (realToFrac currentDepth :: CFloat)
+    poke (p'rlRenderBatch'bufferCount _p) (fromIntegral bufferCount)
+    poke (p'rlRenderBatch'currentBuffer _p) (fromIntegral currentBuffer)
+    poke (p'rlRenderBatch'vertexBuffers _p) =<< newArray vertexBuffers
+    poke (p'rlRenderBatch'draws _p) =<< newArray draws
+    poke (p'rlRenderBatch'drawCounter _p) (fromIntegral drawCounter)
+    poke (p'rlRenderBatch'currentDepth _p) (realToFrac currentDepth)
     return ()
+
+p'rlRenderBatch'bufferCount :: Ptr RLRenderBatch -> Ptr CInt
+p'rlRenderBatch'bufferCount = (`plusPtr` 0)
+
+p'rlRenderBatch'currentBuffer :: Ptr RLRenderBatch -> Ptr CInt
+p'rlRenderBatch'currentBuffer = (`plusPtr` 4)
+
+-- array (rlRenderBatch'bufferCount)
+p'rlRenderBatch'vertexBuffers :: Ptr RLRenderBatch -> Ptr (Ptr RLVertexBuffer)
+p'rlRenderBatch'vertexBuffers = (`plusPtr` 8)
+
+-- array (256)
+p'rlRenderBatch'draws :: Ptr RLRenderBatch -> Ptr (Ptr RLDrawCall)
+p'rlRenderBatch'draws = (`plusPtr` 16)
+
+p'rlRenderBatch'drawCounter :: Ptr RLRenderBatch -> Ptr CInt
+p'rlRenderBatch'drawCounter = (`plusPtr` 24)
+
+p'rlRenderBatch'currentDepth :: Ptr RLRenderBatch -> Ptr CFloat
+p'rlRenderBatch'currentDepth = (`plusPtr` 28)
 
 instance Freeable RLRenderBatch where
   rlFreeDependents val ptr = do
-    vertexBuffersPtr <- (peekByteOff ptr 8 :: IO (Ptr RLVertexBuffer))
-    rlFreeArray (rlRenderBatch'vertexBuffers val) vertexBuffersPtr
-    drawsPtr <- (peekByteOff ptr 16 :: IO (Ptr RLDrawCall))
-    c'free $ castPtr drawsPtr
+    rlFreeArray (rlRenderBatch'vertexBuffers val) =<< peek (p'rlRenderBatch'vertexBuffers ptr)
+    c'free . castPtr =<< peek (p'rlRenderBatch'draws ptr)

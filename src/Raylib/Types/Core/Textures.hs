@@ -1,4 +1,5 @@
 {-# LANGUAGE DeriveAnyClass #-}
+
 {-# OPTIONS -Wall #-}
 
 -- | Bindings for types used mainly in @rtextures@
@@ -9,6 +10,7 @@ module Raylib.Types.Core.Textures
     TextureWrap (..),
     CubemapLayout (..),
     NPatchLayout (..),
+
     -- * Structures
     Image (..),
     Texture (..),
@@ -17,24 +19,46 @@ module Raylib.Types.Core.Textures
     Texture2D,
     TextureCubemap,
     RenderTexture2D,
+
+    -- * Pointer utilities
+    p'image'data,
+    p'image'width,
+    p'image'height,
+    p'image'mipmaps,
+    p'image'format,
+    p'texture'id,
+    p'texture'width,
+    p'texture'height,
+    p'texture'mipmaps,
+    p'texture'format,
+    p'renderTexture'id,
+    p'renderTexture'texture,
+    p'renderTexture'depth,
+    p'nPatchInfo'source,
+    p'nPatchInfo'left,
+    p'nPatchInfo'top,
+    p'nPatchInfo'right,
+    p'nPatchInfo'bottom,
+    p'nPatchInfo'layout,
   )
 where
 
 import Foreign
   ( Ptr,
-    Storable (alignment, peek, peekByteOff, poke, pokeByteOff, sizeOf),
+    Storable (alignment, peek, poke, sizeOf),
     Word8,
     castPtr,
     newArray,
     peekArray,
+    plusPtr,
   )
 import Foreign.C
   ( CInt (..),
     CUChar,
     CUInt,
   )
-import Raylib.Internal.Foreign (Freeable (rlFreeDependents), c'free)
 import Raylib.Internal (getPixelDataSize)
+import Raylib.Internal.Foreign (Freeable (rlFreeDependents), c'free)
 import Raylib.Types.Core (Rectangle)
 
 ---------------------------------------
@@ -186,25 +210,39 @@ instance Storable Image where
   sizeOf _ = 24
   alignment _ = 4
   peek _p = do
-    width <- fromIntegral <$> (peekByteOff _p 8 :: IO CInt)
-    height <- fromIntegral <$> (peekByteOff _p 12 :: IO CInt)
-    mipmaps <- fromIntegral <$> (peekByteOff _p 16 :: IO CInt)
-    format <- peekByteOff _p 20
-    ptr <- (peekByteOff _p 0 :: IO (Ptr CUChar))
-    arr <- peekArray (getPixelDataSize width height (fromEnum format)) ptr
-    return $ Image (map fromIntegral arr) width height mipmaps format
+    width <- fromIntegral <$> peek (p'image'width _p)
+    height <- fromIntegral <$> peek (p'image'height _p)
+    mipmaps <- fromIntegral <$> peek (p'image'mipmaps _p)
+    format <- peek (p'image'format _p)
+    iData <- map fromIntegral <$> (peekArray (getPixelDataSize width height (fromEnum format)) =<< peek (p'image'data _p))
+    return $ Image iData width height mipmaps format
   poke _p (Image arr width height mipmaps format) = do
-    pokeByteOff _p 0 =<< newArray (map fromIntegral arr :: [CUChar])
-    pokeByteOff _p 8 (fromIntegral width :: CInt)
-    pokeByteOff _p 12 (fromIntegral height :: CInt)
-    pokeByteOff _p 16 (fromIntegral mipmaps :: CInt)
-    pokeByteOff _p 20 format
+    poke (p'image'data _p) =<< newArray (map fromIntegral arr)
+    poke (p'image'width _p) (fromIntegral width)
+    poke (p'image'height _p) (fromIntegral height)
+    poke (p'image'mipmaps _p) (fromIntegral mipmaps)
+    poke (p'image'format _p) format
     return ()
+
+-- array (getPixelDataSize image'width image'height (fromEnum image'format))
+p'image'data :: Ptr Image -> Ptr (Ptr CUChar)
+p'image'data = (`plusPtr` 0)
+
+p'image'width :: Ptr Image -> Ptr CInt
+p'image'width = (`plusPtr` 8)
+
+p'image'height :: Ptr Image -> Ptr CInt
+p'image'height = (`plusPtr` 12)
+
+p'image'mipmaps :: Ptr Image -> Ptr CInt
+p'image'mipmaps = (`plusPtr` 16)
+
+p'image'format :: Ptr Image -> Ptr PixelFormat
+p'image'format = (`plusPtr` 20)
 
 instance Freeable Image where
   rlFreeDependents _ ptr = do
-    dataPtr <- (peekByteOff ptr 0 :: IO (Ptr CUChar))
-    c'free $ castPtr dataPtr
+    c'free . castPtr =<< peek (p'image'data ptr)
 
 data Texture = Texture
   { texture'id :: Integer,
@@ -219,19 +257,34 @@ instance Storable Texture where
   sizeOf _ = 20
   alignment _ = 4
   peek _p = do
-    tId <- fromIntegral <$> (peekByteOff _p 0 :: IO CUInt)
-    width <- fromIntegral <$> (peekByteOff _p 4 :: IO CInt)
-    height <- fromIntegral <$> (peekByteOff _p 8 :: IO CInt)
-    mipmaps <- fromIntegral <$> (peekByteOff _p 12 :: IO CInt)
-    format <- peekByteOff _p 16
+    tId <- fromIntegral <$> peek (p'texture'id _p)
+    width <- fromIntegral <$> peek (p'texture'width _p)
+    height <- fromIntegral <$> peek (p'texture'height _p)
+    mipmaps <- fromIntegral <$> peek (p'texture'mipmaps _p)
+    format <- peek (p'texture'format _p)
     return $ Texture tId width height mipmaps format
   poke _p (Texture tId width height mipmaps format) = do
-    pokeByteOff _p 0 (fromIntegral tId :: CUInt)
-    pokeByteOff _p 4 (fromIntegral width :: CInt)
-    pokeByteOff _p 8 (fromIntegral height :: CInt)
-    pokeByteOff _p 12 (fromIntegral mipmaps :: CInt)
-    pokeByteOff _p 16 format
+    poke (p'texture'id _p) (fromIntegral tId)
+    poke (p'texture'width _p) (fromIntegral width)
+    poke (p'texture'height _p) (fromIntegral height)
+    poke (p'texture'mipmaps _p) (fromIntegral mipmaps)
+    poke (p'texture'format _p) format
     return ()
+
+p'texture'id :: Ptr Texture -> Ptr CUInt
+p'texture'id = (`plusPtr` 0)
+
+p'texture'width :: Ptr Texture -> Ptr CInt
+p'texture'width = (`plusPtr` 4)
+
+p'texture'height :: Ptr Texture -> Ptr CInt
+p'texture'height = (`plusPtr` 8)
+
+p'texture'mipmaps :: Ptr Texture -> Ptr CInt
+p'texture'mipmaps = (`plusPtr` 12)
+
+p'texture'format :: Ptr Texture -> Ptr PixelFormat
+p'texture'format = (`plusPtr` 16)
 
 type Texture2D = Texture
 
@@ -248,15 +301,24 @@ instance Storable RenderTexture where
   sizeOf _ = 44
   alignment _ = 4
   peek _p = do
-    rtId <- fromIntegral <$> (peekByteOff _p 0 :: IO CUInt)
-    texture <- peekByteOff _p 4
-    depth <- peekByteOff _p 24
+    rtId <- fromIntegral <$> peek (p'renderTexture'id _p)
+    texture <- peek (p'renderTexture'texture _p)
+    depth <- peek (p'renderTexture'depth _p)
     return $ RenderTexture rtId texture depth
   poke _p (RenderTexture rtId texture depth) = do
-    pokeByteOff _p 0 (fromIntegral rtId :: CUInt)
-    pokeByteOff _p 4 texture
-    pokeByteOff _p 24 depth
+    poke (p'renderTexture'id _p) (fromIntegral rtId)
+    poke (p'renderTexture'texture _p) texture
+    poke (p'renderTexture'depth _p) depth
     return ()
+
+p'renderTexture'id :: Ptr RenderTexture -> Ptr CUInt
+p'renderTexture'id = (`plusPtr` 0)
+
+p'renderTexture'texture :: Ptr RenderTexture -> Ptr Texture
+p'renderTexture'texture = (`plusPtr` 4)
+
+p'renderTexture'depth :: Ptr RenderTexture -> Ptr Texture
+p'renderTexture'depth = (`plusPtr` 24)
 
 type RenderTexture2D = RenderTexture
 
@@ -274,18 +336,36 @@ instance Storable NPatchInfo where
   sizeOf _ = 36
   alignment _ = 4
   peek _p = do
-    source <- peekByteOff _p 0
-    left <- fromIntegral <$> (peekByteOff _p 16 :: IO CInt)
-    top <- fromIntegral <$> (peekByteOff _p 20 :: IO CInt)
-    right <- fromIntegral <$> (peekByteOff _p 24 :: IO CInt)
-    bottom <- fromIntegral <$> (peekByteOff _p 28 :: IO CInt)
-    layout <- peekByteOff _p 32
+    source <- peek (p'nPatchInfo'source _p)
+    left <- fromIntegral <$> peek (p'nPatchInfo'left _p)
+    top <- fromIntegral <$> peek (p'nPatchInfo'top _p)
+    right <- fromIntegral <$> peek (p'nPatchInfo'right _p)
+    bottom <- fromIntegral <$> peek (p'nPatchInfo'bottom _p)
+    layout <- peek (p'nPatchInfo'layout _p)
     return $ NPatchInfo source left right top bottom layout
   poke _p (NPatchInfo source left right top bottom layout) = do
-    pokeByteOff _p 0 source
-    pokeByteOff _p 16 (fromIntegral left :: CInt)
-    pokeByteOff _p 20 (fromIntegral right :: CInt)
-    pokeByteOff _p 24 (fromIntegral top :: CInt)
-    pokeByteOff _p 28 (fromIntegral bottom :: CInt)
-    pokeByteOff _p 32 layout
+    poke (p'nPatchInfo'source _p) source
+    poke (p'nPatchInfo'left _p) (fromIntegral left)
+    poke (p'nPatchInfo'right _p) (fromIntegral right)
+    poke (p'nPatchInfo'top _p) (fromIntegral top)
+    poke (p'nPatchInfo'bottom _p) (fromIntegral bottom)
+    poke (p'nPatchInfo'layout _p) layout
     return ()
+
+p'nPatchInfo'source :: Ptr NPatchInfo -> Ptr Rectangle
+p'nPatchInfo'source = (`plusPtr` 0)
+
+p'nPatchInfo'left :: Ptr NPatchInfo -> Ptr CInt
+p'nPatchInfo'left = (`plusPtr` 16)
+
+p'nPatchInfo'top :: Ptr NPatchInfo -> Ptr CInt
+p'nPatchInfo'top = (`plusPtr` 20)
+
+p'nPatchInfo'right :: Ptr NPatchInfo -> Ptr CInt
+p'nPatchInfo'right = (`plusPtr` 24)
+
+p'nPatchInfo'bottom :: Ptr NPatchInfo -> Ptr CInt
+p'nPatchInfo'bottom = (`plusPtr` 28)
+
+p'nPatchInfo'layout :: Ptr NPatchInfo -> Ptr NPatchLayout
+p'nPatchInfo'layout = (`plusPtr` 32)

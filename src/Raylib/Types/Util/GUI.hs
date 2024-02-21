@@ -23,15 +23,23 @@ module Raylib.Types.Util.GUI
     GuiListViewProperty (..),
     GuiColorPickerProperty (..),
     GuiIconName (..),
+
     -- * Structures
     GuiStyleProp (..),
+
+    -- * Pointer utilities
+    p'guiStyleProp'controlId,
+    p'guiStyleProp'propertyId,
+    p'guiStyleProp'propertyValue,
   )
 where
 
 import Foreign
-  ( Storable (alignment, peek, peekByteOff, poke, pokeByteOff, sizeOf),
+  ( Ptr,
+    Storable (alignment, peek, poke, sizeOf),
     Word16,
     castPtr,
+    plusPtr,
   )
 import Foreign.C
   ( CInt (..),
@@ -1441,12 +1449,21 @@ instance Storable GuiStyleProp where
   sizeOf _ = 8
   alignment _ = 4
   peek _p = do
-    controlId <- fromIntegral <$> (peekByteOff _p 0 :: IO CUShort)
-    propertyId <- fromIntegral <$> (peekByteOff _p 2 :: IO CUShort)
-    propertyValue <- fromIntegral <$> (peekByteOff _p 4 :: IO CInt)
+    controlId <- fromIntegral <$> peek (p'guiStyleProp'controlId _p)
+    propertyId <- fromIntegral <$> peek (p'guiStyleProp'propertyId _p)
+    propertyValue <- fromIntegral <$> peek (p'guiStyleProp'propertyValue _p)
     return $ GuiStyleProp controlId propertyId propertyValue
   poke _p (GuiStyleProp controlId propertyId propertyValue) = do
-    pokeByteOff _p 0 (fromIntegral controlId :: CUShort)
-    pokeByteOff _p 2 (fromIntegral propertyId :: CUShort)
-    pokeByteOff _p 4 (fromIntegral propertyValue :: CInt)
+    poke (p'guiStyleProp'controlId _p) (fromIntegral controlId)
+    poke (p'guiStyleProp'propertyId _p) (fromIntegral propertyId)
+    poke (p'guiStyleProp'propertyValue _p) (fromIntegral propertyValue)
     return ()
+
+p'guiStyleProp'controlId :: Ptr GuiStyleProp -> Ptr CUShort
+p'guiStyleProp'controlId = (`plusPtr` 0)
+
+p'guiStyleProp'propertyId :: Ptr GuiStyleProp -> Ptr CUShort
+p'guiStyleProp'propertyId = (`plusPtr` 2)
+
+p'guiStyleProp'propertyValue :: Ptr GuiStyleProp -> Ptr CInt
+p'guiStyleProp'propertyValue = (`plusPtr` 4)

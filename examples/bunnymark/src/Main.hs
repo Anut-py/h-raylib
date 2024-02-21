@@ -1,6 +1,6 @@
 {-# OPTIONS -Wall #-}
-{-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE BangPatterns #-}
+{-# LANGUAGE TemplateHaskell #-}
 
 -- Writing performant h-raylib code requires the use of pointers and other
 -- un-Haskelly functionality. Unfortunately, this cannot be avoided.
@@ -41,7 +41,7 @@ import Raylib.Core
 import Raylib.Core.Shapes (drawRectangle)
 import Raylib.Core.Text (drawFPS, drawText)
 import Raylib.Core.Textures (c'drawTexture, c'loadTexture, c'unloadTexture)
-import Raylib.Types (Color (Color), MouseButton (MouseButtonLeft), Texture (texture'height, texture'width))
+import Raylib.Types (Color (Color), MouseButton (MouseButtonLeft), Texture, p'texture'height, p'texture'width)
 import Raylib.Util (inGHCi, raylibApplication)
 import Raylib.Util.Colors (black, green, maroon, rayWhite)
 
@@ -120,20 +120,20 @@ startup = do
   texPtr <- withCString texPath c'loadTexture
   -- Use `peek` when you need to access the underlying fields
 
-  -- If you have to do this often (e.g. every frame), use `plusPtr`
-  -- to get a pointer to the exact field that you need
-
-  -- For example, this could be rewritten as
-  --   tWidth <- fromIntegral (peekByteOff texPtr 4 :: IO CInt)
-  -- but since we are only doing this on startup, there is no need to optimize it
-  tex <- peek texPtr
+  -- This could be rewritten as
+  --   tex <- peek texPtr
+  --   let tWidth = texture'width tex
+  --   ...
+  -- but the code below is faster as it doesn't have to load the entire structure into Haskell
+  tWidth <- peek (p'texture'width texPtr)
+  tHeight <- peek (p'texture'height texPtr)
   bunniesPtr <- callocArray maxBunnies
   return
     ( AppState
         { texBunny = texPtr,
           bunnies = bunniesPtr,
-          halfTexWidth = fromIntegral (texture'width tex) / 2,
-          halfTexHeight = fromIntegral (texture'height tex) / 2,
+          halfTexWidth = fromIntegral tWidth / 2,
+          halfTexHeight = fromIntegral tHeight / 2,
           bunniesCount = 0
         }
     )

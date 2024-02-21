@@ -1,4 +1,5 @@
 {-# LANGUAGE DeriveAnyClass #-}
+
 {-# OPTIONS -Wall #-}
 
 -- | Bindings for camera-related types
@@ -6,16 +7,30 @@ module Raylib.Types.Core.Camera
   ( -- * Enumerations
     CameraMode (..),
     CameraProjection (..),
+
     -- * Structures
     Camera3D (..),
     Camera2D (..),
     Camera,
+
+    -- * Pointer utilities
+    p'camera3D'position,
+    p'camera3D'target,
+    p'camera3D'up,
+    p'camera3D'fovy,
+    p'camera3D'projection,
+    p'camera2D'offset,
+    p'camera2D'target,
+    p'camera2D'rotation,
+    p'camera2D'zoom,
   )
 where
 
 import Foreign
-  ( Storable (alignment, peek, peekByteOff, poke, pokeByteOff, sizeOf),
+  ( Ptr,
+    Storable (alignment, peek, poke, sizeOf),
     castPtr,
+    plusPtr,
   )
 import Foreign.C
   ( CFloat,
@@ -63,19 +78,34 @@ instance Storable Camera3D where
   sizeOf _ = 44
   alignment _ = 4
   peek _p = do
-    position <- peekByteOff _p 0
-    target <- peekByteOff _p 12
-    up <- peekByteOff _p 24
-    fovy <- realToFrac <$> (peekByteOff _p 36 :: IO CFloat)
-    projection <- peekByteOff _p 40
+    position <- peek (p'camera3D'position _p)
+    target <- peek (p'camera3D'target _p)
+    up <- peek (p'camera3D'up _p)
+    fovy <- realToFrac <$> peek (p'camera3D'fovy _p)
+    projection <- peek (p'camera3D'projection _p)
     return $ Camera3D position target up fovy projection
   poke _p (Camera3D position target up fovy projection) = do
-    pokeByteOff _p 0 position
-    pokeByteOff _p 12 target
-    pokeByteOff _p 24 up
-    pokeByteOff _p 36 (realToFrac fovy :: CFloat)
-    pokeByteOff _p 40 projection
+    poke (p'camera3D'position _p) position
+    poke (p'camera3D'target _p) target
+    poke (p'camera3D'up _p) up
+    poke (p'camera3D'fovy _p) (realToFrac fovy)
+    poke (p'camera3D'projection _p) projection
     return ()
+
+p'camera3D'position :: Ptr Camera3D -> Ptr Vector3
+p'camera3D'position = (`plusPtr` 0)
+
+p'camera3D'target :: Ptr Camera3D -> Ptr Vector3
+p'camera3D'target = (`plusPtr` 12)
+
+p'camera3D'up :: Ptr Camera3D -> Ptr Vector3
+p'camera3D'up = (`plusPtr` 24)
+
+p'camera3D'fovy :: Ptr Camera3D -> Ptr CFloat
+p'camera3D'fovy = (`plusPtr` 36)
+
+p'camera3D'projection :: Ptr Camera3D -> Ptr CameraProjection
+p'camera3D'projection = (`plusPtr` 40)
 
 type Camera = Camera3D
 
@@ -91,14 +121,26 @@ instance Storable Camera2D where
   sizeOf _ = 24
   alignment _ = 4
   peek _p = do
-    offset <- peekByteOff _p 0
-    target <- peekByteOff _p 8
-    rotation <- realToFrac <$> (peekByteOff _p 16 :: IO CFloat)
-    zoom <- realToFrac <$> (peekByteOff _p 20 :: IO CFloat)
+    offset <- peek (p'camera2D'offset _p)
+    target <- peek (p'camera2D'target _p)
+    rotation <- realToFrac <$> peek (p'camera2D'rotation _p)
+    zoom <- realToFrac <$> peek (p'camera2D'zoom _p)
     return $ Camera2D offset target rotation zoom
   poke _p (Camera2D offset target rotation zoom) = do
-    pokeByteOff _p 0 offset
-    pokeByteOff _p 8 target
-    pokeByteOff _p 16 (realToFrac rotation :: CFloat)
-    pokeByteOff _p 20 (realToFrac zoom :: CFloat)
+    poke (p'camera2D'offset _p) offset
+    poke (p'camera2D'target _p) target
+    poke (p'camera2D'rotation _p) (realToFrac rotation)
+    poke (p'camera2D'zoom _p) (realToFrac zoom)
     return ()
+
+p'camera2D'offset :: Ptr Camera2D -> Ptr Vector2
+p'camera2D'offset = (`plusPtr` 0)
+
+p'camera2D'target :: Ptr Camera2D -> Ptr Vector2
+p'camera2D'target = (`plusPtr` 8)
+
+p'camera2D'rotation :: Ptr Camera2D -> Ptr CFloat
+p'camera2D'rotation = (`plusPtr` 16)
+
+p'camera2D'zoom :: Ptr Camera2D -> Ptr CFloat
+p'camera2D'zoom = (`plusPtr` 20)
