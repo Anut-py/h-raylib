@@ -14,4 +14,4 @@ jobs:
         with:
           hackageToken: ${{ secrets.HACKAGE_AUTH_TOKEN }}
           packagesPath: dist-newstyle/sdist
-          publish: true
+          publish: false
