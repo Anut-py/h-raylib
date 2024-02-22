@@ -6,6 +6,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+        with:
+          submodules: recursive
       - run: cabal v2-sdist
         shell: bash
       - uses: haskell-actions/hackage-publish@v1
