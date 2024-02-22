@@ -30,16 +30,17 @@ Items which have not yet been worked on. Feel free to work on one of these.
 
 Items which have been completed but not published to hackage.
 
-- Implement automatic memory management for callbacks
-- Move Raylib.Internal.Native functions into the modules where they are called
-  - Use Template Haskell to clean up boilerplate
-- Split Raylib.Types into multiple modules
-- Bind `raygui` \[[#34](https://github.com/Anut-py/h-raylib/issues/34)\]
+(none)
 
 ## Published
 
 Items which have been published to hackage.
 
+- Implement automatic memory management for callbacks (`5.1.1.0`)
+- Move Raylib.Internal.Native functions into the modules where they are called (`5.1.1.0`)
+  - Use Template Haskell to clean up boilerplate
+- Split Raylib.Types into multiple modules (`5.1.1.0`)
+- Bind `raygui` \[[#34](https://github.com/Anut-py/h-raylib/issues/34)\]  (`5.1.1.0`)
 - Bind `raymath` (`4.6.0.1`)
 - Bind `rcamera` (`4.6.0.1`)
 - Bind `rlgl` (`4.5.3.2`)
