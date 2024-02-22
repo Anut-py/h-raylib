@@ -23,6 +23,7 @@ extra-source-files:
   examples/**/*.obj
   examples/**/*.png
   examples/**/*.ttf
+  examples/**/*.txt
   examples/**/*.vert
   examples/**/*.xm
   lib/**/*.c
@@ -103,7 +104,9 @@ common example-options
       , base
       , h-raylib
 
-    other-extensions: TemplateHaskell, BangPatterns
+    other-extensions:
+      BangPatterns
+      TemplateHaskell
 
     if flag(platform-web)
       ghc-options:
