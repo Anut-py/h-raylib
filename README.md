@@ -54,6 +54,8 @@ This library has not yet been tested on other platforms (raylib supports
 Android, Raspberry Pi, and DRM, all of which have not been implemented in
 h-raylib). Anybody willing to try is welcome.
 
+Web support has not been finalized yet.
+
 If you get it working on other platforms, please create a pull request in the
 GitHub repository and update `h-raylib.cabal` with the relevant config.
 

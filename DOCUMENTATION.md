@@ -20,6 +20,8 @@ These changes are for automatic memory management. See the "Memory management" s
 
 (Most) functions that took a pointer as an argument in C were changed to take a regular type as an argument and return an updated version of the argument (there are a few exceptions, because `Ptr`s are difficult to avoid in some cases).
 
+You can also access the underlying C functions by prepending `c'` to the function name (e.g. `c'initWindow`). This may be necessary for performance reasons. Note that if you do this, you will have to manually unload and free everything.
+
 ## Memory management
 
 The automatic memory management flow is as follows:

@@ -1,5 +1,23 @@
 # h-raylib changelog
 
+## Version 5.1.1.0
+_22 February, 2024_
+
+- Split `Raylib.Types` into different modules (`Raylib.Types` reexports everything, so this will not break existing code)
+- Fixed `flake.nix` and `default.nix`
+- Exposed all the native functions
+- Added support for callbacks
+- Added more thorough Haddock documentation
+- Added pointer utility functions (`p'*`)
+
+\[[#4](https://github.com/Anut-py/h-raylib/issues/4)\]
+
+- Started working on web support
+
+\[[#34](https://github.com/Anut-py/h-raylib/issues/34)\]
+
+- Added bindings for raygui (`Raylib.Util.GUI`, `Raylib.Util.GUI.Styles`)
+
 ## Version 5.1.0.1
 _16 January, 2024_
 
