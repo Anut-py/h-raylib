@@ -6,6 +6,7 @@
 module Raylib.Types.Core.Audio
   ( -- * Enumerations
     MusicContextType (..),
+    AudioBufferUsage (..),
 
     -- * Structures
     Wave (..),
