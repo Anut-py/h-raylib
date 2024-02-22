@@ -16,7 +16,6 @@ extra-doc-files:
   CONTRIBUTING.md
   DOCUMENTATION.md
   README.md
-  ROADMAP.md
 
 extra-source-files:
   examples/**/*.frag

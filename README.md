@@ -97,7 +97,7 @@ For documentation: [DOCUMENTATION.md](https://github.com/Anut-py/h-raylib/blob/m
 
 For contributors: [CONTRIBUTING.md](https://github.com/Anut-py/h-raylib/blob/master/CONTRIBUTING.md).
 
-If you want to request a feature, create an issue in the GitHub repo. Please check [ROADMAP.md](https://github.com/Anut-py/h-raylib/blob/master/ROADMAP.md) to see if the feature has already been planned.
+If you want to request a feature, create an issue in the GitHub repo. Please check [the roadmap](https://github.com/Anut-py/h-raylib/blob/master/CONTRIBUTING.md#h-raylib-roadmap) to see if the feature has already been planned.
 
 ## FAQ and help
 

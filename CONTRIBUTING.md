@@ -10,6 +10,38 @@ You can use `run-all-examples.sh` to run all of the examples in one go.
 
 You can use `./devtools.js [options]` (on Linux) or `node devtools.js [options]` anywhere else for general development utilities. Use the `--help` flag for details.
 
-[ROADMAP.md](https://github.com/Anut-py/h-raylib/blob/master/ROADMAP.md) is a list of features that may be added to this project. Contributors are welcome to help implement these.
-
 [DOCUMENTATION.md](https://github.com/Anut-py/h-raylib/blob/master/DOCUMENTATION.md) has information that is specific to h-raylib.
+
+# h-raylib roadmap
+
+This is a list of features that may be added to this project. Contributors are welcome to help implement these.
+
+## Pending
+
+Items which have not yet been worked on. Feel free to work on one of these.
+
+- Bind `rgestures`
+
+## In progress
+
+- Add web build support \[[#4](https://github.com/Anut-py/h-raylib/issues/4)\]
+
+## Implemented
+
+Items which have been completed but not published to hackage.
+
+- Implement automatic memory management for callbacks
+- Move Raylib.Internal.Native functions into the modules where they are called
+  - Use Template Haskell to clean up boilerplate
+- Split Raylib.Types into multiple modules
+- Bind `raygui` \[[#34](https://github.com/Anut-py/h-raylib/issues/34)\]
+
+## Published
+
+Items which have been published to hackage.
+
+- Bind `raymath` (`4.6.0.1`)
+- Bind `rcamera` (`4.6.0.1`)
+- Bind `rlgl` (`4.5.3.2`)
+- Allow manual unloading of assets for larger projects (`4.5.3.1`)
+- Make it easier to pass shader parameters (`4.5.3.0`)
