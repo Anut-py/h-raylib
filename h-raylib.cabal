@@ -34,6 +34,8 @@ extra-source-files:
   raylib/**/*.c
   raylib/**/*.h
   raylib/**/*.m
+  flake.nix
+  default.nix
 
 source-repository head
   type:     git
