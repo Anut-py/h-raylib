@@ -22,17 +22,17 @@ where
 import Raylib.Internal.TH (genNative)
 
 $( genNative
-     [ ("c'guiLoadStyleAshes", "GuiLoadStyleAshes_", "rgui_bindings.h", [t|IO ()|]),
-       ("c'guiLoadStyleBluish", "GuiLoadStyleBluish_", "rgui_bindings.h", [t|IO ()|]),
-       ("c'guiLoadStyleCandy", "GuiLoadStyleCandy_", "rgui_bindings.h", [t|IO ()|]),
-       ("c'guiLoadStyleCherry", "GuiLoadStyleCherry_", "rgui_bindings.h", [t|IO ()|]),
-       ("c'guiLoadStyleCyber", "GuiLoadStyleCyber_", "rgui_bindings.h", [t|IO ()|]),
-       ("c'guiLoadStyleDark", "GuiLoadStyleDark_", "rgui_bindings.h", [t|IO ()|]),
-       ("c'guiLoadStyleEnefete", "GuiLoadStyleEnefete_", "rgui_bindings.h", [t|IO ()|]),
-       ("c'guiLoadStyleJungle", "GuiLoadStyleJungle_", "rgui_bindings.h", [t|IO ()|]),
-       ("c'guiLoadStyleLavanda", "GuiLoadStyleLavanda_", "rgui_bindings.h", [t|IO ()|]),
-       ("c'guiLoadStyleSunny", "GuiLoadStyleSunny_", "rgui_bindings.h", [t|IO ()|]),
-       ("c'guiLoadStyleTerminal", "GuiLoadStyleTerminal_", "rgui_bindings.h", [t|IO ()|])
+     [ ("c'guiLoadStyleAshes", "GuiLoadStyleAshes_", "rgui_bindings.h", [t|IO ()|], False),
+       ("c'guiLoadStyleBluish", "GuiLoadStyleBluish_", "rgui_bindings.h", [t|IO ()|], False),
+       ("c'guiLoadStyleCandy", "GuiLoadStyleCandy_", "rgui_bindings.h", [t|IO ()|], False),
+       ("c'guiLoadStyleCherry", "GuiLoadStyleCherry_", "rgui_bindings.h", [t|IO ()|], False),
+       ("c'guiLoadStyleCyber", "GuiLoadStyleCyber_", "rgui_bindings.h", [t|IO ()|], False),
+       ("c'guiLoadStyleDark", "GuiLoadStyleDark_", "rgui_bindings.h", [t|IO ()|], False),
+       ("c'guiLoadStyleEnefete", "GuiLoadStyleEnefete_", "rgui_bindings.h", [t|IO ()|], False),
+       ("c'guiLoadStyleJungle", "GuiLoadStyleJungle_", "rgui_bindings.h", [t|IO ()|], False),
+       ("c'guiLoadStyleLavanda", "GuiLoadStyleLavanda_", "rgui_bindings.h", [t|IO ()|], False),
+       ("c'guiLoadStyleSunny", "GuiLoadStyleSunny_", "rgui_bindings.h", [t|IO ()|], False),
+       ("c'guiLoadStyleTerminal", "GuiLoadStyleTerminal_", "rgui_bindings.h", [t|IO ()|], False)
      ]
  )
 

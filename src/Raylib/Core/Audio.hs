@@ -137,10 +137,14 @@ module Raylib.Core.Audio
     c'detachAudioStreamProcessor,
     c'attachAudioMixedProcessor,
     c'detachAudioMixedProcessor,
+
+    -- * Callbacks
+    mk'audioCallback,
+    createAudioCallback,
   )
 where
 
-import Foreign (Ptr, Storable (peek, sizeOf), castPtr, toBool)
+import Foreign (Ptr, Storable (peek, sizeOf), castPtr, toBool, castFunPtr)
 import Foreign.C
   ( CBool (..),
     CFloat (..),
@@ -150,7 +154,7 @@ import Foreign.C
     CUInt (..),
     withCString,
   )
-import Raylib.Internal (WindowResources, addAudioBuffer, addAudioBufferAlias, addCtxData, unloadAudioBuffers, unloadCtxData, unloadSingleAudioBuffer, unloadSingleAudioBufferAlias, unloadSingleCtxDataPtr)
+import Raylib.Internal (WindowResources, addAudioBuffer, addAudioBufferAlias, addCtxData, unloadAudioBuffers, unloadCtxData, unloadSingleAudioBuffer, unloadSingleAudioBufferAlias, unloadSingleCtxDataPtr, addFunPtr, unloadSingleFunPtr)
 import Raylib.Internal.Foreign
   ( pop,
     popCArray,
@@ -168,72 +172,72 @@ import Raylib.Types
   )
 
 $( genNative
-     [ ("c'initAudioDevice", "InitAudioDevice_", "rl_bindings.h", [t|IO ()|]),
-       ("c'closeAudioDevice", "CloseAudioDevice_", "rl_bindings.h", [t|IO ()|]),
-       ("c'isAudioDeviceReady", "IsAudioDeviceReady_", "rl_bindings.h", [t|IO CBool|]),
-       ("c'setMasterVolume", "SetMasterVolume_", "rl_bindings.h", [t|CFloat -> IO ()|]),
-       ("c'getMasterVolume", "GetMasterVolume_", "rl_bindings.h", [t|IO CFloat|]),
-       ("c'loadWave", "LoadWave_", "rl_bindings.h", [t|CString -> IO (Ptr Wave)|]),
-       ("c'loadWaveFromMemory", "LoadWaveFromMemory_", "rl_bindings.h", [t|CString -> Ptr CUChar -> CInt -> IO (Ptr Wave)|]),
-       ("c'loadSound", "LoadSound_", "rl_bindings.h", [t|CString -> IO (Ptr Sound)|]),
-       ("c'loadSoundFromWave", "LoadSoundFromWave_", "rl_bindings.h", [t|Ptr Wave -> IO (Ptr Sound)|]),
-       ("c'loadSoundAlias", "LoadSoundAlias_", "rl_bindings.h", [t|Ptr Sound -> IO (Ptr Sound)|]),
-       ("c'updateSound", "UpdateSound_", "rl_bindings.h", [t|Ptr Sound -> Ptr () -> CInt -> IO ()|]),
-       ("c'isWaveReady", "IsWaveReady_", "rl_bindings.h", [t|Ptr Wave -> IO CBool|]),
-       ("c'unloadWave", "UnloadWave_", "rl_bindings.h", [t|Ptr Wave -> IO ()|]),
-       ("c'isSoundReady", "IsSoundReady_", "rl_bindings.h", [t|Ptr Sound -> IO CBool|]),
-       ("c'unloadSound", "UnloadSound_", "rl_bindings.h", [t|Ptr Sound -> IO ()|]),
-       ("c'unloadSoundAlias", "UnloadSoundAlias_", "rl_bindings.h", [t|Ptr Sound -> IO ()|]),
-       ("c'exportWave", "ExportWave_", "rl_bindings.h", [t|Ptr Wave -> CString -> IO CBool|]),
-       ("c'exportWaveAsCode", "ExportWaveAsCode_", "rl_bindings.h", [t|Ptr Wave -> CString -> IO CBool|]),
-       ("c'playSound", "PlaySound_", "rl_bindings.h", [t|Ptr Sound -> IO ()|]),
-       ("c'stopSound", "StopSound_", "rl_bindings.h", [t|Ptr Sound -> IO ()|]),
-       ("c'pauseSound", "PauseSound_", "rl_bindings.h", [t|Ptr Sound -> IO ()|]),
-       ("c'resumeSound", "ResumeSound_", "rl_bindings.h", [t|Ptr Sound -> IO ()|]),
-       ("c'isSoundPlaying", "IsSoundPlaying_", "rl_bindings.h", [t|Ptr Sound -> IO CBool|]),
-       ("c'setSoundVolume", "SetSoundVolume_", "rl_bindings.h", [t|Ptr Sound -> CFloat -> IO ()|]),
-       ("c'setSoundPitch", "SetSoundPitch_", "rl_bindings.h", [t|Ptr Sound -> CFloat -> IO ()|]),
-       ("c'setSoundPan", "SetSoundPan_", "rl_bindings.h", [t|Ptr Sound -> CFloat -> IO ()|]),
-       ("c'waveCopy", "WaveCopy_", "rl_bindings.h", [t|Ptr Wave -> IO (Ptr Wave)|]),
-       ("c'waveCrop", "WaveCrop_", "rl_bindings.h", [t|Ptr Wave -> CInt -> CInt -> IO ()|]),
-       ("c'waveFormat", "WaveFormat_", "rl_bindings.h", [t|Ptr Wave -> CInt -> CInt -> CInt -> IO ()|]),
-       ("c'loadWaveSamples", "LoadWaveSamples_", "rl_bindings.h", [t|Ptr Wave -> IO (Ptr CFloat)|]),
-       ("c'unloadWaveSamples", "UnloadWaveSamples_", "rl_bindings.h", [t|Ptr CFloat -> IO ()|]),
-       ("c'loadMusicStream", "LoadMusicStream_", "rl_bindings.h", [t|CString -> IO (Ptr Music)|]),
-       ("c'loadMusicStreamFromMemory", "LoadMusicStreamFromMemory_", "rl_bindings.h", [t|CString -> Ptr CUChar -> CInt -> IO (Ptr Music)|]),
-       ("c'isMusicReady", "IsMusicReady_", "rl_bindings.h", [t|Ptr Music -> IO CBool|]),
-       ("c'unloadMusicStream", "UnloadMusicStream_", "rl_bindings.h", [t|Ptr Music -> IO ()|]),
-       ("c'playMusicStream", "PlayMusicStream_", "rl_bindings.h", [t|Ptr Music -> IO ()|]),
-       ("c'isMusicStreamPlaying", "IsMusicStreamPlaying_", "rl_bindings.h", [t|Ptr Music -> IO CBool|]),
-       ("c'updateMusicStream", "UpdateMusicStream_", "rl_bindings.h", [t|Ptr Music -> IO ()|]),
-       ("c'stopMusicStream", "StopMusicStream_", "rl_bindings.h", [t|Ptr Music -> IO ()|]),
-       ("c'pauseMusicStream", "PauseMusicStream_", "rl_bindings.h", [t|Ptr Music -> IO ()|]),
-       ("c'resumeMusicStream", "ResumeMusicStream_", "rl_bindings.h", [t|Ptr Music -> IO ()|]),
-       ("c'seekMusicStream", "SeekMusicStream_", "rl_bindings.h", [t|Ptr Music -> CFloat -> IO ()|]),
-       ("c'setMusicVolume", "SetMusicVolume_", "rl_bindings.h", [t|Ptr Music -> CFloat -> IO ()|]),
-       ("c'setMusicPitch", "SetMusicPitch_", "rl_bindings.h", [t|Ptr Music -> CFloat -> IO ()|]),
-       ("c'setMusicPan", "SetMusicPan_", "rl_bindings.h", [t|Ptr Music -> CFloat -> IO ()|]),
-       ("c'getMusicTimeLength", "GetMusicTimeLength_", "rl_bindings.h", [t|Ptr Music -> IO CFloat|]),
-       ("c'getMusicTimePlayed", "GetMusicTimePlayed_", "rl_bindings.h", [t|Ptr Music -> IO CFloat|]),
-       ("c'loadAudioStream", "LoadAudioStream_", "rl_bindings.h", [t|CUInt -> CUInt -> CUInt -> IO (Ptr AudioStream)|]),
-       ("c'isAudioStreamReady", "IsAudioStreamReady_", "rl_bindings.h", [t|Ptr AudioStream -> IO CBool|]),
-       ("c'unloadAudioStream", "UnloadAudioStream_", "rl_bindings.h", [t|Ptr AudioStream -> IO ()|]),
-       ("c'updateAudioStream", "UpdateAudioStream_", "rl_bindings.h", [t|Ptr AudioStream -> Ptr () -> CInt -> IO ()|]),
-       ("c'isAudioStreamProcessed", "IsAudioStreamProcessed_", "rl_bindings.h", [t|Ptr AudioStream -> IO CBool|]),
-       ("c'playAudioStream", "PlayAudioStream_", "rl_bindings.h", [t|Ptr AudioStream -> IO ()|]),
-       ("c'pauseAudioStream", "PauseAudioStream_", "rl_bindings.h", [t|Ptr AudioStream -> IO ()|]),
-       ("c'resumeAudioStream", "ResumeAudioStream_", "rl_bindings.h", [t|Ptr AudioStream -> IO ()|]),
-       ("c'isAudioStreamPlaying", "IsAudioStreamPlaying_", "rl_bindings.h", [t|Ptr AudioStream -> IO CBool|]),
-       ("c'stopAudioStream", "StopAudioStream_", "rl_bindings.h", [t|Ptr AudioStream -> IO ()|]),
-       ("c'setAudioStreamVolume", "SetAudioStreamVolume_", "rl_bindings.h", [t|Ptr AudioStream -> CFloat -> IO ()|]),
-       ("c'setAudioStreamPitch", "SetAudioStreamPitch_", "rl_bindings.h", [t|Ptr AudioStream -> CFloat -> IO ()|]),
-       ("c'setAudioStreamPan", "SetAudioStreamPan_", "rl_bindings.h", [t|Ptr AudioStream -> CFloat -> IO ()|]),
-       ("c'setAudioStreamBufferSizeDefault", "SetAudioStreamBufferSizeDefault_", "rl_bindings.h", [t|CInt -> IO ()|]),
-       ("c'setAudioStreamCallback", "SetAudioStreamCallback_", "rl_bindings.h", [t|Ptr AudioStream -> C'AudioCallback -> IO ()|]),
-       ("c'attachAudioStreamProcessor", "AttachAudioStreamProcessor_", "rl_bindings.h", [t|Ptr AudioStream -> C'AudioCallback -> IO ()|]),
-       ("c'detachAudioStreamProcessor", "DetachAudioStreamProcessor_", "rl_bindings.h", [t|Ptr AudioStream -> C'AudioCallback -> IO ()|]),
-       ("c'attachAudioMixedProcessor", "AttachAudioMixedProcessor_", "rl_bindings.h", [t|C'AudioCallback -> IO ()|]),
-       ("c'detachAudioMixedProcessor", "DetachAudioMixedProcessor_", "rl_bindings.h", [t|C'AudioCallback -> IO ()|])
+     [ ("c'initAudioDevice", "InitAudioDevice_", "rl_bindings.h", [t|IO ()|], False),
+       ("c'closeAudioDevice", "CloseAudioDevice_", "rl_bindings.h", [t|IO ()|], False),
+       ("c'isAudioDeviceReady", "IsAudioDeviceReady_", "rl_bindings.h", [t|IO CBool|], False),
+       ("c'setMasterVolume", "SetMasterVolume_", "rl_bindings.h", [t|CFloat -> IO ()|], False),
+       ("c'getMasterVolume", "GetMasterVolume_", "rl_bindings.h", [t|IO CFloat|], False),
+       ("c'loadWave", "LoadWave_", "rl_bindings.h", [t|CString -> IO (Ptr Wave)|], False),
+       ("c'loadWaveFromMemory", "LoadWaveFromMemory_", "rl_bindings.h", [t|CString -> Ptr CUChar -> CInt -> IO (Ptr Wave)|], False),
+       ("c'loadSound", "LoadSound_", "rl_bindings.h", [t|CString -> IO (Ptr Sound)|], False),
+       ("c'loadSoundFromWave", "LoadSoundFromWave_", "rl_bindings.h", [t|Ptr Wave -> IO (Ptr Sound)|], False),
+       ("c'loadSoundAlias", "LoadSoundAlias_", "rl_bindings.h", [t|Ptr Sound -> IO (Ptr Sound)|], False),
+       ("c'updateSound", "UpdateSound_", "rl_bindings.h", [t|Ptr Sound -> Ptr () -> CInt -> IO ()|], False),
+       ("c'isWaveReady", "IsWaveReady_", "rl_bindings.h", [t|Ptr Wave -> IO CBool|], False),
+       ("c'unloadWave", "UnloadWave_", "rl_bindings.h", [t|Ptr Wave -> IO ()|], False),
+       ("c'isSoundReady", "IsSoundReady_", "rl_bindings.h", [t|Ptr Sound -> IO CBool|], False),
+       ("c'unloadSound", "UnloadSound_", "rl_bindings.h", [t|Ptr Sound -> IO ()|], False),
+       ("c'unloadSoundAlias", "UnloadSoundAlias_", "rl_bindings.h", [t|Ptr Sound -> IO ()|], False),
+       ("c'exportWave", "ExportWave_", "rl_bindings.h", [t|Ptr Wave -> CString -> IO CBool|], False),
+       ("c'exportWaveAsCode", "ExportWaveAsCode_", "rl_bindings.h", [t|Ptr Wave -> CString -> IO CBool|], False),
+       ("c'playSound", "PlaySound_", "rl_bindings.h", [t|Ptr Sound -> IO ()|], False),
+       ("c'stopSound", "StopSound_", "rl_bindings.h", [t|Ptr Sound -> IO ()|], False),
+       ("c'pauseSound", "PauseSound_", "rl_bindings.h", [t|Ptr Sound -> IO ()|], False),
+       ("c'resumeSound", "ResumeSound_", "rl_bindings.h", [t|Ptr Sound -> IO ()|], False),
+       ("c'isSoundPlaying", "IsSoundPlaying_", "rl_bindings.h", [t|Ptr Sound -> IO CBool|], False),
+       ("c'setSoundVolume", "SetSoundVolume_", "rl_bindings.h", [t|Ptr Sound -> CFloat -> IO ()|], False),
+       ("c'setSoundPitch", "SetSoundPitch_", "rl_bindings.h", [t|Ptr Sound -> CFloat -> IO ()|], False),
+       ("c'setSoundPan", "SetSoundPan_", "rl_bindings.h", [t|Ptr Sound -> CFloat -> IO ()|], False),
+       ("c'waveCopy", "WaveCopy_", "rl_bindings.h", [t|Ptr Wave -> IO (Ptr Wave)|], False),
+       ("c'waveCrop", "WaveCrop_", "rl_bindings.h", [t|Ptr Wave -> CInt -> CInt -> IO ()|], False),
+       ("c'waveFormat", "WaveFormat_", "rl_bindings.h", [t|Ptr Wave -> CInt -> CInt -> CInt -> IO ()|], False),
+       ("c'loadWaveSamples", "LoadWaveSamples_", "rl_bindings.h", [t|Ptr Wave -> IO (Ptr CFloat)|], False),
+       ("c'unloadWaveSamples", "UnloadWaveSamples_", "rl_bindings.h", [t|Ptr CFloat -> IO ()|], False),
+       ("c'loadMusicStream", "LoadMusicStream_", "rl_bindings.h", [t|CString -> IO (Ptr Music)|], False),
+       ("c'loadMusicStreamFromMemory", "LoadMusicStreamFromMemory_", "rl_bindings.h", [t|CString -> Ptr CUChar -> CInt -> IO (Ptr Music)|], False),
+       ("c'isMusicReady", "IsMusicReady_", "rl_bindings.h", [t|Ptr Music -> IO CBool|], False),
+       ("c'unloadMusicStream", "UnloadMusicStream_", "rl_bindings.h", [t|Ptr Music -> IO ()|], False),
+       ("c'playMusicStream", "PlayMusicStream_", "rl_bindings.h", [t|Ptr Music -> IO ()|], False),
+       ("c'isMusicStreamPlaying", "IsMusicStreamPlaying_", "rl_bindings.h", [t|Ptr Music -> IO CBool|], False),
+       ("c'updateMusicStream", "UpdateMusicStream_", "rl_bindings.h", [t|Ptr Music -> IO ()|], False),
+       ("c'stopMusicStream", "StopMusicStream_", "rl_bindings.h", [t|Ptr Music -> IO ()|], False),
+       ("c'pauseMusicStream", "PauseMusicStream_", "rl_bindings.h", [t|Ptr Music -> IO ()|], False),
+       ("c'resumeMusicStream", "ResumeMusicStream_", "rl_bindings.h", [t|Ptr Music -> IO ()|], False),
+       ("c'seekMusicStream", "SeekMusicStream_", "rl_bindings.h", [t|Ptr Music -> CFloat -> IO ()|], False),
+       ("c'setMusicVolume", "SetMusicVolume_", "rl_bindings.h", [t|Ptr Music -> CFloat -> IO ()|], False),
+       ("c'setMusicPitch", "SetMusicPitch_", "rl_bindings.h", [t|Ptr Music -> CFloat -> IO ()|], False),
+       ("c'setMusicPan", "SetMusicPan_", "rl_bindings.h", [t|Ptr Music -> CFloat -> IO ()|], False),
+       ("c'getMusicTimeLength", "GetMusicTimeLength_", "rl_bindings.h", [t|Ptr Music -> IO CFloat|], False),
+       ("c'getMusicTimePlayed", "GetMusicTimePlayed_", "rl_bindings.h", [t|Ptr Music -> IO CFloat|], False),
+       ("c'loadAudioStream", "LoadAudioStream_", "rl_bindings.h", [t|CUInt -> CUInt -> CUInt -> IO (Ptr AudioStream)|], False),
+       ("c'isAudioStreamReady", "IsAudioStreamReady_", "rl_bindings.h", [t|Ptr AudioStream -> IO CBool|], False),
+       ("c'unloadAudioStream", "UnloadAudioStream_", "rl_bindings.h", [t|Ptr AudioStream -> IO ()|], False),
+       ("c'updateAudioStream", "UpdateAudioStream_", "rl_bindings.h", [t|Ptr AudioStream -> Ptr () -> CInt -> IO ()|], False),
+       ("c'isAudioStreamProcessed", "IsAudioStreamProcessed_", "rl_bindings.h", [t|Ptr AudioStream -> IO CBool|], False),
+       ("c'playAudioStream", "PlayAudioStream_", "rl_bindings.h", [t|Ptr AudioStream -> IO ()|], False),
+       ("c'pauseAudioStream", "PauseAudioStream_", "rl_bindings.h", [t|Ptr AudioStream -> IO ()|], False),
+       ("c'resumeAudioStream", "ResumeAudioStream_", "rl_bindings.h", [t|Ptr AudioStream -> IO ()|], False),
+       ("c'isAudioStreamPlaying", "IsAudioStreamPlaying_", "rl_bindings.h", [t|Ptr AudioStream -> IO CBool|], False),
+       ("c'stopAudioStream", "StopAudioStream_", "rl_bindings.h", [t|Ptr AudioStream -> IO ()|], False),
+       ("c'setAudioStreamVolume", "SetAudioStreamVolume_", "rl_bindings.h", [t|Ptr AudioStream -> CFloat -> IO ()|], False),
+       ("c'setAudioStreamPitch", "SetAudioStreamPitch_", "rl_bindings.h", [t|Ptr AudioStream -> CFloat -> IO ()|], False),
+       ("c'setAudioStreamPan", "SetAudioStreamPan_", "rl_bindings.h", [t|Ptr AudioStream -> CFloat -> IO ()|], False),
+       ("c'setAudioStreamBufferSizeDefault", "SetAudioStreamBufferSizeDefault_", "rl_bindings.h", [t|CInt -> IO ()|], False),
+       ("c'setAudioStreamCallback", "SetAudioStreamCallback_", "rl_bindings.h", [t|Ptr AudioStream -> C'AudioCallback -> IO ()|], False),
+       ("c'attachAudioStreamProcessor", "AttachAudioStreamProcessor_", "rl_bindings.h", [t|Ptr AudioStream -> C'AudioCallback -> IO ()|], False),
+       ("c'detachAudioStreamProcessor", "DetachAudioStreamProcessor_", "rl_bindings.h", [t|Ptr AudioStream -> C'AudioCallback -> IO ()|], False),
+       ("c'attachAudioMixedProcessor", "AttachAudioMixedProcessor_", "rl_bindings.h", [t|C'AudioCallback -> IO ()|], False),
+       ("c'detachAudioMixedProcessor", "DetachAudioMixedProcessor_", "rl_bindings.h", [t|C'AudioCallback -> IO ()|], False)
      ]
  )
 
@@ -457,41 +461,44 @@ setAudioStreamPan stream pan = withFreeable stream (\s -> c'setAudioStreamPan s 
 setAudioStreamBufferSizeDefault :: Int -> IO ()
 setAudioStreamBufferSizeDefault = c'setAudioStreamBufferSizeDefault . fromIntegral
 
-setAudioStreamCallback :: AudioStream -> AudioCallback -> IO C'AudioCallback
-setAudioStreamCallback stream callback =
+setAudioStreamCallback :: AudioStream -> AudioCallback -> WindowResources -> IO C'AudioCallback
+setAudioStreamCallback stream callback window =
   withFreeable
     stream
     ( \s ->
         do
           c <- createAudioCallback callback
+          addFunPtr (castFunPtr c) window
           c'setAudioStreamCallback s c
           return c
     )
 
-attachAudioStreamProcessor :: AudioStream -> AudioCallback -> IO C'AudioCallback
-attachAudioStreamProcessor stream callback =
+attachAudioStreamProcessor :: AudioStream -> AudioCallback -> WindowResources -> IO C'AudioCallback
+attachAudioStreamProcessor stream callback window =
   withFreeable
     stream
     ( \s ->
         do
           c <- createAudioCallback callback
+          addFunPtr (castFunPtr c) window
           c'attachAudioStreamProcessor s c
           return c
     )
 
-detachAudioStreamProcessor :: AudioStream -> C'AudioCallback -> IO ()
-detachAudioStreamProcessor stream callback =
-  withFreeable stream (`c'detachAudioStreamProcessor` callback)
+detachAudioStreamProcessor :: AudioStream -> C'AudioCallback -> WindowResources -> IO ()
+detachAudioStreamProcessor stream callback window =
+  withFreeable stream (`c'detachAudioStreamProcessor` callback) >> unloadSingleFunPtr (castFunPtr callback) window
 
-attachAudioMixedProcessor :: AudioCallback -> IO C'AudioCallback
-attachAudioMixedProcessor callback =
+attachAudioMixedProcessor :: AudioCallback -> WindowResources -> IO C'AudioCallback
+attachAudioMixedProcessor callback window =
   do
     c <- createAudioCallback callback
+    addFunPtr (castFunPtr c) window
     c'attachAudioMixedProcessor c
     return c
 
-detachAudioMixedProcessor :: C'AudioCallback -> IO ()
-detachAudioMixedProcessor = c'detachAudioMixedProcessor
+detachAudioMixedProcessor :: C'AudioCallback -> WindowResources -> IO ()
+detachAudioMixedProcessor callback window = c'detachAudioMixedProcessor callback >> unloadSingleFunPtr (castFunPtr callback) window
 
 foreign import ccall unsafe "wrapper"
   mk'audioCallback ::

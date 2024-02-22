@@ -1170,8 +1170,6 @@ type LoadFileTextCallback = String -> IO String
 
 type SaveFileTextCallback = String -> String -> IO Bool
 
--- TODO: Add FunPtrs to WindowResources for automatic memory management
-
 type C'LoadFileDataCallback = FunPtr (CString -> Ptr CUInt -> IO (Ptr CUChar))
 
 type C'SaveFileDataCallback = FunPtr (CString -> Ptr () -> CUInt -> IO CInt)

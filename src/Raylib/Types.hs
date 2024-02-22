@@ -33,9 +33,9 @@
 -- Haskell wrappers. When you pass one of these wrappers (e.g.
 -- `LoadFileDataCallback`) to a function that takes one as an argument (e.g.
 -- `Raylib.Core.setLoadFileDataCallback`), the function will return a @FunPtr@
--- type (e.g. `C'LoadFileDataCallback`). You will have to manually free this with
--- `Foreign.freeHaskellFunPtr` at the end of your program to avoid memory leaks
--- (TODO: implement automatic memory management for `FunPtr`s).
+-- type (e.g. `C'LoadFileDataCallback`). It will be automatically freed when
+-- `closeWindow` is called, you should not manually free it. In most cases,
+-- you can ignore this value.
 module Raylib.Types
   ( module Raylib.Types.Core,
     module Raylib.Types.Core.Audio,

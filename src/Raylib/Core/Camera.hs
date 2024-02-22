@@ -21,8 +21,8 @@ import Raylib.Internal.TH (genNative)
 import Raylib.Types (Camera3D, CameraMode, Vector3)
 
 $( genNative
-     [ ("c'updateCamera", "UpdateCamera_", "rl_bindings.h", [t|Ptr Camera3D -> CInt -> IO ()|]),
-       ("c'updateCameraPro", "UpdateCameraPro_", "rl_bindings.h", [t|Ptr Camera3D -> Ptr Vector3 -> Ptr Vector3 -> CFloat -> IO ()|])
+     [ ("c'updateCamera", "UpdateCamera_", "rl_bindings.h", [t|Ptr Camera3D -> CInt -> IO ()|], False),
+       ("c'updateCameraPro", "UpdateCameraPro_", "rl_bindings.h", [t|Ptr Camera3D -> Ptr Vector3 -> Ptr Vector3 -> CFloat -> IO ()|], False)
      ]
  )
 

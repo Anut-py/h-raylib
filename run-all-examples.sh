@@ -19,6 +19,7 @@ fi
 
 # core
 cabal run basic-window
+cabal run basic-callbacks
 cabal run basic-automation-events
 cabal run first-person-camera
 cabal run camera-ray-collision

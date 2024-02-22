@@ -118,6 +118,11 @@ executable basic-window
   hs-source-dirs: examples/basic-window/src
   main-is:        Main.hs
 
+executable basic-callbacks
+  import:         example-options
+  hs-source-dirs: examples/basic-callbacks/src
+  main-is:        Main.hs
+
 executable basic-automation-events
   import:         example-options
   hs-source-dirs: examples/basic-automation-events/src

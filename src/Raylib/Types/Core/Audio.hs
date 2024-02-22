@@ -561,6 +561,4 @@ p'music'ctxData = (`plusPtr` 48)
 
 type AudioCallback = Ptr () -> Integer -> IO ()
 
--- TODO: Add FunPtrs to WindowResources for automatic memory management
-
 type C'AudioCallback = FunPtr (Ptr () -> CUInt -> IO ())

@@ -37,7 +37,7 @@ import Foreign.C
   )
 import Raylib.Internal.Foreign (Freeable (rlFreeDependents), c'free, rlFreeArray)
 import Raylib.Types.Core (Rectangle)
-import Raylib.Types.Core.Textures (Image, Texture)
+import Raylib.Types.Core.Textures (Image, Texture, p'image'data)
 
 ---------------------------------------
 -- text enums -------------------------
@@ -92,9 +92,7 @@ p'glyphInfo'image :: Ptr GlyphInfo -> Ptr Image
 p'glyphInfo'image = (`plusPtr` 16)
 
 instance Freeable GlyphInfo where
-  rlFreeDependents _ ptr = do
-    dataPtr <- peek (castPtr (p'glyphInfo'image ptr) :: Ptr (Ptr ())) -- TODO: Use p'image'data
-    c'free dataPtr
+  rlFreeDependents _ ptr = c'free . castPtr =<< peek (p'image'data (p'glyphInfo'image ptr))
 
 data Font = Font
   { font'baseSize :: Int,

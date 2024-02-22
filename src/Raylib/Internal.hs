@@ -18,6 +18,7 @@ module Raylib.Internal
     unloadSingleAudioBuffer,
     unloadSingleAudioBufferAlias,
     unloadSingleAutomationEventList,
+    unloadSingleFunPtr,
 
     -- * Unloading all resources
     unloadShaders,
@@ -29,6 +30,7 @@ module Raylib.Internal
     unloadAudioBuffers,
     unloadAudioBufferAliases,
     unloadAutomationEventLists,
+    unloadFunPtrs,
 
     -- * Adding resources
     addShaderId,
@@ -40,6 +42,7 @@ module Raylib.Internal
     addAudioBuffer,
     addAudioBufferAlias,
     addAutomationEventList,
+    addFunPtr,
 
     -- * Miscellaneous
     c'rlGetShaderIdDefault,
@@ -52,7 +55,7 @@ import Data.IORef (IORef, modifyIORef, newIORef, readIORef)
 import Data.List (delete)
 import Data.Map (Map)
 import qualified Data.Map as Map
-import Foreign (Ptr, Storable (peekByteOff), free)
+import Foreign (FunPtr, Ptr, Storable (peekByteOff), free, freeHaskellFunPtr)
 import Foreign.C (CInt (..), CUInt (..))
 import GHC.IO (unsafePerformIO)
 import Raylib.Internal.TH (genNative)
@@ -77,7 +80,8 @@ data WindowResources = WindowResources
     ctxDataPtrs :: IORef [(CInt, Ptr ())],
     audioBuffers :: IORef [Ptr ()],
     audioBufferAliases :: IORef [Ptr ()],
-    automationEventLists :: IORef [Ptr ()]
+    automationEventLists :: IORef [Ptr ()],
+    funPtrs :: IORef [FunPtr ()]
   }
 
 defaultWindowResources :: IO WindowResources
@@ -92,6 +96,7 @@ defaultWindowResources = do
   aBufs <- newIORef []
   aliases <- newIORef []
   eventLists <- newIORef []
+  fPtrs <- newIORef []
   return
     WindowResources
       { shaderIds = sIds,
@@ -103,20 +108,21 @@ defaultWindowResources = do
         ctxDataPtrs = cdps,
         audioBuffers = aBufs,
         audioBufferAliases = aliases,
-        automationEventLists = eventLists
+        automationEventLists = eventLists,
+        funPtrs = fPtrs
       }
 
 $( genNative
-     [ ("c'rlGetShaderIdDefault", "rlGetShaderIdDefault_", "rlgl_bindings.h", [t|IO CUInt|]),
-       ("c'rlUnloadShaderProgram", "rlUnloadShaderProgram_", "rlgl_bindings.h", [t|CUInt -> IO ()|]),
-       ("c'rlUnloadTexture", "rlUnloadTexture_", "rlgl_bindings.h", [t|CUInt -> IO ()|]),
-       ("c'rlUnloadFramebuffer", "rlUnloadFramebuffer_", "rlgl_bindings.h", [t|CUInt -> IO ()|]),
-       ("c'rlUnloadVertexArray", "rlUnloadVertexArray_", "rlgl_bindings.h", [t|CUInt -> IO ()|]),
-       ("c'rlUnloadVertexBuffer", "rlUnloadVertexBuffer_", "rlgl_bindings.h", [t|CUInt -> IO ()|]),
-       ("c'unloadMusicStreamData", "UnloadMusicStreamData", "rl_internal.h", [t|CInt -> Ptr () -> IO ()|]),
-       ("c'unloadAudioBuffer", "UnloadAudioBuffer_", "rl_internal.h", [t|Ptr () -> IO ()|]),
-       ("c'unloadAudioBufferAlias", "UnloadAudioBufferAlias", "rl_internal.h", [t|Ptr () -> IO ()|]),
-       ("c'getPixelDataSize", "GetPixelDataSize_", "rl_bindings.h", [t|CInt -> CInt -> CInt -> IO CInt|])
+     [ ("c'rlGetShaderIdDefault", "rlGetShaderIdDefault_", "rlgl_bindings.h", [t|IO CUInt|], False),
+       ("c'rlUnloadShaderProgram", "rlUnloadShaderProgram_", "rlgl_bindings.h", [t|CUInt -> IO ()|], False),
+       ("c'rlUnloadTexture", "rlUnloadTexture_", "rlgl_bindings.h", [t|CUInt -> IO ()|], False),
+       ("c'rlUnloadFramebuffer", "rlUnloadFramebuffer_", "rlgl_bindings.h", [t|CUInt -> IO ()|], False),
+       ("c'rlUnloadVertexArray", "rlUnloadVertexArray_", "rlgl_bindings.h", [t|CUInt -> IO ()|], False),
+       ("c'rlUnloadVertexBuffer", "rlUnloadVertexBuffer_", "rlgl_bindings.h", [t|CUInt -> IO ()|], False),
+       ("c'unloadMusicStreamData", "UnloadMusicStreamData", "rl_internal.h", [t|CInt -> Ptr () -> IO ()|], False),
+       ("c'unloadAudioBuffer", "UnloadAudioBuffer_", "rl_internal.h", [t|Ptr () -> IO ()|], False),
+       ("c'unloadAudioBufferAlias", "UnloadAudioBufferAlias", "rl_internal.h", [t|Ptr () -> IO ()|], False),
+       ("c'getPixelDataSize", "GetPixelDataSize_", "rl_bindings.h", [t|CInt -> CInt -> CInt -> IO CInt|], False)
      ]
  )
 
@@ -182,6 +188,11 @@ unloadSingleAutomationEventList :: Ptr () -> WindowResources -> IO ()
 unloadSingleAutomationEventList eventList wr = do
   _unloadAutomationEventList eventList
   modifyIORef (automationEventLists wr) (delete eventList)
+
+unloadSingleFunPtr :: FunPtr () -> WindowResources -> IO ()
+unloadSingleFunPtr fPtr wr = do
+  freeHaskellFunPtr fPtr
+  modifyIORef (funPtrs wr) (delete fPtr)
 
 unloadShaders :: WindowResources -> IO ()
 unloadShaders wr = do
@@ -283,6 +294,17 @@ unloadAutomationEventLists wr = do
         putStrLn $ "INFO: AUTOMATION: h-raylib successfully auto-unloaded automation event lists (" ++ show l ++ " in total)"
     )
 
+unloadFunPtrs :: WindowResources -> IO ()
+unloadFunPtrs wr = do
+  vals <- readIORef (funPtrs wr)
+  let l = length vals
+  when
+    (l > 0)
+    ( do
+        forM_ vals freeHaskellFunPtr
+        putStrLn $ "INFO: h-raylib successfully auto-unloaded `FunPtr`s (" ++ show l ++ " in total)"
+    )
+
 addShaderId :: (Integral a) => a -> WindowResources -> IO ()
 addShaderId sId' wr = do
   modifyIORef (shaderIds wr) (\xs -> if sId `elem` xs then xs else sId : xs)
@@ -331,6 +353,10 @@ addAudioBufferAlias alias wr = do
 addAutomationEventList :: Ptr () -> WindowResources -> IO ()
 addAutomationEventList eventList wr = do
   modifyIORef (automationEventLists wr) (\xs -> if eventList `elem` xs then xs else eventList : xs)
+
+addFunPtr :: FunPtr () -> WindowResources -> IO ()
+addFunPtr fPtr wr = do
+  modifyIORef (funPtrs wr) (\xs -> if fPtr `elem` xs then xs else fPtr : xs)
 
 _unloadAutomationEventList :: Ptr () -> IO ()
 _unloadAutomationEventList ptr = (free =<< (peekByteOff ptr 8 :: IO (Ptr ()))) >> free ptr

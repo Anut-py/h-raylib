@@ -4,7 +4,6 @@
 
 Items which have not yet been worked on. Feel free to work on one of these.
 
-- Implement automatic memory management for callbacks
 - Bind `rgestures`
 
 ## In progress
@@ -15,6 +14,7 @@ Items which have not yet been worked on. Feel free to work on one of these.
 
 Items which have been completed but not published to hackage.
 
+- Implement automatic memory management for callbacks
 - Move Raylib.Internal.Native functions into the modules where they are called
   - Use Template Haskell to clean up boilerplate
 - Split Raylib.Types into multiple modules
