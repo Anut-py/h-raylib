@@ -49,7 +49,7 @@
                 src = self.fetchFromGitHub {
                   owner = "glfw";
                   repo = "GLFW";
-                  rev = "3.4.0";
+                  rev = "3.4";
                   sha256 = "sha256-FcnQPDeNHgov1Z07gjFze0VMz2diOrpbKZCsI96ngz0=";
                 };
               });
