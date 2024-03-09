@@ -9,10 +9,10 @@
       forAllSystems' = nixpkgs.lib.genAttrs;
       forAllSystems = forAllSystems' supportedSystems;
 
-      raylibRev = "54e0af40c1c534b3f3958264c67270434183639e";
-      raylibHash = "sha256-VwqLD0TYOFShav1OSJnlbIVR8ixMm3sB5pNigJey/dQ=";
-      rayguiRev = "bc67f42209cc32965c7d1c00028e3ed0c4158659";
-      rayguiHash = "sha256-yevM/m6Mven/U2KrxVvm9yL9PQtffeU+Vxfdrvj5Vdk=";
+      raylibRev = "ba066656f7be07f8f3f5e9028f053068789755a4";
+      raylibHash = "sha256-WeT9lW4Qs3K5+dEscAKfyvKX6BHJCJNWspbABlrXPgs=";
+      rayguiRev = "b5693d0c418e4b2572de2992b795c6407e8106cf";
+      rayguiHash = "sha256-u7BIpMB3ofv4Fia8TJ0523FhfN8dkz/UvvGrKRjKEnY=";
 
       pkgsForSystem =
         system:

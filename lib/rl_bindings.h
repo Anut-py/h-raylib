@@ -54,9 +54,9 @@ void SetShaderValueTexture_(Shader *a, int b, Texture *c);
 
 void UnloadShader_(Shader *a);
 
-Ray *GetMouseRay_(Vector2 *a, Camera3D *b);
+Ray *GetScreenToWorldRay_(Vector2 *a, Camera3D *b);
 
-Ray *GetViewRay_(Vector2 *a, Camera3D *b, float c, float d);
+Ray *GetScreenToWorldRayEx_(Vector2 *a, Camera3D *b, float c, float d);
 
 Matrix *GetCameraMatrix_(Camera3D *a);
 
@@ -943,6 +943,8 @@ int GetGamepadAxisCount_(int a);
 float GetGamepadAxisMovement_(int a, int b);
 
 int SetGamepadMappings_(const char *a);
+
+void SetGamepadVibration_(int a, float b, float c);
 
 bool IsMouseButtonPressed_(int a);
 

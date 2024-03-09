@@ -698,11 +698,11 @@ unloadRenderTexture renderTexture wr = do
   unloadSingleTexture (texture'id $ renderTexture'texture renderTexture) wr
   unloadSingleFrameBuffer (renderTexture'id renderTexture) wr
 
-updateTexture :: Texture -> Ptr () -> IO Texture
-updateTexture texture pixels = withFreeable texture (\t -> c'updateTexture t pixels >> peek t)
+updateTexture :: Texture -> Ptr () -> IO ()
+updateTexture texture pixels = withFreeable texture (\t -> c'updateTexture t pixels)
 
-updateTextureRec :: Texture -> Rectangle -> Ptr () -> IO Texture
-updateTextureRec texture rect pixels = withFreeable texture (\t -> withFreeable rect (\r -> c'updateTextureRec t r pixels) >> peek t)
+updateTextureRec :: Texture -> Rectangle -> Ptr () -> IO ()
+updateTextureRec texture rect pixels = withFreeable texture (\t -> withFreeable rect (\r -> c'updateTextureRec t r pixels))
 
 genTextureMipmaps :: Texture -> IO Texture
 genTextureMipmaps texture = withFreeable texture (\t -> c'genTextureMipmaps t >> peek t)

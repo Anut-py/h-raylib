@@ -92,8 +92,8 @@ module Raylib.Core
     setShaderValueMatrix,
     setShaderValueTexture,
     unloadShader,
-    getMouseRay,
-    getViewRay,
+    getScreenToWorldRay,
+    getScreenToWorldRayEx,
     getCameraMatrix,
     getCameraMatrix2D,
     getWorldToScreen,
@@ -171,6 +171,7 @@ module Raylib.Core
     getGamepadAxisCount,
     getGamepadAxisMovement,
     setGamepadMappings,
+    setGamepadVibration,
     isMouseButtonPressed,
     isMouseButtonDown,
     isMouseButtonReleased,
@@ -286,8 +287,8 @@ module Raylib.Core
     c'setShaderValueMatrix,
     c'setShaderValueTexture,
     c'unloadShader,
-    c'getMouseRay,
-    c'getViewRay,
+    c'getScreenToWorldRay,
+    c'getScreenToWorldRayEx,
     c'getCameraMatrix,
     c'getCameraMatrix2D,
     c'getWorldToScreen,
@@ -369,6 +370,7 @@ module Raylib.Core
     c'getGamepadAxisCount,
     c'getGamepadAxisMovement,
     c'setGamepadMappings,
+    c'setGamepadVibration,
     c'isMouseButtonPressed,
     c'isMouseButtonDown,
     c'isMouseButtonReleased,
@@ -414,12 +416,13 @@ import qualified Data.Map as Map
 import Foreign
   ( Ptr,
     Storable (peek, poke, sizeOf),
+    castFunPtr,
     castPtr,
     fromBool,
     malloc,
     newArray,
     peekArray,
-    toBool, castFunPtr,
+    toBool,
   )
 import Foreign.C
   ( CBool (..),
@@ -435,7 +438,7 @@ import Foreign.C
     withCString,
   )
 import Foreign.Ptr (nullPtr)
-import Raylib.Internal (WindowResources, addAutomationEventList, addShaderId, defaultWindowResources, shaderLocations, unloadAutomationEventLists, unloadFrameBuffers, unloadShaders, unloadSingleAutomationEventList, unloadSingleShader, unloadTextures, unloadVaoIds, unloadVboIds, addFunPtr, unloadFunPtrs)
+import Raylib.Internal (WindowResources, addAutomationEventList, addFunPtr, addShaderId, defaultWindowResources, shaderLocations, unloadAutomationEventLists, unloadFrameBuffers, unloadFunPtrs, unloadShaders, unloadSingleAutomationEventList, unloadSingleShader, unloadTextures, unloadVaoIds, unloadVboIds)
 import Raylib.Internal.Foreign (c'free, configsToBitflag, pop, popCArray, popCString, withFreeable, withFreeableArray, withFreeableArrayLen, withMaybeCString)
 import Raylib.Internal.TH (genNative)
 import Raylib.Types
@@ -566,8 +569,8 @@ $( genNative
        ("c'setShaderValueMatrix", "SetShaderValueMatrix_", "rl_bindings.h", [t|Ptr Shader -> CInt -> Ptr Matrix -> IO ()|], False),
        ("c'setShaderValueTexture", "SetShaderValueTexture_", "rl_bindings.h", [t|Ptr Shader -> CInt -> Ptr Texture -> IO ()|], False),
        ("c'unloadShader", "UnloadShader_", "rl_bindings.h", [t|Ptr Shader -> IO ()|], False),
-       ("c'getMouseRay", "GetMouseRay_", "rl_bindings.h", [t|Ptr Vector2 -> Ptr Camera3D -> IO (Ptr Ray)|], False),
-       ("c'getViewRay", "GetViewRay_", "rl_bindings.h", [t|Ptr Vector2 -> Ptr Camera3D -> CFloat -> CFloat -> IO (Ptr Ray)|], False),
+       ("c'getScreenToWorldRay", "GetScreenToWorldRay_", "rl_bindings.h", [t|Ptr Vector2 -> Ptr Camera3D -> IO (Ptr Ray)|], False),
+       ("c'getScreenToWorldRayEx", "GetScreenToWorldRayEx_", "rl_bindings.h", [t|Ptr Vector2 -> Ptr Camera3D -> CFloat -> CFloat -> IO (Ptr Ray)|], False),
        ("c'getCameraMatrix", "GetCameraMatrix_", "rl_bindings.h", [t|Ptr Camera3D -> IO (Ptr Matrix)|], False),
        ("c'getCameraMatrix2D", "GetCameraMatrix2D_", "rl_bindings.h", [t|Ptr Camera2D -> IO (Ptr Matrix)|], False),
        ("c'getWorldToScreen", "GetWorldToScreen_", "rl_bindings.h", [t|Ptr Vector3 -> Ptr Camera3D -> IO (Ptr Vector2)|], False),
@@ -649,6 +652,7 @@ $( genNative
        ("c'getGamepadAxisCount", "GetGamepadAxisCount_", "rl_bindings.h", [t|CInt -> IO CInt|], False),
        ("c'getGamepadAxisMovement", "GetGamepadAxisMovement_", "rl_bindings.h", [t|CInt -> CInt -> IO CFloat|], False),
        ("c'setGamepadMappings", "SetGamepadMappings_", "rl_bindings.h", [t|CString -> IO CInt|], False),
+       ("c'setGamepadVibration", "SetGamepadVibration_", "rl_bindings.h", [t|CInt -> CFloat -> CFloat -> IO ()|], False),
        ("c'isMouseButtonPressed", "IsMouseButtonPressed_", "rl_bindings.h", [t|CInt -> IO CBool|], False),
        ("c'isMouseButtonDown", "IsMouseButtonDown_", "rl_bindings.h", [t|CInt -> IO CBool|], False),
        ("c'isMouseButtonReleased", "IsMouseButtonReleased_", "rl_bindings.h", [t|CInt -> IO CBool|], False),
@@ -992,11 +996,11 @@ setShaderValueTexture shader locIndex tex = withFreeable shader (\s -> withFreea
 unloadShader :: Shader -> WindowResources -> IO ()
 unloadShader shader = unloadSingleShader (shader'id shader)
 
-getMouseRay :: Vector2 -> Camera3D -> IO Ray
-getMouseRay mousePosition camera = withFreeable mousePosition (withFreeable camera . c'getMouseRay) >>= pop
+getScreenToWorldRay :: Vector2 -> Camera3D -> IO Ray
+getScreenToWorldRay position camera = withFreeable position (withFreeable camera . c'getScreenToWorldRay) >>= pop
 
-getViewRay :: Vector2 -> Camera3D -> Float -> Float -> IO Ray
-getViewRay mousePosition camera width height = withFreeable mousePosition (\p -> withFreeable camera (\c -> c'getViewRay p c (realToFrac width) (realToFrac height))) >>= pop
+getScreenToWorldRayEx :: Vector2 -> Camera3D -> Float -> Float -> IO Ray
+getScreenToWorldRayEx position camera width height = withFreeable position (\p -> withFreeable camera (\c -> c'getScreenToWorldRayEx p c (realToFrac width) (realToFrac height))) >>= pop
 
 getCameraMatrix :: Camera3D -> IO Matrix
 getCameraMatrix camera = withFreeable camera c'getCameraMatrix >>= pop
@@ -1311,6 +1315,9 @@ getGamepadAxisMovement gamepad axis = realToFrac <$> c'getGamepadAxisMovement (f
 
 setGamepadMappings :: String -> IO Int
 setGamepadMappings mappings = fromIntegral <$> withCString mappings c'setGamepadMappings
+
+setGamepadVibration :: Int -> Float -> Float -> IO ()
+setGamepadVibration gamepad leftMotor rightMotor = c'setGamepadVibration (fromIntegral gamepad) (realToFrac leftMotor) (realToFrac rightMotor)
 
 isMouseButtonPressed :: MouseButton -> IO Bool
 isMouseButtonPressed button = toBool <$> c'isMouseButtonPressed (fromIntegral $ fromEnum button)

@@ -29,6 +29,7 @@ module Raylib.Util.Math
     vector2Transform,
     vector2Reflect,
     vector2Rotate,
+    vector2Refract,
 
     -- ** Vector3 math
     vector3CrossProduct,
@@ -90,8 +91,8 @@ module Raylib.Util.Math
   )
 where
 
-import Raylib.Types (Matrix (..), Quaternion, Vector2 (Vector2), Vector3 (Vector3), Vector4 (Vector4))
 import Data.Foldable (foldl')
+import Raylib.Types (Matrix (..), Quaternion, Vector2 (Vector2), Vector3 (Vector3), Vector4 (Vector4))
 
 epsilon :: Float
 epsilon = 0.000001
@@ -233,7 +234,7 @@ class Vector a where
   constant val = fromList $ repeat val
 
   -- | Sum of all vectors in a structure
-  vectorSum :: Foldable t => t a -> a
+  vectorSum :: (Foldable t) => t a -> a
   vectorSum = foldl' (|+|) zero
 
   -- | Vector additive inverse
@@ -345,7 +346,7 @@ vector2Angle (Vector2 x1 y1) (Vector2 x2 y2) = atan2 (x1 * x2 + y1 * y2) (x1 * y
 
 -- | Angle created by the line between two 2D vectors (parameters must be normalized)
 vector2LineAngle :: Vector2 -> Vector2 -> Float
-vector2LineAngle (Vector2 sx sy) (Vector2 ex ey) = - atan2 (ey - sy) (ex - sx)
+vector2LineAngle (Vector2 sx sy) (Vector2 ex ey) = -atan2 (ey - sy) (ex - sx)
 
 -- | Transform a 2D vector by the given matrix
 vector2Transform :: Vector2 -> Matrix -> Vector2
@@ -366,6 +367,22 @@ vector2Rotate (Vector2 x y) angle = Vector2 (x * c - y * s) (x * s + y * c)
   where
     c = cos angle
     s = sin angle
+
+-- | Compute the direction of a refracted ray
+vector2Refract ::
+  -- | Normalized direction of the incoming ray
+  Vector2 ->
+  -- | Normalized normal vector of the interface of two optical media
+  Vector2 ->
+  -- | Ratio of the refractive index of the medium from where the ray comes
+  --    to the refractive index of the medium on the other side of the surface
+  Float ->
+  Vector2
+vector2Refract (Vector2 vx vy) (Vector2 nx ny) r = if d >= 0 then Vector2 (r * vx - (r * dot + d') * nx) (r * vy - (r * dot + d') * ny) else Vector2 0 0
+  where
+    dot = vx * nx + vy * ny
+    d = 1 - r * r * (1 - dot * dot)
+    d' = sqrt d
 
 ------------------------------------------------
 -- Vector3 math --------------------------------
@@ -516,20 +533,20 @@ vector3Unproject (Vector3 x y z) projection view = Vector3 (rx / rw) (ry / rw) (
     matViewProjInv =
       Matrix
         ((a11 * b11 - a12 * b10 + a13 * b09) * invDet)
-        ((- a01 * b11 + a02 * b10 - a03 * b09) * invDet)
+        ((-a01 * b11 + a02 * b10 - a03 * b09) * invDet)
         ((a31 * b05 - a32 * b04 + a33 * b03) * invDet)
-        ((- a21 * b05 + a22 * b04 - a23 * b03) * invDet)
-        ((- a10 * b11 + a12 * b08 - a13 * b07) * invDet)
+        ((-a21 * b05 + a22 * b04 - a23 * b03) * invDet)
+        ((-a10 * b11 + a12 * b08 - a13 * b07) * invDet)
         ((a00 * b11 - a02 * b08 + a03 * b07) * invDet)
-        ((- a30 * b05 + a32 * b02 - a33 * b01) * invDet)
+        ((-a30 * b05 + a32 * b02 - a33 * b01) * invDet)
         ((a20 * b05 - a22 * b02 + a23 * b01) * invDet)
         ((a10 * b10 - a11 * b08 + a13 * b06) * invDet)
-        ((- a00 * b10 + a01 * b08 - a03 * b06) * invDet)
+        ((-a00 * b10 + a01 * b08 - a03 * b06) * invDet)
         ((a30 * b04 - a31 * b02 + a33 * b00) * invDet)
-        ((- a20 * b04 + a21 * b02 - a23 * b00) * invDet)
-        ((- a10 * b09 + a11 * b07 - a12 * b06) * invDet)
+        ((-a20 * b04 + a21 * b02 - a23 * b00) * invDet)
+        ((-a10 * b09 + a11 * b07 - a12 * b06) * invDet)
         ((a00 * b09 - a01 * b07 + a02 * b06) * invDet)
-        ((- a30 * b03 + a31 * b01 - a32 * b00) * invDet)
+        ((-a30 * b03 + a31 * b01 - a32 * b00) * invDet)
         ((a20 * b03 - a21 * b01 + a22 * b00) * invDet)
     (Vector4 rx ry rz rw) = quaternionTransform (Vector4 x y z 1) matViewProjInv
 
@@ -574,16 +591,29 @@ matrixConstant n = matrixFromList $ repeat n
 matrixDeterminant :: Matrix -> Float
 matrixDeterminant
   (Matrix a00 a10 a20 a30 a01 a11 a21 a31 a02 a12 a22 a32 a03 a13 a23 a33) =
-    a30 * a21 * a12 * a03 - a20 * a31 * a12 * a03 - a30 * a11 * a22 * a03 + a10 * a31 * a22 * a03
-      + a20 * a11 * a32 * a03 - a10 * a21 * a32 * a03 - a30 * a21 * a02 * a13
+    a30 * a21 * a12 * a03
+      - a20 * a31 * a12 * a03
+      - a30 * a11 * a22 * a03
+      + a10 * a31 * a22 * a03
+      + a20 * a11 * a32 * a03
+      - a10 * a21 * a32 * a03
+      - a30 * a21 * a02 * a13
       + a20 * a31 * a02 * a13
-      + a30 * a01 * a22 * a13 - a00 * a31 * a22 * a13 - a20 * a01 * a32 * a13
+      + a30 * a01 * a22 * a13
+      - a00 * a31 * a22 * a13
+      - a20 * a01 * a32 * a13
       + a00 * a21 * a32 * a13
-      + a30 * a11 * a02 * a23 - a10 * a31 * a02 * a23 - a30 * a01 * a12 * a23
+      + a30 * a11 * a02 * a23
+      - a10 * a31 * a02 * a23
+      - a30 * a01 * a12 * a23
       + a00 * a31 * a12 * a23
-      + a10 * a01 * a32 * a23 - a00 * a11 * a32 * a23 - a20 * a11 * a02 * a33
+      + a10 * a01 * a32 * a23
+      - a00 * a11 * a32 * a23
+      - a20 * a11 * a02 * a33
       + a10 * a21 * a02 * a33
-      + a20 * a01 * a12 * a33 - a00 * a21 * a12 * a33 - a10 * a01 * a22 * a33
+      + a20 * a01 * a12 * a33
+      - a00 * a21 * a12 * a33
+      - a10 * a01 * a22 * a33
       + a00 * a11 * a22 * a33
 
 -- | Trace of a matrix (sum of the values along the diagonal)
@@ -602,20 +632,20 @@ matrixInvert
   (Matrix a00 a10 a20 a30 a01 a11 a21 a31 a02 a12 a22 a32 a03 a13 a23 a33) =
     Matrix
       ((a11 * b11 - a12 * b10 + a13 * b09) * invDet)
-      ((- a10 * b11 + a12 * b08 - a13 * b07) * invDet)
+      ((-a10 * b11 + a12 * b08 - a13 * b07) * invDet)
       ((a10 * b10 - a11 * b08 + a13 * b06) * invDet)
-      ((- a10 * b09 + a11 * b07 - a12 * b06) * invDet)
-      ((- a01 * b11 + a02 * b10 - a03 * b09) * invDet)
+      ((-a10 * b09 + a11 * b07 - a12 * b06) * invDet)
+      ((-a01 * b11 + a02 * b10 - a03 * b09) * invDet)
       ((a00 * b11 - a02 * b08 + a03 * b07) * invDet)
-      ((- a00 * b10 + a01 * b08 - a03 * b06) * invDet)
+      ((-a00 * b10 + a01 * b08 - a03 * b06) * invDet)
       ((a00 * b09 - a01 * b07 + a02 * b06) * invDet)
       ((a31 * b05 - a32 * b04 + a33 * b03) * invDet)
-      ((- a30 * b05 + a32 * b02 - a33 * b01) * invDet)
+      ((-a30 * b05 + a32 * b02 - a33 * b01) * invDet)
       ((a30 * b04 - a31 * b02 + a33 * b00) * invDet)
-      ((- a30 * b03 + a31 * b01 - a32 * b00) * invDet)
-      ((- a21 * b05 + a22 * b04 - a23 * b03) * invDet)
+      ((-a30 * b03 + a31 * b01 - a32 * b00) * invDet)
+      ((-a21 * b05 + a22 * b04 - a23 * b03) * invDet)
       ((a20 * b05 - a22 * b02 + a23 * b01) * invDet)
-      ((- a20 * b04 + a21 * b02 - a23 * b00) * invDet)
+      ((-a20 * b04 + a21 * b02 - a23 * b00) * invDet)
       ((a20 * b03 - a21 * b01 + a22 * b00) * invDet)
     where
       b00 = a00 * a11 - a01 * a10
@@ -706,39 +736,39 @@ matrixRotate axis angle = Matrix (x * x * t + c) (x * y * t - z * s) (x * z * t 
 
 -- | x-rotation matrix (angle should be in radians)
 matrixRotateX :: Float -> Matrix
-matrixRotateX angle = Matrix 1 0 0 0 0 c (- s) 0 0 s c 0 0 0 0 1
+matrixRotateX angle = Matrix 1 0 0 0 0 c (-s) 0 0 s c 0 0 0 0 1
   where
     s = sin angle
     c = cos angle
 
 -- | y-rotation matrix (angle should be in radians)
 matrixRotateY :: Float -> Matrix
-matrixRotateY angle = Matrix c 0 s 0 0 1 0 0 (- s) 0 c 0 0 0 0 1
+matrixRotateY angle = Matrix c 0 s 0 0 1 0 0 (-s) 0 c 0 0 0 0 1
   where
     s = sin angle
     c = cos angle
 
 -- | z-rotation matrix (angle should be in radians)
 matrixRotateZ :: Float -> Matrix
-matrixRotateZ angle = Matrix c (- s) 0 0 s c 0 0 0 0 1 0 0 0 0 1
+matrixRotateZ angle = Matrix c (-s) 0 0 s c 0 0 0 0 1 0 0 0 0 1
   where
     s = sin angle
     c = cos angle
 
 -- | Euler angle xyz rotation matrix (angles should be in radians)
 matrixRotateXYZ :: Vector3 -> Matrix
-matrixRotateXYZ (Vector3 x y z) = Matrix (cz - cy) (sz * cy) (- sy) 0 (cz * sy * sx - sz * cx) (sz * sy * sx + cz * cx) (cy * sx) 0 (cz * sy * cx + sz * sx) (sz * sy * cx - cz * sx) (cy * cx) 0 0 0 0 1
+matrixRotateXYZ (Vector3 x y z) = Matrix (cz - cy) (sz * cy) (-sy) 0 (cz * sy * sx - sz * cx) (sz * sy * sx + cz * cx) (cy * sx) 0 (cz * sy * cx + sz * sx) (sz * sy * cx - cz * sx) (cy * cx) 0 0 0 0 1
   where
-    cx = cos (- x)
-    sx = sin (- x)
-    cy = cos (- y)
-    sy = sin (- y)
-    cz = cos (- z)
-    sz = sin (- z)
+    cx = cos (-x)
+    sx = sin (-x)
+    cy = cos (-y)
+    sy = sin (-y)
+    cz = cos (-z)
+    sz = sin (-z)
 
 -- | Euler angle zyx rotation matrix (angles should be in radians)
 matrixRotateZYX :: Vector3 -> Matrix
-matrixRotateZYX (Vector3 x y z) = Matrix (cz * cy) (cz * sy * sx - cx * sz) (sz * sx + cz * cx * sy) 0 (cy * sz) (cz * cx + sz * sy * sx) (cx * sz * sy - cz * sx) 0 (- sy) (cy * sx) (cy * cx) 0 0 0 0 1
+matrixRotateZYX (Vector3 x y z) = Matrix (cz * cy) (cz * sy * sx - cx * sz) (sz * sx + cz * cx * sy) 0 (cy * sz) (cz * cx + sz * sy * sx) (cx * sz * sy - cz * sx) 0 (-sy) (cy * sx) (cy * cx) 0 0 0 0 1
   where
     cz = cos z
     sz = sin z
@@ -778,8 +808,8 @@ matrixFrustum left right bottom top near far =
     0
     0
     0
-    (- (far + near) / z)
-    (- far * near * 2 / z)
+    (-(far + near) / z)
+    (-far * near * 2 / z)
     0
     0
     (-1)
@@ -803,9 +833,9 @@ matrixPerspective ::
 matrixPerspective fovy aspect near far = matrixFrustum left right bottom top near far
   where
     top = near * tan (fovy / 2)
-    bottom = - top
+    bottom = -top
     right = top * aspect
-    left = - right
+    left = -right
 
 -- | Orthographic projection matrix
 matrixOrtho ::
@@ -823,7 +853,7 @@ matrixOrtho ::
   Float ->
   Matrix
 matrixOrtho left right bottom top near far =
-  Matrix (2 / x) 0 0 (- (left + right) / x) 0 (2 / y) 0 (- (top + bottom) / y) 0 0 (-2 / z) (- (far + near) / z) 0 0 0 1
+  Matrix (2 / x) 0 0 (-(left + right) / x) 0 (2 / y) 0 (-(top + bottom) / y) 0 0 (-2 / z) (-(far + near) / z) 0 0 0 1
   where
     x = right - left
     y = top - bottom
@@ -838,7 +868,7 @@ matrixLookAt ::
   -- | World up vector
   Vector3 ->
   Matrix
-matrixLookAt eye target up = Matrix xx xy xz (- vx |.| eye) yx yy yz (- vy |.| eye) zx zy zz (- vz |.| eye) 0 0 0 1
+matrixLookAt eye target up = Matrix xx xy xz (-vx |.| eye) yx yy yz (-vy |.| eye) zx zy zz (-vz |.| eye) 0 0 0 1
   where
     vz@(Vector3 zx zy zz) = vectorNormalize $ eye |-| target
     vx@(Vector3 xx xy xz) = vectorNormalize $ vector3CrossProduct up vz
@@ -854,7 +884,7 @@ quaternionIdentity = Vector4 0 0 0 1
 
 -- | Invert a quaternion
 quaternionInvert :: Quaternion -> Quaternion
-quaternionInvert q@(Vector4 x y z w) = Vector4 (- x * invLength) (- y * invLength) (- z * invLength) (w * invLength)
+quaternionInvert q@(Vector4 x y z w) = Vector4 (-x * invLength) (-y * invLength) (-z * invLength) (w * invLength)
   where
     invLength = 1 / magnitudeSqr q
 
@@ -903,7 +933,7 @@ quaternionSLerp q1 q2 amount
   | abs sinHalfTheta < epsilon = (q1 |+| q2') |/ 2
   | otherwise = (q1 |* ratioA) |+| (q2 |* ratioB)
   where
-    cosHalfTheta = if dot < 0 then - dot else dot
+    cosHalfTheta = if dot < 0 then -dot else dot
     sinHalfTheta = sqrt (1 - cosHalfTheta * cosHalfTheta)
     halfTheta = acos cosHalfTheta
 

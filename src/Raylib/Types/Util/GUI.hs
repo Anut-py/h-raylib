@@ -865,9 +865,9 @@ data GuiIconName
   | IconFolder
   | IconFile
   | IconSandTimer
-  | Icon220
-  | Icon221
-  | Icon222
+  | IconWarning
+  | IconHelpBox
+  | IconInfoBox
   | Icon223
   | Icon224
   | Icon225
@@ -1125,9 +1125,9 @@ instance Enum GuiIconName where
     IconFolder -> 217
     IconFile -> 218
     IconSandTimer -> 219
-    Icon220 -> 220
-    Icon221 -> 221
-    Icon222 -> 222
+    IconWarning -> 220
+    IconHelpBox -> 221
+    IconInfoBox -> 222
     Icon223 -> 223
     Icon224 -> 224
     Icon225 -> 225
@@ -1382,9 +1382,9 @@ instance Enum GuiIconName where
     217 -> IconFolder
     218 -> IconFile
     219 -> IconSandTimer
-    220 -> Icon220
-    221 -> Icon221
-    222 -> Icon222
+    220 -> IconWarning
+    221 -> IconHelpBox
+    222 -> IconInfoBox
     223 -> Icon223
     224 -> Icon224
     225 -> Icon225

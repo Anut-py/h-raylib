@@ -126,17 +126,17 @@ RLBIND void UnloadShader_(Shader *a)
     UnloadShader(*a);
 }
 
-RLBIND Ray *GetMouseRay_(Vector2 *a, Camera3D *b)
+RLBIND Ray *GetScreenToWorldRay_(Vector2 *a, Camera3D *b)
 {
     Ray *ptr = (Ray *)malloc(sizeof(Ray));
-    *ptr = GetMouseRay(*a, *b);
+    *ptr = GetScreenToWorldRay(*a, *b);
     return ptr;
 }
 
-RLBIND Ray *GetViewRay_(Vector2 *a, Camera3D *b, float c, float d)
+RLBIND Ray *GetScreenToWorldRayEx_(Vector2 *a, Camera3D *b, float c, float d)
 {
     Ray *ptr = (Ray *)malloc(sizeof(Ray));
-    *ptr = GetViewRay(*a, *b, c, d);
+    *ptr = GetScreenToWorldRayEx(*a, *b, c, d);
     return ptr;
 }
 
@@ -2578,6 +2578,11 @@ RLBIND float GetGamepadAxisMovement_(int a, int b)
 RLBIND int SetGamepadMappings_(const char *a)
 {
     return SetGamepadMappings(a);
+}
+
+RLBIND void SetGamepadVibration_(int a, float b, float c)
+{
+    SetGamepadVibration(a, b, c);
 }
 
 RLBIND bool IsMouseButtonPressed_(int a)
