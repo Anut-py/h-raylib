@@ -46,6 +46,7 @@
               # temporary fix for CI/CD
               # TODO: remove when github.com/NixOS/nixpkgs/pull/293296 gets merged
               glfw = super.glfw.overrideAttrs (old: {
+                version = "3.4.0";
                 src = self.fetchFromGitHub {
                   owner = "glfw";
                   repo = "GLFW";
