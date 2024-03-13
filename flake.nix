@@ -53,6 +53,7 @@
                   rev = "3.4";
                   sha256 = "sha256-FcnQPDeNHgov1Z07gjFze0VMz2diOrpbKZCsI96ngz0=";
                 };
+                cmakeFlags = old.cmakeFlags ++ [ "-DGLFW_BUILD_WAYLAND=OFF" ];
               });
             })
           ];
