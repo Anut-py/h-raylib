@@ -2,16 +2,14 @@
 {-# LANGUAGE CPP #-}
 {-# LANGUAGE FlexibleInstances #-}
 
-{-|
-Miscellaneous utility functions for marshalling values to/from C. The most
-notable thing in this module is the `Freeable` typeclass.
--}
+-- |
+-- Miscellaneous utility functions for marshalling values to/from C. The most
+-- notable thing in this module is the `Freeable` typeclass.
 module Raylib.Internal.Foreign
   ( c'free,
     p'free,
     freeMaybePtr,
     Freeable (..),
-    rlFreeArray,
     rlFreeMaybeArray,
     pop,
     popCArray,
@@ -40,13 +38,13 @@ where
 
 import Control.Monad (forM_, unless)
 import Data.Bits ((.|.))
-import Foreign (FunPtr, Ptr, Storable (peek, peekByteOff, poke, pokeByteOff, sizeOf), castPtr, malloc, newArray, nullPtr, peekArray, plusPtr, with, callocBytes)
-import Foreign.C (CFloat, CInt, CString, CUChar, CUInt, peekCString, withCString)
-import Foreign.C.Types (CBool, CChar, CShort, CUShort)
-import qualified Data.Text as T
-import qualified Data.Text.Encoding as TE
 import qualified Data.ByteString as BS
 import Data.Maybe (fromMaybe)
+import qualified Data.Text as T
+import qualified Data.Text.Encoding as TE
+import Foreign (FunPtr, Ptr, Storable (peek, peekByteOff, poke, sizeOf), allocaBytes, castPtr, malloc, newArray, nullPtr, peekArray, plusPtr, pokeArray0, with, withArray, withArrayLen)
+import Foreign.C (CFloat, CInt, CString, CUChar, CUInt, peekCString, withCString)
+import Foreign.C.Types (CBool, CChar, CShort, CUShort)
 
 -- Internal utility functions
 
@@ -113,12 +111,9 @@ instance (Freeable a, Storable a) => Freeable [a] where
           let val = arr !! i in rlFreeDependents val (plusPtr ptr (i * sizeOf val))
       )
 
-rlFreeArray :: (Freeable a, Storable a) => [a] -> Ptr a -> IO ()
-rlFreeArray arr ptr = rlFree arr (castPtr ptr)
-
 rlFreeMaybeArray :: (Freeable a, Storable a) => Maybe [a] -> Ptr a -> IO ()
 rlFreeMaybeArray Nothing _ = return ()
-rlFreeMaybeArray (Just arr) ptr = rlFreeArray arr ptr
+rlFreeMaybeArray (Just arr) ptr = rlFree arr (castPtr ptr)
 
 pop :: (Freeable a, Storable a) => Ptr a -> IO a
 pop ptr = do
@@ -140,32 +135,40 @@ popCString ptr = do
 
 withFreeable :: (Freeable a, Storable a) => a -> (Ptr a -> IO b) -> IO b
 withFreeable val f = do
-  ptr <- malloc
-  poke ptr val
-  result <- f ptr
-  rlFree val ptr
-  return result
+  with
+    val
+    ( \ptr -> do
+        result <- f ptr
+        rlFreeDependents val ptr
+        return result
+    )
 
 withFreeableArray :: (Freeable a, Storable a) => [a] -> (Ptr a -> IO b) -> IO b
 withFreeableArray arr f = do
-  ptr <- newArray arr
-  result <- f ptr
-  rlFreeArray arr ptr
-  return result
+  withArray
+    arr
+    ( \ptr -> do
+        result <- f ptr
+        rlFreeDependents arr (castPtr ptr)
+        return result
+    )
 
 withFreeableArrayLen :: (Freeable a, Storable a) => [a] -> (Int -> Ptr a -> IO b) -> IO b
 withFreeableArrayLen arr f = do
-  ptr <- newArray arr
-  result <- f (length arr) ptr
-  rlFreeArray arr ptr
-  return result
+  withArrayLen
+    arr
+    ( \l ptr -> do
+        result <- f l ptr
+        rlFreeDependents arr (castPtr ptr)
+        return result
+    )
 
 withFreeableArray2D :: (Freeable a, Storable a) => [[a]] -> (Ptr (Ptr a) -> IO b) -> IO b
 withFreeableArray2D arr func = do
   arrays <- mapM newArray arr
   ptr <- newArray arrays
   res <- func ptr
-  forM_ (zip [0 ..] arrays) (\(i, a) -> rlFreeArray (arr !! i) a)
+  forM_ (zip [0 ..] arrays) (\(i, a) -> rlFree (arr !! i) (castPtr a))
   c'free $ castPtr ptr
   return res
 
@@ -188,12 +191,14 @@ withCStringBuffer :: String -> Maybe Int -> (Int -> CString -> IO b) -> IO (b, S
 withCStringBuffer str bufferSize f = do
   let bytes = BS.unpack (TE.encodeUtf8 (T.pack str))
       bufferSize' = fromMaybe (length bytes + 8) bufferSize
-  buffer <- callocBytes bufferSize'
-  mapM_ (uncurry (pokeByteOff buffer)) (zip [0 ..] bytes)
-  res <- f bufferSize' buffer
-  str' <- peekCString buffer
-  c'free $ castPtr buffer
-  return (res, str')
+  allocaBytes
+    bufferSize'
+    ( \buffer -> do
+        pokeArray0 0 buffer (map fromIntegral bytes)
+        res <- f bufferSize' buffer
+        str' <- peekCString buffer
+        return (res, str')
+    )
 
 peekMaybe :: (Storable a) => Ptr (Ptr a) -> IO (Maybe a)
 peekMaybe ptr = do

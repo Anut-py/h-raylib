@@ -62,7 +62,7 @@ import Foreign.C
     CInt (..),
     CUInt,
   )
-import Raylib.Internal.Foreign (Freeable (rlFreeDependents), c'free, peekStaticArray, pokeStaticArray, rlFreeArray)
+import Raylib.Internal.Foreign (Freeable (rlFreeDependents), c'free, peekStaticArray, pokeStaticArray, rlFree)
 import Raylib.Types.Core (Color, Vector2, Vector3)
 
 ---------------------------------------
@@ -963,5 +963,5 @@ p'rlRenderBatch'currentDepth = (`plusPtr` 28)
 
 instance Freeable RLRenderBatch where
   rlFreeDependents val ptr = do
-    rlFreeArray (rlRenderBatch'vertexBuffers val) =<< peek (p'rlRenderBatch'vertexBuffers ptr)
+    rlFree (rlRenderBatch'vertexBuffers val) . castPtr =<< peek (p'rlRenderBatch'vertexBuffers ptr)
     c'free . castPtr =<< peek (p'rlRenderBatch'draws ptr)

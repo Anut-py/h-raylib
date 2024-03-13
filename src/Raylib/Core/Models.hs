@@ -149,12 +149,12 @@ module Raylib.Core.Models
     c'getRayCollisionBox,
     c'getRayCollisionMesh,
     c'getRayCollisionTriangle,
-    c'getRayCollisionQuad
+    c'getRayCollisionQuad,
   )
 where
 
 import Control.Monad (forM_)
-import Foreign (Ptr, Storable (peek, poke), castPtr, fromBool, malloc, peekArray, toBool)
+import Foreign (Ptr, Storable (peek), fromBool, peekArray, toBool, with)
 import Foreign.C
   ( CBool (..),
     CFloat (..),
@@ -165,8 +165,7 @@ import Foreign.C
 import GHC.IO (unsafePerformIO)
 import Raylib.Internal (WindowResources, addShaderId, addTextureId, addVaoId, addVboIds, unloadSingleShader, unloadSingleTexture, unloadSingleVaoId, unloadSingleVboIdList)
 import Raylib.Internal.Foreign
-  ( c'free,
-    pop,
+  ( pop,
     popCArray,
     withFreeable,
     withFreeableArray,
@@ -343,10 +342,7 @@ loadModel fileName wr = do
 
 loadModelFromMesh :: Mesh -> WindowResources -> IO Model
 loadModelFromMesh mesh wr = do
-  meshPtr <- malloc
-  poke meshPtr mesh
-  model <- c'loadModelFromMesh meshPtr >>= pop
-  c'free $ castPtr meshPtr
+  model <- with mesh c'loadModelFromMesh >>= pop
   storeMaterialData (model'materials model) wr
   return model
 

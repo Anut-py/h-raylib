@@ -82,17 +82,21 @@ where
 
 import Control.Monad (forM_, unless)
 import Foreign
-  ( Ptr,
+  ( ForeignPtr,
+    Ptr,
     Storable (alignment, peek, poke, sizeOf),
     Word16,
     Word8,
+    castForeignPtr,
     castPtr,
     fromBool,
-    malloc,
+    mallocForeignPtr,
+    mallocForeignPtrArray,
     newArray,
     newForeignPtr,
     peekArray,
     plusPtr,
+    pokeArray,
     toBool,
     withForeignPtr,
   )
@@ -108,7 +112,7 @@ import Foreign.C
     peekCString,
   )
 import Raylib.Internal (c'rlGetShaderIdDefault)
-import Raylib.Internal.Foreign (Freeable (rlFreeDependents), c'free, freeMaybePtr, newMaybeArray, p'free, peekMaybeArray, peekStaticArray, pokeStaticArray, rightPad, rlFreeArray, rlFreeMaybeArray)
+import Raylib.Internal.Foreign (Freeable (rlFreeDependents), c'free, freeMaybePtr, newMaybeArray, p'free, peekMaybeArray, peekStaticArray, pokeStaticArray, rightPad, rlFree, rlFreeMaybeArray)
 import Raylib.Types.Core (Color, Matrix, Quaternion, Vector2 (Vector2), Vector3 (Vector3), Vector4 (Vector4))
 import Raylib.Types.Core.Textures (Texture (texture'id))
 
@@ -196,89 +200,104 @@ data ShaderUniformDataV
   deriving (Eq, Show)
 
 -- | Internal use
-unpackShaderUniformData :: ShaderUniformData -> IO (ShaderUniformDataType, Ptr ())
+unpackShaderUniformData :: ShaderUniformData -> IO (ShaderUniformDataType, ForeignPtr ())
 unpackShaderUniformData u = do
   case u of
     (ShaderUniformFloat f) ->
       do
-        ptr <- malloc
-        poke ptr (realToFrac f :: CFloat)
-        return (ShaderUniformFloatType, castPtr ptr)
+        fptr <- mallocForeignPtr
+        withForeignPtr fptr (\ptr -> poke ptr (realToFrac f :: CFloat))
+        return (ShaderUniformFloatType, castForeignPtr fptr)
     (ShaderUniformVec2 (Vector2 x y)) ->
       do
-        ptr <- newArray (map realToFrac [x, y] :: [CFloat])
-        return (ShaderUniformVec2Type, castPtr ptr)
+        fptr <- mallocForeignPtrArray 2
+        withForeignPtr fptr (\ptr -> pokeArray ptr (map realToFrac [x, y] :: [CFloat]))
+        return (ShaderUniformVec2Type, castForeignPtr fptr)
     (ShaderUniformVec3 (Vector3 x y z)) ->
       do
-        ptr <- newArray (map realToFrac [x, y, z] :: [CFloat])
-        return (ShaderUniformVec3Type, castPtr ptr)
+        fptr <- mallocForeignPtrArray 3
+        withForeignPtr fptr (\ptr -> pokeArray ptr (map realToFrac [x, y, z] :: [CFloat]))
+        return (ShaderUniformVec3Type, castForeignPtr fptr)
     (ShaderUniformVec4 (Vector4 x y z w)) ->
       do
-        ptr <- newArray (map realToFrac [x, y, z, w] :: [CFloat])
-        return (ShaderUniformVec4Type, castPtr ptr)
+        fptr <- mallocForeignPtrArray 3
+        withForeignPtr fptr (\ptr -> pokeArray ptr (map realToFrac [x, y, z, w] :: [CFloat]))
+        return (ShaderUniformVec4Type, castForeignPtr fptr)
     (ShaderUniformInt i) ->
       do
-        ptr <- malloc
-        poke ptr (fromIntegral i :: CInt)
-        return (ShaderUniformIntType, castPtr ptr)
+        fptr <- mallocForeignPtr
+        withForeignPtr fptr (\ptr -> poke ptr (fromIntegral i :: CInt))
+        return (ShaderUniformIntType, castForeignPtr fptr)
     (ShaderUniformIVec2 (i1, i2)) ->
       do
-        ptr <- newArray (map fromIntegral [i1, i2] :: [CInt])
-        return (ShaderUniformIVec2Type, castPtr ptr)
+        fptr <- mallocForeignPtrArray 2
+        withForeignPtr fptr (\ptr -> pokeArray ptr (map fromIntegral [i1, i2] :: [CInt]))
+        return (ShaderUniformIVec2Type, castForeignPtr fptr)
     (ShaderUniformIVec3 (i1, i2, i3)) ->
       do
-        ptr <- newArray (map fromIntegral [i1, i2, i3] :: [CInt])
-        return (ShaderUniformIVec3Type, castPtr ptr)
+        fptr <- mallocForeignPtrArray 3
+        withForeignPtr fptr (\ptr -> pokeArray ptr (map fromIntegral [i1, i2, i3] :: [CInt]))
+        return (ShaderUniformIVec3Type, castForeignPtr fptr)
     (ShaderUniformIVec4 (i1, i2, i3, i4)) ->
       do
-        ptr <- newArray (map fromIntegral [i1, i2, i3, i4] :: [CInt])
-        return (ShaderUniformIVec4Type, castPtr ptr)
+        fptr <- mallocForeignPtrArray 4
+        withForeignPtr fptr (\ptr -> pokeArray ptr (map fromIntegral [i1, i2, i3, i4] :: [CInt]))
+        return (ShaderUniformIVec4Type, castForeignPtr fptr)
     (ShaderUniformSampler2D texture) ->
       do
-        ptr <- malloc
-        poke ptr (fromIntegral $ texture'id texture :: CInt)
-        return (ShaderUniformSampler2DType, castPtr ptr)
+        fptr <- mallocForeignPtr
+        withForeignPtr fptr (\ptr -> poke ptr (fromIntegral $ texture'id texture :: CInt))
+        return (ShaderUniformSampler2DType, castForeignPtr fptr)
 
 -- | Internal use
-unpackShaderUniformDataV :: ShaderUniformDataV -> IO (ShaderUniformDataType, Ptr (), Int)
+unpackShaderUniformDataV :: ShaderUniformDataV -> IO (ShaderUniformDataType, ForeignPtr (), Int)
 unpackShaderUniformDataV xs = do
   case xs of
     (ShaderUniformFloatV fs) ->
       do
-        ptr <- newArray (map realToFrac fs :: [CFloat])
-        return (ShaderUniformFloatType, castPtr ptr, length fs)
+        fptr <- mallocForeignPtrArray (length fs)
+        withForeignPtr fptr (\ptr -> pokeArray ptr (map realToFrac fs :: [CFloat]))
+        return (ShaderUniformFloatType, castForeignPtr fptr, length fs)
     (ShaderUniformVec2V vs) ->
       do
-        ptr <- newArray (map realToFrac $ concatMap (\(Vector2 x y) -> [x, y]) vs :: [CFloat])
-        return (ShaderUniformVec2Type, castPtr ptr, length vs)
+        fptr <- mallocForeignPtrArray (2 * length vs)
+        withForeignPtr fptr (\ptr -> pokeArray ptr (map realToFrac $ concatMap (\(Vector2 x y) -> [x, y]) vs :: [CFloat]))
+        return (ShaderUniformVec2Type, castForeignPtr fptr, length vs)
     (ShaderUniformVec3V vs) ->
       do
-        ptr <- newArray (map realToFrac $ concatMap (\(Vector3 x y z) -> [x, y, z]) vs :: [CFloat])
-        return (ShaderUniformVec3Type, castPtr ptr, length vs)
+        fptr <- mallocForeignPtrArray (3 * length vs)
+        withForeignPtr fptr (\ptr -> pokeArray ptr (map realToFrac $ concatMap (\(Vector3 x y z) -> [x, y, z]) vs :: [CFloat]))
+        return (ShaderUniformVec3Type, castForeignPtr fptr, length vs)
     (ShaderUniformVec4V vs) ->
       do
-        ptr <- newArray (map realToFrac $ concatMap (\(Vector4 x y z w) -> [x, y, z, w]) vs :: [CFloat])
-        return (ShaderUniformVec4Type, castPtr ptr, length vs)
+        fptr <- mallocForeignPtrArray (4 * length vs)
+        withForeignPtr fptr (\ptr -> pokeArray ptr (map realToFrac $ concatMap (\(Vector4 x y z w) -> [x, y, z, w]) vs :: [CFloat]))
+        return (ShaderUniformVec4Type, castForeignPtr fptr, length vs)
     (ShaderUniformIntV is) ->
       do
-        ptr <- newArray (map fromIntegral is :: [CInt])
-        return (ShaderUniformIntType, castPtr ptr, length is)
+        fptr <- mallocForeignPtrArray (length is)
+        withForeignPtr fptr (\ptr -> pokeArray ptr (map fromIntegral is :: [CInt]))
+        return (ShaderUniformFloatType, castForeignPtr fptr, length is)
     (ShaderUniformIVec2V is) ->
       do
-        ptr <- newArray (map fromIntegral $ concatMap (\(x, y) -> [x, y]) is :: [CInt])
-        return (ShaderUniformIVec2Type, castPtr ptr, length is)
+        fptr <- mallocForeignPtrArray (2 * length is)
+        withForeignPtr fptr (\ptr -> pokeArray ptr (map fromIntegral $ concatMap (\(x, y) -> [x, y]) is :: [CInt]))
+        return (ShaderUniformIVec2Type, castForeignPtr fptr, length is)
     (ShaderUniformIVec3V is) ->
       do
-        ptr <- newArray (map fromIntegral $ concatMap (\(x, y, z) -> [x, y, z]) is :: [CInt])
-        return (ShaderUniformIVec3Type, castPtr ptr, length is)
+        fptr <- mallocForeignPtrArray (3 * length is)
+        withForeignPtr fptr (\ptr -> pokeArray ptr (map fromIntegral $ concatMap (\(x, y, z) -> [x, y, z]) is :: [CInt]))
+        return (ShaderUniformIVec3Type, castForeignPtr fptr, length is)
     (ShaderUniformIVec4V is) ->
       do
-        ptr <- newArray (map fromIntegral $ concatMap (\(x, y, z, w) -> [x, y, z, w]) is :: [CInt])
-        return (ShaderUniformIVec4Type, castPtr ptr, length is)
+        fptr <- mallocForeignPtrArray (4 * length is)
+        withForeignPtr fptr (\ptr -> pokeArray ptr (map fromIntegral $ concatMap (\(x, y, z, w) -> [x, y, z, w]) is :: [CInt]))
+        return (ShaderUniformIVec4Type, castForeignPtr fptr, length is)
     (ShaderUniformSampler2DV textures) ->
       do
-        ptr <- newArray (map (fromIntegral . texture'id) textures :: [CInt])
-        return (ShaderUniformSampler2DType, castPtr ptr, length textures)
+        fptr <- mallocForeignPtr
+        withForeignPtr fptr (\ptr -> pokeArray ptr (map (fromIntegral . texture'id) textures :: [CInt]))
+        return (ShaderUniformSampler2DType, castForeignPtr fptr, length textures)
 
 -- Unused
 data ShaderAttributeDataType
@@ -667,8 +686,8 @@ p'model'bindPose = (`plusPtr` 112)
 
 instance Freeable Model where
   rlFreeDependents val ptr = do
-    rlFreeArray (model'meshes val) =<< peek (p'model'meshes ptr)
-    rlFreeArray (model'materials val) =<< peek (p'model'materials ptr)
+    rlFree (model'meshes val) . castPtr =<< peek (p'model'meshes ptr)
+    rlFree (model'materials val) . castPtr =<< peek (p'model'materials ptr)
     c'free . castPtr =<< peek (p'model'meshMaterial ptr)
     freeMaybePtr . castPtr =<< peek (p'model'bones ptr)
     freeMaybePtr . castPtr =<< peek (p'model'bindPose ptr)

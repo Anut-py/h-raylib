@@ -351,7 +351,7 @@ module Raylib.Util.RLGL
     c'rlglClose,
     c'rlDrawRenderBatchActive,
     c'rlLoadDrawCube,
-    c'rlLoadDrawQuad
+    c'rlLoadDrawQuad,
   )
 where
 
@@ -360,10 +360,12 @@ import Foreign
     Storable (peek, poke, sizeOf),
     Word8,
     castPtr,
+    finalizeForeignPtr,
     fromBool,
     malloc,
     nullPtr,
     toBool,
+    withForeignPtr,
   )
 import Foreign.C
   ( CBool (..),
@@ -1162,8 +1164,9 @@ rlGetLocationAttrib shaderId attribName =
 -- | Set shader value uniform
 rlSetUniform :: Int -> ShaderUniformDataV -> IO ()
 rlSetUniform locIndex value = do
-  (dataType, ptr, count) <- unpackShaderUniformDataV value
-  c'rlSetUniform (fromIntegral locIndex) ptr (fromIntegral $ fromEnum dataType) (fromIntegral count)
+  (dataType, fptr, count) <- unpackShaderUniformDataV value
+  withForeignPtr fptr (\ptr -> c'rlSetUniform (fromIntegral locIndex) ptr (fromIntegral $ fromEnum dataType) (fromIntegral count))
+  finalizeForeignPtr fptr
 
 -- | Set shader value matrix
 rlSetUniformMatrix :: Int -> Matrix -> IO ()

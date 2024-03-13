@@ -35,7 +35,7 @@ import Foreign
 import Foreign.C
   ( CInt (..),
   )
-import Raylib.Internal.Foreign (Freeable (rlFreeDependents), c'free, rlFreeArray)
+import Raylib.Internal.Foreign (Freeable (rlFreeDependents), c'free, rlFree)
 import Raylib.Types.Core (Rectangle)
 import Raylib.Types.Core.Textures (Image, Texture, p'image'data)
 
@@ -147,4 +147,4 @@ p'font'glyphs = (`plusPtr` 40)
 instance Freeable Font where
   rlFreeDependents val ptr = do
     c'free . castPtr =<< peek (p'font'recs ptr)
-    rlFreeArray (font'glyphs val) =<< peek (p'font'glyphs ptr)
+    rlFree (font'glyphs val) . castPtr =<< peek (p'font'glyphs ptr)

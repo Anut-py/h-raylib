@@ -418,11 +418,13 @@ import Foreign
     Storable (peek, poke, sizeOf),
     castFunPtr,
     castPtr,
+    finalizeForeignPtr,
     fromBool,
     malloc,
     newArray,
     peekArray,
     toBool,
+    withForeignPtr,
   )
 import Foreign.C
   ( CBool (..),
@@ -439,7 +441,7 @@ import Foreign.C
   )
 import Foreign.Ptr (nullPtr)
 import Raylib.Internal (WindowResources, addAutomationEventList, addFunPtr, addShaderId, defaultWindowResources, shaderLocations, unloadAutomationEventLists, unloadFrameBuffers, unloadFunPtrs, unloadShaders, unloadSingleAutomationEventList, unloadSingleShader, unloadTextures, unloadVaoIds, unloadVboIds)
-import Raylib.Internal.Foreign (c'free, configsToBitflag, pop, popCArray, popCString, withFreeable, withFreeableArray, withFreeableArrayLen, withMaybeCString)
+import Raylib.Internal.Foreign (configsToBitflag, pop, popCArray, popCString, withFreeable, withFreeableArray, withFreeableArrayLen, withMaybeCString)
 import Raylib.Internal.TH (genNative)
 import Raylib.Types
   ( AutomationEvent,
@@ -973,15 +975,15 @@ setShaderValueV shader uniformName values wr = do
 
 nativeSetShaderValue :: Shader -> Int -> ShaderUniformData -> IO ()
 nativeSetShaderValue shader locIndex value = do
-  (uniformType, ptr) <- unpackShaderUniformData value
-  withFreeable shader (\s -> c'setShaderValue s (fromIntegral locIndex) ptr (fromIntegral $ fromEnum uniformType))
-  c'free $ castPtr ptr
+  (uniformType, fptr) <- unpackShaderUniformData value
+  withFreeable shader (\s -> withForeignPtr fptr (\ptr -> c'setShaderValue s (fromIntegral locIndex) ptr (fromIntegral $ fromEnum uniformType)))
+  finalizeForeignPtr fptr
 
 nativeSetShaderValueV :: Shader -> Int -> ShaderUniformDataV -> IO ()
 nativeSetShaderValueV shader locIndex values = do
-  (uniformType, ptr, l) <- unpackShaderUniformDataV values
-  withFreeable shader (\s -> c'setShaderValueV s (fromIntegral locIndex) ptr (fromIntegral $ fromEnum uniformType) (fromIntegral l))
-  c'free $ castPtr ptr
+  (uniformType, fptr, l) <- unpackShaderUniformDataV values
+  withFreeable shader (\s -> withForeignPtr fptr (\ptr -> c'setShaderValueV s (fromIntegral locIndex) ptr (fromIntegral $ fromEnum uniformType) (fromIntegral l)))
+  finalizeForeignPtr fptr
 
 setShaderValueMatrix :: Shader -> Int -> Matrix -> IO ()
 setShaderValueMatrix shader locIndex mat = withFreeable shader (\s -> withFreeable mat (c'setShaderValueMatrix s (fromIntegral locIndex)))

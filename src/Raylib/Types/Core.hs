@@ -109,9 +109,11 @@ import Foreign
     Storable (alignment, peek, poke, sizeOf),
     Word8,
     castPtr,
+    mallocArray,
     newArray,
     peekArray,
-    plusPtr, callocArray, pokeArray,
+    plusPtr,
+    pokeArray,
   )
 import Foreign.C
   ( CFloat,
@@ -1137,7 +1139,7 @@ instance Storable AutomationEventList where
   poke _p (AutomationEventList capacity events) = do
     poke (p'automationEventList'capacity _p) (fromIntegral capacity)
     poke (p'automationEventList'count _p) (fromIntegral (length events))
-    eventsPtr <- callocArray (fromIntegral capacity)
+    eventsPtr <- mallocArray (fromIntegral capacity)
     pokeArray eventsPtr events
     poke (p'automationEventList'events _p) eventsPtr
     return ()

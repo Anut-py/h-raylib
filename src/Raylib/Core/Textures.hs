@@ -25,7 +25,6 @@ module Raylib.Core.Textures
     genImagePerlinNoise,
     genImageCellular,
     genImageText,
-    imageCopy,
     imageFromImage,
     imageText,
     imageTextEx,
@@ -213,7 +212,7 @@ module Raylib.Core.Textures
     c'colorAlphaBlend,
     c'getColor,
     c'getPixelColor,
-    c'setPixelColor
+    c'setPixelColor,
   )
 where
 
@@ -484,9 +483,6 @@ genImageCellular width height tileSize =
 genImageText :: Int -> Int -> String -> IO Image
 genImageText width height text =
   withCString text (c'genImageText (fromIntegral width) (fromIntegral height)) >>= pop
-
-imageCopy :: Image -> IO Image
-imageCopy image = withFreeable image c'imageCopy >>= pop
 
 imageFromImage :: Image -> Rectangle -> IO Image
 imageFromImage image rect = withFreeable image (withFreeable rect . c'imageFromImage) >>= pop
