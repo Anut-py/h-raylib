@@ -191,7 +191,6 @@ import Raylib.Types
     Vector2,
     Vector3,
   )
-import Prelude hiding (length)
 
 $( genNative
      [ ("c'drawLine3D", "DrawLine3D_", "rl_bindings.h", [t|Ptr Vector3 -> Ptr Vector3 -> Ptr Color -> IO ()|], False),
@@ -286,13 +285,13 @@ drawTriangleStrip3D :: [Vector3] -> Int -> Color -> IO ()
 drawTriangleStrip3D points pointCount color = withFreeableArray points (\p -> withFreeable color (c'drawTriangleStrip3D p (fromIntegral pointCount)))
 
 drawCube :: Vector3 -> Float -> Float -> Float -> Color -> IO ()
-drawCube position width height length color = withFreeable position (\p -> withFreeable color (c'drawCube p (realToFrac width) (realToFrac height) (realToFrac length)))
+drawCube position width height _length color = withFreeable position (\p -> withFreeable color (c'drawCube p (realToFrac width) (realToFrac height) (realToFrac _length)))
 
 drawCubeV :: Vector3 -> Vector3 -> Color -> IO ()
 drawCubeV position size color = withFreeable position (\p -> withFreeable size (withFreeable color . c'drawCubeV p))
 
 drawCubeWires :: Vector3 -> Float -> Float -> Float -> Color -> IO ()
-drawCubeWires position width height length color = withFreeable position (\p -> withFreeable color (c'drawCubeWires p (realToFrac width) (realToFrac height) (realToFrac length)))
+drawCubeWires position width height _length color = withFreeable position (\p -> withFreeable color (c'drawCubeWires p (realToFrac width) (realToFrac height) (realToFrac _length)))
 
 drawCubeWiresV :: Vector3 -> Vector3 -> Color -> IO ()
 drawCubeWiresV position size color = withFreeable position (\p -> withFreeable size (withFreeable color . c'drawCubeWiresV p))
@@ -430,10 +429,10 @@ genMeshPoly :: Int -> Float -> WindowResources -> IO Mesh
 genMeshPoly sides radius wr = c'genMeshPoly (fromIntegral sides) (realToFrac radius) >>= pop >>= (`storeMeshData` wr)
 
 genMeshPlane :: Float -> Float -> Int -> Int -> WindowResources -> IO Mesh
-genMeshPlane width length resX resZ wr = c'genMeshPlane (realToFrac width) (realToFrac length) (fromIntegral resX) (fromIntegral resZ) >>= pop >>= (`storeMeshData` wr)
+genMeshPlane width _length resX resZ wr = c'genMeshPlane (realToFrac width) (realToFrac _length) (fromIntegral resX) (fromIntegral resZ) >>= pop >>= (`storeMeshData` wr)
 
 genMeshCube :: Float -> Float -> Float -> WindowResources -> IO Mesh
-genMeshCube width height length wr = c'genMeshCube (realToFrac width) (realToFrac height) (realToFrac length) >>= pop >>= (`storeMeshData` wr)
+genMeshCube width height _length wr = c'genMeshCube (realToFrac width) (realToFrac height) (realToFrac _length) >>= pop >>= (`storeMeshData` wr)
 
 genMeshSphere :: Float -> Int -> Int -> WindowResources -> IO Mesh
 genMeshSphere radius rings slices wr = c'genMeshSphere (realToFrac radius) (fromIntegral rings) (fromIntegral slices) >>= pop >>= (`storeMeshData` wr)

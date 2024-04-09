@@ -1052,7 +1052,7 @@ p'vrStereoConfig'scaleIn :: Ptr VrStereoConfig -> Ptr CFloat
 p'vrStereoConfig'scaleIn = (`plusPtr` 296)
 
 data FilePathList = FilePathList
-  { filePathlist'capacity :: Integer,
+  { filePathList'capacity :: Integer,
     filePathList'paths :: [String]
   }
   deriving (Eq, Show)

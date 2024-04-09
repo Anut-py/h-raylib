@@ -1164,7 +1164,11 @@ isFileDropped :: IO Bool
 isFileDropped = toBool <$> c'isFileDropped
 
 loadDroppedFiles :: IO FilePathList
-loadDroppedFiles = c'loadDroppedFiles >>= pop
+loadDroppedFiles = do
+  ptr <- c'loadDroppedFiles
+  val <- peek ptr
+  c'unloadDroppedFiles ptr
+  return val
 
 getFileModTime :: String -> IO Integer
 getFileModTime fileName = fromIntegral <$> withCString fileName c'getFileModTime
