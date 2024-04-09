@@ -9,10 +9,10 @@
       forAllSystems' = nixpkgs.lib.genAttrs;
       forAllSystems = forAllSystems' supportedSystems;
 
-      raylibRev = "ba066656f7be07f8f3f5e9028f053068789755a4";
-      raylibHash = "sha256-WeT9lW4Qs3K5+dEscAKfyvKX6BHJCJNWspbABlrXPgs=";
-      rayguiRev = "b5693d0c418e4b2572de2992b795c6407e8106cf";
-      rayguiHash = "sha256-u7BIpMB3ofv4Fia8TJ0523FhfN8dkz/UvvGrKRjKEnY=";
+      raylibRev = "04afba260f64ee2ea9ef0b4a6d2058c9ffdad66d";
+      raylibHash = "sha256-WDXeTb6LbVw2ydX8w2Ql9Xq06+iB+VNoosiYWOGmj00=";
+      rayguiRev = "85549da837fdb3844b77ede80922fca99276c8cd";
+      rayguiHash = "sha256-KxiAWPc8jgt68ySVK2S3ocRTULqQlCZQVxxyD7BcOzI=";
 
       pkgsForSystem =
         system:
@@ -33,7 +33,7 @@
               });
               raygui = super.stdenv.mkDerivation { # A bit of a hack to get raygui working
                 name = "raygui";
-                version = "4.0.0";
+                version = "4.1.0";
                 src = self.fetchFromGitHub {
                   owner = "raysan5";
                   repo = "raygui";
