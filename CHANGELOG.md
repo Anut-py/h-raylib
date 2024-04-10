@@ -1,6 +1,7 @@
 # h-raylib changelog
 
 ## Version 5.1.2.0
+_9 April, 2024_
 
 - Internal changes for performance
 - Fixed a typo in `filePathList'capacity` (previously `filePathlist'capacity`)
