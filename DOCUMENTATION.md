@@ -4,6 +4,10 @@ This file only contains h-raylib specific information. For documentation on indi
 
 For regular users of the library, the Haddock documentation should be more than enough (although much of it is auto-generated, so make sure to create an issue if you find anything that seems wrong). The documentation included here is more useful for contributors or anyone who wants to learn about how h-raylib works internally.
 
+## Versioning scheme
+
+The first two numbers in the version track the underlying C raylib version. For example, `5.1.x.x` versions use raylib 5.1 under the hood. The third number represents breaking changes (renamed/deleted functions or modules). The last number represents non-breaking changes (new functions or modules, bug fixes, etc).
+
 ## Project structure
 
 h-raylib contains bindings for raylib.h, raymath.h, rcamera.h, rlgl.h, and raygui.h. The public modules' documentation can be found in Haddock, as mentioned above, and documentation for the private modules can be found in the source files.
