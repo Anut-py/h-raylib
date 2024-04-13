@@ -223,6 +223,10 @@ instance Storable RAudioBuffer where
       getBytesPerSample = ([0, 1, 2, 3, 4, 4] !!)
       loadBase ptr = do
         converter <- map fromIntegral <$> peekStaticArray 78 (castPtr (p'rAudioBuffer'converter ptr) :: Ptr CInt)
+        let formatIn =
+              case converter of
+                [] -> error "invalid miniaudio converter"
+                x:_ -> x
         funPtr <- peek (p'rAudioBuffer'callback ptr)
         let callback = if funPtr == nullFunPtr then Nothing else Just funPtr
         processor <- peekMaybe (p'rAudioBuffer'processor ptr)
@@ -241,7 +245,7 @@ instance Storable RAudioBuffer where
         frameCursorPos <- fromIntegral <$> peek (p'rAudioBuffer'frameCursorPos ptr)
         framesProcessed <- fromIntegral <$> peek (p'rAudioBuffer'framesProcessed ptr)
 
-        bData <- map fromIntegral <$> (peekArray (fromIntegral $ sizeInFrames * 2 * getBytesPerSample (head converter)) =<< peek (p'rAudioBuffer'data ptr))
+        bData <- map fromIntegral <$> (peekArray (fromIntegral $ sizeInFrames * 2 * getBytesPerSample formatIn) =<< peek (p'rAudioBuffer'data ptr))
 
         return $ RAudioBuffer converter callback processor volume pitch pan playing paused looping usage isSubBufferProcessed sizeInFrames frameCursorPos framesProcessed bData
       loadNext ptr =
