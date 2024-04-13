@@ -66,6 +66,7 @@ module Raylib.Types.Core.Models
     p'model'bones,
     p'model'bindPose,
     p'modelAnimation'boneCount,
+    p'modelAnimation'frameCount,
     p'modelAnimation'bones,
     p'modelAnimation'framePoses,
     p'modelAnimation'name,
