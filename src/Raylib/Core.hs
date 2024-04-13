@@ -97,9 +97,9 @@ module Raylib.Core
     getCameraMatrix,
     getCameraMatrix2D,
     getWorldToScreen,
-    getScreenToWorld2D,
     getWorldToScreenEx,
     getWorldToScreen2D,
+    getScreenToWorld2D,
     setTargetFPS,
     getFPS,
     getFrameTime,
@@ -483,6 +483,7 @@ import Raylib.Types
     unpackShaderUniformData,
     unpackShaderUniformDataV,
   )
+import GHC.IO (unsafePerformIO)
 
 $( genNative
      [ ("c'initWindow", "InitWindow_", "rl_bindings.h", [t|CInt -> CInt -> CString -> IO ()|], False),
@@ -1001,26 +1002,26 @@ unloadShader shader = unloadSingleShader (shader'id shader)
 getScreenToWorldRay :: Vector2 -> Camera3D -> IO Ray
 getScreenToWorldRay position camera = withFreeable position (withFreeable camera . c'getScreenToWorldRay) >>= pop
 
-getScreenToWorldRayEx :: Vector2 -> Camera3D -> Float -> Float -> IO Ray
-getScreenToWorldRayEx position camera width height = withFreeable position (\p -> withFreeable camera (\c -> c'getScreenToWorldRayEx p c (realToFrac width) (realToFrac height))) >>= pop
+getScreenToWorldRayEx :: Vector2 -> Camera3D -> Float -> Float -> Ray
+getScreenToWorldRayEx position camera width height = unsafePerformIO $ withFreeable position (\p -> withFreeable camera (\c -> c'getScreenToWorldRayEx p c (realToFrac width) (realToFrac height))) >>= pop
 
-getCameraMatrix :: Camera3D -> IO Matrix
-getCameraMatrix camera = withFreeable camera c'getCameraMatrix >>= pop
+getCameraMatrix :: Camera3D -> Matrix
+getCameraMatrix camera = unsafePerformIO $ withFreeable camera c'getCameraMatrix >>= pop
 
-getCameraMatrix2D :: Camera2D -> IO Matrix
-getCameraMatrix2D camera = withFreeable camera c'getCameraMatrix2D >>= pop
+getCameraMatrix2D :: Camera2D -> Matrix
+getCameraMatrix2D camera = unsafePerformIO $ withFreeable camera c'getCameraMatrix2D >>= pop
 
 getWorldToScreen :: Vector3 -> Camera3D -> IO Vector2
 getWorldToScreen position camera = withFreeable position (withFreeable camera . c'getWorldToScreen) >>= pop
 
-getScreenToWorld2D :: Vector2 -> Camera2D -> IO Vector2
-getScreenToWorld2D position camera = withFreeable position (withFreeable camera . c'getScreenToWorld2D) >>= pop
+getWorldToScreenEx :: Vector3 -> Camera3D -> Int -> Int -> Vector2
+getWorldToScreenEx position camera width height = unsafePerformIO $ withFreeable position (\p -> withFreeable camera (\c -> c'getWorldToScreenEx p c (fromIntegral width) (fromIntegral height))) >>= pop
 
-getWorldToScreenEx :: Vector3 -> Camera3D -> Int -> Int -> IO Vector2
-getWorldToScreenEx position camera width height = withFreeable position (\p -> withFreeable camera (\c -> c'getWorldToScreenEx p c (fromIntegral width) (fromIntegral height))) >>= pop
+getWorldToScreen2D :: Vector2 -> Camera2D -> Vector2
+getWorldToScreen2D position camera = unsafePerformIO $ withFreeable position (withFreeable camera . c'getWorldToScreen2D) >>= pop
 
-getWorldToScreen2D :: Vector2 -> Camera2D -> IO Vector2
-getWorldToScreen2D position camera = withFreeable position (withFreeable camera . c'getWorldToScreen2D) >>= pop
+getScreenToWorld2D :: Vector2 -> Camera2D -> Vector2
+getScreenToWorld2D position camera = unsafePerformIO $ withFreeable position (withFreeable camera . c'getScreenToWorld2D) >>= pop
 
 setTargetFPS :: Int -> IO ()
 setTargetFPS fps = c'setTargetFPS $ fromIntegral fps
