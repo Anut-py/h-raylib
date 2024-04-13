@@ -1,5 +1,11 @@
 # h-raylib changelog
 
+## Version 5.1.3.0
+_13 April, 2024_
+
+- Made some utility functions pure
+- Improved the performance of `Raylib.Util.Math`
+
 ## Version 5.1.2.0
 _9 April, 2024_
 
