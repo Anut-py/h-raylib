@@ -185,41 +185,56 @@ class Vector a where
   -- | Vector representation of a list
   fromList :: [Float] -> a
 
+  -- | Left fold over a vector
+  foldlV :: (b -> Float -> b) -> b -> a -> b
+
+  -- | Right fold over a vector
+  foldrV :: (Float -> b -> b) -> b -> a -> b
+
+  -- | Map over a vector
+  mapV :: (Float -> Float) -> a -> a
+
+  -- | Equivalent of `zipWith` over a vector
+  zipWithV :: (Float -> Float -> Float) -> a -> a -> a
+  
+  -- | Equivalent of `zipWith3` over a vector
+  zipWithV3 :: (Float -> Float -> Float -> Float) -> a -> a -> a -> a
+
   -- | Vector-vector addition
   (|+|) :: a -> a -> a
-  a |+| b = fromList $ zipWith (+) (asList a) (asList b)
+  a |+| b = zipWithV (+) a b
 
   -- | Vector-vector subtraction
   (|-|) :: a -> a -> a
-  a |-| b = fromList $ zipWith (-) (asList a) (asList b)
+  a |-| b = zipWithV (-) a b
 
   -- | Vector-scalar addition
   (|+) :: a -> Float -> a
-  a |+ b = a |+| constant b
+  a |+ b = mapV (+ b) a
 
   -- | Vector-scalar subtraction
   (|-) :: a -> Float -> a
-  a |- b = a |-| constant b
+  a |- b = mapV (\x -> x - b) a
 
   -- | Vector-vector multiplication
   (|*|) :: a -> a -> a
-  a |*| b = fromList $ zipWith (*) (asList a) (asList b)
+  a |*| b = zipWithV (*) a b
 
   -- | Vector-vector division
   (|/|) :: a -> a -> a
-  a |/| b = fromList $ zipWith (/) (asList a) (asList b)
+  a |/| b = zipWithV (/) a b
 
   -- | Vector-scalar multiplication
   (|*) :: a -> Float -> a
-  a |* b = a |*| constant b
+  a |* b = mapV (* b) a
 
   -- | Vector-scalar division
   (|/) :: a -> Float -> a
-  a |/ b = a |/| constant b
+  a |/ b = mapV (/ b) a
 
   -- | Vector-vector dot product
   (|.|) :: a -> a -> Float
-  a |.| b = sum . asList $ a |*| b
+  a |.| b = foldlV (+) 0 (a |*| b)
 
   -- | Zero vector
   zero :: a
@@ -231,7 +246,6 @@ class Vector a where
 
   -- | Scalar to vector (all elements are set to the scalar)
   constant :: Float -> a
-  constant val = fromList $ repeat val
 
   -- | Sum of all vectors in a structure
   vectorSum :: (Foldable t) => t a -> a
@@ -239,11 +253,11 @@ class Vector a where
 
   -- | Vector additive inverse
   additiveInverse :: a -> a
-  additiveInverse v = fromList $ map negate (asList v)
+  additiveInverse v = mapV negate v
 
   -- | Vector multiplicative inverse
   multiplicativeInverse :: a -> a
-  multiplicativeInverse v = fromList $ map (1 /) (asList v)
+  multiplicativeInverse v = mapV (1 /) v
 
   -- | Squared magnitude of a vector
   magnitudeSqr :: a -> Float
@@ -261,7 +275,9 @@ class Vector a where
 
   -- | Distance between two vectors
   vectorDistance :: a -> a -> Float
-  vectorDistance a b = sqrt $ vectorDistanceSqr a b
+  vectorDistance a b = if v == 1 then v else sqrt v
+    where
+      v = vectorDistanceSqr a b
 
   -- | Normalize vector (same direction, magnitude 1)
   vectorNormalize :: a -> a
@@ -269,7 +285,7 @@ class Vector a where
 
   -- | Lerp between two vectors
   vectorLerp :: a -> a -> Float -> a
-  vectorLerp a b amount = fromList $ zipWith (\v1 v2 -> lerp v1 v2 amount) (asList a) (asList b)
+  vectorLerp a b amount = zipWithV (\v1 v2 -> lerp v1 v2 amount) a b
 
   -- | Move vector towards target
   vectorMoveTowards ::
@@ -283,7 +299,7 @@ class Vector a where
   vectorMoveTowards v target maxDistance =
     if distSquared <= maxDistance * maxDistance
       then target
-      else v |+| fromList (map (* (maxDistance / dist)) (asList diff))
+      else v |+| mapV (* (maxDistance / dist)) diff
     where
       diff = target |-| v
       distSquared = magnitudeSqr diff
@@ -298,7 +314,7 @@ class Vector a where
     -- | Upper bound
     a ->
     a
-  vectorClamp v low high = fromList $ zipWith3 clamp (asList v) (asList low) (asList high)
+  vectorClamp v low high = zipWithV3 clamp v low high
 
   -- | Clamp the magnitude of a vector to a range
   vectorClampValue ::
@@ -315,26 +331,44 @@ class Vector a where
 
   -- | Min value for each pair of components
   vectorMin :: a -> a -> a
-  vectorMin v1 v2 = fromList $ zipWith min (asList v1) (asList v2)
+  vectorMin v1 v2 = zipWithV min v1 v2
 
   -- | Max value for each pair of components
   vectorMax :: a -> a -> a
-  vectorMax v1 v2 = fromList $ zipWith max (asList v1) (asList v2)
+  vectorMax v1 v2 = zipWithV max v1 v2
 
 instance Vector Vector2 where
   asList (Vector2 x y) = [x, y]
   fromList (x : y : _) = Vector2 x y
   fromList _ = error "(Vector2.fromList) Input list must have at least two elements!"
+  foldlV f val (Vector2 x y) = f (f val x) y
+  foldrV f val (Vector2 x y) = f x (f y val)
+  mapV f (Vector2 x y) = Vector2 (f x) (f y)
+  zipWithV f (Vector2 x1 y1) (Vector2 x2 y2) = Vector2 (f x1 x2) (f y1 y2)
+  zipWithV3 f (Vector2 x1 y1) (Vector2 x2 y2) (Vector2 x3 y3) = Vector2 (f x1 x2 x3) (f y1 y2 y3)
+  constant x = Vector2 x x
 
 instance Vector Vector3 where
   asList (Vector3 x y z) = [x, y, z]
   fromList (x : y : z : _) = Vector3 x y z
   fromList _ = error "(Vector3.fromList) Input list must have at least three elements!"
+  foldlV f val (Vector3 x y z) = f (f (f val x) y) z
+  foldrV f val (Vector3 x y z) = f x (f y (f z val))
+  mapV f (Vector3 x y z) = Vector3 (f x) (f y) (f z)
+  zipWithV f (Vector3 x1 y1 z1) (Vector3 x2 y2 z2) = Vector3 (f x1 x2) (f y1 y2) (f z1 z2)
+  zipWithV3 f (Vector3 x1 y1 z1) (Vector3 x2 y2 z2) (Vector3 x3 y3 z3) = Vector3 (f x1 x2 x3) (f y1 y2 y3) (f z1 z2 z3)
+  constant x = Vector3 x x x
 
 instance Vector Vector4 where
   asList (Vector4 x y z w) = [x, y, z, w]
   fromList (x : y : z : w : _) = Vector4 x y z w
   fromList _ = error "(Vector4.fromList) Input list must have at least four elements!"
+  foldlV f val (Vector4 x y z w) = f (f (f (f val x) y) z) w
+  foldrV f val (Vector4 x y z w) = f x (f y (f z (f w val)))
+  mapV f (Vector4 x y z w) = Vector4 (f x) (f y) (f z) (f w)
+  zipWithV f (Vector4 x1 y1 z1 w1) (Vector4 x2 y2 z2 w2) = Vector4 (f x1 x2) (f y1 y2) (f z1 z2) (f w1 w2)
+  zipWithV3 f (Vector4 x1 y1 z1 w1) (Vector4 x2 y2 z2 w2) (Vector4 x3 y3 z3 w3) = Vector4 (f x1 x2 x3) (f y1 y2 y3) (f z1 z2 z3) (f w1 w2 w3)
+  constant x = Vector4 x x x x
 
 ------------------------------------------------
 -- Vector2 math --------------------------------
