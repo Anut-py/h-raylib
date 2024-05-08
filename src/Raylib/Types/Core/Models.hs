@@ -1,4 +1,5 @@
 {-# LANGUAGE DeriveAnyClass #-}
+{-# LANGUAGE PatternSynonyms #-}
 
 {-# OPTIONS -Wall #-}
 
@@ -114,7 +115,7 @@ import Foreign.C
   )
 import Raylib.Internal (c'rlGetShaderIdDefault)
 import Raylib.Internal.Foreign (Freeable (rlFreeDependents), c'free, freeMaybePtr, newMaybeArray, p'free, peekMaybeArray, peekStaticArray, pokeStaticArray, rightPad, rlFree, rlFreeMaybeArray)
-import Raylib.Types.Core (Color, Matrix, Quaternion, Vector2 (Vector2), Vector3 (Vector3), Vector4 (Vector4))
+import Raylib.Types.Core (Color, Matrix, Quaternion, Vector2, pattern Vector2, Vector3, pattern Vector3, Vector4, pattern Vector4)
 import Raylib.Types.Core.Textures (Texture (texture'id))
 
 ---------------------------------------

@@ -1,5 +1,6 @@
 {-# OPTIONS -Wall #-}
 {-# LANGUAGE DeriveAnyClass #-}
+{-# LANGUAGE PatternSynonyms #-}
 
 -- | Bindings for types used in all raylib modules
 module Raylib.Types.Core
@@ -15,9 +16,21 @@ module Raylib.Types.Core
     Gesture (..),
 
     -- * Structures
-    Vector2 (..),
-    Vector3 (..),
-    Vector4 (..),
+    Vector2,
+    Vector3,
+    Vector4,
+    pattern Vector2,
+    vector2'x,
+    vector2'y,
+    pattern Vector3,
+    vector3'x,
+    vector3'y,
+    vector3'z,
+    pattern Vector4,
+    vector4'x,
+    vector4'y,
+    vector4'z,
+    vector4'w,
     vectorToColor,
     Matrix (..),
     Color (..),
@@ -124,7 +137,9 @@ import Foreign.C
     newCString,
     peekCString,
   )
+import Linear (V2(V2), V3(V3), V4(V4))
 import Raylib.Internal.Foreign (Freeable (rlFreeDependents), c'free, peekStaticArray, pokeStaticArray)
+
 
 ---------------------------------------
 -- core enums -------------------------
@@ -640,23 +655,14 @@ instance Enum Gesture where
 -- core structures --------------------
 ---------------------------------------
 
-data Vector2 = Vector2
-  { vector2'x :: Float,
-    vector2'y :: Float
-  }
-  deriving (Eq, Show, Freeable)
 
-instance Storable Vector2 where
-  sizeOf _ = 8
-  alignment _ = 4
-  peek _p = do
-    x <- realToFrac <$> peek (p'vector2'x _p)
-    y <- realToFrac <$> peek (p'vector2'y _p)
-    return $ Vector2 x y
-  poke _p (Vector2 x y) = do
-    poke (p'vector2'x _p) (realToFrac x)
-    poke (p'vector2'y _p) (realToFrac y)
-    return ()
+type Vector2 = V2 Float
+
+pattern Vector2 :: Float -> Float -> Vector2
+pattern Vector2
+  { vector2'x ,
+    vector2'y
+  } = V2 vector2'x vector2'y
 
 p'vector2'x :: Ptr Vector2 -> Ptr CFloat
 p'vector2'x = (`plusPtr` 0)
@@ -664,26 +670,14 @@ p'vector2'x = (`plusPtr` 0)
 p'vector2'y :: Ptr Vector2 -> Ptr CFloat
 p'vector2'y = (`plusPtr` 4)
 
-data Vector3 = Vector3
-  { vector3'x :: Float,
-    vector3'y :: Float,
-    vector3'z :: Float
-  }
-  deriving (Eq, Show, Freeable)
+type Vector3 = V3 Float
 
-instance Storable Vector3 where
-  sizeOf _ = 12
-  alignment _ = 4
-  peek _p = do
-    x <- realToFrac <$> peek (p'vector3'x _p)
-    y <- realToFrac <$> peek (p'vector3'y _p)
-    z <- realToFrac <$> peek (p'vector3'z _p)
-    return $ Vector3 x y z
-  poke _p (Vector3 x y z) = do
-    poke (p'vector3'x _p) (realToFrac x)
-    poke (p'vector3'y _p) (realToFrac y)
-    poke (p'vector3'z _p) (realToFrac z)
-    return ()
+pattern Vector3 :: Float -> Float -> Float -> Vector3
+pattern Vector3
+  { vector3'x ,
+    vector3'y ,
+    vector3'z
+  } = V3 vector3'x vector3'y vector3'z
 
 p'vector3'x :: Ptr Vector3 -> Ptr CFloat
 p'vector3'x = (`plusPtr` 0)
@@ -694,29 +688,14 @@ p'vector3'y = (`plusPtr` 4)
 p'vector3'z :: Ptr Vector3 -> Ptr CFloat
 p'vector3'z = (`plusPtr` 8)
 
-data Vector4 = Vector4
-  { vector4'x :: Float,
-    vector4'y :: Float,
-    vector4'z :: Float,
-    vector4'w :: Float
-  }
-  deriving (Eq, Show, Freeable)
+type Vector4 = V4 Float
 
-instance Storable Vector4 where
-  sizeOf _ = 16
-  alignment _ = 4
-  peek _p = do
-    x <- realToFrac <$> peek (p'vector4'x _p)
-    y <- realToFrac <$> peek (p'vector4'y _p)
-    z <- realToFrac <$> peek (p'vector4'z _p)
-    w <- realToFrac <$> peek (p'vector4'w _p)
-    return $ Vector4 x y z w
-  poke _p (Vector4 x y z w) = do
-    poke (p'vector4'x _p) (realToFrac x)
-    poke (p'vector4'y _p) (realToFrac y)
-    poke (p'vector4'z _p) (realToFrac z)
-    poke (p'vector4'w _p) (realToFrac w)
-    return ()
+pattern Vector4
+  { vector4'x,
+    vector4'y,
+    vector4'z,
+    vector4'w
+  } = V4 vector4'x vector4'y vector4'z vector4'w
 
 vectorToColor :: Vector4 -> Color
 vectorToColor (Vector4 x y z w) = Color (round $ x * 255) (round $ y * 255) (round $ z * 255) (round $ w * 255)
