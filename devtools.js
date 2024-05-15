@@ -334,7 +334,6 @@ This script contains useful tools for h-raylib development
 
     -d                Diff the local raylib source with the latest remote code
     --raylib-diff
-    --nix-update
 
     -g                Diff the local raygui source with the latest remote code
     --raygui-diff
