@@ -36,6 +36,7 @@ module Raylib.Core.Shapes
     drawRectangleLinesEx,
     drawRectangleRounded,
     drawRectangleRoundedLines,
+    drawRectangleRoundedLinesEx,
     drawTriangle,
     drawTriangleLines,
     drawTriangleFan,
@@ -102,6 +103,7 @@ module Raylib.Core.Shapes
     c'drawRectangleLinesEx,
     c'drawRectangleRounded,
     c'drawRectangleRoundedLines,
+    c'drawRectangleRoundedLinesEx,
     c'drawTriangle,
     c'drawTriangleLines,
     c'drawTriangleFan,
@@ -181,7 +183,8 @@ $( genNative
        ("c'drawRectangleLines", "DrawRectangleLines_", "rl_bindings.h", [t|CInt -> CInt -> CInt -> CInt -> Ptr Color -> IO ()|], False),
        ("c'drawRectangleLinesEx", "DrawRectangleLinesEx_", "rl_bindings.h", [t|Ptr Rectangle -> CFloat -> Ptr Color -> IO ()|], False),
        ("c'drawRectangleRounded", "DrawRectangleRounded_", "rl_bindings.h", [t|Ptr Rectangle -> CFloat -> CInt -> Ptr Color -> IO ()|], False),
-       ("c'drawRectangleRoundedLines", "DrawRectangleRoundedLines_", "rl_bindings.h", [t|Ptr Rectangle -> CFloat -> CInt -> CFloat -> Ptr Color -> IO ()|], False),
+       ("c'drawRectangleRoundedLines", "DrawRectangleRoundedLines_", "rl_bindings.h", [t|Ptr Rectangle -> CFloat -> CInt -> Ptr Color -> IO ()|], False),
+       ("c'drawRectangleRoundedLinesEx", "DrawRectangleRoundedLinesEx_", "rl_bindings.h", [t|Ptr Rectangle -> CFloat -> CInt -> CFloat -> Ptr Color -> IO ()|], False),
        ("c'drawTriangle", "DrawTriangle_", "rl_bindings.h", [t|Ptr Vector2 -> Ptr Vector2 -> Ptr Vector2 -> Ptr Color -> IO ()|], False),
        ("c'drawTriangleLines", "DrawTriangleLines_", "rl_bindings.h", [t|Ptr Vector2 -> Ptr Vector2 -> Ptr Vector2 -> Ptr Color -> IO ()|], False),
        ("c'drawTriangleFan", "DrawTriangleFan_", "rl_bindings.h", [t|Ptr Vector2 -> CInt -> Ptr Color -> IO ()|], False),
@@ -399,9 +402,13 @@ drawRectangleRounded :: Rectangle -> Float -> Int -> Color -> IO ()
 drawRectangleRounded rect roundness segments color =
   withFreeable rect (\r -> withFreeable color $ c'drawRectangleRounded r (realToFrac roundness) (fromIntegral segments))
 
-drawRectangleRoundedLines :: Rectangle -> Float -> Int -> Float -> Color -> IO ()
-drawRectangleRoundedLines rect roundness segments thickness color =
-  withFreeable rect (\r -> withFreeable color $ c'drawRectangleRoundedLines r (realToFrac roundness) (fromIntegral segments) (realToFrac thickness))
+drawRectangleRoundedLines :: Rectangle -> Float -> Int -> Color -> IO ()
+drawRectangleRoundedLines rect roundness segments color =
+  withFreeable rect (\r -> withFreeable color $ c'drawRectangleRoundedLines r (realToFrac roundness) (fromIntegral segments))
+
+drawRectangleRoundedLinesEx :: Rectangle -> Float -> Int -> Float -> Color -> IO ()
+drawRectangleRoundedLinesEx rect roundness segments thickness color =
+  withFreeable rect (\r -> withFreeable color $ c'drawRectangleRoundedLinesEx r (realToFrac roundness) (fromIntegral segments) (realToFrac thickness))
 
 drawTriangle :: Vector2 -> Vector2 -> Vector2 -> Color -> IO ()
 drawTriangle v1 v2 v3 color =

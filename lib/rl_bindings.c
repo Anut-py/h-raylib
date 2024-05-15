@@ -441,9 +441,14 @@ RLBIND void DrawRectangleRounded_(Rectangle *a, float b, int c, Color *d)
     DrawRectangleRounded(*a, b, c, *d);
 }
 
-RLBIND void DrawRectangleRoundedLines_(Rectangle *a, float b, int c, float d, Color *e)
+RLBIND void DrawRectangleRoundedLines_(Rectangle *a, float b, int c, Color *d)
 {
-    DrawRectangleRoundedLines(*a, b, c, d, *e);
+    DrawRectangleRoundedLines(*a, b, c, *d);
+}
+
+RLBIND void DrawRectangleRoundedLinesEx_(Rectangle *a, float b, int c, float d, Color *e)
+{
+    DrawRectangleRoundedLinesEx(*a, b, c, d, *e);
 }
 
 RLBIND void DrawTriangle_(Vector2 *a, Vector2 *b, Vector2 *c, Color *d)

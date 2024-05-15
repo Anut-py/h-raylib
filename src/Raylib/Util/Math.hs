@@ -39,6 +39,7 @@ module Raylib.Util.Math
     vector3Transform,
     vector3RotateByQuaternion,
     vector3RotateByAxisAngle,
+    vector3CubicHermite,
     vector3Reflect,
     vector3Barycenter,
     vector3Unproject,
@@ -80,6 +81,7 @@ module Raylib.Util.Math
     quaternionLerp,
     quaternionNLerp,
     quaternionSLerp,
+    quaternionCubicHermiteSpline,
     quaternionFromVector3ToVector3,
     quaternionFromMatrix,
     quaternionToMatrix,
@@ -196,7 +198,7 @@ class Vector a where
 
   -- | Equivalent of `zipWith` over a vector
   zipWithV :: (Float -> Float -> Float) -> a -> a -> a
-  
+
   -- | Equivalent of `zipWith3` over a vector
   zipWithV3 :: (Float -> Float -> Float -> Float) -> a -> a -> a -> a
 
@@ -491,6 +493,29 @@ vector3RotateByAxisAngle v axis angle = v |+| (wv |* (2 * a)) |+| (wwv |* 2)
     w = Vector3 b c d
     wv = vector3CrossProduct w v
     wwv = vector3CrossProduct w wv
+
+-- | Cubic hermite interpolation between two vectors and their tangents
+--   as described in the [GLTF 2.0 specification](https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#interpolation-cubic)
+vector3CubicHermite ::
+  -- | Vector 1
+  Vector3 ->
+  -- | Tangent for vector 1
+  Vector3 ->
+  -- | Vector 2
+  Vector3 ->
+  -- | Tangent for vector 2
+  Vector3 ->
+  -- | Interpolation amount
+  Float ->
+  Vector3
+vector3CubicHermite (Vector3 x1 y1 z1) (Vector3 tx1 ty1 tz1) (Vector3 x2 y2 z2) (Vector3 tx2 ty2 tz2) a =
+  Vector3
+    ((2 * a3 - 3 * a2 + 1) * x1 + (a3 - 2 * a2 + a) * tx1 + (-2 * a3 + 3 * a2) * x2 + (a3 - a2) * tx2)
+    ((2 * a3 - 3 * a2 + 1) * y1 + (a3 - 2 * a2 + a) * ty1 + (-2 * a3 + 3 * a2) * y2 + (a3 - a2) * ty2)
+    ((2 * a3 - 3 * a2 + 1) * z1 + (a3 - 2 * a2 + a) * tz1 + (-2 * a3 + 3 * a2) * z2 + (a3 - a2) * tz2)
+  where
+    a2 = a * a
+    a3 = a2 * a
 
 -- | Reflect 3D vector to normal
 vector3Reflect ::
@@ -976,6 +1001,33 @@ quaternionSLerp q1 q2 amount
 
     q2' = if dot < 0 then additiveInverse q2 else q2
     dot = q1 |.| q2
+
+-- | Quaternion cubic spline interpolation using the Cubic Hermite Spline algorithm
+--   as described in the [GLTF 2.0 specification](https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#interpolation-cubic)
+quaternionCubicHermiteSpline ::
+  -- | Quaternion 1
+  Quaternion ->
+  -- | Out tangent 1
+  Quaternion ->
+  -- | Quaternion 2
+  Quaternion ->
+  -- | In tangent 2
+  Quaternion ->
+  -- | Interpolation amount
+  Float ->
+  Quaternion
+quaternionCubicHermiteSpline q1 outTangent1 q2 inTangent2 t = vectorNormalize (p0 |+| m0 |+| p1 |+| m1)
+  where
+    t2 = t * t
+    t3 = t2 * t
+    h00 = 2 * t3 - 3 * t2 + 1
+    h10 = t3 - 2 * t2 + t
+    h01 = -2 * t3 + 3 * t2
+    h11 = t3 - t2
+    p0 = q1 |* h00
+    m0 = outTangent1 |* h10
+    p1 = q2 |* h01
+    m1 = inTangent2 |* h11
 
 -- | Quaternion based on the rotation between two vectors
 quaternionFromVector3ToVector3 :: Vector3 -> Vector3 -> Quaternion

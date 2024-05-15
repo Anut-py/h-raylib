@@ -38,7 +38,8 @@ import Raylib.Util.GUI
     guiWindowBox, guiCheckBox, guiColorPicker,
   )
 import Raylib.Util.GUI.Styles
-  ( guiLoadStyleAshes,
+  ( guiLoadStyleAmber,
+    guiLoadStyleAshes,
     guiLoadStyleBluish,
     guiLoadStyleCandy,
     guiLoadStyleCherry,
@@ -113,6 +114,7 @@ pages = 2
 themes :: [IO ()]
 themes =
   [ guiLoadStyleDefault,
+    guiLoadStyleAmber,
     guiLoadStyleAshes,
     guiLoadStyleBluish,
     guiLoadStyleCandy,
@@ -289,7 +291,7 @@ mainLoop state = do
       guiLabel (Rectangle 20 100 400 30) "Theme"
 
       guiSetStyleTextSize 20
-      (scroll', theme') <- guiListView (Rectangle 20 140 400 (height - 660)) "default;ashes;bluish;candy;cherry;cyber;dark;enefete;jungle;lavanda;sunny;terminal" (scroll ps) (theme ps)
+      (scroll', theme') <- guiListView (Rectangle 20 140 400 (height - 660)) "default;amber;ashes;bluish;candy;cherry;cyber;dark;enefete;jungle;lavanda;sunny;terminal" (scroll ps) (theme ps)
 
       guiSetStyleTextSize 30
       guiLabel (Rectangle 20 (height - 510) 360 30) "Custom background color"

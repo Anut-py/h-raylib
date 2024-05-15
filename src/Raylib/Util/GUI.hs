@@ -17,6 +17,7 @@
 -- should make your own retained mode GUI.
 module Raylib.Util.GUI
   ( -- * High level
+
     -- ** Global gui state control functions
     guiEnable,
     guiDisable,
@@ -135,6 +136,7 @@ module Raylib.Util.GUI
     guiDropdownBox,
     guiSpinner,
     guiValueBox,
+    guiValueBoxFloat,
     guiTextBox,
     guiSlider,
     guiSliderBar,
@@ -195,6 +197,7 @@ module Raylib.Util.GUI
     c'guiDropdownBox,
     c'guiSpinner,
     c'guiValueBox,
+    c'guiValueBoxFloat,
     c'guiTextBox,
     c'guiSlider,
     c'guiSliderBar,
@@ -211,7 +214,7 @@ module Raylib.Util.GUI
     c'guiColorBarAlpha,
     c'guiColorBarHue,
     c'guiColorPickerHSV,
-    c'guiColorPanelHSV
+    c'guiColorPanelHSV,
   )
 where
 
@@ -273,6 +276,7 @@ $( genNative
        ("c'guiDropdownBox", "GuiDropdownBox_", "rgui_bindings.h", [t|Ptr Rectangle -> CString -> Ptr CInt -> CBool -> IO CInt|], False),
        ("c'guiSpinner", "GuiSpinner_", "rgui_bindings.h", [t|Ptr Rectangle -> CString -> Ptr CInt -> CInt -> CInt -> CBool -> IO CInt|], False),
        ("c'guiValueBox", "GuiValueBox_", "rgui_bindings.h", [t|Ptr Rectangle -> CString -> Ptr CInt -> CInt -> CInt -> CBool -> IO CInt|], False),
+       ("c'guiValueBoxFloat", "GuiValueBoxFloat_", "rgui_bindings.h", [t|Ptr Rectangle -> CString -> CString -> Ptr CFloat -> CBool -> IO CInt|], False),
        ("c'guiTextBox", "GuiTextBox_", "rgui_bindings.h", [t|Ptr Rectangle -> CString -> CInt -> CBool -> IO CInt|], False),
        ("c'guiSlider", "GuiSlider_", "rgui_bindings.h", [t|Ptr Rectangle -> CString -> CString -> Ptr CFloat -> CFloat -> CFloat -> IO CInt|], False),
        ("c'guiSliderBar", "GuiSliderBar_", "rgui_bindings.h", [t|Ptr Rectangle -> CString -> CString -> Ptr CFloat -> CFloat -> CFloat -> IO CInt|], False),
@@ -882,6 +886,48 @@ guiValueBox bounds text value minValue maxValue editMode =
                 )
           )
     )
+
+-- | Value box control for float values
+guiValueBoxFloat ::
+  Rectangle ->
+  Maybe String ->
+  -- | The current text representation
+  String ->
+  -- | Text representation buffer size; if `Nothing`, then it will
+  --   automatically allocate a buffer large enough to fit the number
+  Maybe Int ->
+  -- | The current value
+  Float ->
+  -- | `True` if the value box should be editable, `False` otherwise
+  Bool ->
+  -- | A tuple, the first element is whether the value box was toggled (i.e.
+  --   the edit mode should be toggled), the second and thirds elements are the
+  --   updated value and text representation
+  IO (Bool, Float, String)
+guiValueBoxFloat bounds text textValue bufferSize value editMode =
+  unwrap
+    <$> withFreeable
+      bounds
+      ( \b ->
+          withMaybeCString
+            text
+            ( \t ->
+                withCStringBuffer
+                  textValue
+                  bufferSize
+                  ( \_ tv ->
+                      withFreeable
+                        (realToFrac value)
+                        ( \v -> do
+                            changed <- c'guiValueBoxFloat b t tv v (fromBool editMode)
+                            value' <- peek v
+                            return (toBool changed, realToFrac value')
+                        )
+                  )
+            )
+      )
+  where
+    unwrap ((a, b), c) = (a, b, c)
 
 -- | Text Box control, updates input text
 guiTextBox ::

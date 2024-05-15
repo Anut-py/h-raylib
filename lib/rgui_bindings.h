@@ -5,6 +5,7 @@
  */
 
 #include "rl_common.h"
+#include <style_amber.h>
 #include <style_ashes.h>
 #include <style_bluish.h>
 #include <style_candy.h>
@@ -44,6 +45,8 @@ int GuiGetStyle_(int control, int property);
 void GuiLoadStyle_(const char *fileName);
 
 void GuiLoadStyleDefault_(void);
+
+void GuiLoadStyleAmber_(void);
 
 void GuiLoadStyleAshes_(void);
 
@@ -116,6 +119,8 @@ int GuiDropdownBox_(Rectangle *bounds, const char *text, int *active, bool editM
 int GuiSpinner_(Rectangle *bounds, const char *text, int *value, int minValue, int maxValue, bool editMode);
 
 int GuiValueBox_(Rectangle *bounds, const char *text, int *value, int minValue, int maxValue, bool editMode);
+
+int GuiValueBoxFloat_(Rectangle *bounds, const char *text, char *textValue, float *value, bool editMode);
 
 int GuiTextBox_(Rectangle *bounds, char *text, int textSize, bool editMode);
 

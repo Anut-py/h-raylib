@@ -164,7 +164,9 @@ void DrawRectangleLinesEx_(Rectangle *a, float b, Color *c);
 
 void DrawRectangleRounded_(Rectangle *a, float b, int c, Color *d);
 
-void DrawRectangleRoundedLines_(Rectangle *a, float b, int c, float d, Color *e);
+void DrawRectangleRoundedLines_(Rectangle *a, float b, int c, Color *d);
+
+void DrawRectangleRoundedLinesEx_(Rectangle *a, float b, int c, float d, Color *e);
 
 void DrawTriangle_(Vector2 *a, Vector2 *b, Vector2 *c, Color *d);
 

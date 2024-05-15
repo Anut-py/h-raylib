@@ -793,33 +793,37 @@ data RLVertexBuffer = RLVertexBuffer
     rlVertexBuffer'vertices :: [Vector3],
     -- | Vertex texture coordinates (UV - 2 components per vertex) (shader-location = 1)
     rlVertexBuffer'texcoords :: [Vector2],
+    -- | Vertex normals (XYZ - 3 components per vertex) (shader-location = 2)
+    rlVertexBuffer'normals :: [Vector3],
     -- | Vertex colors (RGBA - 4 components per vertex) (shader-location = 3)
     rlVertexBuffer'colors :: [Color],
     -- | Vertex indices (in case vertex data comes indexed) (6 indices per quad)
     rlVertexBuffer'indices :: [Integer],
     -- | OpenGL Vertex Array Object id
     rlVertexBuffer'vaoId :: Integer,
-    -- | OpenGL Vertex Buffer Objects id (4 types of vertex data)
+    -- | OpenGL Vertex Buffer Objects id (5 types of vertex data)
     rlVertexBuffer'vboId :: [Integer]
   }
   deriving (Eq, Show)
 
 instance Storable RLVertexBuffer where
-  sizeOf _ = 64
+  sizeOf _ = 72
   alignment _ = 8
   peek _p = do
     elementCount <- fromIntegral <$> peek (p'rlVertexBuffer'elementCount _p)
     vertices <- peekArray elementCount =<< peek (p'rlVertexBuffer'vertices _p)
     texcoords <- peekArray elementCount =<< peek (p'rlVertexBuffer'texcoords _p)
+    normals <- peekArray elementCount =<< peek (p'rlVertexBuffer'normals _p)
     colors <- peekArray elementCount =<< peek (p'rlVertexBuffer'colors _p)
     indices <- map fromIntegral <$> (peekArray elementCount =<< peek (p'rlVertexBuffer'indices _p))
     vaoId <- fromIntegral <$> peek (p'rlVertexBuffer'vaoId _p)
-    vboId <- map fromIntegral <$> peekStaticArray 4 (p'rlVertexBuffer'vboId _p)
-    return $ RLVertexBuffer elementCount vertices texcoords colors indices vaoId vboId
-  poke _p (RLVertexBuffer elementCount vertices texcoords colors indices vaoId vboId) = do
+    vboId <- map fromIntegral <$> peekStaticArray 5 (p'rlVertexBuffer'vboId _p)
+    return $ RLVertexBuffer elementCount vertices texcoords normals colors indices vaoId vboId
+  poke _p (RLVertexBuffer elementCount vertices texcoords normals colors indices vaoId vboId) = do
     poke (p'rlVertexBuffer'elementCount _p) (fromIntegral elementCount)
     poke (p'rlVertexBuffer'vertices _p) =<< newArray vertices
     poke (p'rlVertexBuffer'texcoords _p) =<< newArray texcoords
+    poke (p'rlVertexBuffer'normals _p) =<< newArray normals
     poke (p'rlVertexBuffer'colors _p) =<< newArray colors
     poke (p'rlVertexBuffer'indices _p) =<< newArray (map fromIntegral indices)
     poke (p'rlVertexBuffer'vaoId _p) (fromIntegral vaoId)
@@ -838,19 +842,23 @@ p'rlVertexBuffer'texcoords :: Ptr RLVertexBuffer -> Ptr (Ptr Vector2)
 p'rlVertexBuffer'texcoords = (`plusPtr` 16)
 
 -- array (rlVertexBuffer'elementCount)
+p'rlVertexBuffer'normals :: Ptr RLVertexBuffer -> Ptr (Ptr Vector3)
+p'rlVertexBuffer'normals = (`plusPtr` 24)
+
+-- array (rlVertexBuffer'elementCount)
 p'rlVertexBuffer'colors :: Ptr RLVertexBuffer -> Ptr (Ptr Color)
-p'rlVertexBuffer'colors = (`plusPtr` 24)
+p'rlVertexBuffer'colors = (`plusPtr` 32)
 
 -- array (rlVertexBuffer'elementCount)
 p'rlVertexBuffer'indices :: Ptr RLVertexBuffer -> Ptr (Ptr CUInt)
-p'rlVertexBuffer'indices = (`plusPtr` 32)
+p'rlVertexBuffer'indices = (`plusPtr` 40)
 
 p'rlVertexBuffer'vaoId :: Ptr RLVertexBuffer -> Ptr CUInt
-p'rlVertexBuffer'vaoId = (`plusPtr` 40)
+p'rlVertexBuffer'vaoId = (`plusPtr` 48)
 
--- static array (4)
+-- static array (5)
 p'rlVertexBuffer'vboId :: Ptr RLVertexBuffer -> Ptr CUInt
-p'rlVertexBuffer'vboId = (`plusPtr` 44)
+p'rlVertexBuffer'vboId = (`plusPtr` 52)
 
 instance Freeable RLVertexBuffer where
   rlFreeDependents _ ptr = do

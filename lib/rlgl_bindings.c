@@ -116,6 +116,19 @@ RLBIND void rlViewport_(int a, int b, int c, int d)
   rlViewport(a, b, c, d);
 }
 
+RLBIND void rlSetClipPlanes_(double a, double b)
+{
+  rlSetClipPlanes(a, b);
+}
+
+RLBIND double rlGetCullDistanceNear_() {
+  return rlGetCullDistanceNear();
+}
+
+RLBIND double rlGetCullDistanceFar_() {
+  return rlGetCullDistanceFar();
+}
+
 RLBIND void rlBegin_(int a)
 {
   rlBegin(a);
@@ -391,7 +404,7 @@ RLBIND void rlUnloadVertexBuffer_(unsigned int a)
   rlUnloadVertexBuffer(a);
 }
 
-RLBIND void rlSetVertexAttribute_(unsigned int a, int b, int c, bool d, int e, const void *f)
+RLBIND void rlSetVertexAttribute_(unsigned int a, int b, int c, bool d, int e, int f)
 {
   rlSetVertexAttribute(a, b, c, d, e, f);
 }

@@ -17,6 +17,9 @@ module Raylib.Util.RLGL
     rlFrustum,
     rlOrtho,
     rlViewport,
+    rlSetClipPlanes,
+    rlGetCullDistanceNear,
+    rlGetCullDistanceFar,
 
     -- ** Vertex level operations
     rlBegin,
@@ -209,6 +212,9 @@ module Raylib.Util.RLGL
     c'rlFrustum,
     c'rlOrtho,
     c'rlViewport,
+    c'rlSetClipPlanes,
+    c'rlGetCullDistanceNear,
+    c'rlGetCullDistanceFar,
     c'rlBegin,
     c'rlVertex2i,
     c'rlVertex2f,
@@ -415,6 +421,9 @@ $( genNative
        ("c'rlFrustum", "rlFrustum_", "rlgl_bindings.h", [t|CDouble -> CDouble -> CDouble -> CDouble -> CDouble -> CDouble -> IO ()|], False),
        ("c'rlOrtho", "rlOrtho_", "rlgl_bindings.h", [t|CDouble -> CDouble -> CDouble -> CDouble -> CDouble -> CDouble -> IO ()|], False),
        ("c'rlViewport", "rlViewport_", "rlgl_bindings.h", [t|CInt -> CInt -> CInt -> CInt -> IO ()|], False),
+       ("c'rlSetClipPlanes", "rlSetClipPlanes_", "rlgl_bindings.h", [t|CDouble -> CDouble -> IO ()|], False),
+       ("c'rlGetCullDistanceNear", "rlGetCullDistanceNear", "rlgl_bindings.h", [t|IO CDouble|], False),
+       ("c'rlGetCullDistanceFar", "rlGetCullDistanceFar", "rlgl_bindings.h", [t|IO CDouble|], False),
        ("c'rlBegin", "rlBegin_", "rlgl_bindings.h", [t|CInt -> IO ()|], False),
        ("c'rlVertex2i", "rlVertex2i_", "rlgl_bindings.h", [t|CInt -> CInt -> IO ()|], False),
        ("c'rlVertex2f", "rlVertex2f_", "rlgl_bindings.h", [t|CFloat -> CFloat -> IO ()|], False),
@@ -472,7 +481,7 @@ $( genNative
        ("c'rlUpdateVertexBufferElements", "rlUpdateVertexBufferElements_", "rlgl_bindings.h", [t|CUInt -> Ptr () -> CInt -> CInt -> IO ()|], False),
        ("c'rlUnloadVertexArray", "rlUnloadVertexArray_", "rlgl_bindings.h", [t|CUInt -> IO ()|], False),
        ("c'rlUnloadVertexBuffer", "rlUnloadVertexBuffer_", "rlgl_bindings.h", [t|CUInt -> IO ()|], False),
-       ("c'rlSetVertexAttribute", "rlSetVertexAttribute_", "rlgl_bindings.h", [t|CUInt -> CInt -> CInt -> CBool -> CInt -> Ptr () -> IO ()|], False),
+       ("c'rlSetVertexAttribute", "rlSetVertexAttribute_", "rlgl_bindings.h", [t|CUInt -> CInt -> CInt -> CBool -> CInt -> CInt -> IO ()|], False),
        ("c'rlSetVertexAttributeDivisor", "rlSetVertexAttributeDivisor_", "rlgl_bindings.h", [t|CUInt -> CInt -> IO ()|], False),
        ("c'rlSetVertexAttributeDefault", "rlSetVertexAttributeDefault_", "rlgl_bindings.h", [t|CInt -> Ptr () -> CInt -> CInt -> IO ()|], False),
        ("c'rlDrawVertexArray", "rlDrawVertexArray_", "rlgl_bindings.h", [t|CInt -> CInt -> IO ()|], False),
@@ -604,6 +613,18 @@ rlOrtho left right bottom top znear zfar = c'rlOrtho (realToFrac left) (realToFr
 -- | Set the viewport area
 rlViewport :: Int -> Int -> Int -> Int -> IO ()
 rlViewport x y width height = c'rlViewport (fromIntegral x) (fromIntegral y) (fromIntegral width) (fromIntegral height)
+
+-- | Set clip planes distances
+rlSetClipPlanes :: Double -> Double -> IO ()
+rlSetClipPlanes near far = c'rlSetClipPlanes (realToFrac near) (realToFrac far)
+
+-- | Get cull plane distance near
+rlGetCullDistanceNear :: IO Double
+rlGetCullDistanceNear = realToFrac <$> c'rlGetCullDistanceNear
+
+-- | Get cull plane distance far
+rlGetCullDistanceFar :: IO Double
+rlGetCullDistanceFar = realToFrac <$> c'rlGetCullDistanceFar
 
 -- | Initialize drawing mode (how to organize vertex)
 rlBegin :: RLDrawMode -> IO ()
@@ -975,9 +996,9 @@ rlUnloadVertexBuffer vboId = c'rlUnloadVertexBuffer (fromIntegral vboId)
 -- TODO: improve types for the functions below
 
 -- | Set vertex attribute (the type must be a valid GLenum value)
-rlSetVertexAttribute :: Integer -> Int -> Int -> Bool -> Int -> Ptr () -> IO ()
-rlSetVertexAttribute index compSize aType normalized stride =
-  c'rlSetVertexAttribute (fromIntegral index) (fromIntegral compSize) (fromIntegral aType) (fromBool normalized) (fromIntegral stride)
+rlSetVertexAttribute :: Integer -> Int -> Int -> Bool -> Int -> Int -> IO ()
+rlSetVertexAttribute index compSize aType normalized stride offset =
+  c'rlSetVertexAttribute (fromIntegral index) (fromIntegral compSize) (fromIntegral aType) (fromBool normalized) (fromIntegral stride) (fromIntegral offset)
 
 -- | Set vertex attribute divisor
 rlSetVertexAttributeDivisor :: Integer -> Int -> IO ()

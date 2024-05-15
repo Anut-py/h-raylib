@@ -46,6 +46,12 @@ void rlOrtho_(double a, double b, double c, double d, double e, double f);
 
 void rlViewport_(int a, int b, int c, int d);
 
+void rlSetClipPlanes_(double a, double b);
+
+double rlGetCullDistanceNear_();
+
+double rlGetCullDistanceFar_();
+
 void rlBegin_(int a);
 
 void rlVertex2i_(int a, int b);
@@ -156,7 +162,7 @@ void rlUnloadVertexArray_(unsigned int a);
 
 void rlUnloadVertexBuffer_(unsigned int a);
 
-void rlSetVertexAttribute_(unsigned int a, int b, int c, bool d, int e, const void *f);
+void rlSetVertexAttribute_(unsigned int a, int b, int c, bool d, int e, int f);
 
 void rlSetVertexAttributeDivisor_(unsigned int a, int b);
 

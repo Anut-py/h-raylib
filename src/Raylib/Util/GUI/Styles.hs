@@ -5,7 +5,8 @@
 --   will activate that style. To return to the default style, simply call
 --   `Raylib.Util.GUI.guiLoadStyleDefault`.
 module Raylib.Util.GUI.Styles
-  ( guiLoadStyleAshes,
+  ( guiLoadStyleAmber,
+    guiLoadStyleAshes,
     guiLoadStyleBluish,
     guiLoadStyleCandy,
     guiLoadStyleCherry,
@@ -22,7 +23,8 @@ where
 import Raylib.Internal.TH (genNative)
 
 $( genNative
-     [ ("c'guiLoadStyleAshes", "GuiLoadStyleAshes_", "rgui_bindings.h", [t|IO ()|], False),
+     [ ("c'guiLoadStyleAmber", "GuiLoadStyleAmber_", "rgui_bindings.h", [t|IO ()|], False),
+       ("c'guiLoadStyleAshes", "GuiLoadStyleAshes_", "rgui_bindings.h", [t|IO ()|], False),
        ("c'guiLoadStyleBluish", "GuiLoadStyleBluish_", "rgui_bindings.h", [t|IO ()|], False),
        ("c'guiLoadStyleCandy", "GuiLoadStyleCandy_", "rgui_bindings.h", [t|IO ()|], False),
        ("c'guiLoadStyleCherry", "GuiLoadStyleCherry_", "rgui_bindings.h", [t|IO ()|], False),
@@ -35,6 +37,9 @@ $( genNative
        ("c'guiLoadStyleTerminal", "GuiLoadStyleTerminal_", "rgui_bindings.h", [t|IO ()|], False)
      ]
  )
+
+guiLoadStyleAmber :: IO ()
+guiLoadStyleAmber = c'guiLoadStyleAmber
 
 guiLoadStyleAshes :: IO ()
 guiLoadStyleAshes = c'guiLoadStyleAshes

@@ -78,6 +78,11 @@ RLBIND void GuiLoadStyleDefault_(void)
   return GuiLoadStyleDefault();
 }
 
+RLBIND void GuiLoadStyleAmber_(void)
+{
+  GuiLoadStyleAmber();
+}
+
 RLBIND void GuiLoadStyleAshes_(void)
 {
   GuiLoadStyleAshes();
@@ -256,6 +261,10 @@ RLBIND int GuiSpinner_(Rectangle *bounds, const char *text, int *value, int minV
 RLBIND int GuiValueBox_(Rectangle *bounds, const char *text, int *value, int minValue, int maxValue, bool editMode)
 {
   return GuiValueBox(*bounds, text, value, minValue, maxValue, editMode);
+}
+
+RLBIND int GuiValueBoxFloat_(Rectangle *bounds, const char *text, char *textValue, float *value, bool editMode) {
+  return GuiValueBoxFloat(*bounds, text, textValue, value, editMode);
 }
 
 RLBIND int GuiTextBox_(Rectangle *bounds, char *text, int textSize, bool editMode)

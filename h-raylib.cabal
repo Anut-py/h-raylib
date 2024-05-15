@@ -18,6 +18,7 @@ extra-doc-files:
   README.md
 
 extra-source-files:
+  default.nix
   examples/**/*.frag
   examples/**/*.mtl
   examples/**/*.obj
@@ -26,16 +27,15 @@ extra-source-files:
   examples/**/*.txt
   examples/**/*.vert
   examples/**/*.xm
+  flake.nix
   lib/**/*.c
   lib/**/*.h
   lib/**/*.m
-  raygui/examples/styles/*.h
   raygui/src/*.h
+  raygui/styles/**/*.h
   raylib/**/*.c
   raylib/**/*.h
   raylib/**/*.m
-  flake.nix
-  default.nix
 
 source-repository head
   type:     git
@@ -286,7 +286,8 @@ library
       Xi
       Xext
 
-    cc-options:      -Wno-implicit-function-declaration -Wno-unused-result -D_GLFW_X11
+    cc-options:
+      -Wno-implicit-function-declaration -Wno-unused-result -D_GLFW_X11
 
   elif (flag(platform-mac) || (flag(detect-platform) && os(osx)))
     frameworks: OpenGL Cocoa IOKit CoreVideo CoreAudio CoreFoundation
@@ -320,7 +321,11 @@ library
     if !flag(platform-nixos)
       include-dirs:
         raylib/src raylib/src/external/glfw/src
-        raylib/src/external/glfw/include raygui/src raygui/examples/styles
+        raylib/src/external/glfw/include raygui/src raygui/styles/amber
+        raygui/styles/ashes raygui/styles/bluish raygui/styles/candy
+        raygui/styles/cherry raygui/styles/cyber raygui/styles/dark
+        raygui/styles/default raygui/styles/enefete raygui/styles/jungle
+        raygui/styles/lavanda raygui/styles/sunny raygui/styles/terminal
 
       c-sources:
         raylib/src/raudio.c
