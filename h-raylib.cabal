@@ -203,6 +203,8 @@ library
     Raylib.Core.Shapes
     Raylib.Core.Text
     Raylib.Core.Textures
+    Raylib.Internal
+    Raylib.Internal.Foreign
     Raylib.Types
     Raylib.Types.Core
     Raylib.Types.Core.Audio
@@ -222,8 +224,6 @@ library
     Raylib.Util.RLGL
 
   other-modules:
-    Raylib.Internal
-    Raylib.Internal.Foreign
     Raylib.Internal.TH
     Raylib.Internal.Web.Native
     Raylib.Internal.Web.Processable
