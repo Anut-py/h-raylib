@@ -1,5 +1,6 @@
 {-# OPTIONS -Wall #-}
 {-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE PatternSynonyms #-}
 
 -- | Bindings to @rshapes@
 module Raylib.Core.Shapes
@@ -149,7 +150,7 @@ import Foreign.C
 import GHC.IO (unsafePerformIO)
 import Raylib.Internal.Foreign (pop, withFreeable, withFreeableArray, withFreeableArrayLen)
 import Raylib.Internal.TH (genNative)
-import Raylib.Types (Color, Rectangle, Texture, Vector2 (Vector2))
+import Raylib.Types (Color, Rectangle, Texture, Vector2, pattern Vector2)
 
 $( genNative
      [ ("c'setShapesTexture", "SetShapesTexture_", "rl_bindings.h", [t|Ptr Texture -> Ptr Rectangle -> IO ()|], False),

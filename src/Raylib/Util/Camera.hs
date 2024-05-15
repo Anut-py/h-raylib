@@ -1,4 +1,5 @@
 {-# OPTIONS -Wall #-}
+{-# LANGUAGE PatternSynonyms #-}
 
 -- | Bindings to @rcamera@ (rcamera.h)
 --
@@ -21,7 +22,7 @@ module Raylib.Util.Camera
   )
 where
 
-import Raylib.Types (Camera, Camera3D (..), CameraProjection (CameraOrthographic, CameraPerspective), Matrix, Vector3 (..))
+import Raylib.Types (Camera, Camera3D (..), CameraProjection (CameraOrthographic, CameraPerspective), Matrix, Vector3, vector3'y, pattern Vector3)
 import Raylib.Util.Math (Vector (..), clamp, deg2Rad, matrixLookAt, matrixOrtho, matrixPerspective, vector3Angle, vector3CrossProduct, vector3RotateByAxisAngle)
 
 -- | The camera's forward vector (normalized)

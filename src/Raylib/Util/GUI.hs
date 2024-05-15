@@ -1,5 +1,6 @@
 {-# OPTIONS -Wall #-}
 {-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE PatternSynonyms #-}
 
 -- |
 -- Bindings to @raygui@
@@ -234,8 +235,7 @@ import Foreign.C
 import Raylib.Core.Textures (colorToInt, getColor)
 import Raylib.Internal.Foreign (pop, popCArray, popCString, withCStringBuffer, withFreeable, withFreeableArrayLen, withMaybe, withMaybeCString)
 import Raylib.Internal.TH (genNative)
-import Raylib.Types (Color (Color), Font, GuiControl (Default), GuiControlProperty (..), GuiDefaultProperty (..), GuiIconName, GuiState, GuiTextAlignment, GuiTextAlignmentVertical, GuiTextWrapMode, Rectangle (Rectangle), Vector2 (Vector2), Vector3 (Vector3))
-
+import Raylib.Types (Color (Color), Font, GuiControl (Default), GuiControlProperty (..), GuiDefaultProperty (..), GuiIconName, GuiState, GuiTextAlignment, GuiTextAlignmentVertical, GuiTextWrapMode, Rectangle (Rectangle), Vector2, pattern Vector2, Vector3, pattern Vector3)
 $( genNative
      [ ("c'guiEnable", "GuiEnable_", "rgui_bindings.h", [t|IO ()|], False),
        ("c'guiDisable", "GuiDisable_", "rgui_bindings.h", [t|IO ()|], False),
