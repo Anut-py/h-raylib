@@ -48,7 +48,7 @@ jobs:
         if: startsWith(matrix.os, 'macOS')
         run: |
           brew install llvm@12
-          echo 'export PATH="/opt/homebrew/opt/llvm@12/bin:$PATH"' >> /Users/runner/.bash_profile
+          export PATH="/opt/homebrew/opt/llvm@12/bin:$PATH"
           export LDFLAGS="-L/opt/homebrew/opt/llvm@12/lib"
           export CPPFLAGS="-I/opt/homebrew/opt/llvm@12/include"
           
