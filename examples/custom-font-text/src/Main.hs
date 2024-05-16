@@ -1,4 +1,6 @@
 {-# OPTIONS -Wall #-}
+{-# LANGUAGE PatternSynonyms #-}
+
 module Main where
 
 import Control.Monad (unless, void)
@@ -10,7 +12,7 @@ import Raylib.Core
     isKeyPressed,
   )
 import Raylib.Core.Text (drawText, drawTextEx, loadFont)
-import Raylib.Types (KeyboardKey (KeyDown, KeyUp), Vector2 (Vector2))
+import Raylib.Types (KeyboardKey (KeyDown, KeyUp), pattern Vector2)
 import Raylib.Util (inGHCi, whileWindowOpen_, withWindow, drawing)
 import Raylib.Util.Colors (black, rayWhite)
 

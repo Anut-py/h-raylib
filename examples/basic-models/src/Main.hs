@@ -1,4 +1,5 @@
 {-# OPTIONS -Wall #-}
+{-# LANGUAGE PatternSynonyms #-}
 
 module Main where
 
@@ -6,7 +7,7 @@ import Control.Monad (unless, void)
 import Raylib.Core (changeDirectory, clearBackground, disableCursor, getApplicationDirectory)
 import Raylib.Core.Camera (updateCamera)
 import Raylib.Core.Models (drawGrid, drawModel, genMeshCube, loadModel, loadModelFromMesh)
-import Raylib.Types (Camera3D (Camera3D), CameraMode (CameraModeFirstPerson), CameraProjection (CameraPerspective), Vector3 (Vector3))
+import Raylib.Types (Camera3D (Camera3D), CameraMode (CameraModeFirstPerson), CameraProjection (CameraPerspective), pattern Vector3)
 import Raylib.Util (drawing, inGHCi, mode3D, whileWindowOpen_, withWindow)
 import Raylib.Util.Colors (orange, white)
 

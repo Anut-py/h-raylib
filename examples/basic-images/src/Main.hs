@@ -1,4 +1,5 @@
 {-# OPTIONS -Wall #-}
+{-# LANGUAGE PatternSynonyms #-}
 module Main where
 
 import Control.Monad (unless, void)
@@ -16,7 +17,7 @@ import Raylib.Core.Textures
     loadRenderTexture,
     loadTextureFromImage,
   )
-import Raylib.Types (Rectangle (Rectangle), RenderTexture (renderTexture'texture), Vector2 (Vector2))
+import Raylib.Types (Rectangle (Rectangle), RenderTexture (renderTexture'texture), pattern Vector2)
 import Raylib.Util (drawing, inGHCi, textureMode, whileWindowOpen0, withWindow)
 import Raylib.Util.Colors (black, lightGray, orange, white)
 

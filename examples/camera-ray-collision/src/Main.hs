@@ -1,4 +1,6 @@
 {-# OPTIONS -Wall #-}
+{-# LANGUAGE PatternSynonyms #-}
+
 module Main where
 
 import Control.Monad (when)
@@ -12,7 +14,7 @@ import Raylib.Types
     CameraMode (CameraModeFirstPerson),
     CameraProjection (CameraPerspective),
     RayCollision (rayCollision'hit, rayCollision'point),
-    Vector3 (Vector3),
+    pattern Vector3,
   )
 import Raylib.Util (cameraDirectionRay, drawing, mode3D, whileWindowOpen_, withWindow)
 import Raylib.Util.Colors (black, red, white)

@@ -1,4 +1,5 @@
 {-# OPTIONS -Wall #-}
+{-# LANGUAGE PatternSynonyms #-}
 
 module Main where
 
@@ -8,7 +9,7 @@ import Raylib.Core.Camera (updateCamera)
 import Raylib.Core.Models (drawCube, drawGrid, drawSphere)
 import Raylib.Core.Text (drawText)
 import Raylib.Core.Textures (drawTextureRec, loadRenderTexture)
-import Raylib.Types (Camera3D (Camera3D), CameraMode (CameraModeOrbital), CameraProjection (CameraPerspective), KeyboardKey (KeyLeft, KeyRight), Rectangle (Rectangle), RenderTexture (renderTexture'texture), ShaderUniformData (ShaderUniformVec2), Vector2 (Vector2), Vector3 (Vector3))
+import Raylib.Types (Camera3D (Camera3D), CameraMode (CameraModeOrbital), CameraProjection (CameraPerspective), KeyboardKey (KeyLeft, KeyRight), Rectangle (Rectangle), RenderTexture (renderTexture'texture), ShaderUniformData (ShaderUniformVec2), pattern Vector2, pattern Vector3)
 import Raylib.Util (inGHCi, mode3D, textureMode, whileWindowOpen_, withWindow, drawing, shaderMode)
 import Raylib.Util.Colors (black, blue, darkBlue, darkGreen, green, maroon, orange, red, white)
 

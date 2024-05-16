@@ -663,6 +663,7 @@ pattern Vector2
   { vector2'x ,
     vector2'y
   } = V2 vector2'x vector2'y
+{-# COMPLETE Vector2 :: V2 #-}
 
 p'vector2'x :: Ptr Vector2 -> Ptr CFloat
 p'vector2'x = (`plusPtr` 0)
@@ -678,6 +679,7 @@ pattern Vector3
     vector3'y ,
     vector3'z
   } = V3 vector3'x vector3'y vector3'z
+{-# COMPLETE Vector3 :: V3 #-}
 
 p'vector3'x :: Ptr Vector3 -> Ptr CFloat
 p'vector3'x = (`plusPtr` 0)
@@ -690,12 +692,14 @@ p'vector3'z = (`plusPtr` 8)
 
 type Vector4 = V4 Float
 
+pattern Vector4 :: a -> a -> a -> a -> V4 a
 pattern Vector4
   { vector4'x,
     vector4'y,
     vector4'z,
     vector4'w
   } = V4 vector4'x vector4'y vector4'z vector4'w
+{-# COMPLETE Vector4 :: V4 #-}
 
 vectorToColor :: Vector4 -> Color
 vectorToColor (Vector4 x y z w) = Color (round $ x * 255) (round $ y * 255) (round $ z * 255) (round $ w * 255)

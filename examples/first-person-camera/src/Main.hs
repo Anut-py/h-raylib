@@ -1,11 +1,13 @@
 {-# OPTIONS -Wall #-}
+{-# LANGUAGE PatternSynonyms #-}
+
 module Main where
 
 import Raylib.Core (clearBackground, disableCursor)
 import Raylib.Core.Camera (updateCamera)
 import Raylib.Core.Models (drawCircle3D, drawCubeWiresV, drawLine3D)
 import Raylib.Core.Text (drawFPS)
-import Raylib.Types (Camera3D (Camera3D), CameraMode (CameraModeFirstPerson), CameraProjection (CameraPerspective), Vector3 (Vector3))
+import Raylib.Types (Camera3D (Camera3D), CameraMode (CameraModeFirstPerson), CameraProjection (CameraPerspective), pattern Vector3)
 import Raylib.Util (drawing, mode3D, whileWindowOpen_, withWindow)
 import Raylib.Util.Colors (black, white)
 

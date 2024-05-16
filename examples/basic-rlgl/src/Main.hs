@@ -1,11 +1,13 @@
 {-# OPTIONS -Wall #-}
+{-# LANGUAGE PatternSynonyms #-}
+
 module Main where
 
 import Control.Monad (unless, void)
 import Raylib.Core (changeDirectory, clearBackground, getApplicationDirectory)
 import Raylib.Core.Models (drawGrid)
 import Raylib.Core.Textures (loadTexture)
-import Raylib.Types (Camera3D (Camera3D), CameraProjection (CameraPerspective), Color (Color), RLDrawMode (RLQuads), Rectangle (Rectangle), Texture (texture'height, texture'id, texture'width), Vector3 (Vector3))
+import Raylib.Types (Camera3D (Camera3D), CameraProjection (CameraPerspective), Color (Color), RLDrawMode (RLQuads), Rectangle (Rectangle), Texture (texture'height, texture'id, texture'width), Vector3, pattern Vector3)
 import Raylib.Util (drawing, inGHCi, mode3D, whileWindowOpen0, withWindow)
 import Raylib.Util.Colors (rayWhite, white)
 import Raylib.Util.RLGL (rlBegin, rlColor4ub, rlEnd, rlNormal3f, rlPopMatrix, rlPushMatrix, rlRotatef, rlScalef, rlSetTexture, rlTexCoord2f, rlTranslatef, rlVertex3f)

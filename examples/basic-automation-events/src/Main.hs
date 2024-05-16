@@ -1,4 +1,5 @@
 {-# OPTIONS -Wall #-}
+{-# LANGUAGE PatternSynonyms #-}
 
 module Main where
 
@@ -27,7 +28,7 @@ import Raylib.Types
     Color (Color),
     KeyboardKey (KeyDown, KeyLeft, KeyP, KeyR, KeyRight, KeyUp),
     MouseButton (MouseButtonLeft),
-    Vector2 (Vector2),
+    pattern Vector2,
   )
 import Raylib.Util (drawing, whileWindowOpen_, withWindow)
 import Raylib.Util.Colors (black, red, white)

@@ -1,4 +1,5 @@
 {-# OPTIONS -Wall #-}
+{-# LANGUAGE PatternSynonyms #-}
 
 module Main where
 
@@ -34,9 +35,10 @@ import Raylib.Types
         ShaderUniformVec3,
         ShaderUniformVec4
       ),
-    Vector3 (Vector3),
-    Vector4 (Vector4, vector4'w),
+    vector4'w,
     vectorToColor,
+    pattern Vector3,
+    pattern Vector4,
   )
 import Raylib.Util (inGHCi, setMaterialShader, whileWindowOpen_)
 import Raylib.Util.Colors (black, blue, lightGray, orange, white)
