@@ -1,5 +1,5 @@
 { mkDerivation, base, containers, exceptions, lens, template-haskell, text, bytestring
-, lib, systemDeps, buildExamples, ...
+, linear, lib, systemDeps, buildExamples, ...
 }:
 mkDerivation {
   pname = "h-raylib";
@@ -8,7 +8,7 @@ mkDerivation {
   isLibrary = true;
   isExecutable = buildExamples;
   configureFlags = ["-fplatform-nixos"] ++ lib.optional buildExamples ["-fexamples"];
-  libraryHaskellDepends = [ base containers exceptions lens template-haskell text bytestring ];
+  libraryHaskellDepends = [ base containers exceptions lens linear template-haskell text bytestring ];
   librarySystemDepends = systemDeps;
   description = "Raylib bindings for Haskell";
   license = lib.licenses.asl20;

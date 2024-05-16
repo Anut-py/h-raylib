@@ -5,7 +5,7 @@
 
   outputs = { self, nixpkgs, ... }@inputs:
     let
-      supportedSystems = [ "x86_64-linux" "x86_64-darwin" ];
+      supportedSystems = [ "x86_64-linux" "x86_64-darwin" "aarch64-linux" "aarch64-darwin" ];
       forAllSystems' = nixpkgs.lib.genAttrs;
       forAllSystems = forAllSystems' supportedSystems;
 
@@ -41,7 +41,7 @@
                   sha256 = rayguiHash;
                 };
                 nativeBuildInputs = [];
-                postFixup = "mkdir -p $out/include/ && cp ./src/raygui.h $out/include/ && cp ./examples/styles/*.h $out/include/";
+                postFixup = "mkdir -p $out/include/ && cp ./src/raygui.h $out/include/ && cp ./styles/**/*.h $out/include/";
               };
               # temporary fix for CI/CD
               # TODO: remove when github.com/NixOS/nixpkgs/pull/293296 gets merged
