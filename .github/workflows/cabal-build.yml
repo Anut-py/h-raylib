@@ -44,10 +44,10 @@ jobs:
       #   run: |
       #     choco install mingw
           
-      # - name: Install dependencies on macOS
-      #   if: startsWith(matrix.os, 'macOS')
-      #   run: |
-      #     brew install pkg-config
+      - name: Install dependencies on macOS
+        if: startsWith(matrix.os, 'macOS')
+        run: |
+          brew install llvm@12
           
       - name: Configure the build
         run: |
