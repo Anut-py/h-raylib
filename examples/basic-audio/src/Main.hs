@@ -1,5 +1,3 @@
-{-# OPTIONS -Wall #-}
-
 module Main where
 
 import Control.Monad (unless, void)

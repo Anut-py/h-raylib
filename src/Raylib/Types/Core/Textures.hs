@@ -1,7 +1,5 @@
 {-# LANGUAGE DeriveAnyClass #-}
 
-{-# OPTIONS -Wall #-}
-
 -- | Bindings for types used mainly in @rtextures@
 module Raylib.Types.Core.Textures
   ( -- * Enumerations

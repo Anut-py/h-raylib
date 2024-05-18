@@ -1,5 +1,4 @@
 {-# LANGUAGE CPP #-}
-{-# OPTIONS -Wall #-}
 {-# LANGUAGE ConstrainedClassMethods #-}
 
 -- | Internal code to convert Haskell types to raw bytes

@@ -1,7 +1,5 @@
 {-# LANGUAGE DeriveAnyClass #-}
 
-{-# OPTIONS -Wall #-}
-
 -- | Bindings for types used in @raudio@
 module Raylib.Types.Core.Audio
   ( -- * Enumerations

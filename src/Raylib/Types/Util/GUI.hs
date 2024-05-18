@@ -1,4 +1,3 @@
-{-# OPTIONS -Wall #-}
 {-# LANGUAGE DeriveAnyClass #-}
 
 -- | Bindings for types used in @raygui@

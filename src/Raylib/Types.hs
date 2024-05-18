@@ -1,5 +1,3 @@
-{-# OPTIONS -Wall #-}
-
 -- |
 --
 -- Each @Types@ module has up to 4 sections: one for enumerations, one for

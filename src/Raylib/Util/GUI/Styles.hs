@@ -1,4 +1,3 @@
-{-# OPTIONS -Wall #-}
 {-# LANGUAGE TemplateHaskell #-}
 
 -- | Predefined styles that come with raygui. Calling one of these functions

@@ -1,7 +1,5 @@
 {-# LANGUAGE DeriveAnyClass #-}
 
-{-# OPTIONS -Wall #-}
-
 -- | Bindings for camera-related types
 module Raylib.Types.Core.Camera
   ( -- * Enumerations

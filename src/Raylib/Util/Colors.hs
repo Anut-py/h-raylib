@@ -1,5 +1,3 @@
-{-# OPTIONS -Wall #-}
-
 -- | Simple color palette defined in raylib.h
 module Raylib.Util.Colors
   ( lightGray,

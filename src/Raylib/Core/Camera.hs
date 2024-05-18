@@ -1,4 +1,3 @@
-{-# OPTIONS -Wall #-}
 {-# LANGUAGE TemplateHaskell #-}
 
 -- | Bindings to @rcamera@ (raylib.h)

@@ -1,5 +1,3 @@
-{-# OPTIONS -Wall #-}
-
 -- | Bindings for types used in @rtext@
 module Raylib.Types.Core.Text
   ( -- * Enumerations

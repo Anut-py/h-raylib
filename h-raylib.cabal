@@ -109,6 +109,8 @@ common example-options
     other-extensions:
       BangPatterns
       TemplateHaskell
+      
+    ghc-options: -Wall
 
     if flag(platform-web)
       ghc-options:
@@ -246,9 +248,12 @@ library
     DeriveAnyClass
     FlexibleInstances
     ForeignFunctionInterface
+    PatternSynonyms
     ScopedTypeVariables
     TemplateHaskell
     TemplateHaskellQuotes
+  
+  ghc-options: -Wall
 
   if (flag(platform-windows) || (flag(detect-platform) && os(windows)))
     if flag(mingw-cross)
@@ -312,7 +317,7 @@ library
     c-sources:   lib/web.c
 
   else
-    cc-options: -DPLATFORM_DESKTOP
+    cc-options: -DPLATFORM_DESKTOP -Wno-int-to-void-pointer-cast
     c-sources:
       lib/rgui_bindings.c
       lib/rl_bindings.c
@@ -325,8 +330,8 @@ library
         raylib/src/external/glfw/include raygui/src raygui/styles/amber
         raygui/styles/ashes raygui/styles/bluish raygui/styles/candy
         raygui/styles/cherry raygui/styles/cyber raygui/styles/dark
-        raygui/styles/default raygui/styles/enefete raygui/styles/jungle
-        raygui/styles/lavanda raygui/styles/sunny raygui/styles/terminal
+        raygui/styles/enefete raygui/styles/jungle raygui/styles/lavanda
+        raygui/styles/sunny raygui/styles/terminal
 
       c-sources:
         raylib/src/raudio.c

@@ -1,8 +1,6 @@
 {-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE PatternSynonyms #-}
 
-{-# OPTIONS -Wall #-}
-
 -- | Bindings for types used mainly in @rmodels@
 module Raylib.Types.Core.Models
   ( -- * Enumerations

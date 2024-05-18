@@ -1,5 +1,4 @@
 {-# LANGUAGE PatternSynonyms #-}
-{-# OPTIONS -Wall #-}
 {-# LANGUAGE TemplateHaskell #-}
 
 -- | Lenses for raylib types
