@@ -118,7 +118,7 @@ void DrawLineV_(Vector2 *a, Vector2 *b, Color *c);
 
 void DrawLineEx_(Vector2 *a, Vector2 *b, float c, Color *d);
 
-void DrawLineStrip_(Vector2 *a, int b, Color *c);
+void DrawLineStrip_(const Vector2 *a, int b, Color *c);
 
 void DrawLineBezier_(Vector2 *a, Vector2 *b, float c, Color *d);
 
@@ -172,9 +172,9 @@ void DrawTriangle_(Vector2 *a, Vector2 *b, Vector2 *c, Color *d);
 
 void DrawTriangleLines_(Vector2 *a, Vector2 *b, Vector2 *c, Color *d);
 
-void DrawTriangleFan_(Vector2 *a, int b, Color *c);
+void DrawTriangleFan_(const Vector2 *a, int b, Color *c);
 
-void DrawTriangleStrip_(Vector2 *a, int b, Color *c);
+void DrawTriangleStrip_(const Vector2 *a, int b, Color *c);
 
 void DrawPoly_(Vector2 *a, int b, float c, float d, Color *e);
 
@@ -182,15 +182,15 @@ void DrawPolyLines_(Vector2 *a, int b, float c, float d, Color *e);
 
 void DrawPolyLinesEx_(Vector2 *a, int b, float c, float d, float e, Color *f);
 
-void DrawSplineLinear_(Vector2 *a, int b, float c, Color *d);
+void DrawSplineLinear_(const Vector2 *a, int b, float c, Color *d);
 
-void DrawSplineBasis_(Vector2 *a, int b, float c, Color *d);
+void DrawSplineBasis_(const Vector2 *a, int b, float c, Color *d);
 
-void DrawSplineCatmullRom_(Vector2 *a, int b, float c, Color *d);
+void DrawSplineCatmullRom_(const Vector2 *a, int b, float c, Color *d);
 
-void DrawSplineBezierQuadratic_(Vector2 *a, int b, float c, Color *d);
+void DrawSplineBezierQuadratic_(const Vector2 *a, int b, float c, Color *d);
 
-void DrawSplineBezierCubic_(Vector2 *a, int b, float c, Color *d);
+void DrawSplineBezierCubic_(const Vector2 *a, int b, float c, Color *d);
 
 void DrawSplineSegmentLinear_(Vector2 *a, Vector2 *b, float c, Color *d);
 
@@ -224,11 +224,13 @@ bool CheckCollisionPointCircle_(Vector2 *a, Vector2 *b, float c);
 
 bool CheckCollisionPointTriangle_(Vector2 *a, Vector2 *b, Vector2 *c, Vector2 *d);
 
-bool CheckCollisionPointPoly_(Vector2 *a, Vector2 *b, int c);
+bool CheckCollisionPointPoly_(Vector2 *a, const Vector2 *b, int c);
 
 bool CheckCollisionLines_(Vector2 *a, Vector2 *b, Vector2 *c, Vector2 *d, Vector2 *e);
 
 bool CheckCollisionPointLine_(Vector2 *a, Vector2 *b, Vector2 *c, int d);
+
+bool CheckCollisionCircleLine_(Vector2 *a, float b, Vector2 *c, Vector2 *d);
 
 Rectangle *GetCollisionRec_(Rectangle *a, Rectangle *b);
 
@@ -442,7 +444,7 @@ void DrawCircle3D_(Vector3 *a, float b, Vector3 *c, float d, Color *e);
 
 void DrawTriangle3D_(Vector3 *a, Vector3 *b, Vector3 *c, Color *d);
 
-void DrawTriangleStrip3D_(Vector3 *a, int b, Color *c);
+void DrawTriangleStrip3D_(const Vector3 *a, int b, Color *c);
 
 void DrawCube_(Vector3 *a, float b, float c, float d, Color *e);
 
@@ -889,6 +891,8 @@ const char *GetApplicationDirectory_();
 bool ChangeDirectory_(const char *a);
 
 bool IsPathFile_(const char *a);
+
+bool IsFileNameValid_(const char *a);
 
 bool IsFileDropped_();
 

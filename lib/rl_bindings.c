@@ -326,7 +326,7 @@ RLBIND void DrawLineEx_(Vector2 *a, Vector2 *b, float c, Color *d)
     DrawLineEx(*a, *b, c, *d);
 }
 
-RLBIND void DrawLineStrip_(Vector2 *a, int b, Color *c)
+RLBIND void DrawLineStrip_(const Vector2 *a, int b, Color *c)
 {
     DrawLineStrip(a, b, *c);
 }
@@ -461,12 +461,12 @@ RLBIND void DrawTriangleLines_(Vector2 *a, Vector2 *b, Vector2 *c, Color *d)
     DrawTriangleLines(*a, *b, *c, *d);
 }
 
-RLBIND void DrawTriangleFan_(Vector2 *a, int b, Color *c)
+RLBIND void DrawTriangleFan_(const Vector2 *a, int b, Color *c)
 {
     DrawTriangleFan(a, b, *c);
 }
 
-RLBIND void DrawTriangleStrip_(Vector2 *a, int b, Color *c)
+RLBIND void DrawTriangleStrip_(const Vector2 *a, int b, Color *c)
 {
     DrawTriangleStrip(a, b, *c);
 }
@@ -486,27 +486,27 @@ RLBIND void DrawPolyLinesEx_(Vector2 *a, int b, float c, float d, float e, Color
     DrawPolyLinesEx(*a, b, c, d, e, *f);
 }
 
-RLBIND void DrawSplineLinear_(Vector2 *a, int b, float c, Color *d)
+RLBIND void DrawSplineLinear_(const Vector2 *a, int b, float c, Color *d)
 {
     DrawSplineLinear(a, b, c, *d);
 }
 
-RLBIND void DrawSplineBasis_(Vector2 *a, int b, float c, Color *d)
+RLBIND void DrawSplineBasis_(const Vector2 *a, int b, float c, Color *d)
 {
     DrawSplineBasis(a, b, c, *d);
 }
 
-RLBIND void DrawSplineCatmullRom_(Vector2 *a, int b, float c, Color *d)
+RLBIND void DrawSplineCatmullRom_(const Vector2 *a, int b, float c, Color *d)
 {
     DrawSplineCatmullRom(a, b, c, *d);
 }
 
-RLBIND void DrawSplineBezierQuadratic_(Vector2 *a, int b, float c, Color *d)
+RLBIND void DrawSplineBezierQuadratic_(const Vector2 *a, int b, float c, Color *d)
 {
     DrawSplineBezierQuadratic(a, b, c, *d);
 }
 
-RLBIND void DrawSplineBezierCubic_(Vector2 *a, int b, float c, Color *d)
+RLBIND void DrawSplineBezierCubic_(const Vector2 *a, int b, float c, Color *d)
 {
     DrawSplineBezierCubic(a, b, c, *d);
 }
@@ -601,7 +601,7 @@ RLBIND bool CheckCollisionPointTriangle_(Vector2 *a, Vector2 *b, Vector2 *c, Vec
     return CheckCollisionPointTriangle(*a, *b, *c, *d);
 }
 
-RLBIND bool CheckCollisionPointPoly_(Vector2 *a, Vector2 *b, int c)
+RLBIND bool CheckCollisionPointPoly_(Vector2 *a, const Vector2 *b, int c)
 {
     return CheckCollisionPointPoly(*a, b, c);
 }
@@ -614,6 +614,11 @@ RLBIND bool CheckCollisionLines_(Vector2 *a, Vector2 *b, Vector2 *c, Vector2 *d,
 RLBIND bool CheckCollisionPointLine_(Vector2 *a, Vector2 *b, Vector2 *c, int d)
 {
     return CheckCollisionPointLine(*a, *b, *c, d);
+}
+
+RLBIND bool CheckCollisionCircleLine_(Vector2 *a, float b, Vector2 *c, Vector2 *d)
+{
+    return CheckCollisionCircleLine(*a, b, *c, *d);
 }
 
 RLBIND Rectangle *GetCollisionRec_(Rectangle *a, Rectangle *b)
@@ -1275,7 +1280,7 @@ RLBIND void DrawTriangle3D_(Vector3 *a, Vector3 *b, Vector3 *c, Color *d)
     DrawTriangle3D(*a, *b, *c, *d);
 }
 
-RLBIND void DrawTriangleStrip3D_(Vector3 *a, int b, Color *c)
+RLBIND void DrawTriangleStrip3D_(const Vector3 *a, int b, Color *c)
 {
     DrawTriangleStrip3D(a, b, *c);
 }
@@ -2443,6 +2448,11 @@ RLBIND bool ChangeDirectory_(const char *a)
 RLBIND bool IsPathFile_(const char *a)
 {
     return IsPathFile(a);
+}
+
+RLBIND bool IsFileNameValid_(const char *a)
+{
+    return IsFileNameValid(a);
 }
 
 RLBIND bool IsFileDropped_()

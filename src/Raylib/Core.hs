@@ -133,6 +133,7 @@ module Raylib.Core
     getApplicationDirectory,
     changeDirectory,
     isPathFile,
+    isFileNameValid,
     loadDirectoryFiles,
     loadDirectoryFilesEx,
     isFileDropped,
@@ -333,6 +334,7 @@ module Raylib.Core
     c'getApplicationDirectory,
     c'changeDirectory,
     c'isPathFile,
+    c'isFileNameValid,
     c'loadDirectoryFiles,
     c'loadDirectoryFilesEx,
     c'unloadDirectoryFiles,
@@ -618,6 +620,7 @@ $( genNative
        ("c'getApplicationDirectory", "GetApplicationDirectory_", "rl_bindings.h", [t|IO CString|], False),
        ("c'changeDirectory", "ChangeDirectory_", "rl_bindings.h", [t|CString -> IO CBool|], False),
        ("c'isPathFile", "IsPathFile_", "rl_bindings.h", [t|CString -> IO CBool|], False),
+       ("c'isFileNameValid", "IsFileNameValid_", "rl_bindings.h", [t|CString -> IO CBool|], False),
        ("c'loadDirectoryFiles", "LoadDirectoryFiles_", "rl_bindings.h", [t|CString -> IO (Ptr FilePathList)|], False),
        ("c'loadDirectoryFilesEx", "LoadDirectoryFilesEx_", "rl_bindings.h", [t|CString -> CString -> CInt -> IO (Ptr FilePathList)|], False),
        ("c'unloadDirectoryFiles", "UnloadDirectoryFiles_", "rl_bindings.h", [t|Ptr FilePathList -> IO ()|], False),
@@ -1152,6 +1155,9 @@ changeDirectory dir = toBool <$> withCString dir c'changeDirectory
 
 isPathFile :: String -> IO Bool
 isPathFile path = toBool <$> withCString path c'isPathFile
+
+isFileNameValid :: String -> IO Bool
+isFileNameValid path = toBool <$> withCString path c'isFileNameValid
 
 loadDirectoryFiles :: String -> IO FilePathList
 loadDirectoryFiles dirPath = withCString dirPath c'loadDirectoryFiles >>= pop

@@ -509,15 +509,19 @@ data GuiDropdownBoxProperty
     ArrowPadding
   | -- | DropdownBox items separation
     DropdownItemsSpacing
+  | -- | DropdownBox arrow hidden
+    DropdownArrowHidden
   deriving (Eq, Show)
 
 instance Enum GuiDropdownBoxProperty where
   fromEnum x = case x of
     ArrowPadding -> 16
     DropdownItemsSpacing -> 17
+    DropdownArrowHidden -> 18
   toEnum x = case x of
     16 -> ArrowPadding
     17 -> DropdownItemsSpacing
+    18 -> DropdownArrowHidden
     n -> error $ "(GuiDropdownBoxProperty.toEnum) Invalid value: " ++ show n
 
 instance Storable GuiDropdownBoxProperty where
@@ -584,6 +588,8 @@ data GuiListViewProperty
     ScrollbarWidth
   | -- | ListView scrollbar side (0-SCROLLBAR_LEFT_SIDE, 1-SCROLLBAR_RIGHT_SIDE)
     ScrollbarSide
+  | -- | ListView items border width
+    ListItemsBorderWidth
   deriving (Eq, Show)
 
 instance Enum GuiListViewProperty where
@@ -592,11 +598,13 @@ instance Enum GuiListViewProperty where
     ListItemsSpacing -> 17
     ScrollbarWidth -> 18
     ScrollbarSide -> 19
+    ListItemsBorderWidth -> 20
   toEnum x = case x of
     16 -> ListItemsHeight
     17 -> ListItemsSpacing
     18 -> ScrollbarWidth
     19 -> ScrollbarSide
+    20 -> ListItemsBorderWidth
     n -> error $ "(GuiListViewProperty.toEnum) Invalid value: " ++ show n
 
 instance Storable GuiListViewProperty where
@@ -867,11 +875,11 @@ data GuiIconName
   | IconWarning
   | IconHelpBox
   | IconInfoBox
-  | Icon223
-  | Icon224
-  | Icon225
-  | Icon226
-  | Icon227
+  | IconPriority
+  | IconLayersIso
+  | IconLayers2
+  | IconMLayers
+  | IconMaps
   | Icon228
   | Icon229
   | Icon230
@@ -1127,11 +1135,11 @@ instance Enum GuiIconName where
     IconWarning -> 220
     IconHelpBox -> 221
     IconInfoBox -> 222
-    Icon223 -> 223
-    Icon224 -> 224
-    Icon225 -> 225
-    Icon226 -> 226
-    Icon227 -> 227
+    IconPriority -> 223
+    IconLayersIso -> 224
+    IconLayers2 -> 225
+    IconMLayers -> 226
+    IconMaps -> 227
     Icon228 -> 228
     Icon229 -> 229
     Icon230 -> 230
@@ -1384,11 +1392,11 @@ instance Enum GuiIconName where
     220 -> IconWarning
     221 -> IconHelpBox
     222 -> IconInfoBox
-    223 -> Icon223
-    224 -> Icon224
-    225 -> Icon225
-    226 -> Icon226
-    227 -> Icon227
+    223 -> IconPriority
+    224 -> IconLayersIso
+    225 -> IconLayers2
+    226 -> IconMLayers
+    227 -> IconMaps
     228 -> Icon228
     229 -> Icon229
     230 -> Icon230

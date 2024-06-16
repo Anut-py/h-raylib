@@ -336,9 +336,9 @@ waveCopy :: Wave -> IO Wave
 waveCopy wave = withFreeable wave c'waveCopy >>= pop
 
 waveCrop :: Wave -> Int -> Int -> IO Wave
-waveCrop wave initSample finalSample = do
+waveCrop wave initFrame finalFrame = do
   new <- waveCopy wave
-  withFreeable new (\w -> c'waveCrop w (fromIntegral initSample) (fromIntegral finalSample) >> peek w)
+  withFreeable new (\w -> c'waveCrop w (fromIntegral initFrame) (fromIntegral finalFrame) >> peek w)
 
 waveFormat :: Wave -> Int -> Int -> Int -> IO ()
 waveFormat wave sampleRate sampleSize channels = do

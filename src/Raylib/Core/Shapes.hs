@@ -68,6 +68,7 @@ module Raylib.Core.Shapes
     checkCollisionPointPoly,
     checkCollisionLines,
     checkCollisionPointLine,
+    checkCollisionCircleLine,
     getCollisionRec,
 
     -- * Native
@@ -135,6 +136,7 @@ module Raylib.Core.Shapes
     c'checkCollisionPointPoly,
     c'checkCollisionLines,
     c'checkCollisionPointLine,
+    c'checkCollisionCircleLine,
     c'getCollisionRec
   )
 where
@@ -216,6 +218,7 @@ $( genNative
        ("c'checkCollisionPointPoly", "CheckCollisionPointPoly_", "rl_bindings.h", [t|Ptr Vector2 -> Ptr Vector2 -> CInt -> IO CBool|], False),
        ("c'checkCollisionLines", "CheckCollisionLines_", "rl_bindings.h", [t|Ptr Vector2 -> Ptr Vector2 -> Ptr Vector2 -> Ptr Vector2 -> Ptr Vector2 -> IO CBool|], False),
        ("c'checkCollisionPointLine", "CheckCollisionPointLine_", "rl_bindings.h", [t|Ptr Vector2 -> Ptr Vector2 -> Ptr Vector2 -> CInt -> IO CBool|], False),
+       ("c'checkCollisionCircleLine", "CheckCollisionCircleLine_", "rl_bindings.h", [t|Ptr Vector2 -> CFloat -> Ptr Vector2 -> Ptr Vector2 -> IO CBool|], False),
        ("c'getCollisionRec", "GetCollisionRec_", "rl_bindings.h", [t|Ptr Rectangle -> Ptr Rectangle -> IO (Ptr Rectangle)|], False)
      ]
  )
@@ -547,6 +550,10 @@ checkCollisionLines start1 end1 start2 end2 =
 checkCollisionPointLine :: Vector2 -> Vector2 -> Vector2 -> Int -> Bool
 checkCollisionPointLine point p1 p2 threshold =
   unsafePerformIO $ toBool <$> withFreeable point (\p -> withFreeable p1 (\ptr1 -> withFreeable p2 (\ptr2 -> c'checkCollisionPointLine p ptr1 ptr2 (fromIntegral threshold))))
+
+checkCollisionCircleLine :: Vector2 -> Float -> Vector2 -> Vector2 -> Bool
+checkCollisionCircleLine center radius p1 p2 =
+  unsafePerformIO $ toBool <$> withFreeable center (\c -> withFreeable p1 (\ptr1 -> withFreeable p2 (\ptr2 -> c'checkCollisionCircleLine c (realToFrac radius) ptr1 ptr2)))
 
 getCollisionRec :: Rectangle -> Rectangle -> Rectangle
 getCollisionRec rec1 rec2 =
