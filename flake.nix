@@ -43,18 +43,6 @@
                 nativeBuildInputs = [];
                 postFixup = "mkdir -p $out/include/ && cp ./src/raygui.h $out/include/ && cp ./styles/**/*.h $out/include/";
               };
-              # temporary fix for CI/CD
-              # TODO: remove when github.com/NixOS/nixpkgs/pull/293296 gets merged
-              glfw = super.glfw.overrideAttrs (old: {
-                version = "3.4.0";
-                src = self.fetchFromGitHub {
-                  owner = "glfw";
-                  repo = "GLFW";
-                  rev = "3.4";
-                  sha256 = "sha256-FcnQPDeNHgov1Z07gjFze0VMz2diOrpbKZCsI96ngz0=";
-                };
-                cmakeFlags = old.cmakeFlags ++ [ "-DGLFW_BUILD_WAYLAND=OFF" ];
-              });
             })
           ];
         };
