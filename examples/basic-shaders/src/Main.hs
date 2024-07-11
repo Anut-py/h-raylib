@@ -2,6 +2,7 @@
 
 module Main where
 
+import Paths_h_raylib (getDataFileName)
 import Control.Monad (unless, void, when)
 import Numeric (showFFloat)
 import Raylib.Core
@@ -39,22 +40,23 @@ import Raylib.Types
     pattern Vector3,
     pattern Vector4,
   )
-import Raylib.Util (inGHCi, setMaterialShader, whileWindowOpen_)
+import Raylib.Util (inGHCi, setMaterialShader, whileWindowOpen_, managed)
 import Raylib.Util.Colors (black, blue, lightGray, orange, white)
 
 assetsPath :: String
-assetsPath = (if not inGHCi then "../../../../../../../../../../" else "./") ++ "examples/basic-shaders/assets/"
+assetsPath = "examples/basic-shaders/assets/"
 
 main :: IO ()
 main = do
   window <- initWindow 1300 800 "raylib [shaders] example - basic shaders"
   setTargetFPS 60
   disableCursor
-  unless inGHCi (void $ changeDirectory =<< getApplicationDirectory)
 
   let camera = Camera3D (Vector3 1 3 3) (Vector3 1 0 1) (Vector3 0 1 0) 45 CameraPerspective
 
-  shader <- loadShader (Just $ assetsPath ++ "lighting.vert") (Just $ assetsPath ++ "lighting.frag") window
+  vert <- getDataFileName (assetsPath ++ "lighting.vert")
+  frag <- getDataFileName (assetsPath ++ "lighting.frag")
+  shader <- managed window $ loadShader (Just vert) (Just frag)
 
   let pointLightPosition = Vector3 0 3 2
   let pointLightColor = Vector4 1 1 1 1
@@ -70,16 +72,16 @@ main = do
   setShaderValue shader "ambientLightColor" (ShaderUniformVec4 ambientLightColor) window
   setShaderValue shader "ambientStrength" (ShaderUniformFloat ambientStrength) window
 
-  cubeMesh <- genMeshCube 2 2 2 window
-  cubeModel' <- loadModelFromMesh cubeMesh window
+  cubeMesh <- managed window $ genMeshCube 2 2 2
+  cubeModel' <- managed window $ loadModelFromMesh cubeMesh
   let cubeModel = setMaterialShader cubeModel' 0 shader
 
-  sphereMesh <- genMeshSphere 0.5 32 32 window
-  sphereModel' <- loadModelFromMesh sphereMesh window
+  sphereMesh <- managed window $ genMeshSphere 0.5 32 32
+  sphereModel' <- managed window $ loadModelFromMesh sphereMesh
   let sphereModel = setMaterialShader sphereModel' 0 shader
 
-  planeMesh <- genMeshPlane 100 100 20 20 window
-  planeModel' <- loadModelFromMesh planeMesh window
+  planeMesh <- managed window $ genMeshPlane 100 100 20 20
+  planeModel' <- managed window $ loadModelFromMesh planeMesh
   let planeModel = setMaterialShader planeModel' 0 shader
 
   whileWindowOpen_
@@ -134,7 +136,7 @@ main = do
     )
     (camera, pointLightStrength, specularStrength)
 
-  closeWindow window
+  closeWindow (Just window)
 
 clamp :: Float -> Float -> Float -> Float
 clamp x l h = min h (max x l)

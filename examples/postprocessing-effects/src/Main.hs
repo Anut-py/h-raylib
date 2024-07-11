@@ -2,6 +2,7 @@
 
 module Main where
 
+import Paths_h_raylib (getDataFileName)
 import Control.Monad (unless, void)
 import Raylib.Core (changeDirectory, clearBackground, getApplicationDirectory, isKeyPressed, loadShader, setShaderValue)
 import Raylib.Core.Camera (updateCamera)
@@ -9,11 +10,11 @@ import Raylib.Core.Models (drawCube, drawGrid, drawSphere)
 import Raylib.Core.Text (drawText)
 import Raylib.Core.Textures (drawTextureRec, loadRenderTexture)
 import Raylib.Types (Camera3D (Camera3D), CameraMode (CameraModeOrbital), CameraProjection (CameraPerspective), KeyboardKey (KeyLeft, KeyRight), Rectangle (Rectangle), RenderTexture (renderTexture'texture), ShaderUniformData (ShaderUniformVec2), pattern Vector2, pattern Vector3)
-import Raylib.Util (inGHCi, mode3D, textureMode, whileWindowOpen_, withWindow, drawing, shaderMode)
+import Raylib.Util (inGHCi, mode3D, textureMode, whileWindowOpen_, withWindow, drawing, shaderMode, managed)
 import Raylib.Util.Colors (black, blue, darkBlue, darkGreen, green, maroon, orange, red, white)
 
 assetsPath :: String
-assetsPath = (if not inGHCi then "../../../../../../../../../../" else "./") ++ "examples/postprocessing-effects/assets/"
+assetsPath = "examples/postprocessing-effects/assets/"
 
 main :: IO ()
 main = do
@@ -30,14 +31,14 @@ main = do
 
         let camera = Camera3D (Vector3 3 4 3) (Vector3 0 1 0) (Vector3 0 1 0) 45 CameraPerspective
 
-        rt <- loadRenderTexture width height window
+        rt <- managed window $ loadRenderTexture width height
 
         -- Most of the shaders here are based on the ones at https://github.com/raysan5/raylib/tree/master/examples/shaders/resources/shaders/glsl330
-        defaultShader <- loadShader Nothing Nothing window
-        grayscaleShader <- loadShader Nothing (Just $ assetsPath ++ "grayscale.frag") window
-        blurShader <- loadShader Nothing (Just $ assetsPath ++ "blur.frag") window
-        pixelateShader <- loadShader Nothing (Just $ assetsPath ++ "pixelate.frag") window
-        bloomShader <- loadShader Nothing (Just $ assetsPath ++ "bloom.frag") window
+        defaultShader <- managed window $ loadShader Nothing Nothing
+        grayscaleShader <- managed window $ loadShader Nothing . Just =<< getDataFileName (assetsPath ++ "grayscale.frag")
+        blurShader <- managed window $ loadShader Nothing . Just =<< getDataFileName (assetsPath ++ "blur.frag")
+        pixelateShader <- managed window $ loadShader Nothing . Just =<< getDataFileName (assetsPath ++ "pixelate.frag")
+        bloomShader <- managed window $ loadShader Nothing . Just =<< getDataFileName (assetsPath ++ "bloom.frag")
 
         let shaders = [("None", defaultShader), ("Grayscale", grayscaleShader), ("Blur", blurShader), ("Pixelate", pixelateShader), ("Bloom", bloomShader)]
 

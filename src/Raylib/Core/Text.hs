@@ -75,7 +75,7 @@ import Foreign.C
     peekCString,
     withCString,
   )
-import Raylib.Internal (WindowResources, addTextureId, unloadSingleTexture)
+import Raylib.Internal (WindowResources, unloadSingleTexture)
 import Raylib.Internal.Foreign
   ( pop,
     popCArray,
@@ -133,29 +133,17 @@ $( genNative
 getFontDefault :: IO Font
 getFontDefault = c'getFontDefault >>= pop
 
-loadFont :: String -> WindowResources -> IO Font
-loadFont fileName wr = do
-  font <- withCString fileName c'loadFont >>= pop
-  addTextureId (texture'id $ font'texture font) wr
-  return font
+loadFont :: String -> IO Font
+loadFont fileName = withCString fileName c'loadFont >>= pop
 
-loadFontEx :: String -> Int -> [Int] -> Int -> WindowResources -> IO Font
-loadFontEx fileName fontSize fontChars glyphCount wr = do
-  font <- withCString fileName (\f -> withFreeableArray (map fromIntegral fontChars) (\c -> c'loadFontEx f (fromIntegral fontSize) c (fromIntegral glyphCount))) >>= pop
-  addTextureId (texture'id $ font'texture font) wr
-  return font
+loadFontEx :: String -> Int -> [Int] -> Int -> IO Font
+loadFontEx fileName fontSize fontChars glyphCount = withCString fileName (\f -> withFreeableArray (map fromIntegral fontChars) (\c -> c'loadFontEx f (fromIntegral fontSize) c (fromIntegral glyphCount))) >>= pop
 
-loadFontFromImage :: Image -> Color -> Int -> WindowResources -> IO Font
-loadFontFromImage image key firstChar wr = do
-  font <- withFreeable image (\i -> withFreeable key (\k -> c'loadFontFromImage i k (fromIntegral firstChar))) >>= pop
-  addTextureId (texture'id $ font'texture font) wr
-  return font
+loadFontFromImage :: Image -> Color -> Int -> IO Font
+loadFontFromImage image key firstChar = withFreeable image (\i -> withFreeable key (\k -> c'loadFontFromImage i k (fromIntegral firstChar))) >>= pop
 
-loadFontFromMemory :: String -> [Integer] -> Int -> [Int] -> Int -> WindowResources -> IO Font
-loadFontFromMemory fileType fileData fontSize fontChars glyphCount wr = do
-  font <- withCString fileType (\t -> withFreeableArrayLen (map fromIntegral fileData) (\size d -> withFreeableArray (map fromIntegral fontChars) (\c -> c'loadFontFromMemory t d (fromIntegral $ size * sizeOf (0 :: CUChar)) (fromIntegral fontSize) c (fromIntegral glyphCount)))) >>= pop
-  addTextureId (texture'id $ font'texture font) wr
-  return font
+loadFontFromMemory :: String -> [Integer] -> Int -> [Int] -> Int -> IO Font
+loadFontFromMemory fileType fileData fontSize fontChars glyphCount = withCString fileType (\t -> withFreeableArrayLen (map fromIntegral fileData) (\size d -> withFreeableArray (map fromIntegral fontChars) (\c -> c'loadFontFromMemory t d (fromIntegral $ size * sizeOf (0 :: CUChar)) (fromIntegral fontSize) c (fromIntegral glyphCount)))) >>= pop
 
 loadFontData :: [Integer] -> Int -> [Int] -> Int -> FontType -> IO GlyphInfo
 loadFontData fileData fontSize fontChars glyphCount fontType = withFreeableArrayLen (map fromIntegral fileData) (\size d -> withFreeableArray (map fromIntegral fontChars) (\c -> c'loadFontData d (fromIntegral $ size * sizeOf (0 :: CUChar)) (fromIntegral fontSize) c (fromIntegral glyphCount) (fromIntegral $ fromEnum fontType))) >>= pop
@@ -163,10 +151,7 @@ loadFontData fileData fontSize fontChars glyphCount fontType = withFreeableArray
 genImageFontAtlas :: [GlyphInfo] -> [[Rectangle]] -> Int -> Int -> Int -> Int -> IO Image
 genImageFontAtlas chars recs glyphCount fontSize padding packMethod = withFreeableArray chars (\c -> withFreeableArray2D recs (\r -> c'genImageFontAtlas c r (fromIntegral glyphCount) (fromIntegral fontSize) (fromIntegral padding) (fromIntegral packMethod))) >>= pop
 
--- | Unloads a font from GPU memory (VRAM). Fonts are automatically unloaded
--- when `Raylib.Core.closeWindow` is called, so manually unloading fonts is not required.
--- In larger projects, you may want to manually unload fonts to avoid having
--- them in VRAM for too long.
+-- | Unloads a `managed` font from GPU memory (VRAM)
 unloadFont :: Font -> WindowResources -> IO ()
 unloadFont font = unloadSingleTexture (texture'id $ font'texture font)
 

@@ -33,6 +33,7 @@ import Foreign
 import Foreign.C
   ( CInt (..),
   )
+import Raylib.Internal (Closeable(..))
 import Raylib.Internal.Foreign (Freeable (rlFreeDependents), c'free, rlFree)
 import Raylib.Types.Core (Rectangle)
 import Raylib.Types.Core.Textures (Image, Texture, p'image'data)
@@ -121,6 +122,10 @@ instance Storable Font where
     poke (p'font'recs _p) =<< newArray recs
     poke (p'font'glyphs _p) =<< newArray glyphs
     return ()
+
+instance Closeable Font where
+  close font = close (font'texture font)
+  addToWindowResources window font = addToWindowResources window (font'texture font)
 
 p'font'baseSize :: Ptr Font -> Ptr CInt
 p'font'baseSize = (`plusPtr` 0)

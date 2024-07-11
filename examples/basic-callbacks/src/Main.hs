@@ -1,13 +1,14 @@
 {-# LANGUAGE TemplateHaskell #-}
 module Main where
 
+import Paths_h_raylib (getDataFileName)
 import Raylib.Core (clearBackground, initWindow, setTargetFPS, windowShouldClose, closeWindow, setLoadFileTextCallback, loadFileText, getApplicationDirectory)
 import Raylib.Core.Text (drawText)
-import Raylib.Util (drawing, raylibApplication, WindowResources, inGHCi)
+import Raylib.Util (drawing, raylibApplication, WindowResources, inGHCi, managed)
 import Raylib.Util.Colors (black, rayWhite)
 
 filePath :: String
-filePath = (if not inGHCi then "../../../../../../../../../../" else "./") ++ "examples/basic-callbacks/assets/data.txt"
+filePath = "examples/basic-callbacks/assets/data.txt"
 
 type AppState = (String, WindowResources)
 
@@ -15,9 +16,8 @@ startup :: IO AppState
 startup = do
   window <- initWindow 600 450 "raylib [core] example - basic callbacks"
   setTargetFPS 60
-  executableDir <- getApplicationDirectory
-  _ <- setLoadFileTextCallback (\s -> putStrLn ("opening file: " ++ executableDir ++ s) >> readFile (executableDir ++ s)) window
-  text <- loadFileText filePath
+  _ <- managed window $ setLoadFileTextCallback (\s -> putStrLn ("opening file: " ++ s) >> readFile s)
+  text <- loadFileText =<< getDataFileName filePath
   return (text, window)
 
 mainLoop :: AppState -> IO AppState
@@ -33,6 +33,6 @@ shouldClose :: AppState -> IO Bool
 shouldClose _ = windowShouldClose
 
 teardown :: AppState -> IO ()
-teardown = closeWindow . snd
+teardown = closeWindow . Just . snd
 
-$(raylibApplication 'startup 'mainLoop 'shouldClose 'teardown)
+raylibApplication 'startup 'mainLoop 'shouldClose 'teardown

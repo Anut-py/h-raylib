@@ -19,14 +19,6 @@ extra-doc-files:
 
 extra-source-files:
   default.nix
-  examples/**/*.frag
-  examples/**/*.mtl
-  examples/**/*.obj
-  examples/**/*.png
-  examples/**/*.ttf
-  examples/**/*.txt
-  examples/**/*.vert
-  examples/**/*.xm
   flake.nix
   lib/**/*.c
   lib/**/*.h
@@ -36,6 +28,16 @@ extra-source-files:
   raylib/**/*.c
   raylib/**/*.h
   raylib/**/*.m
+
+data-files:
+  examples/**/*.frag
+  examples/**/*.mtl
+  examples/**/*.obj
+  examples/**/*.png
+  examples/**/*.ttf
+  examples/**/*.txt
+  examples/**/*.vert
+  examples/**/*.xm
 
 source-repository head
   type:     git
@@ -105,6 +107,9 @@ common example-options
     build-depends:
       , base
       , h-raylib
+
+    other-modules: Paths_h_raylib
+    autogen-modules: Paths_h_raylib
 
     other-extensions:
       BangPatterns

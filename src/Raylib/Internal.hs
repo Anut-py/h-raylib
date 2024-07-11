@@ -6,6 +6,11 @@
 module Raylib.Internal
   ( WindowResources (..),
     defaultWindowResources,
+    releaseNonAudioWindowResources,
+    releaseAudioWindowResources,
+    releaseAllWindowResources,
+    Closeable (..),
+    managed,
 
     -- * Unloading individual resources
     unloadSingleShader,
@@ -43,6 +48,18 @@ module Raylib.Internal
     addAutomationEventList,
     addFunPtr,
 
+    -- * Native unload functions
+    c'rlUnloadShaderProgram,
+    c'rlUnloadTexture,
+    c'rlUnloadFramebuffer,
+    c'rlUnloadVertexArray,
+    c'rlUnloadVertexBuffer,
+    c'unloadMusicStreamData,
+    c'unloadAudioBuffer,
+    c'unloadAudioBufferAlias,
+    c'getPixelDataSize,
+    _unloadAutomationEventList,
+
     -- * Miscellaneous
     c'rlGetShaderIdDefault,
     getPixelDataSize,
@@ -54,7 +71,7 @@ import Data.IORef (IORef, modifyIORef, newIORef, readIORef)
 import Data.List (delete)
 import Data.Map (Map)
 import qualified Data.Map as Map
-import Foreign (FunPtr, Ptr, Storable (peekByteOff), free, freeHaskellFunPtr)
+import Foreign (FunPtr, Ptr, Storable (peekByteOff), free, freeHaskellFunPtr, castFunPtr)
 import Foreign.C (CInt (..), CUInt (..))
 import GHC.IO (unsafePerformIO)
 import Raylib.Internal.TH (genNative)
@@ -82,6 +99,27 @@ data WindowResources = WindowResources
     automationEventLists :: IORef [Ptr ()],
     funPtrs :: IORef [FunPtr ()]
   }
+
+-- | Typeclass to conveniently release resources
+class Closeable a where
+  -- | Release a resource; this is only necessary when using an unmanaged resource
+  --
+  --   WARNING: Do not use this on a managed resource, doing so will cause it to be freed twice
+  close :: a -> IO ()
+
+  -- | Add an unmanaged resource to a `WindowResources` handle to be freed later
+  addToWindowResources :: WindowResources -> a -> IO ()
+
+instance {-# OVERLAPPABLE #-} (Closeable a) => Closeable [a] where
+  close xs = forM_ xs close
+  addToWindowResources window xs = forM_ xs (addToWindowResources window)
+
+-- | Use this when loading a resource for automatic memory management
+managed :: (Closeable a) => WindowResources -> IO a -> IO a
+managed window resource = do
+  resource' <- resource
+  addToWindowResources window resource'
+  return resource'
 
 defaultWindowResources :: IO WindowResources
 defaultWindowResources = do
@@ -356,6 +394,30 @@ addAutomationEventList eventList wr = do
 addFunPtr :: FunPtr () -> WindowResources -> IO ()
 addFunPtr fPtr wr = do
   modifyIORef (funPtrs wr) (\xs -> if fPtr `elem` xs then xs else fPtr : xs)
+
+instance Closeable (FunPtr a) where
+  close fun = freeHaskellFunPtr fun
+  addToWindowResources window fun = addFunPtr (castFunPtr fun) window
+
+releaseNonAudioWindowResources :: WindowResources -> IO ()
+releaseNonAudioWindowResources wr = do
+  unloadShaders wr
+  unloadTextures wr
+  unloadFrameBuffers wr
+  unloadVaoIds wr
+  unloadVboIds wr
+  unloadAutomationEventLists wr
+  unloadFunPtrs wr
+
+releaseAudioWindowResources :: WindowResources -> IO ()
+releaseAudioWindowResources wr = do
+  unloadCtxData wr
+  unloadAudioBuffers wr
+
+releaseAllWindowResources :: WindowResources -> IO ()
+releaseAllWindowResources wr = do
+  releaseNonAudioWindowResources wr
+  releaseAudioWindowResources wr
 
 _unloadAutomationEventList :: Ptr () -> IO ()
 _unloadAutomationEventList ptr = (free =<< (peekByteOff ptr 8 :: IO (Ptr ()))) >> free ptr

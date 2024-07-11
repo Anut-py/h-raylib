@@ -1,5 +1,7 @@
 {-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE PatternSynonyms #-}
+{-# LANGUAGE TypeSynonymInstances #-}
+{-# LANGUAGE FlexibleInstances #-}
 
 -- | Bindings for types used in all raylib modules
 module Raylib.Types.Core
@@ -137,6 +139,7 @@ import Foreign.C
     peekCString,
   )
 import Linear (V2(V2), V3(V3), V4(V4))
+import Raylib.Internal (Closeable(..), _unloadAutomationEventList, addAutomationEventList)
 import Raylib.Internal.Foreign (Freeable (rlFreeDependents), c'free, peekStaticArray, pokeStaticArray)
 
 
@@ -1141,6 +1144,10 @@ instance Freeable AutomationEventList where
     c'free . castPtr =<< peek (p'automationEventList'events ptr)
 
 type AutomationEventListRef = Ptr AutomationEventList
+
+instance Closeable AutomationEventListRef where
+  close = _unloadAutomationEventList . castPtr
+  addToWindowResources window listRef = addAutomationEventList (castPtr listRef) window
 
 ---------------------------------------
 -- core callbacks ---------------------

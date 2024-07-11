@@ -5,6 +5,7 @@
 module Raylib.Core
   ( -- * High level
     initWindow,
+    initWindowUnmanaged,
     windowShouldClose,
     closeWindow,
     isWindowReady,
@@ -152,7 +153,7 @@ module Raylib.Core
     stopAutomationEventRecording,
     playAutomationEvent,
     peekAutomationEventList,
-    freeAutomationEventList,
+    unloadAutomationEventList,
     isKeyPressed,
     isKeyPressedRepeat,
     isKeyDown,
@@ -417,7 +418,6 @@ import qualified Data.Map as Map
 import Foreign
   ( Ptr,
     Storable (peek, poke, sizeOf),
-    castFunPtr,
     castPtr,
     finalizeForeignPtr,
     fromBool,
@@ -441,7 +441,7 @@ import Foreign.C
     withCString,
   )
 import Foreign.Ptr (nullPtr)
-import Raylib.Internal (WindowResources, addAutomationEventList, addFunPtr, addShaderId, defaultWindowResources, shaderLocations, unloadAutomationEventLists, unloadFrameBuffers, unloadFunPtrs, unloadShaders, unloadSingleAutomationEventList, unloadSingleShader, unloadTextures, unloadVaoIds, unloadVboIds)
+import Raylib.Internal (WindowResources, defaultWindowResources, shaderLocations, unloadSingleAutomationEventList, unloadSingleShader, releaseNonAudioWindowResources)
 import Raylib.Internal.Foreign (configsToBitflag, pop, popCArray, popCString, withFreeable, withFreeableArray, withFreeableArrayLen, withMaybeCString)
 import Raylib.Internal.TH (genNative)
 import Raylib.Types
@@ -692,23 +692,24 @@ initWindow ::
   Int ->
   Int ->
   String ->
-  -- | This value must be passed to some @load*@ and @unload*@ functions for
+  -- | This value can be used with `managed` when loading resources for
   --   automatic memory management.
   IO WindowResources
 initWindow width height title = withCString title (c'initWindow (fromIntegral width) (fromIntegral height)) >> defaultWindowResources
 
+initWindowUnmanaged ::
+  Int ->
+  Int ->
+  String ->
+  IO ()
+initWindowUnmanaged width height title = withCString title (c'initWindow (fromIntegral width) (fromIntegral height))
+
 windowShouldClose :: IO Bool
 windowShouldClose = toBool <$> c'windowShouldClose
 
-closeWindow :: WindowResources -> IO ()
+closeWindow :: Maybe WindowResources -> IO ()
 closeWindow wr = do
-  unloadShaders wr
-  unloadTextures wr
-  unloadFrameBuffers wr
-  unloadVaoIds wr
-  unloadVboIds wr
-  unloadAutomationEventLists wr
-  unloadFunPtrs wr
+  mapM_ releaseNonAudioWindowResources wr
   c'closeWindow
 
 isWindowReady :: IO Bool
@@ -927,17 +928,11 @@ endVrStereoMode = c'endVrStereoMode
 loadVrStereoConfig :: VrDeviceInfo -> IO VrStereoConfig
 loadVrStereoConfig deviceInfo = withFreeable deviceInfo c'loadVrStereoConfig >>= pop
 
-loadShader :: Maybe String -> Maybe String -> WindowResources -> IO Shader
-loadShader vsFileName fsFileName wr = do
-  shader <- withMaybeCString vsFileName (withMaybeCString fsFileName . c'loadShader) >>= pop
-  addShaderId (shader'id shader) wr
-  return shader
+loadShader :: Maybe String -> Maybe String -> IO Shader
+loadShader vsFileName fsFileName = withMaybeCString vsFileName (withMaybeCString fsFileName . c'loadShader) >>= pop
 
-loadShaderFromMemory :: Maybe String -> Maybe String -> WindowResources -> IO Shader
-loadShaderFromMemory vsCode fsCode wr = do
-  shader <- withMaybeCString vsCode (withMaybeCString fsCode . c'loadShaderFromMemory) >>= pop
-  addShaderId (shader'id shader) wr
-  return shader
+loadShaderFromMemory :: Maybe String -> Maybe String -> IO Shader
+loadShaderFromMemory vsCode fsCode = withMaybeCString vsCode (withMaybeCString fsCode . c'loadShaderFromMemory) >>= pop
 
 isShaderReady :: Shader -> IO Bool
 isShaderReady shader = toBool <$> withFreeable shader c'isShaderReady
@@ -994,10 +989,7 @@ setShaderValueMatrix shader locIndex mat = withFreeable shader (\s -> withFreeab
 setShaderValueTexture :: Shader -> Int -> Texture -> IO ()
 setShaderValueTexture shader locIndex tex = withFreeable shader (\s -> withFreeable tex (c'setShaderValueTexture s (fromIntegral locIndex)))
 
--- | Unloads a shader from GPU memory (VRAM). Shaders are automatically unloaded
--- when `closeWindow` is called, so manually unloading shaders is not required.
--- In larger projects, you may want to manually unload shaders to avoid having
--- them in VRAM for too long.
+-- | Unloads a `managed` shader from GPU memory (VRAM)
 unloadShader :: Shader -> WindowResources -> IO ()
 unloadShader shader = unloadSingleShader (shader'id shader)
 
@@ -1061,31 +1053,27 @@ setTraceLogLevel = c'setTraceLogLevel . fromIntegral . fromEnum
 openURL :: String -> IO ()
 openURL url = withCString url c'openURL
 
-setLoadFileDataCallback :: LoadFileDataCallback -> WindowResources -> IO C'LoadFileDataCallback
-setLoadFileDataCallback callback window = do
+setLoadFileDataCallback :: LoadFileDataCallback -> IO C'LoadFileDataCallback
+setLoadFileDataCallback callback = do
   c <- createLoadFileDataCallback callback
-  addFunPtr (castFunPtr c) window
   c'setLoadFileDataCallback c
   return c
 
-setSaveFileDataCallback :: (Storable a) => SaveFileDataCallback a -> WindowResources -> IO C'SaveFileDataCallback
-setSaveFileDataCallback callback window = do
+setSaveFileDataCallback :: (Storable a) => SaveFileDataCallback a -> IO C'SaveFileDataCallback
+setSaveFileDataCallback callback = do
   c <- createSaveFileDataCallback callback
-  addFunPtr (castFunPtr c) window
   c'setSaveFileDataCallback c
   return c
 
-setLoadFileTextCallback :: LoadFileTextCallback -> WindowResources -> IO C'LoadFileTextCallback
-setLoadFileTextCallback callback window = do
+setLoadFileTextCallback :: LoadFileTextCallback -> IO C'LoadFileTextCallback
+setLoadFileTextCallback callback = do
   c <- createLoadFileTextCallback callback
-  addFunPtr (castFunPtr c) window
   c'setLoadFileTextCallback c
   return c
 
-setSaveFileTextCallback :: SaveFileTextCallback -> WindowResources -> IO C'SaveFileTextCallback
-setSaveFileTextCallback callback window = do
+setSaveFileTextCallback :: SaveFileTextCallback -> IO C'SaveFileTextCallback
+setSaveFileTextCallback callback = do
   c <- createSaveFileTextCallback callback
-  addFunPtr (castFunPtr c) window
   c'setSaveFileTextCallback c
   return c
 
@@ -1248,12 +1236,11 @@ newAutomationEventList = c'loadAutomationEventList nullPtr >>= pop
 exportAutomationEventList :: AutomationEventList -> String -> IO Bool
 exportAutomationEventList list fileName = toBool <$> withFreeable list (withCString fileName . c'exportAutomationEventList)
 
-setAutomationEventList :: AutomationEventList -> WindowResources -> IO AutomationEventListRef
-setAutomationEventList list wr = do
+setAutomationEventList :: AutomationEventList -> IO AutomationEventListRef
+setAutomationEventList list = do
   ptr <- malloc
   poke ptr list
   c'setAutomationEventList ptr
-  addAutomationEventList (castPtr ptr) wr
   return ptr
 
 setAutomationEventBaseFrame :: Int -> IO ()
@@ -1271,8 +1258,9 @@ playAutomationEvent event = withFreeable event c'playAutomationEvent
 peekAutomationEventList :: AutomationEventListRef -> IO AutomationEventList
 peekAutomationEventList = peek
 
-freeAutomationEventList :: AutomationEventListRef -> WindowResources -> IO ()
-freeAutomationEventList list = unloadSingleAutomationEventList (castPtr list)
+-- | Unloads a `managed` automation event list from CPU memory (RAM)
+unloadAutomationEventList :: AutomationEventListRef -> WindowResources -> IO ()
+unloadAutomationEventList list = unloadSingleAutomationEventList (castPtr list)
 
 isKeyPressed :: KeyboardKey -> IO Bool
 isKeyPressed key = toBool <$> c'isKeyPressed (fromIntegral $ fromEnum key)

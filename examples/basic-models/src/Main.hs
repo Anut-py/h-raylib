@@ -2,16 +2,17 @@
 
 module Main where
 
+import Paths_h_raylib (getDataFileName)
 import Control.Monad (unless, void)
 import Raylib.Core (changeDirectory, clearBackground, disableCursor, getApplicationDirectory)
 import Raylib.Core.Camera (updateCamera)
 import Raylib.Core.Models (drawGrid, drawModel, genMeshCube, loadModel, loadModelFromMesh)
 import Raylib.Types (Camera3D (Camera3D), CameraMode (CameraModeFirstPerson), CameraProjection (CameraPerspective), pattern Vector3)
-import Raylib.Util (drawing, inGHCi, mode3D, whileWindowOpen_, withWindow)
+import Raylib.Util (drawing, inGHCi, mode3D, whileWindowOpen_, withWindow, managed)
 import Raylib.Util.Colors (orange, white)
 
 modelPath :: String
-modelPath = (if not inGHCi then "../../../../../../../../../../" else "./") ++ "examples/basic-models/assets/Model.obj"
+modelPath = "examples/basic-models/assets/Model.obj"
 
 main :: IO ()
 main = do
@@ -22,11 +23,10 @@ main = do
     60
     ( \window -> do
         disableCursor
-        unless inGHCi (void $ changeDirectory =<< getApplicationDirectory)
 
-        mesh <- genMeshCube 2 3 4 window
-        cubeModel <- loadModelFromMesh mesh window
-        customModel <- loadModel modelPath window
+        mesh <- managed window $ genMeshCube 2 3 4
+        cubeModel <- managed window $ loadModelFromMesh mesh
+        customModel <- managed window $ loadModel =<< getDataFileName modelPath
 
         let camera = Camera3D (Vector3 3 2 3) (Vector3 0 0 0) (Vector3 0 1 0) 70 CameraPerspective
 

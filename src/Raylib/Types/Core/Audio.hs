@@ -83,6 +83,7 @@ import Foreign.C
     CUChar,
     CUInt,
   )
+import Raylib.Internal (Closeable (..), c'unloadAudioBuffer, addAudioBuffer, c'unloadMusicStreamData, addCtxData)
 import Raylib.Internal.Foreign (Freeable (rlFreeDependents), c'free, peekMaybe, peekStaticArray, pokeMaybe, pokeStaticArray)
 
 ---------------------------------------
@@ -474,6 +475,10 @@ instance Storable AudioStream where
     poke (p'audioStream'channels _p) (fromIntegral channels)
     return ()
 
+instance Closeable AudioStream where
+  close stream = c'unloadAudioBuffer (castPtr (audioStream'buffer stream))
+  addToWindowResources window stream = addAudioBuffer (castPtr (audioStream'buffer stream)) window
+
 -- maybe
 p'audioStream'buffer :: Ptr AudioStream -> Ptr (Ptr RAudioBuffer)
 p'audioStream'buffer = (`plusPtr` 0)
@@ -509,6 +514,10 @@ instance Storable Sound where
     poke (p'sound'frameCount _p) (fromIntegral frameCount)
     return ()
 
+instance Closeable Sound where
+  close sound = close (sound'stream sound)
+  addToWindowResources window = addToWindowResources window . sound'stream
+
 p'sound'stream :: Ptr Sound -> Ptr AudioStream
 p'sound'stream = (`plusPtr` 0)
 
@@ -541,6 +550,10 @@ instance Storable Music where
     poke (p'music'ctxType _p) ctxType
     poke (p'music'ctxData _p) ctxData
     return ()
+
+instance Closeable Music where
+  close music = c'unloadMusicStreamData (fromIntegral (fromEnum (music'ctxType music))) (music'ctxData music)
+  addToWindowResources window music = addCtxData (fromEnum $ music'ctxType music) (music'ctxData music) window
 
 p'music'stream :: Ptr Music -> Ptr AudioStream
 p'music'stream = (`plusPtr` 0)

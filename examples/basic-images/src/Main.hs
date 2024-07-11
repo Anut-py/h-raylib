@@ -1,6 +1,7 @@
 {-# LANGUAGE PatternSynonyms #-}
 module Main where
 
+import Paths_h_raylib (getDataFileName)
 import Control.Monad (unless, void)
 import Raylib.Core
   ( changeDirectory,
@@ -17,11 +18,11 @@ import Raylib.Core.Textures
     loadTextureFromImage,
   )
 import Raylib.Types (Rectangle (Rectangle), RenderTexture (renderTexture'texture), pattern Vector2)
-import Raylib.Util (drawing, inGHCi, textureMode, whileWindowOpen0, withWindow)
+import Raylib.Util (drawing, inGHCi, textureMode, whileWindowOpen0, withWindow, managed)
 import Raylib.Util.Colors (black, lightGray, orange, white)
 
 logoPath :: String
-logoPath = (if not inGHCi then "../../../../../../../../../../" else "./") ++ "examples/basic-images/assets/raylib-logo.png"
+logoPath = "examples/basic-images/assets/raylib-logo.png"
 
 main :: IO ()
 main = do
@@ -31,11 +32,9 @@ main = do
     "raylib [textures] example - basic images"
     60
     ( \window -> do
-        unless inGHCi (void $ changeDirectory =<< getApplicationDirectory)
-
-        texture <- genImagePerlinNoise 600 450 20 20 2 >>= (`loadTextureFromImage` window)
-        logo <- loadImage logoPath >>= (`loadTextureFromImage` window)
-        rt <- loadRenderTexture 200 200 window
+        texture <- managed window $ loadTextureFromImage =<< genImagePerlinNoise 600 450 20 20 2
+        logo <- managed window $ loadTextureFromImage =<< loadImage =<< getDataFileName logoPath
+        rt <- managed window $ loadRenderTexture 200 200
 
         whileWindowOpen0
           ( drawing

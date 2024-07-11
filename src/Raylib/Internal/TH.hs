@@ -1,5 +1,3 @@
-{-# OPTIONS -Wall -Wno-unrecognised-pragmas #-}
-{-# HLINT ignore "Unused LANGUAGE pragma" #-}
 {-# LANGUAGE CPP #-}
 {-# LANGUAGE TemplateHaskellQuotes #-}
 {-# LANGUAGE TupleSections #-}

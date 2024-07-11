@@ -55,9 +55,10 @@ import Foreign.C
     CUChar,
     CUInt,
   )
-import Raylib.Internal (getPixelDataSize)
+import Raylib.Internal (getPixelDataSize, Closeable (..), c'rlUnloadTexture, addTextureId, c'rlUnloadFramebuffer, addFrameBuffer)
 import Raylib.Internal.Foreign (Freeable (rlFreeDependents), c'free)
 import Raylib.Types.Core (Rectangle)
+import Control.Monad (when)
 
 ---------------------------------------
 -- textures enums ---------------------
@@ -269,6 +270,10 @@ instance Storable Texture where
     poke (p'texture'format _p) format
     return ()
 
+instance Closeable Texture where
+  close texture = let tId = fromIntegral (texture'id texture) in when (tId > 0) (c'rlUnloadTexture tId)
+  addToWindowResources window texture = addTextureId (texture'id texture) window
+
 p'texture'id :: Ptr Texture -> Ptr CUInt
 p'texture'id = (`plusPtr` 0)
 
@@ -308,6 +313,15 @@ instance Storable RenderTexture where
     poke (p'renderTexture'texture _p) texture
     poke (p'renderTexture'depth _p) depth
     return ()
+
+instance Closeable RenderTexture where
+  close renderTexture = do
+    let fbId = fromIntegral (renderTexture'id renderTexture)
+    when (fbId > 0) (c'rlUnloadFramebuffer fbId)
+    close (renderTexture'texture renderTexture)
+  addToWindowResources window renderTexture = do
+    addFrameBuffer (renderTexture'id renderTexture) window
+    addToWindowResources window (renderTexture'texture renderTexture)
 
 p'renderTexture'id :: Ptr RenderTexture -> Ptr CUInt
 p'renderTexture'id = (`plusPtr` 0)

@@ -232,7 +232,7 @@ import Foreign.C
     withCString,
   )
 import GHC.IO (unsafePerformIO)
-import Raylib.Internal (WindowResources, addFrameBuffer, addTextureId, unloadSingleFrameBuffer, unloadSingleTexture)
+import Raylib.Internal (WindowResources, unloadSingleFrameBuffer, unloadSingleTexture)
 import qualified Raylib.Internal as I
 import Raylib.Internal.Foreign
   ( pop,
@@ -646,30 +646,17 @@ imageDrawText image text x y fontSize color = withFreeable image (\i -> withCStr
 imageDrawTextEx :: Image -> Font -> String -> Vector2 -> Float -> Float -> Color -> IO Image
 imageDrawTextEx image font text position fontSize spacing tint = withFreeable image (\i -> withFreeable font (\f -> withCString text (\t -> withFreeable position (\p -> withFreeable tint (c'imageDrawTextEx i f t p (realToFrac fontSize) (realToFrac spacing))))) >> peek i)
 
-loadTexture :: String -> WindowResources -> IO Texture
-loadTexture fileName wr = do
-  texture <- withCString fileName c'loadTexture >>= pop
-  addTextureId (texture'id texture) wr
-  return texture
+loadTexture :: String -> IO Texture
+loadTexture fileName = withCString fileName c'loadTexture >>= pop
 
-loadTextureFromImage :: Image -> WindowResources -> IO Texture
-loadTextureFromImage image wr = do
-  texture <- withFreeable image c'loadTextureFromImage >>= pop
-  addTextureId (texture'id texture) wr
-  return texture
+loadTextureFromImage :: Image -> IO Texture
+loadTextureFromImage image = withFreeable image c'loadTextureFromImage >>= pop
 
-loadTextureCubemap :: Image -> CubemapLayout -> WindowResources -> IO Texture
-loadTextureCubemap image layout wr = do
-  texture <- withFreeable image (\i -> c'loadTextureCubemap i (fromIntegral $ fromEnum layout)) >>= pop
-  addTextureId (texture'id texture) wr
-  return texture
+loadTextureCubemap :: Image -> CubemapLayout -> IO Texture
+loadTextureCubemap image layout = withFreeable image (\i -> c'loadTextureCubemap i (fromIntegral $ fromEnum layout)) >>= pop
 
-loadRenderTexture :: Int -> Int -> WindowResources -> IO RenderTexture
-loadRenderTexture width height wr = do
-  renderTexture <- c'loadRenderTexture (fromIntegral width) (fromIntegral height) >>= pop
-  addFrameBuffer (renderTexture'id renderTexture) wr
-  addTextureId (texture'id $ renderTexture'texture renderTexture) wr
-  return renderTexture
+loadRenderTexture :: Int -> Int -> IO RenderTexture
+loadRenderTexture width height = c'loadRenderTexture (fromIntegral width) (fromIntegral height) >>= pop
 
 isTextureReady :: Texture -> IO Bool
 isTextureReady texture = toBool <$> withFreeable texture c'isTextureReady
@@ -677,17 +664,11 @@ isTextureReady texture = toBool <$> withFreeable texture c'isTextureReady
 isRenderTextureReady :: RenderTexture -> IO Bool
 isRenderTextureReady renderTexture = toBool <$> withFreeable renderTexture c'isRenderTextureReady
 
--- | Unloads a texture from GPU memory (VRAM). Textures are automatically unloaded
--- when `Raylib.Core.closeWindow` is called, so manually unloading textures is not required.
--- In larger projects, you may want to manually unload textures to avoid having
--- them in VRAM for too long.
+-- | Unloads a `managed` texture from GPU memory (VRAM)
 unloadTexture :: Texture -> WindowResources -> IO ()
 unloadTexture texture = unloadSingleTexture (texture'id texture)
 
--- | Unloads a render texture from GPU memory (VRAM). Render textures are
--- automatically unloaded when `Raylib.Core.closeWindow` is called, so manually unloading
--- render textures is not required. In larger projects, you may want to
--- manually unload render textures to avoid having them in VRAM for too long.
+-- | Unloads a `managed` render texture from GPU memory (VRAM)
 unloadRenderTexture :: RenderTexture -> WindowResources -> IO ()
 unloadRenderTexture renderTexture wr = do
   unloadSingleTexture (texture'id $ renderTexture'texture renderTexture) wr

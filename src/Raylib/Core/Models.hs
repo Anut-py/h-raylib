@@ -26,6 +26,7 @@ module Raylib.Core.Models
     drawGrid,
     loadModel,
     loadModelFromMesh,
+    loadModelFromMeshManaged,
     unloadModel,
     isModelReady,
     getModelBoundingBox,
@@ -162,7 +163,7 @@ import Foreign.C
     withCString,
   )
 import GHC.IO (unsafePerformIO)
-import Raylib.Internal (WindowResources, addShaderId, addTextureId, addVaoId, addVboIds, unloadSingleShader, unloadSingleTexture, unloadSingleVaoId, unloadSingleVboIdList)
+import Raylib.Internal (WindowResources, unloadSingleShader, unloadSingleTexture, unloadSingleVaoId, unloadSingleVboIdList, addToWindowResources)
 import Raylib.Internal.Foreign
   ( pop,
     popCArray,
@@ -188,7 +189,7 @@ import Raylib.Types
     Shader (shader'id),
     Texture (texture'id),
     Vector2,
-    Vector3,
+    Vector3, MaterialMapIndex,
   )
 
 $( genNative
@@ -331,24 +332,20 @@ drawRay ray color = withFreeable ray (withFreeable color . c'drawRay)
 drawGrid :: Int -> Float -> IO ()
 drawGrid slices spacing = c'drawGrid (fromIntegral slices) (realToFrac spacing)
 
-loadModel :: String -> WindowResources -> IO Model
-loadModel fileName wr = do
-  model <- withCString fileName c'loadModel >>= pop
-  forM_ (model'meshes model) (`storeMeshData` wr)
-  storeMaterialData (model'materials model) wr
+loadModel :: String -> IO Model
+loadModel fileName = withCString fileName c'loadModel >>= pop
+
+-- | Use `loadModelFromMeshManaged` for a resource-managed version
+loadModelFromMesh :: Mesh -> IO Model
+loadModelFromMesh mesh = with mesh c'loadModelFromMesh >>= pop
+
+loadModelFromMeshManaged :: Mesh -> WindowResources -> IO Model
+loadModelFromMeshManaged mesh wr = do
+  model <- loadModelFromMesh mesh
+  forM_ (model'materials model) (addToWindowResources wr)
   return model
 
-loadModelFromMesh :: Mesh -> WindowResources -> IO Model
-loadModelFromMesh mesh wr = do
-  model <- with mesh c'loadModelFromMesh >>= pop
-  storeMaterialData (model'materials model) wr
-  return model
-
--- | Unloads a model from GPU memory (VRAM). This unloads its associated
--- meshes and materials. Models are automatically unloaded when `Raylib.Core.closeWindow`
--- is called, so manually unloading models is not required. In larger projects,
--- you may want to manually unload models to avoid having them in VRAM for too
--- long.
+-- | Unloads a `managed` model from GPU memory (VRAM)
 unloadModel :: Model -> WindowResources -> IO ()
 unloadModel model wr = do
   forM_ (model'meshes model) (`unloadMesh` wr)
@@ -384,27 +381,17 @@ drawBillboardRec camera texture source position size tint = withFreeable camera 
 drawBillboardPro :: Camera3D -> Texture -> Rectangle -> Vector3 -> Vector3 -> Vector2 -> Vector2 -> Float -> Color -> IO ()
 drawBillboardPro camera texture source position up size origin rotation tint = withFreeable camera (\c -> withFreeable texture (\t -> withFreeable source (\s -> withFreeable position (\p -> withFreeable up (\u -> withFreeable size (\sz -> withFreeable origin (\o -> withFreeable tint (c'drawBillboardPro c t s p u sz o (realToFrac rotation)))))))))
 
-uploadMesh :: Mesh -> Bool -> WindowResources -> IO Mesh
-uploadMesh mesh dynamic wr = withFreeable mesh (\m -> c'uploadMesh m (fromBool dynamic) >> peek m >>= (`storeMeshData` wr))
+uploadMesh :: Mesh -> Bool -> IO Mesh
+uploadMesh mesh dynamic = withFreeable mesh (\m -> c'uploadMesh m (fromBool dynamic) >> peek m)
 
 updateMeshBuffer :: Mesh -> Int -> Ptr () -> Int -> Int -> IO ()
 updateMeshBuffer mesh index dataValue dataSize offset = withFreeable mesh (\m -> c'updateMeshBuffer m (fromIntegral index) dataValue (fromIntegral dataSize) (fromIntegral offset))
 
--- | Unloads a mesh from GPU memory (VRAM). Meshes are
--- automatically unloaded when `Raylib.Core.closeWindow` is called, so manually unloading
--- meshes is not required. In larger projects, you may want to
--- manually unload meshes to avoid having them in VRAM for too long.
+-- | Unloads a `managed` mesh from GPU memory (VRAM)
 unloadMesh :: Mesh -> WindowResources -> IO ()
 unloadMesh mesh wr = do
   unloadSingleVaoId (mesh'vaoId mesh) wr
   unloadSingleVboIdList (mesh'vboId mesh) wr
-
--- Internal
-storeMeshData :: Mesh -> WindowResources -> IO Mesh
-storeMeshData mesh wr = do
-  addVaoId (mesh'vaoId mesh) wr
-  addVboIds (mesh'vboId mesh) wr
-  return mesh
 
 drawMesh :: Mesh -> Material -> Matrix -> IO ()
 drawMesh mesh material transform = withFreeable mesh (\m -> withFreeable material (withFreeable transform . c'drawMesh m))
@@ -424,41 +411,41 @@ getMeshBoundingBox mesh = withFreeable mesh c'getMeshBoundingBox >>= pop
 genMeshTangents :: Mesh -> IO Mesh
 genMeshTangents mesh = withFreeable mesh (\m -> c'genMeshTangents m >> peek m)
 
-genMeshPoly :: Int -> Float -> WindowResources -> IO Mesh
-genMeshPoly sides radius wr = c'genMeshPoly (fromIntegral sides) (realToFrac radius) >>= pop >>= (`storeMeshData` wr)
+genMeshPoly :: Int -> Float -> IO Mesh
+genMeshPoly sides radius = c'genMeshPoly (fromIntegral sides) (realToFrac radius) >>= pop
 
-genMeshPlane :: Float -> Float -> Int -> Int -> WindowResources -> IO Mesh
-genMeshPlane width _length resX resZ wr = c'genMeshPlane (realToFrac width) (realToFrac _length) (fromIntegral resX) (fromIntegral resZ) >>= pop >>= (`storeMeshData` wr)
+genMeshPlane :: Float -> Float -> Int -> Int -> IO Mesh
+genMeshPlane width _length resX resZ = c'genMeshPlane (realToFrac width) (realToFrac _length) (fromIntegral resX) (fromIntegral resZ) >>= pop
 
-genMeshCube :: Float -> Float -> Float -> WindowResources -> IO Mesh
-genMeshCube width height _length wr = c'genMeshCube (realToFrac width) (realToFrac height) (realToFrac _length) >>= pop >>= (`storeMeshData` wr)
+genMeshCube :: Float -> Float -> Float -> IO Mesh
+genMeshCube width height _length = c'genMeshCube (realToFrac width) (realToFrac height) (realToFrac _length) >>= pop
 
-genMeshSphere :: Float -> Int -> Int -> WindowResources -> IO Mesh
-genMeshSphere radius rings slices wr = c'genMeshSphere (realToFrac radius) (fromIntegral rings) (fromIntegral slices) >>= pop >>= (`storeMeshData` wr)
+genMeshSphere :: Float -> Int -> Int -> IO Mesh
+genMeshSphere radius rings slices = c'genMeshSphere (realToFrac radius) (fromIntegral rings) (fromIntegral slices) >>= pop
 
-genMeshHemiSphere :: Float -> Int -> Int -> WindowResources -> IO Mesh
-genMeshHemiSphere radius rings slices wr = c'genMeshHemiSphere (realToFrac radius) (fromIntegral rings) (fromIntegral slices) >>= pop >>= (`storeMeshData` wr)
+genMeshHemiSphere :: Float -> Int -> Int -> IO Mesh
+genMeshHemiSphere radius rings slices = c'genMeshHemiSphere (realToFrac radius) (fromIntegral rings) (fromIntegral slices) >>= pop
 
-genMeshCylinder :: Float -> Float -> Int -> WindowResources -> IO Mesh
-genMeshCylinder radius height slices wr = c'genMeshCylinder (realToFrac radius) (realToFrac height) (fromIntegral slices) >>= pop >>= (`storeMeshData` wr)
+genMeshCylinder :: Float -> Float -> Int -> IO Mesh
+genMeshCylinder radius height slices = c'genMeshCylinder (realToFrac radius) (realToFrac height) (fromIntegral slices) >>= pop
 
-genMeshCone :: Float -> Float -> Int -> WindowResources -> IO Mesh
-genMeshCone radius height slices wr = c'genMeshCone (realToFrac radius) (realToFrac height) (fromIntegral slices) >>= pop >>= (`storeMeshData` wr)
+genMeshCone :: Float -> Float -> Int -> IO Mesh
+genMeshCone radius height slices = c'genMeshCone (realToFrac radius) (realToFrac height) (fromIntegral slices) >>= pop
 
-genMeshTorus :: Float -> Float -> Int -> Int -> WindowResources -> IO Mesh
-genMeshTorus radius size radSeg sides wr = c'genMeshTorus (realToFrac radius) (realToFrac size) (fromIntegral radSeg) (fromIntegral sides) >>= pop >>= (`storeMeshData` wr)
+genMeshTorus :: Float -> Float -> Int -> Int -> IO Mesh
+genMeshTorus radius size radSeg sides = c'genMeshTorus (realToFrac radius) (realToFrac size) (fromIntegral radSeg) (fromIntegral sides) >>= pop
 
-genMeshKnot :: Float -> Float -> Int -> Int -> WindowResources -> IO Mesh
-genMeshKnot radius size radSeg sides wr = c'genMeshKnot (realToFrac radius) (realToFrac size) (fromIntegral radSeg) (fromIntegral sides) >>= pop >>= (`storeMeshData` wr)
+genMeshKnot :: Float -> Float -> Int -> Int -> IO Mesh
+genMeshKnot radius size radSeg sides = c'genMeshKnot (realToFrac radius) (realToFrac size) (fromIntegral radSeg) (fromIntegral sides) >>= pop
 
-genMeshHeightmap :: Image -> Vector3 -> WindowResources -> IO Mesh
-genMeshHeightmap heightmap size wr = withFreeable heightmap (withFreeable size . c'genMeshHeightmap) >>= pop >>= (`storeMeshData` wr)
+genMeshHeightmap :: Image -> Vector3 -> IO Mesh
+genMeshHeightmap heightmap size = withFreeable heightmap (withFreeable size . c'genMeshHeightmap) >>= pop
 
-genMeshCubicmap :: Image -> Vector3 -> WindowResources -> IO Mesh
-genMeshCubicmap cubicmap cubeSize wr = withFreeable cubicmap (withFreeable cubeSize . c'genMeshCubicmap) >>= pop >>= (`storeMeshData` wr)
+genMeshCubicmap :: Image -> Vector3 -> IO Mesh
+genMeshCubicmap cubicmap cubeSize = withFreeable cubicmap (withFreeable cubeSize . c'genMeshCubicmap) >>= pop
 
-loadMaterials :: String -> WindowResources -> IO [Material]
-loadMaterials fileName wr =
+loadMaterials :: String -> IO [Material]
+loadMaterials fileName =
   withCString
     fileName
     ( \f ->
@@ -468,27 +455,11 @@ loadMaterials fileName wr =
               ptr <- c'loadMaterials f n
               num <- peek n
               materials <- popCArray (fromIntegral num) ptr
-              storeMaterialData materials wr
               return materials
           )
     )
 
--- Internal
-storeMaterialData :: [Material] -> WindowResources -> IO ()
-storeMaterialData materials wr =
-  forM_
-    materials
-    ( \mat -> do
-        addShaderId (shader'id $ material'shader mat) wr
-        case material'maps mat of
-          Nothing -> return ()
-          (Just maps) -> forM_ maps (\m -> addTextureId (texture'id $ materialMap'texture m) wr)
-    )
-
--- | Unloads a material from GPU memory (VRAM). Materials are
--- automatically unloaded when `Raylib.Core.closeWindow` is called, so manually unloading
--- materials is not required. In larger projects, you may want to
--- manually unload materials to avoid having them in VRAM for too long.
+-- | Unloads a `managed` material from GPU memory (VRAM)
 unloadMaterial :: Material -> WindowResources -> IO ()
 unloadMaterial material wr = do
   unloadSingleShader (shader'id $ material'shader material) wr
@@ -502,8 +473,8 @@ loadMaterialDefault = c'loadMaterialDefault >>= pop
 isMaterialReady :: Material -> IO Bool
 isMaterialReady material = toBool <$> withFreeable material c'isMaterialReady
 
-setMaterialTexture :: Material -> Int -> Texture -> IO Material
-setMaterialTexture material mapType texture = withFreeable material (\m -> withFreeable texture (c'setMaterialTexture m (fromIntegral mapType)) >> peek m)
+setMaterialTexture :: Material -> MaterialMapIndex -> Texture -> IO Material
+setMaterialTexture material mapType texture = withFreeable material (\m -> withFreeable texture (c'setMaterialTexture m (fromIntegral (fromEnum mapType))) >> peek m)
 
 setModelMeshMaterial :: Model -> Int -> Int -> IO Model
 setModelMeshMaterial model meshId materialId = withFreeable model (\m -> c'setModelMeshMaterial m (fromIntegral meshId) (fromIntegral materialId) >> peek m)

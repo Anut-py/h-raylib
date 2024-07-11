@@ -24,6 +24,6 @@ shouldClose :: WindowResources -> IO Bool
 shouldClose _ = windowShouldClose
 
 teardown :: WindowResources -> IO ()
-teardown = closeWindow
+teardown = closeWindow . Just
 
 $(raylibApplication 'startup 'mainLoop 'shouldClose 'teardown)

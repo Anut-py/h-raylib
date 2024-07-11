@@ -20,12 +20,16 @@ module Raylib.Util
     whileWindowOpen_,
     whileWindowOpen0,
 
+    -- * Resource management
+    WindowResources,
+    Closeable (..),
+    managed,
+
     -- * Miscellaneous
     cameraDirectionRay,
     setMaterialShader,
     inGHCi,
     inWeb,
-    WindowResources,
     Freeable (..),
   )
 where
@@ -34,7 +38,7 @@ import Control.Monad (void)
 import Control.Monad.Catch (MonadMask, bracket, bracket_)
 import Control.Monad.IO.Class (MonadIO (liftIO))
 import Raylib.Core (beginBlendMode, beginDrawing, beginMode2D, beginMode3D, beginScissorMode, beginShaderMode, beginTextureMode, beginVrStereoMode, closeWindow, endBlendMode, endDrawing, endMode2D, endMode3D, endScissorMode, endShaderMode, endTextureMode, endVrStereoMode, initWindow, setTargetFPS, windowShouldClose)
-import Raylib.Internal (WindowResources)
+import Raylib.Internal (WindowResources, Closeable (..), managed)
 import Raylib.Internal.Foreign (Freeable (..))
 import Raylib.Types
   ( BlendMode,
@@ -76,7 +80,7 @@ withWindow ::
   Int ->
   (WindowResources -> m b) ->
   m b
-withWindow w h title fps = bracket (liftIO $ initWindow w h title <* setTargetFPS fps) (liftIO . closeWindow)
+withWindow w h title fps = bracket (liftIO $ initWindow w h title <* setTargetFPS fps) (liftIO . closeWindow . Just)
 
 drawing :: (MonadIO m, MonadMask m) => m b -> m b
 drawing = bracket_ (liftIO beginDrawing) (liftIO endDrawing)
@@ -236,7 +240,7 @@ runRaylibProgram :: IO a -> (a -> IO a) -> (a -> IO Bool) -> (a -> IO ()) -> IO 
 runRaylibProgram startup mainLoop shouldClose teardown = do
   st <- startup
   helper st
-  where helper s = shouldClose s >>= (\close -> if close then teardown s else mainLoop s >>= helper)
+  where helper s = shouldClose s >>= (\toClose -> if toClose then teardown s else mainLoop s >>= helper)
 
 #endif
 

@@ -2,6 +2,7 @@
 
 module Main where
 
+import Paths_h_raylib (getDataFileName)
 import Control.Monad (unless, void)
 import Foreign (fromBool)
 import Raylib.Core
@@ -12,11 +13,11 @@ import Raylib.Core
   )
 import Raylib.Core.Text (drawText, drawTextEx, loadFont)
 import Raylib.Types (KeyboardKey (KeyDown, KeyUp), pattern Vector2)
-import Raylib.Util (inGHCi, whileWindowOpen_, withWindow, drawing)
+import Raylib.Util (inGHCi, whileWindowOpen_, withWindow, drawing, managed)
 import Raylib.Util.Colors (black, rayWhite)
 
 mainFontPath :: String
-mainFontPath = (if not inGHCi then "../../../../../../../../../../" else "./") ++ "examples/custom-font-text/assets/Lato-Regular.ttf"
+mainFontPath = "examples/custom-font-text/assets/Lato-Regular.ttf"
 
 main :: IO ()
 main = do
@@ -26,9 +27,7 @@ main = do
     "raylib [text] example - custom font text"
     60
     ( \window -> do
-        unless inGHCi (void $ changeDirectory =<< getApplicationDirectory)
-
-        mainFont <- loadFont mainFontPath window
+        mainFont <- managed window $ loadFont =<< getDataFileName mainFontPath
 
         whileWindowOpen_
           ( \size -> do

@@ -6,6 +6,7 @@
 
 module Main where
 
+import Paths_h_raylib (getDataFileName)
 import Control.Monad (forM_, unless, void, when)
 import Foreign
   ( ForeignPtr,
@@ -35,7 +36,7 @@ import Raylib.Core
     initWindow,
     isMouseButtonDown,
     setTargetFPS,
-    windowShouldClose,
+    windowShouldClose, closeWindow,
   )
 import Raylib.Core.Shapes (drawRectangle)
 import Raylib.Core.Text (drawFPS, drawText)
@@ -45,7 +46,7 @@ import Raylib.Util (inGHCi, raylibApplication)
 import Raylib.Util.Colors (black, green, maroon, rayWhite)
 
 texPath :: String
-texPath = (if not inGHCi then "../../../../../../../../../../" else "./") ++ "examples/bunnymark/assets/wabbit_alpha.png"
+texPath = "examples/bunnymark/assets/wabbit_alpha.png"
 
 maxBunnies :: Int
 maxBunnies = 500000 -- 500K bunnies limit
@@ -115,8 +116,8 @@ startup :: IO AppState
 startup = do
   _ <- initWindow 800 450 "raylib [textures] example - bunnymark"
   setTargetFPS 60
-  unless inGHCi (void $ changeDirectory =<< getApplicationDirectory)
-  texPtr <- withCString texPath c'loadTexture
+  texPath' <- getDataFileName texPath
+  texPtr <- withCString texPath' c'loadTexture
   -- Use `peek` when you need to access the underlying fields
 
   -- This could be rewritten as
@@ -219,5 +220,6 @@ teardown state = do
   -- Unload and free functions have to be manually called
   c'unloadTexture (texBunny state)
   free (texBunny state)
+  closeWindow Nothing
 
 $(raylibApplication 'startup 'mainLoop 'shouldClose 'teardown)

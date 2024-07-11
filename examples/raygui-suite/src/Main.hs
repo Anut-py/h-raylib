@@ -308,6 +308,6 @@ shouldClose :: AppState -> IO Bool
 shouldClose = const windowShouldClose
 
 teardown :: AppState -> IO ()
-teardown s = closeWindow (window s)
+teardown s = closeWindow (Just (window s))
 
 $(raylibApplication 'startup 'mainLoop 'shouldClose 'teardown)

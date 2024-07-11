@@ -80,7 +80,7 @@ module Raylib.Types.Core.Models
   )
 where
 
-import Control.Monad (forM_, unless)
+import Control.Monad (forM_, unless, when)
 import Foreign
   ( ForeignPtr,
     Ptr,
@@ -111,9 +111,9 @@ import Foreign.C
     castCharToCChar,
     peekCString,
   )
-import Raylib.Internal (c'rlGetShaderIdDefault)
+import Raylib.Internal (Closeable (addToWindowResources, close), addShaderId, addTextureId, addVaoId, addVboIds, c'rlGetShaderIdDefault, c'rlUnloadShaderProgram, c'rlUnloadTexture, c'rlUnloadVertexArray, c'rlUnloadVertexBuffer)
 import Raylib.Internal.Foreign (Freeable (rlFreeDependents), c'free, freeMaybePtr, newMaybeArray, p'free, peekMaybeArray, peekStaticArray, pokeStaticArray, rightPad, rlFree, rlFreeMaybeArray)
-import Raylib.Types.Core (Color, Matrix, Quaternion, Vector2, pattern Vector2, Vector3, pattern Vector3, Vector4, pattern Vector4)
+import Raylib.Types.Core (Color, Matrix, Quaternion, Vector2, Vector3, Vector4, pattern Vector2, pattern Vector3, pattern Vector4)
 import Raylib.Types.Core.Textures (Texture (texture'id))
 
 ---------------------------------------
@@ -368,6 +368,16 @@ instance Storable Mesh where
     poke (p'mesh'vboId _p) =<< newMaybeArray (map fromIntegral <$> vboId)
     return ()
 
+instance Closeable Mesh where
+  close mesh = do
+    c'rlUnloadVertexArray (fromIntegral (mesh'vaoId mesh))
+    case mesh'vboId mesh of
+      Nothing -> return ()
+      Just vbos -> forM_ vbos (c'rlUnloadVertexBuffer . fromIntegral)
+  addToWindowResources window mesh = do
+    addVaoId (mesh'vaoId mesh) window
+    addVboIds (mesh'vboId mesh) window
+
 p'mesh'vertexCount :: Ptr Mesh -> Ptr CInt
 p'mesh'vertexCount = (`plusPtr` 0)
 
@@ -476,6 +486,13 @@ instance Storable Shader where
       else poke (p'shader'locs _p) locsArr
     return ()
 
+instance Closeable Shader where
+  close shader = do
+    shaderIdDefault <- c'rlGetShaderIdDefault
+    unless (sId == shaderIdDefault) (c'rlUnloadShaderProgram sId)
+    where sId = fromIntegral (shader'id shader)
+  addToWindowResources window shader = addShaderId (shader'id shader) window
+
 p'shader'id :: Ptr Shader -> Ptr CUInt
 p'shader'id = (`plusPtr` 0)
 
@@ -543,6 +560,27 @@ instance Storable Material where
     poke (p'material'maps _p) =<< newMaybeArray maps
     pokeStaticArray (p'material'params _p) (map realToFrac params)
     return ()
+
+instance Closeable Material where
+  close mat = do
+    let sId = fromIntegral (shader'id (material'shader mat))
+    shaderIdDefault <- c'rlGetShaderIdDefault
+    unless (sId == shaderIdDefault) (c'rlUnloadShaderProgram sId)
+    case material'maps mat of
+      Nothing -> return ()
+      (Just maps) ->
+        forM_
+          maps
+          ( \m ->
+              let tId =
+                    fromIntegral (texture'id (materialMap'texture m))
+               in when (tId > 0) (c'rlUnloadTexture tId)
+          )
+  addToWindowResources window mat = do
+    addShaderId (shader'id $ material'shader mat) window
+    case material'maps mat of
+      Nothing -> return ()
+      (Just maps) -> forM_ maps (\m -> addTextureId (texture'id $ materialMap'texture m) window)
 
 p'material'shader :: Ptr Material -> Ptr Shader
 p'material'shader = (`plusPtr` 0)
@@ -651,6 +689,14 @@ instance Storable Model where
     poke (p'model'bones _p) =<< newMaybeArray bones
     poke (p'model'bindPose _p) =<< newMaybeArray bindPose
     return ()
+
+instance Closeable Model where
+  close model = do
+    forM_ (model'meshes model) close
+    forM_ (model'materials model) close
+  addToWindowResources window model = do
+    forM_ (model'meshes model) (addToWindowResources window)
+    forM_ (model'materials model) (addToWindowResources window)
 
 p'model'transform :: Ptr Model -> Ptr Matrix
 p'model'transform = (`plusPtr` 0)

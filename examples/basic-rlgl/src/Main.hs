@@ -2,18 +2,19 @@
 
 module Main where
 
+import Paths_h_raylib (getDataFileName)
 import Control.Monad (unless, void)
 import Raylib.Core (changeDirectory, clearBackground, getApplicationDirectory)
 import Raylib.Core.Models (drawGrid)
 import Raylib.Core.Textures (loadTexture)
 import Raylib.Types (Camera3D (Camera3D), CameraProjection (CameraPerspective), Color (Color), RLDrawMode (RLQuads), Rectangle (Rectangle), Texture (texture'height, texture'id, texture'width), Vector3, pattern Vector3)
-import Raylib.Util (drawing, inGHCi, mode3D, whileWindowOpen0, withWindow)
+import Raylib.Util (drawing, inGHCi, mode3D, whileWindowOpen0, withWindow, managed)
 import Raylib.Util.Colors (rayWhite, white)
 import Raylib.Util.RLGL (rlBegin, rlColor4ub, rlEnd, rlNormal3f, rlPopMatrix, rlPushMatrix, rlRotatef, rlScalef, rlSetTexture, rlTexCoord2f, rlTranslatef, rlVertex3f)
 import Prelude hiding (length)
 
 texturePath :: String
-texturePath = (if not inGHCi then "../../../../../../../../../../" else "./") ++ "examples/basic-rlgl/assets/cubicmap_atlas.png"
+texturePath = "examples/basic-rlgl/assets/cubicmap_atlas.png"
 
 main :: IO ()
 main = do
@@ -23,11 +24,9 @@ main = do
     "raylib [rlgl] example - basic rlgl"
     60
     ( \window -> do
-        unless inGHCi (void $ changeDirectory =<< getApplicationDirectory)
-
         let camera = Camera3D (Vector3 0 10 10) (Vector3 0 0 0) (Vector3 0 1 0) 45 CameraPerspective
 
-        texture <- loadTexture texturePath window
+        texture <- managed window $ loadTexture =<< getDataFileName texturePath
 
         whileWindowOpen0
           ( drawing
