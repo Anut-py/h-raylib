@@ -3,18 +3,16 @@
 module Main where
 
 import Paths_h_raylib (getDataFileName)
-import Control.Monad (unless, void, when)
+import Control.Monad (when)
 import Numeric (showFFloat)
 import Raylib.Core
   ( beginDrawing,
     beginMode3D,
-    changeDirectory,
     clearBackground,
     closeWindow,
     disableCursor,
     endDrawing,
     endMode3D,
-    getApplicationDirectory,
     getFrameTime,
     initWindow,
     isKeyDown,
@@ -40,7 +38,7 @@ import Raylib.Types
     pattern Vector3,
     pattern Vector4,
   )
-import Raylib.Util (inGHCi, setMaterialShader, whileWindowOpen_, managed)
+import Raylib.Util (setMaterialShader, whileWindowOpen_, managed)
 import Raylib.Util.Colors (black, blue, lightGray, orange, white)
 
 assetsPath :: String

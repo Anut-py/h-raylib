@@ -7,7 +7,7 @@
 module Main where
 
 import Paths_h_raylib (getDataFileName)
-import Control.Monad (forM_, unless, void, when)
+import Control.Monad (forM_, when)
 import Foreign
   ( ForeignPtr,
     Ptr,
@@ -26,10 +26,8 @@ import Raylib.Core
     c'getMouseX,
     c'getMouseY,
     c'getRandomValue,
-    changeDirectory,
     clearBackground,
     endDrawing,
-    getApplicationDirectory,
     getFrameTime,
     getScreenHeight,
     getScreenWidth,
@@ -42,7 +40,7 @@ import Raylib.Core.Shapes (drawRectangle)
 import Raylib.Core.Text (drawFPS, drawText)
 import Raylib.Core.Textures (c'drawTexture, c'loadTexture, c'unloadTexture)
 import Raylib.Types (Color (Color), MouseButton (MouseButtonLeft), Texture, p'texture'height, p'texture'width)
-import Raylib.Util (inGHCi, raylibApplication)
+import Raylib.Util (raylibApplication)
 import Raylib.Util.Colors (black, green, maroon, rayWhite)
 
 texPath :: String

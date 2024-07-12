@@ -2,12 +2,7 @@
 module Main where
 
 import Paths_h_raylib (getDataFileName)
-import Control.Monad (unless, void)
-import Raylib.Core
-  ( changeDirectory,
-    clearBackground,
-    getApplicationDirectory,
-  )
+import Raylib.Core (clearBackground)
 import Raylib.Core.Text (drawText)
 import Raylib.Core.Textures
   ( drawTexture,
@@ -18,7 +13,7 @@ import Raylib.Core.Textures
     loadTextureFromImage,
   )
 import Raylib.Types (Rectangle (Rectangle), RenderTexture (renderTexture'texture), pattern Vector2)
-import Raylib.Util (drawing, inGHCi, textureMode, whileWindowOpen0, withWindow, managed)
+import Raylib.Util (drawing, textureMode, whileWindowOpen0, withWindow, managed)
 import Raylib.Util.Colors (black, lightGray, orange, white)
 
 logoPath :: String

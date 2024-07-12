@@ -2,11 +2,10 @@
 module Main where
 
 import Paths_h_raylib (getDataFileName)
-import Control.Monad (unless, void)
-import Raylib.Core (changeDirectory, clearBackground, getApplicationDirectory, initWindow, setTargetFPS, windowShouldClose, closeWindow)
+import Raylib.Core (clearBackground, initWindow, setTargetFPS, windowShouldClose, closeWindow)
 import Raylib.Core.Audio (closeAudioDevice, initAudioDevice, loadMusicStream, playMusicStream, updateMusicStream)
 import Raylib.Core.Text (drawText)
-import Raylib.Util (drawing, inGHCi, whileWindowOpen0, withWindow, managed, WindowResources, raylibApplication)
+import Raylib.Util (drawing, managed, WindowResources, raylibApplication)
 import Raylib.Util.Colors (lightGray, rayWhite)
 import Raylib.Types (Music)
 

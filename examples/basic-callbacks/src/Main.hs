@@ -2,9 +2,9 @@
 module Main where
 
 import Paths_h_raylib (getDataFileName)
-import Raylib.Core (clearBackground, initWindow, setTargetFPS, windowShouldClose, closeWindow, setLoadFileTextCallback, loadFileText, getApplicationDirectory)
+import Raylib.Core (clearBackground, initWindow, setTargetFPS, windowShouldClose, closeWindow, setLoadFileTextCallback, loadFileText)
 import Raylib.Core.Text (drawText)
-import Raylib.Util (drawing, raylibApplication, WindowResources, inGHCi, managed)
+import Raylib.Util (drawing, raylibApplication, WindowResources, managed)
 import Raylib.Util.Colors (black, rayWhite)
 
 filePath :: String

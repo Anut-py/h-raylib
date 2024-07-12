@@ -22,7 +22,7 @@ module Raylib.Util
 
     -- * Resource management
     WindowResources,
-    Closeable (..),
+    Closeable (close),
     managed,
 
     -- * Miscellaneous

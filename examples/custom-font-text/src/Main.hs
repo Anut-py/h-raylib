@@ -3,17 +3,11 @@
 module Main where
 
 import Paths_h_raylib (getDataFileName)
-import Control.Monad (unless, void)
 import Foreign (fromBool)
-import Raylib.Core
-  ( changeDirectory,
-    clearBackground,
-    getApplicationDirectory,
-    isKeyPressed,
-  )
+import Raylib.Core (clearBackground, isKeyPressed)
 import Raylib.Core.Text (drawText, drawTextEx, loadFont)
 import Raylib.Types (KeyboardKey (KeyDown, KeyUp), pattern Vector2)
-import Raylib.Util (inGHCi, whileWindowOpen_, withWindow, drawing, managed)
+import Raylib.Util (whileWindowOpen_, withWindow, drawing, managed)
 import Raylib.Util.Colors (black, rayWhite)
 
 mainFontPath :: String
