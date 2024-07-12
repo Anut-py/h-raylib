@@ -3,7 +3,6 @@
 module Main where
 
 import Paths_h_raylib (getDataFileName)
-import Control.Monad (unless, void)
 import Raylib.Core (clearBackground)
 import Raylib.Core.Models (drawGrid)
 import Raylib.Core.Textures (loadTexture)
