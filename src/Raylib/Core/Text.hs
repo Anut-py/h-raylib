@@ -61,11 +61,11 @@ module Raylib.Core.Text
     c'getCodepointCount,
     c'getCodepointNext,
     c'getCodepointPrevious,
-    c'codepointToUTF8
+    c'codepointToUTF8,
   )
 where
 
-import Foreign (Ptr, Storable (peek, sizeOf), toBool)
+import Foreign (Ptr, Storable (peek, sizeOf), nullPtr, toBool)
 import Foreign.C
   ( CBool (..),
     CFloat (..),
@@ -136,17 +136,49 @@ getFontDefault = c'getFontDefault >>= pop
 loadFont :: String -> IO Font
 loadFont fileName = withCString fileName c'loadFont >>= pop
 
-loadFontEx :: String -> Int -> [Int] -> Int -> IO Font
-loadFontEx fileName fontSize fontChars glyphCount = withCString fileName (\f -> withFreeableArray (map fromIntegral fontChars) (\c -> c'loadFontEx f (fromIntegral fontSize) c (fromIntegral glyphCount))) >>= pop
+loadFontEx :: String -> Int -> Maybe [Int] -> IO Font
+loadFontEx fileName fontSize codepoints =
+  withCString
+    fileName
+    ( \f -> case codepoints of
+        Just codepoints' -> withFreeableArrayLen (map fromIntegral codepoints') (\l c -> c'loadFontEx f (fromIntegral fontSize) c (fromIntegral l))
+        Nothing -> c'loadFontEx f (fromIntegral fontSize) nullPtr 0
+    )
+    >>= pop
 
 loadFontFromImage :: Image -> Color -> Int -> IO Font
 loadFontFromImage image key firstChar = withFreeable image (\i -> withFreeable key (\k -> c'loadFontFromImage i k (fromIntegral firstChar))) >>= pop
 
-loadFontFromMemory :: String -> [Integer] -> Int -> [Int] -> Int -> IO Font
-loadFontFromMemory fileType fileData fontSize fontChars glyphCount = withCString fileType (\t -> withFreeableArrayLen (map fromIntegral fileData) (\size d -> withFreeableArray (map fromIntegral fontChars) (\c -> c'loadFontFromMemory t d (fromIntegral $ size * sizeOf (0 :: CUChar)) (fromIntegral fontSize) c (fromIntegral glyphCount)))) >>= pop
+loadFontFromMemory :: String -> [Integer] -> Int -> Maybe [Int] -> IO Font
+loadFontFromMemory fileType fileData fontSize codepoints =
+  withCString
+    fileType
+    ( \t ->
+        withFreeableArrayLen
+          (map fromIntegral fileData)
+          ( \size d ->
+              case codepoints of
+                Just codepoints' ->
+                  withFreeableArrayLen
+                    (map fromIntegral codepoints')
+                    ( \l c -> c'loadFontFromMemory t d (fromIntegral $ size * sizeOf (0 :: CUChar)) (fromIntegral fontSize) c (fromIntegral l)
+                    )
+                Nothing -> c'loadFontFromMemory t d (fromIntegral $ size * sizeOf (0 :: CUChar)) (fromIntegral fontSize) nullPtr 0
+          )
+    )
+    >>= pop
 
-loadFontData :: [Integer] -> Int -> [Int] -> Int -> FontType -> IO GlyphInfo
-loadFontData fileData fontSize fontChars glyphCount fontType = withFreeableArrayLen (map fromIntegral fileData) (\size d -> withFreeableArray (map fromIntegral fontChars) (\c -> c'loadFontData d (fromIntegral $ size * sizeOf (0 :: CUChar)) (fromIntegral fontSize) c (fromIntegral glyphCount) (fromIntegral $ fromEnum fontType))) >>= pop
+loadFontData :: [Integer] -> Int -> Maybe [Int] -> FontType -> IO GlyphInfo
+loadFontData fileData fontSize codepoints fontType =
+  withFreeableArrayLen
+    (map fromIntegral fileData)
+    ( \size d ->
+        case codepoints of
+          Just codepoints' ->
+            withFreeableArrayLen (map fromIntegral codepoints') (\l c -> c'loadFontData d (fromIntegral (size * sizeOf (0 :: CUChar))) (fromIntegral fontSize) c (fromIntegral l) (fromIntegral (fromEnum fontType)))
+          Nothing -> c'loadFontData d (fromIntegral (size * sizeOf (0 :: CUChar))) (fromIntegral fontSize) nullPtr 0 (fromIntegral (fromEnum fontType))
+    )
+    >>= pop
 
 genImageFontAtlas :: [GlyphInfo] -> [[Rectangle]] -> Int -> Int -> Int -> Int -> IO Image
 genImageFontAtlas chars recs glyphCount fontSize padding packMethod = withFreeableArray chars (\c -> withFreeableArray2D recs (\r -> c'genImageFontAtlas c r (fromIntegral glyphCount) (fromIntegral fontSize) (fromIntegral padding) (fromIntegral packMethod))) >>= pop
