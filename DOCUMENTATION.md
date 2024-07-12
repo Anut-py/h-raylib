@@ -1,12 +1,41 @@
 # h-raylib documentation
 
-This file only contains h-raylib specific information. For documentation on individual functions, check the [raylib cheatsheet](https://www.raylib.com/cheatsheet/cheatsheet.html) and the [h-raylib Haddock documentation](https://hackage.haskell.org/package/h-raylib). You can also look at the examples included here in the `examples` directory (written in Haskell), or you can look at the more extensive set of examples [on the raylib website](https://www.raylib.com/examples.html) (written in C). For information about raylib in general, view the [raylib wiki](https://github.com/raysan5/raylib/wiki).
-
-For regular users of the library, the Haddock documentation should be more than enough (although much of it is auto-generated, so make sure to create an issue if you find anything that seems wrong). The documentation included here is more useful for contributors or anyone who wants to learn about how h-raylib works internally.
+This file only contains h-raylib specific information. For documentation on individual functions, check the [raylib cheatsheet](https://www.raylib.com/cheatsheet/cheatsheet.html) and the [h-raylib Haddock documentation (incomplete)](https://hackage.haskell.org/package/h-raylib). You can also look at the examples included here in the `examples` directory (written in Haskell), or you can look at the more extensive set of examples [on the raylib website](https://www.raylib.com/examples.html) (written in C). For information about raylib in general, view the [raylib wiki](https://github.com/raysan5/raylib/wiki).
 
 ## Versioning scheme
 
 The first two numbers in the version track the underlying C raylib version. For example, `5.1.x.x` versions use raylib 5.1 under the hood. The third number represents breaking changes (renamed/deleted functions or modules). The last number represents non-breaking changes (new functions or modules, bug fixes, etc).
+
+## Memory management
+
+### Automatic management flow (recommended)
+
+This flow is the one used in most of the example programs and should be used unless it is absolutely necessary not to.
+
+1. A `WindowResources` handle is retrieved by calling `initWindow`
+2. A `load*` function is called (e.g. `loadModel`) along with `managed` (e.g. `model <- managed window $ loadModel filePath`, where `window :: WindowResources`)
+3. The data is loaded
+4. Any data that requires extra functions be called to unload it is automatically stored in the `WindowResources` handle
+5. The window is closed and `closeWindow` is called with the `WindowResources` handle (`closeWindow (Just window)`)
+6. All the data stored in the handle is now automatically unloaded
+
+In some cases, models and other data used by a program are extremely large and thus expensive to keep in memory for the entire duration of the program. For this reason, the `unload*` functions are available to manually unload auto-managed data on the fly (be sure *not* to use the `close` function on automatically managed resources).
+
+Make sure to take a look at the examples to get a better understanding of this.
+
+### Manual management flow
+
+In some cases, you may want to opt out of automatic memory management, like so:
+
+1. `initWindowUnmanaged` is called (it does not return a `WindowResources` handle)
+2. A `load*` function is called *without* using `managed` (e.g. `model <- loadModel filePath`)
+3. The data is loaded
+4. The data must be manually unloaded with `close` (e.g. `close model`)
+5. The window is closed by calling `closeWindow` without a `WindowResources` handle (`closeWindow Nothing`)
+
+Note that if you are using the automatic memory management flow, then you can still load unmanaged resources by simply omitting `managed` when loading something (e.g. `model <- loadModel filePath`); however, you will still have to unload it manually with `close`, just like in the manual management flow.
+
+The `Raylib.Internal` module is available for advanced users who want to create their own `WindowResources` object and manually add resources to it. This should be used with caution; it is error-prone, and in the vast majority of cases, simply using the automatic or manual management flows is sufficient.
 
 ## Project structure
 
@@ -16,27 +45,8 @@ h-raylib contains bindings for raylib.h, raymath.h, rcamera.h, rlgl.h, and raygu
 
 The binding functions in h-raylib are an almost one-to-one mapping to their corresponding raylib functions. The types and functions are, in some cases, slightly modified if it is possible to utilize Haskell features.
 
-The `initWindow` function (Raylib.Core) returns a `WindowResources` value that must be passed to some `load*` functions and several other functions. 
-
-The `unload*` functions are optional; even if you do not call them, all assets used by a program will be automatically be unloaded when it terminates. For some types (e.g. `Image`), an unloading function is not necessary.
-
-These changes are for automatic memory management. See the "Memory management" section for details.
+The `initWindow` function (Raylib.Core) returns a `WindowResources` value that must be passed to the `managed` function for automatic memory management.
 
 (Most) functions that took a pointer as an argument in C were changed to take a regular type as an argument and return an updated version of the argument (there are a few exceptions, because `Ptr`s are difficult to avoid in some cases).
 
 You can also access the underlying C functions by prepending `c'` to the function name (e.g. `c'initWindow`). This may be necessary for performance reasons. Note that if you do this, you will have to manually unload and free everything.
-
-## Memory management
-
-The automatic memory management flow is as follows:
-
-1. A `WindowResources` value is retrieved by calling `initWindow`.
-2. A `load*` function is called (e.g. `loadModel`).
-3. The data is loaded.
-4. Any data that requires extra functions be called to unload it is stored in `Raylib.Internal` (e.g. shaders need to be freed from the GPU).
-5. The window is closed and `closeWindow` is called.
-6. All the data stored in `Raylib.Internal` is now unloaded (e.g. `rlUnloadShaderProgram` is called on all loaded shaders).
-
-Keep in mind that this is all automatic; no extra action in the code is necessary for this to happen. Take a look at `Raylib.Internal` to see the functions used for this.
-
-In some cases, models and other data used by a program are extremely large and thus expensive to keep in memory for the entire duration of the program. For this reason, the `unload*` functions are available to manually unload data on the fly.

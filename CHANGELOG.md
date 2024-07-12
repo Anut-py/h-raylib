@@ -1,5 +1,14 @@
 # h-raylib changelog
 
+## Version 5.5.0.0
+_12 July 2024_
+
+- **BREAKING CHANGE**: Reimplemented `Vector2/3/4` using `linear`'s `V2/3/4`
+- \[[#55](https://github.com/Anut-py/h-raylib/issues/55)\] **BREAKING CHANGE**: Completely reworked memory management (check `DOCUMENTATION.md` and the example programs)
+- Dropped ghc 8.10 support
+- \[[#54](https://github.com/Anut-py/h-raylib/issues/54)\] Exposed internal modules
+- \[[#56](https://github.com/Anut-py/h-raylib/issues/56)\] Fixed a bug with `loadFontEx` and other font-related functions not working
+
 ## Version 5.1.3.0
 _13 April, 2024_
 
@@ -22,27 +31,15 @@ _22 February, 2024_
 - Added support for callbacks
 - Added more thorough Haddock documentation
 - Added pointer utility functions (`p'*`)
-
-\[[#4](https://github.com/Anut-py/h-raylib/issues/4)\]
-
-- Started working on web support
-
-\[[#34](https://github.com/Anut-py/h-raylib/issues/34)\]
-
-- Added bindings for raygui (`Raylib.Util.GUI`, `Raylib.Util.GUI.Styles`)
+- \[[#4](https://github.com/Anut-py/h-raylib/issues/4)\] Started working on web support
+- \[[#34](https://github.com/Anut-py/h-raylib/issues/34)\] Added bindings for raygui (`Raylib.Util.GUI`, `Raylib.Util.GUI.Styles`)
 
 ## Version 5.1.0.1
 _16 January, 2024_
 
 - Updated raylib to the master branch
-
-\[[#26](https://github.com/Anut-py/h-raylib/pull/26)\]
-
-- New `platform-nixos` build flag
-
-\[[#27](https://github.com/Anut-py/h-raylib/pull/27), [#35](https://github.com/Anut-py/h-raylib/pull/35)\]
-
-- Added flake.nix
+- \[[#26](https://github.com/Anut-py/h-raylib/pull/26)\] New `platform-nixos` build flag
+- \[[#27](https://github.com/Anut-py/h-raylib/pull/27), [#35](https://github.com/Anut-py/h-raylib/pull/35)\] Added flake.nix
 
 ## Version 4.6.0.7
 _10 September, 2023_
@@ -57,35 +54,21 @@ _24 July, 2023_
 ## Version 4.6.0.5
 _29 June, 2023_
 
-\[[#22](https://github.com/Anut-py/h-raylib/pull/22)\]
-
-- Allowed `base-4.18` to support GHC 9.4 and higher
-
-\[[#23](https://github.com/Anut-py/h-raylib/pull/23)\]
-
-- Added helper functions in `Raylib.Util` as an alternative to the `begin*` and `end*` functions
+- \[[#22](https://github.com/Anut-py/h-raylib/pull/22)\] Allowed `base-4.18` to support GHC 9.4 and higher
+- \[[#23](https://github.com/Anut-py/h-raylib/pull/23)\] Added helper functions in `Raylib.Util` as an alternative to the `begin*` and `end*` functions
 
 ## Version 4.6.0.4
 _16 June, 2023_
 
 - Updated raylib to the master branch
-
-\[[#19](https://github.com/Anut-py/h-raylib/pull/19)\]
-
-- Changed all the `Raylib.Util` functions to use `MonadIO` for flexibility
-
-\[[#20](https://github.com/Anut-py/h-raylib/pull/20)\]
-
-- Changed `CFloat` to `Float` in `drawCapsule` and `drawCapsuleWires`
+- \[[#19](https://github.com/Anut-py/h-raylib/pull/19)\] Changed all the `Raylib.Util` functions to use `MonadIO` for flexibility
+- \[[#20](https://github.com/Anut-py/h-raylib/pull/20)\] Changed `CFloat` to `Float` in `drawCapsule` and `drawCapsuleWires`
 
 ## Version 4.6.0.3
 _23 April, 2023_
 
 - Updated raylib to the master branch
-
-\[[#18](https://github.com/Anut-py/h-raylib/pull/18)\]
-
-- Added lenses for raylib data structures
+- \[[#18](https://github.com/Anut-py/h-raylib/pull/18)\] Added lenses for raylib data structures
 
 ## Version 4.6.0.2
 _8 April, 2023_
@@ -97,10 +80,7 @@ _8 April, 2023_
 _2 April, 2023_
 
 - Created the `Raylib.Util.Math` and `Raylib.Util.Camera` modules. They are Haskell implementations of `raymath` and `rcamera`.
-
-\[[#15](https://github.com/Anut-py/h-raylib/pull/15)\]
-
-- Fixed a memory issue with `getFontDefault`
+- \[[#15](https://github.com/Anut-py/h-raylib/pull/15)\] Fixed a memory issue with `getFontDefault`
 
 ## Version 4.5.3.4
 _19 March, 2023_
@@ -117,19 +97,14 @@ _15 March, 2023_
 ## Version 4.5.3.2
 _1 March, 2023_
 
-\[[#12](https://github.com/Anut-py/h-raylib/pull/12)\]
-
-- Added rlgl bindings (`Raylib.Util.RLGL`)
+- \[[#12](https://github.com/Anut-py/h-raylib/pull/12)\] Added rlgl bindings (`Raylib.Util.RLGL`)
 
 ## Version 4.5.3.1
 _27 February, 2023_
 
 - Added manual asset unloading functions
 - Updated raylib to the master branch
-
-\[[#11](https://github.com/Anut-py/h-raylib/pull/11)\]
-
-- Fixed a build issue on MacOS
+- \[[#11](https://github.com/Anut-py/h-raylib/pull/11)\] Fixed a build issue on MacOS
 
 ## Version 4.5.3.0
 _24 February, 2023_
@@ -159,10 +134,7 @@ _12 February, 2023_
 - **BREAKING CHANGE**: Changed all types to minimize usage of `Ptr`s
 - **BREAKING CHANGE**: Split the `Raylib` module into six modules: `Raylib.Audio`, `Raylib.Core`, `Raylib.Models`, `Raylib.Shapes`, `Raylib.Text`, and `Raylib.Textures`
 - Added the internal `Freeable` typeclass to prevent memory leaks
-
-\[[#8](https://github.com/Anut-py/h-raylib/issues/8)\]
-
-- Added `Xext` as a dependency again
+- \[[#8](https://github.com/Anut-py/h-raylib/issues/8)\] Added `Xext` as a dependency again
 
 ## Version 4.5.0.12
 _14 January, 2023_
@@ -189,9 +161,7 @@ _23 December, 2022_
 ## Version 4.5.0.8
 _18 December, 2022_
 
-\[[#9](https://github.com/Anut-py/h-raylib/issues/9)\]
-
-- Fixed an issue on Mac where `clang` failed to detect that `rglfw.c` was using objective-c
+- \[[#9](https://github.com/Anut-py/h-raylib/issues/9)\] Fixed an issue on Mac where `clang` failed to detect that `rglfw.c` was using objective-c
 
 ## Version 4.5.0.7
 _26 November, 2022_
@@ -205,9 +175,7 @@ _26 November, 2022_
 ## Version 4.5.0.6
 _24 November, 2022_
 
-\[[#6](https://github.com/Anut-py/h-raylib/issues/6)\]
-
-- Fixed `Font` marshalling
+- \[[#6](https://github.com/Anut-py/h-raylib/issues/6)\] Fixed `Font` marshalling
 
 ## Version 4.5.0.5
 _19 November, 2022_
