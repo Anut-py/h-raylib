@@ -74,6 +74,7 @@ module Raylib.Util.Math
     matrixPerspective,
     matrixOrtho,
     matrixLookAt,
+    matrixDecompose,
 
     -- * Quaternion math
     quaternionIdentity,
@@ -933,6 +934,35 @@ matrixLookAt eye target up = Matrix xx xy xz (-vx |.| eye) yx yy yz (-vy |.| eye
     vz@(Vector3 zx zy zz) = vectorNormalize $ eye |-| target
     vx@(Vector3 xx xy xz) = vectorNormalize $ vector3CrossProduct up vz
     vy@(Vector3 yx yy yz) = vector3CrossProduct vz vx
+
+-- | Decompose a transformation matrix into its rotational, translational and scaling components
+matrixDecompose :: Matrix -> (Vector3, Quaternion, Vector3)
+matrixDecompose (Matrix m0 m4 m8 m12 m1 m5 m9 m13 m2 m6 m10 m14 m3 m7 m11 m15) =
+  (translation, rotation, scale)
+  where
+    a = m0
+    b = m4
+    c = m8
+    d = m1
+    e = m5
+    f = m9
+    g = m2
+    h = m6
+    i = m10
+    translation = Vector3 m12 m13 m14
+    a' = e*i - f*h
+    b' = f*g - d*i
+    c' = d*h - e*g
+    det = a*a' + b*b' + c*c'
+    abc = Vector3 a b c
+    def = Vector3 d e f
+    ghi = Vector3 g h i
+    scalex = magnitude abc
+    scaley = magnitude def
+    scalez = magnitude ghi
+    s = Vector3 scalex scaley scalez
+    scale@(Vector3 sx sy sz) = if det < 0 then additiveInverse s else s
+    rotation = if floatEquals det 0 then quaternionIdentity else quaternionFromMatrix (Matrix (m0 / sx) m4 m8 m12 m1 (m5 / sy) m9 m13 m2 m6 (m10 / sz) m14 m3 m7 m11 m15)
 
 ------------------------------------------------
 -- Quaternion math -----------------------------

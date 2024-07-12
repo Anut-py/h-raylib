@@ -25,6 +25,7 @@ module Raylib.Core.Textures
     genImageCellular,
     genImageText,
     imageFromImage,
+    imageFromChannel,
     imageText,
     imageTextEx,
     imageFormat,
@@ -69,6 +70,11 @@ module Raylib.Core.Textures
     imageDrawRectangleV,
     imageDrawRectangleRec,
     imageDrawRectangleLines,
+    imageDrawTriangle,
+    imageDrawTriangleEx,
+    imageDrawTriangleLines,
+    imageDrawTriangleFan,
+    imageDrawTriangleStrip,
     imageDraw,
     imageDrawText,
     imageDrawTextEx,
@@ -132,6 +138,7 @@ module Raylib.Core.Textures
     c'genImageText,
     c'imageCopy,
     c'imageFromImage,
+    c'imageFromChannel,
     c'imageText,
     c'imageTextEx,
     c'imageFormat,
@@ -176,6 +183,11 @@ module Raylib.Core.Textures
     c'imageDrawRectangleV,
     c'imageDrawRectangleRec,
     c'imageDrawRectangleLines,
+    c'imageDrawTriangle,
+    c'imageDrawTriangleEx,
+    c'imageDrawTriangleLines,
+    c'imageDrawTriangleFan,
+    c'imageDrawTriangleStrip,
     c'imageDraw,
     c'imageDrawText,
     c'imageDrawTextEx,
@@ -284,6 +296,7 @@ $( genNative
        ("c'genImageText", "GenImageText_", "rl_bindings.h", [t|CInt -> CInt -> CString -> IO (Ptr Image)|], False),
        ("c'imageCopy", "ImageCopy_", "rl_bindings.h", [t|Ptr Image -> IO (Ptr Image)|], False),
        ("c'imageFromImage", "ImageFromImage_", "rl_bindings.h", [t|Ptr Image -> Ptr Rectangle -> IO (Ptr Image)|], False),
+       ("c'imageFromChannel", "ImageFromChannel_", "rl_bindings.h", [t|Ptr Image -> CInt -> IO (Ptr Image)|], False),
        ("c'imageText", "ImageText_", "rl_bindings.h", [t|CString -> CInt -> Ptr Color -> IO (Ptr Image)|], False),
        ("c'imageTextEx", "ImageTextEx_", "rl_bindings.h", [t|Ptr Font -> CString -> CFloat -> CFloat -> Ptr Color -> IO (Ptr Image)|], False),
        ("c'imageFormat", "ImageFormat_", "rl_bindings.h", [t|Ptr Image -> CInt -> IO ()|], False),
@@ -328,6 +341,11 @@ $( genNative
        ("c'imageDrawRectangleV", "ImageDrawRectangleV_", "rl_bindings.h", [t|Ptr Image -> Ptr Vector2 -> Ptr Vector2 -> Ptr Color -> IO ()|], False),
        ("c'imageDrawRectangleRec", "ImageDrawRectangleRec_", "rl_bindings.h", [t|Ptr Image -> Ptr Rectangle -> Ptr Color -> IO ()|], False),
        ("c'imageDrawRectangleLines", "ImageDrawRectangleLines_", "rl_bindings.h", [t|Ptr Image -> Ptr Rectangle -> CInt -> Ptr Color -> IO ()|], False),
+       ("c'imageDrawTriangle", "ImageDrawTriangle_", "rl_bindings.h", [t|Ptr Image -> Ptr Vector2 -> Ptr Vector2 -> Ptr Vector2 -> Ptr Color -> IO ()|], False),
+       ("c'imageDrawTriangleEx", "ImageDrawTriangleEx_", "rl_bindings.h", [t|Ptr Image -> Ptr Vector2 -> Ptr Vector2 -> Ptr Vector2 -> Ptr Color -> Ptr Color -> Ptr Color -> IO ()|], False),
+       ("c'imageDrawTriangleLines", "ImageDrawTriangleLines_", "rl_bindings.h", [t|Ptr Image -> Ptr Vector2 -> Ptr Vector2 -> Ptr Vector2 -> Ptr Color -> IO ()|], False),
+       ("c'imageDrawTriangleFan", "ImageDrawTriangleFan_", "rl_bindings.h", [t|Ptr Image -> Ptr Vector2 -> CInt -> Ptr Color -> IO ()|], False),
+       ("c'imageDrawTriangleStrip", "ImageDrawTriangleStrip_", "rl_bindings.h", [t|Ptr Image -> Ptr Vector2 -> CInt -> Ptr Color -> IO ()|], False),
        ("c'imageDraw", "ImageDraw_", "rl_bindings.h", [t|Ptr Image -> Ptr Image -> Ptr Rectangle -> Ptr Rectangle -> Ptr Color -> IO ()|], False),
        ("c'imageDrawText", "ImageDrawText_", "rl_bindings.h", [t|Ptr Image -> CString -> CInt -> CInt -> CInt -> Ptr Color -> IO ()|], False),
        ("c'imageDrawTextEx", "ImageDrawTextEx_", "rl_bindings.h", [t|Ptr Image -> Ptr Font -> CString -> Ptr Vector2 -> CFloat -> CFloat -> Ptr Color -> IO ()|], False),
@@ -486,13 +504,16 @@ genImageText width height text =
 imageFromImage :: Image -> Rectangle -> IO Image
 imageFromImage image rect = withFreeable image (withFreeable rect . c'imageFromImage) >>= pop
 
+imageFromChannel :: Image -> Int -> IO Image
+imageFromChannel image channel = withFreeable image (\i -> c'imageFromChannel i (fromIntegral channel)) >>= pop
+
 imageText :: String -> Int -> Color -> IO Image
 imageText text fontSize color =
-  withCString text (\t -> withFreeable color $ c'imageText t (fromIntegral fontSize)) >>= pop
+  withCString text (\t -> withFreeable color (c'imageText t (fromIntegral fontSize))) >>= pop
 
 imageTextEx :: Font -> String -> Float -> Float -> Color -> IO Image
 imageTextEx font text fontSize spacing tint =
-  withFreeable font (\f -> withCString text (\t -> withFreeable tint $ c'imageTextEx f t (realToFrac fontSize) (realToFrac spacing))) >>= pop
+  withFreeable font (\f -> withCString text (\t -> withFreeable tint (c'imageTextEx f t (realToFrac fontSize) (realToFrac spacing)))) >>= pop
 
 imageFormat :: Image -> PixelFormat -> IO Image
 imageFormat image newFormat =
@@ -636,6 +657,21 @@ imageDrawRectangleRec image rectangle color = withFreeable image (\i -> withFree
 
 imageDrawRectangleLines :: Image -> Rectangle -> Int -> Color -> IO Image
 imageDrawRectangleLines image rectangle thickness color = withFreeable image (\i -> withFreeable rectangle (\r -> withFreeable color (c'imageDrawRectangleLines i r (fromIntegral thickness))) >> peek i)
+
+imageDrawTriangle :: Image -> Vector2 -> Vector2 -> Vector2 -> Color -> IO Image
+imageDrawTriangle image v1 v2 v3 color = withFreeable image (\i -> withFreeable v1 (\p1 -> withFreeable v2 (\p2 -> withFreeable v3 (\p3 -> withFreeable color (\c -> c'imageDrawTriangle i p1 p2 p3 c)))) >> peek i)
+
+imageDrawTriangleEx :: Image -> Vector2 -> Vector2 -> Vector2 -> Color -> Color -> Color -> IO Image
+imageDrawTriangleEx image v1 v2 v3 c1 c2 c3 = withFreeable image (\i -> withFreeable v1 (\p1 -> withFreeable v2 (\p2 -> withFreeable v3 (\p3 -> withFreeable c1 (\q1 -> withFreeable c2 (\q2 -> withFreeable c3 (\q3 -> c'imageDrawTriangleEx i p1 p2 p3 q1 q2 q3)))))) >> peek i)
+
+imageDrawTriangleLines :: Image -> Vector2 -> Vector2 -> Vector2 -> Color -> IO Image
+imageDrawTriangleLines image v1 v2 v3 color = withFreeable image (\i -> withFreeable v1 (\p1 -> withFreeable v2 (\p2 -> withFreeable v3 (\p3 -> withFreeable color (\c -> c'imageDrawTriangleLines i p1 p2 p3 c)))) >> peek i)
+
+imageDrawTriangleFan :: Image -> [Vector2] -> Color -> IO Image
+imageDrawTriangleFan image points color = withFreeable image (\i -> withFreeableArrayLen points (\l p -> withFreeable color (c'imageDrawTriangleFan i p (fromIntegral l))) >> peek i)
+
+imageDrawTriangleStrip :: Image -> [Vector2] -> Color -> IO Image
+imageDrawTriangleStrip image points color = withFreeable image (\i -> withFreeableArrayLen points (\l p -> withFreeable color (c'imageDrawTriangleStrip i p (fromIntegral l))) >> peek i)
 
 imageDraw :: Image -> Image -> Rectangle -> Rectangle -> Color -> IO Image
 imageDraw image source srcRec dstRec tint = withFreeable image (\i -> withFreeable source (\s -> withFreeable srcRec (\sr -> withFreeable dstRec (withFreeable tint . c'imageDraw i s sr))) >> peek i)

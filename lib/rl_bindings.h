@@ -282,6 +282,8 @@ Image *ImageCopy_(Image *a);
 
 Image *ImageFromImage_(Image *a, Rectangle *b);
 
+Image *ImageFromChannel_(Image *a, int b);
+
 Image *ImageText_(char *a, int b, Color *c);
 
 Image *ImageTextEx_(Font *a, char *b, float c, float d, Color *e);
@@ -333,6 +335,16 @@ void ImageDrawRectangleV_(Image *a, Vector2 *b, Vector2 *c, Color *d);
 void ImageDrawRectangleRec_(Image *a, Rectangle *b, Color *c);
 
 void ImageDrawRectangleLines_(Image *a, Rectangle *b, int c, Color *d);
+
+void ImageDrawTriangle_(Image *a, Vector2 *b, Vector2 *c, Vector2 *d, Color *e);
+
+void ImageDrawTriangleEx_(Image *a, Vector2 *b, Vector2 *c, Vector2 *d, Color *e, Color *f, Color *g);
+
+void ImageDrawTriangleLines_(Image *a, Vector2 *b, Vector2 *c, Vector2 *d, Color *e);
+
+void ImageDrawTriangleFan_(Image *a, Vector2 *b, int c, Color *d);
+
+void ImageDrawTriangleStrip_(Image *a, Vector2 *b, int c, Color *d);
 
 void ImageDraw_(Image *a, Image *b, Rectangle *c, Rectangle *d, Color *e);
 
@@ -1004,7 +1016,7 @@ void ImageAlphaPremultiply_(Image *a);
 
 void ImageBlurGaussian_(Image *a, int b);
 
-void ImageKernelConvolution_(Image *a, float *b, int c);
+void ImageKernelConvolution_(Image *a, const float *b, int c);
 
 void ImageResize_(Image *a, int b, int c);
 

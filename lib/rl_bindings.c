@@ -786,6 +786,13 @@ RLBIND Image *ImageFromImage_(Image *a, Rectangle *b)
     return ptr;
 }
 
+RLBIND Image *ImageFromChannel_(Image *a, int b)
+{
+    Image *ptr = (Image *)malloc(sizeof(Image));
+    *ptr = ImageFromChannel(*a, b);
+    return ptr;
+}
+
 RLBIND Image *ImageText_(char *a, int b, Color *c)
 {
     Image *ptr = (Image *)malloc(sizeof(Image));
@@ -922,6 +929,31 @@ RLBIND void ImageDrawRectangleRec_(Image *a, Rectangle *b, Color *c)
 RLBIND void ImageDrawRectangleLines_(Image *a, Rectangle *b, int c, Color *d)
 {
     ImageDrawRectangleLines(a, *b, c, *d);
+}
+
+RLBIND void ImageDrawTriangle_(Image *a, Vector2 *b, Vector2 *c, Vector2 *d, Color *e)
+{
+    ImageDrawTriangle(a, *b, *c, *d, *e);
+}
+
+RLBIND void ImageDrawTriangleEx_(Image *a, Vector2 *b, Vector2 *c, Vector2 *d, Color *e, Color *f, Color *g)
+{
+    ImageDrawTriangleEx(a, *b, *c, *d, *e, *f, *g);
+}
+
+RLBIND void ImageDrawTriangleLines_(Image *a, Vector2 *b, Vector2 *c, Vector2 *d, Color *e)
+{
+    ImageDrawTriangleLines(a, *b, *c, *d, *e);
+}
+
+RLBIND void ImageDrawTriangleFan_(Image *a, Vector2 *b, int c, Color *d)
+{
+    ImageDrawTriangleFan(a, b, c, *d);
+}
+
+RLBIND void ImageDrawTriangleStrip_(Image *a, Vector2 *b, int c, Color *d)
+{
+    ImageDrawTriangleStrip(a, b, c, *d);
 }
 
 RLBIND void ImageDraw_(Image *a, Image *b, Rectangle *c, Rectangle *d, Color *e)
@@ -2730,7 +2762,7 @@ RLBIND void ImageBlurGaussian_(Image *a, int b)
     ImageBlurGaussian(a, b);
 }
 
-RLBIND void ImageKernelConvolution_(Image *a, float *b, int c)
+RLBIND void ImageKernelConvolution_(Image *a, const float *b, int c)
 {
     ImageKernelConvolution(a, b, c);
 }
