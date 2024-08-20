@@ -112,6 +112,7 @@ module Raylib.Core
     traceLog,
     setTraceLogLevel,
     openURL,
+    setTraceLogCallback,
     setLoadFileDataCallback,
     setSaveFileDataCallback,
     setLoadFileTextCallback,
@@ -482,209 +483,210 @@ import Raylib.Types
     VrDeviceInfo,
     VrStereoConfig,
     unpackShaderUniformData,
-    unpackShaderUniformDataV,
+    unpackShaderUniformDataV, C'TraceLogCallback, TraceLogCallback,
   )
 import GHC.IO (unsafePerformIO)
 
 $( genNative
-     [ ("c'initWindow", "InitWindow_", "rl_bindings.h", [t|CInt -> CInt -> CString -> IO ()|], False),
-       ("c'windowShouldClose", "WindowShouldClose_", "rl_bindings.h", [t|IO CBool|], False),
-       ("c'closeWindow", "CloseWindow_", "rl_bindings.h", [t|IO ()|], False),
-       ("c'isWindowReady", "IsWindowReady_", "rl_bindings.h", [t|IO CBool|], False),
-       ("c'isWindowFullscreen", "IsWindowFullscreen_", "rl_bindings.h", [t|IO CBool|], False),
-       ("c'isWindowHidden", "IsWindowHidden_", "rl_bindings.h", [t|IO CBool|], False),
-       ("c'isWindowMinimized", "IsWindowMinimized_", "rl_bindings.h", [t|IO CBool|], False),
-       ("c'isWindowMaximized", "IsWindowMaximized_", "rl_bindings.h", [t|IO CBool|], False),
-       ("c'isWindowFocused", "IsWindowFocused_", "rl_bindings.h", [t|IO CBool|], False),
-       ("c'isWindowResized", "IsWindowResized_", "rl_bindings.h", [t|IO CBool|], False),
-       ("c'isWindowState", "IsWindowState_", "rl_bindings.h", [t|CUInt -> IO CBool|], False),
-       ("c'setWindowState", "SetWindowState_", "rl_bindings.h", [t|CUInt -> IO ()|], False),
-       ("c'clearWindowState", "ClearWindowState_", "rl_bindings.h", [t|CUInt -> IO ()|], False),
-       ("c'toggleFullscreen", "ToggleFullscreen_", "rl_bindings.h", [t|IO ()|], False),
-       ("c'toggleBorderlessWindowed", "ToggleBorderlessWindowed_", "rl_bindings.h", [t|IO ()|], False),
-       ("c'maximizeWindow", "MaximizeWindow_", "rl_bindings.h", [t|IO ()|], False),
-       ("c'minimizeWindow", "MinimizeWindow_", "rl_bindings.h", [t|IO ()|], False),
-       ("c'restoreWindow", "RestoreWindow_", "rl_bindings.h", [t|IO ()|], False),
-       ("c'setWindowIcon", "SetWindowIcon_", "rl_bindings.h", [t|Ptr Image -> IO ()|], False),
-       ("c'setWindowIcons", "SetWindowIcons_", "rl_bindings.h", [t|Ptr Image -> CInt -> IO ()|], False),
-       ("c'setWindowTitle", "SetWindowTitle_", "rl_bindings.h", [t|CString -> IO ()|], False),
-       ("c'setWindowPosition", "SetWindowPosition_", "rl_bindings.h", [t|CInt -> CInt -> IO ()|], False),
-       ("c'setWindowMonitor", "SetWindowMonitor_", "rl_bindings.h", [t|CInt -> IO ()|], False),
-       ("c'setWindowMinSize", "SetWindowMinSize_", "rl_bindings.h", [t|CInt -> CInt -> IO ()|], False),
-       ("c'setWindowMaxSize", "SetWindowMaxSize_", "rl_bindings.h", [t|CInt -> CInt -> IO ()|], False),
-       ("c'setWindowSize", "SetWindowSize_", "rl_bindings.h", [t|CInt -> CInt -> IO ()|], False),
-       ("c'setWindowOpacity", "SetWindowOpacity_", "rl_bindings.h", [t|CFloat -> IO ()|], False),
-       ("c'setWindowFocused", "SetWindowFocused_", "rl_bindings.h", [t|IO ()|], False),
-       ("c'getWindowHandle", "GetWindowHandle_", "rl_bindings.h", [t|IO (Ptr ())|], False),
-       ("c'getScreenWidth", "GetScreenWidth_", "rl_bindings.h", [t|IO CInt|], False),
-       ("c'getScreenHeight", "GetScreenHeight_", "rl_bindings.h", [t|IO CInt|], False),
-       ("c'getRenderWidth", "GetRenderWidth_", "rl_bindings.h", [t|IO CInt|], False),
-       ("c'getRenderHeight", "GetRenderHeight_", "rl_bindings.h", [t|IO CInt|], False),
-       ("c'getMonitorCount", "GetMonitorCount_", "rl_bindings.h", [t|IO CInt|], False),
-       ("c'getCurrentMonitor", "GetCurrentMonitor_", "rl_bindings.h", [t|IO CInt|], False),
-       ("c'getMonitorPosition", "GetMonitorPosition_", "rl_bindings.h", [t|CInt -> IO (Ptr Vector2)|], False),
-       ("c'getMonitorWidth", "GetMonitorWidth_", "rl_bindings.h", [t|CInt -> IO CInt|], False),
-       ("c'getMonitorHeight", "GetMonitorHeight_", "rl_bindings.h", [t|CInt -> IO CInt|], False),
-       ("c'getMonitorPhysicalWidth", "GetMonitorPhysicalWidth_", "rl_bindings.h", [t|CInt -> IO CInt|], False),
-       ("c'getMonitorPhysicalHeight", "GetMonitorPhysicalHeight_", "rl_bindings.h", [t|CInt -> IO CInt|], False),
-       ("c'getMonitorRefreshRate", "GetMonitorRefreshRate_", "rl_bindings.h", [t|CInt -> IO CInt|], False),
-       ("c'getWindowPosition", "GetWindowPosition_", "rl_bindings.h", [t|IO (Ptr Vector2)|], False),
-       ("c'getWindowScaleDPI", "GetWindowScaleDPI_", "rl_bindings.h", [t|IO (Ptr Vector2)|], False),
-       ("c'getMonitorName", "GetMonitorName_", "rl_bindings.h", [t|CInt -> IO CString|], False),
-       ("c'setClipboardText", "SetClipboardText_", "rl_bindings.h", [t|CString -> IO ()|], False),
-       ("c'getClipboardText", "GetClipboardText_", "rl_bindings.h", [t|IO CString|], False),
-       ("c'enableEventWaiting", "EnableEventWaiting_", "rl_bindings.h", [t|IO ()|], False),
-       ("c'disableEventWaiting", "DisableEventWaiting_", "rl_bindings.h", [t|IO ()|], False),
-       ("c'swapScreenBuffer", "SwapScreenBuffer_", "rl_bindings.h", [t|IO ()|], False),
-       ("c'pollInputEvents", "PollInputEvents_", "rl_bindings.h", [t|IO ()|], False),
-       ("c'waitTime", "WaitTime_", "rl_bindings.h", [t|CDouble -> IO ()|], False),
-       ("c'showCursor", "ShowCursor_", "rl_bindings.h", [t|IO ()|], False),
-       ("c'hideCursor", "HideCursor_", "rl_bindings.h", [t|IO ()|], False),
-       ("c'isCursorHidden", "IsCursorHidden_", "rl_bindings.h", [t|IO CBool|], False),
-       ("c'enableCursor", "EnableCursor_", "rl_bindings.h", [t|IO ()|], False),
-       ("c'disableCursor", "DisableCursor_", "rl_bindings.h", [t|IO ()|], False),
-       ("c'isCursorOnScreen", "IsCursorOnScreen_", "rl_bindings.h", [t|IO CBool|], False),
-       ("c'clearBackground", "ClearBackground_", "rl_bindings.h", [t|Ptr Color -> IO ()|], False),
-       ("c'beginDrawing", "BeginDrawing_", "rl_bindings.h", [t|IO ()|], False),
-       ("c'endDrawing", "EndDrawing_", "rl_bindings.h", [t|IO ()|], False),
-       ("c'beginMode2D", "BeginMode2D_", "rl_bindings.h", [t|Ptr Camera2D -> IO ()|], False),
-       ("c'endMode2D", "EndMode2D_", "rl_bindings.h", [t|IO ()|], False),
-       ("c'beginMode3D", "BeginMode3D_", "rl_bindings.h", [t|Ptr Camera3D -> IO ()|], False),
-       ("c'endMode3D", "EndMode3D_", "rl_bindings.h", [t|IO ()|], False),
-       ("c'beginTextureMode", "BeginTextureMode_", "rl_bindings.h", [t|Ptr RenderTexture -> IO ()|], False),
-       ("c'endTextureMode", "EndTextureMode_", "rl_bindings.h", [t|IO ()|], False),
-       ("c'beginShaderMode", "BeginShaderMode_", "rl_bindings.h", [t|Ptr Shader -> IO ()|], False),
-       ("c'endShaderMode", "EndShaderMode_", "rl_bindings.h", [t|IO ()|], False),
-       ("c'beginBlendMode", "BeginBlendMode_", "rl_bindings.h", [t|CInt -> IO ()|], False),
-       ("c'endBlendMode", "EndBlendMode_", "rl_bindings.h", [t|IO ()|], False),
-       ("c'beginScissorMode", "BeginScissorMode_", "rl_bindings.h", [t|CInt -> CInt -> CInt -> CInt -> IO ()|], False),
-       ("c'endScissorMode", "EndScissorMode_", "rl_bindings.h", [t|IO ()|], False),
-       ("c'beginVrStereoMode", "BeginVrStereoMode_", "rl_bindings.h", [t|Ptr VrStereoConfig -> IO ()|], False),
-       ("c'endVrStereoMode", "EndVrStereoMode_", "rl_bindings.h", [t|IO ()|], False),
-       ("c'loadVrStereoConfig", "LoadVrStereoConfig_", "rl_bindings.h", [t|Ptr VrDeviceInfo -> IO (Ptr VrStereoConfig)|], False),
-       ("c'unloadVrStereoConfig", "UnloadVrStereoConfig_", "rl_bindings.h", [t|Ptr VrStereoConfig -> IO ()|], False),
-       ("c'loadShader", "LoadShader_", "rl_bindings.h", [t|CString -> CString -> IO (Ptr Shader)|], False),
-       ("c'loadShaderFromMemory", "LoadShaderFromMemory_", "rl_bindings.h", [t|CString -> CString -> IO (Ptr Shader)|], False),
-       ("c'isShaderReady", "IsShaderReady_", "rl_bindings.h", [t|Ptr Shader -> IO CBool|], False),
-       ("c'getShaderLocation", "GetShaderLocation_", "rl_bindings.h", [t|Ptr Shader -> CString -> IO CInt|], False),
-       ("c'getShaderLocationAttrib", "GetShaderLocationAttrib_", "rl_bindings.h", [t|Ptr Shader -> CString -> IO CInt|], False),
-       ("c'setShaderValue", "SetShaderValue_", "rl_bindings.h", [t|Ptr Shader -> CInt -> Ptr () -> CInt -> IO ()|], False),
-       ("c'setShaderValueV", "SetShaderValueV_", "rl_bindings.h", [t|Ptr Shader -> CInt -> Ptr () -> CInt -> CInt -> IO ()|], False),
-       ("c'setShaderValueMatrix", "SetShaderValueMatrix_", "rl_bindings.h", [t|Ptr Shader -> CInt -> Ptr Matrix -> IO ()|], False),
-       ("c'setShaderValueTexture", "SetShaderValueTexture_", "rl_bindings.h", [t|Ptr Shader -> CInt -> Ptr Texture -> IO ()|], False),
-       ("c'unloadShader", "UnloadShader_", "rl_bindings.h", [t|Ptr Shader -> IO ()|], False),
-       ("c'getScreenToWorldRay", "GetScreenToWorldRay_", "rl_bindings.h", [t|Ptr Vector2 -> Ptr Camera3D -> IO (Ptr Ray)|], False),
-       ("c'getScreenToWorldRayEx", "GetScreenToWorldRayEx_", "rl_bindings.h", [t|Ptr Vector2 -> Ptr Camera3D -> CFloat -> CFloat -> IO (Ptr Ray)|], False),
-       ("c'getCameraMatrix", "GetCameraMatrix_", "rl_bindings.h", [t|Ptr Camera3D -> IO (Ptr Matrix)|], False),
-       ("c'getCameraMatrix2D", "GetCameraMatrix2D_", "rl_bindings.h", [t|Ptr Camera2D -> IO (Ptr Matrix)|], False),
-       ("c'getWorldToScreen", "GetWorldToScreen_", "rl_bindings.h", [t|Ptr Vector3 -> Ptr Camera3D -> IO (Ptr Vector2)|], False),
-       ("c'getScreenToWorld2D", "GetScreenToWorld2D_", "rl_bindings.h", [t|Ptr Vector2 -> Ptr Camera2D -> IO (Ptr Vector2)|], False),
-       ("c'getWorldToScreenEx", "GetWorldToScreenEx_", "rl_bindings.h", [t|Ptr Vector3 -> Ptr Camera3D -> CInt -> CInt -> IO (Ptr Vector2)|], False),
-       ("c'getWorldToScreen2D", "GetWorldToScreen2D_", "rl_bindings.h", [t|Ptr Vector2 -> Ptr Camera2D -> IO (Ptr Vector2)|], False),
-       ("c'setTargetFPS", "SetTargetFPS_", "rl_bindings.h", [t|CInt -> IO ()|], False),
-       ("c'getFPS", "GetFPS_", "rl_bindings.h", [t|IO CInt|], False),
-       ("c'getFrameTime", "GetFrameTime_", "rl_bindings.h", [t|IO CFloat|], False),
-       ("c'getTime", "GetTime_", "rl_bindings.h", [t|IO CDouble|], False),
-       ("c'setRandomSeed", "SetRandomSeed_", "rl_bindings.h", [t|CUInt -> IO ()|], False),
-       ("c'getRandomValue", "GetRandomValue_", "rl_bindings.h", [t|CInt -> CInt -> IO CInt|], False),
-       ("c'loadRandomSequence", "LoadRandomSequence_", "rl_bindings.h", [t|CUInt -> CInt -> CInt -> IO (Ptr CInt)|], False),
-       ("c'takeScreenshot", "TakeScreenshot_", "rl_bindings.h", [t|CString -> IO ()|], False),
-       ("c'setConfigFlags", "SetConfigFlags_", "rl_bindings.h", [t|CUInt -> IO ()|], False),
-       ("c'traceLog", "TraceLog_", "rl_bindings.h", [t|CInt -> CString -> IO ()|], False), -- Uses varags, can't implement complete functionality
-       ("c'setTraceLogLevel", "SetTraceLogLevel_", "rl_bindings.h", [t|CInt -> IO ()|], False),
-       ("c'memAlloc", "MemAlloc_", "rl_bindings.h", [t|CInt -> IO (Ptr ())|], False),
-       ("c'memRealloc", "MemRealloc_", "rl_bindings.h", [t|Ptr () -> CInt -> IO (Ptr ())|], False),
-       ("c'memFree", "MemFree_", "rl_bindings.h", [t|Ptr () -> IO ()|], False),
-       ("c'openURL", "OpenURL_", "rl_bindings.h", [t|CString -> IO ()|], False),
-       ("c'setLoadFileDataCallback", "SetLoadFileDataCallback_", "rl_bindings.h", [t|C'LoadFileDataCallback -> IO ()|], False),
-       ("c'setSaveFileDataCallback", "SetSaveFileDataCallback_", "rl_bindings.h", [t|C'SaveFileDataCallback -> IO ()|], False),
-       ("c'setLoadFileTextCallback", "SetLoadFileTextCallback_", "rl_bindings.h", [t|C'LoadFileTextCallback -> IO ()|], False),
-       ("c'setSaveFileTextCallback", "SetSaveFileTextCallback_", "rl_bindings.h", [t|C'SaveFileTextCallback -> IO ()|], False),
-       ("c'loadFileData", "LoadFileData_", "rl_bindings.h", [t|CString -> Ptr CInt -> IO (Ptr CUChar)|], True),
-       ("c'unloadFileData", "UnloadFileData_", "rl_bindings.h", [t|Ptr CUChar -> IO ()|], False),
-       ("c'saveFileData", "SaveFileData_", "rl_bindings.h", [t|CString -> Ptr () -> CInt -> IO CBool|], True),
-       ("c'exportDataAsCode", "ExportDataAsCode_", "rl_bindings.h", [t|Ptr CUChar -> CInt -> CString -> IO CBool|], False),
-       ("c'loadFileText", "LoadFileText_", "rl_bindings.h", [t|CString -> IO CString|], True),
-       ("c'unloadFileText", "UnloadFileText_", "rl_bindings.h", [t|CString -> IO ()|], False),
-       ("c'saveFileText", "SaveFileText_", "rl_bindings.h", [t|CString -> CString -> IO CBool|], True),
-       ("c'fileExists", "FileExists_", "rl_bindings.h", [t|CString -> IO CBool|], False),
-       ("c'directoryExists", "DirectoryExists_", "rl_bindings.h", [t|CString -> IO CBool|], False),
-       ("c'isFileExtension", "IsFileExtension_", "rl_bindings.h", [t|CString -> CString -> IO CBool|], False),
-       ("c'getFileLength", "GetFileLength_", "rl_bindings.h", [t|CString -> IO CBool|], False),
-       ("c'getFileExtension", "GetFileExtension_", "rl_bindings.h", [t|CString -> IO CString|], False),
-       ("c'getFileName", "GetFileName_", "rl_bindings.h", [t|CString -> IO CString|], False),
-       ("c'getFileNameWithoutExt", "GetFileNameWithoutExt_", "rl_bindings.h", [t|CString -> IO CString|], False),
-       ("c'getDirectoryPath", "GetDirectoryPath_", "rl_bindings.h", [t|CString -> IO CString|], False),
-       ("c'getPrevDirectoryPath", "GetPrevDirectoryPath_", "rl_bindings.h", [t|CString -> IO CString|], False),
-       ("c'getWorkingDirectory", "GetWorkingDirectory_", "rl_bindings.h", [t|IO CString|], False),
-       ("c'getApplicationDirectory", "GetApplicationDirectory_", "rl_bindings.h", [t|IO CString|], False),
-       ("c'changeDirectory", "ChangeDirectory_", "rl_bindings.h", [t|CString -> IO CBool|], False),
-       ("c'isPathFile", "IsPathFile_", "rl_bindings.h", [t|CString -> IO CBool|], False),
-       ("c'isFileNameValid", "IsFileNameValid_", "rl_bindings.h", [t|CString -> IO CBool|], False),
-       ("c'loadDirectoryFiles", "LoadDirectoryFiles_", "rl_bindings.h", [t|CString -> IO (Ptr FilePathList)|], False),
-       ("c'loadDirectoryFilesEx", "LoadDirectoryFilesEx_", "rl_bindings.h", [t|CString -> CString -> CInt -> IO (Ptr FilePathList)|], False),
-       ("c'unloadDirectoryFiles", "UnloadDirectoryFiles_", "rl_bindings.h", [t|Ptr FilePathList -> IO ()|], False),
-       ("c'isFileDropped", "IsFileDropped_", "rl_bindings.h", [t|IO CBool|], False),
-       ("c'loadDroppedFiles", "LoadDroppedFiles_", "rl_bindings.h", [t|IO (Ptr FilePathList)|], False),
-       ("c'unloadDroppedFiles", "UnloadDroppedFiles_", "rl_bindings.h", [t|Ptr FilePathList -> IO ()|], False),
-       ("c'getFileModTime", "GetFileModTime_", "rl_bindings.h", [t|CString -> IO CLong|], False),
-       ("c'compressData", "CompressData_", "rl_bindings.h", [t|Ptr CUChar -> CInt -> Ptr CInt -> IO (Ptr CUChar)|], False),
-       ("c'decompressData", "DecompressData_", "rl_bindings.h", [t|Ptr CUChar -> CInt -> Ptr CInt -> IO (Ptr CUChar)|], False),
-       ("c'encodeDataBase64", "EncodeDataBase64_", "rl_bindings.h", [t|Ptr CUChar -> CInt -> Ptr CInt -> IO CString|], False),
-       ("c'decodeDataBase64", "DecodeDataBase64_", "rl_bindings.h", [t|Ptr CUChar -> Ptr CInt -> IO (Ptr CUChar)|], False),
-       ("c'loadAutomationEventList", "LoadAutomationEventList_", "rl_bindings.h", [t|CString -> IO (Ptr AutomationEventList)|], False),
-       ("c'exportAutomationEventList", "ExportAutomationEventList_", "rl_bindings.h", [t|Ptr AutomationEventList -> CString -> IO CBool|], False),
-       ("c'setAutomationEventList", "SetAutomationEventList_", "rl_bindings.h", [t|Ptr AutomationEventList -> IO ()|], False),
-       ("c'setAutomationEventBaseFrame", "SetAutomationEventBaseFrame_", "rl_bindings.h", [t|CInt -> IO ()|], False),
-       ("c'startAutomationEventRecording", "StartAutomationEventRecording_", "rl_bindings.h", [t|IO ()|], False),
-       ("c'stopAutomationEventRecording", "StopAutomationEventRecording_", "rl_bindings.h", [t|IO ()|], False),
-       ("c'playAutomationEvent", "PlayAutomationEvent", "rl_bindings.h", [t|Ptr AutomationEvent -> IO ()|], False),
-       ("c'isKeyPressed", "IsKeyPressed_", "rl_bindings.h", [t|CInt -> IO CBool|], False),
-       ("c'isKeyPressedRepeat", "IsKeyPressedRepeat_", "rl_bindings.h", [t|CInt -> IO CBool|], False),
-       ("c'isKeyDown", "IsKeyDown_", "rl_bindings.h", [t|CInt -> IO CBool|], False),
-       ("c'isKeyReleased", "IsKeyReleased_", "rl_bindings.h", [t|CInt -> IO CBool|], False),
-       ("c'isKeyUp", "IsKeyUp_", "rl_bindings.h", [t|CInt -> IO CBool|], False),
-       ("c'setExitKey", "SetExitKey_", "rl_bindings.h", [t|CInt -> IO ()|], False),
-       ("c'getKeyPressed", "GetKeyPressed_", "rl_bindings.h", [t|IO CInt|], False),
-       ("c'getCharPressed", "GetCharPressed_", "rl_bindings.h", [t|IO CInt|], False),
-       ("c'isGamepadAvailable", "IsGamepadAvailable_", "rl_bindings.h", [t|CInt -> IO CBool|], False),
-       ("c'getGamepadName", "GetGamepadName_", "rl_bindings.h", [t|CInt -> IO CString|], False),
-       ("c'isGamepadButtonPressed", "IsGamepadButtonPressed_", "rl_bindings.h", [t|CInt -> CInt -> IO CBool|], False),
-       ("c'isGamepadButtonDown", "IsGamepadButtonDown_", "rl_bindings.h", [t|CInt -> CInt -> IO CBool|], False),
-       ("c'isGamepadButtonReleased", "IsGamepadButtonReleased_", "rl_bindings.h", [t|CInt -> CInt -> IO CBool|], False),
-       ("c'isGamepadButtonUp", "IsGamepadButtonUp_", "rl_bindings.h", [t|CInt -> CInt -> IO CBool|], False),
-       ("c'getGamepadButtonPressed", "GetGamepadButtonPressed_", "rl_bindings.h", [t|IO CInt|], False),
-       ("c'getGamepadAxisCount", "GetGamepadAxisCount_", "rl_bindings.h", [t|CInt -> IO CInt|], False),
-       ("c'getGamepadAxisMovement", "GetGamepadAxisMovement_", "rl_bindings.h", [t|CInt -> CInt -> IO CFloat|], False),
-       ("c'setGamepadMappings", "SetGamepadMappings_", "rl_bindings.h", [t|CString -> IO CInt|], False),
-       ("c'setGamepadVibration", "SetGamepadVibration_", "rl_bindings.h", [t|CInt -> CFloat -> CFloat -> IO ()|], False),
-       ("c'isMouseButtonPressed", "IsMouseButtonPressed_", "rl_bindings.h", [t|CInt -> IO CBool|], False),
-       ("c'isMouseButtonDown", "IsMouseButtonDown_", "rl_bindings.h", [t|CInt -> IO CBool|], False),
-       ("c'isMouseButtonReleased", "IsMouseButtonReleased_", "rl_bindings.h", [t|CInt -> IO CBool|], False),
-       ("c'isMouseButtonUp", "IsMouseButtonUp_", "rl_bindings.h", [t|CInt -> IO CBool|], False),
-       ("c'getMouseX", "GetMouseX_", "rl_bindings.h", [t|IO CInt|], False),
-       ("c'getMouseY", "GetMouseY_", "rl_bindings.h", [t|IO CInt|], False),
-       ("c'getMousePosition", "GetMousePosition_", "rl_bindings.h", [t|IO (Ptr Vector2)|], False),
-       ("c'getMouseDelta", "GetMouseDelta_", "rl_bindings.h", [t|IO (Ptr Vector2)|], False),
-       ("c'setMousePosition", "SetMousePosition_", "rl_bindings.h", [t|CInt -> CInt -> IO ()|], False),
-       ("c'setMouseOffset", "SetMouseOffset_", "rl_bindings.h", [t|CInt -> CInt -> IO ()|], False),
-       ("c'setMouseScale", "SetMouseScale_", "rl_bindings.h", [t|CFloat -> CFloat -> IO ()|], False),
-       ("c'getMouseWheelMove", "GetMouseWheelMove_", "rl_bindings.h", [t|IO CFloat|], False),
-       ("c'getMouseWheelMoveV", "GetMouseWheelMoveV_", "rl_bindings.h", [t|IO (Ptr Vector2)|], False),
-       ("c'setMouseCursor", "SetMouseCursor_", "rl_bindings.h", [t|CInt -> IO ()|], False),
-       ("c'getTouchX", "GetTouchX_", "rl_bindings.h", [t|IO CInt|], False),
-       ("c'getTouchY", "GetTouchY_", "rl_bindings.h", [t|IO CInt|], False),
-       ("c'getTouchPosition", "GetTouchPosition_", "rl_bindings.h", [t|CInt -> IO (Ptr Vector2)|], False),
-       ("c'getTouchPointId", "GetTouchPointId_", "rl_bindings.h", [t|CInt -> IO CInt|], False),
-       ("c'getTouchPointCount", "GetTouchPointCount_", "rl_bindings.h", [t|IO CInt|], False),
-       ("c'setGesturesEnabled", "SetGesturesEnabled_", "rl_bindings.h", [t|CUInt -> IO ()|], False),
-       ("c'isGestureDetected", "IsGestureDetected_", "rl_bindings.h", [t|CUInt -> IO CBool|], False),
-       ("c'getGestureDetected", "GetGestureDetected_", "rl_bindings.h", [t|IO CInt|], False),
-       ("c'getGestureHoldDuration", "GetGestureHoldDuration_", "rl_bindings.h", [t|IO CFloat|], False),
-       ("c'getGestureDragVector", "GetGestureDragVector_", "rl_bindings.h", [t|IO (Ptr Vector2)|], False),
-       ("c'getGestureDragAngle", "GetGestureDragAngle_", "rl_bindings.h", [t|IO CFloat|], False),
-       ("c'getGesturePinchVector", "GetGesturePinchVector_", "rl_bindings.h", [t|IO (Ptr Vector2)|], False),
-       ("c'getGesturePinchAngle", "GetGesturePinchAngle_", "rl_bindings.h", [t|IO CFloat|], False)
+     [ ("c'initWindow", "InitWindow_", "rl_bindings.h", [t|CInt -> CInt -> CString -> IO ()|]),
+       ("c'windowShouldClose", "WindowShouldClose_", "rl_bindings.h", [t|IO CBool|]),
+       ("c'closeWindow", "CloseWindow_", "rl_bindings.h", [t|IO ()|]),
+       ("c'isWindowReady", "IsWindowReady_", "rl_bindings.h", [t|IO CBool|]),
+       ("c'isWindowFullscreen", "IsWindowFullscreen_", "rl_bindings.h", [t|IO CBool|]),
+       ("c'isWindowHidden", "IsWindowHidden_", "rl_bindings.h", [t|IO CBool|]),
+       ("c'isWindowMinimized", "IsWindowMinimized_", "rl_bindings.h", [t|IO CBool|]),
+       ("c'isWindowMaximized", "IsWindowMaximized_", "rl_bindings.h", [t|IO CBool|]),
+       ("c'isWindowFocused", "IsWindowFocused_", "rl_bindings.h", [t|IO CBool|]),
+       ("c'isWindowResized", "IsWindowResized_", "rl_bindings.h", [t|IO CBool|]),
+       ("c'isWindowState", "IsWindowState_", "rl_bindings.h", [t|CUInt -> IO CBool|]),
+       ("c'setWindowState", "SetWindowState_", "rl_bindings.h", [t|CUInt -> IO ()|]),
+       ("c'clearWindowState", "ClearWindowState_", "rl_bindings.h", [t|CUInt -> IO ()|]),
+       ("c'toggleFullscreen", "ToggleFullscreen_", "rl_bindings.h", [t|IO ()|]),
+       ("c'toggleBorderlessWindowed", "ToggleBorderlessWindowed_", "rl_bindings.h", [t|IO ()|]),
+       ("c'maximizeWindow", "MaximizeWindow_", "rl_bindings.h", [t|IO ()|]),
+       ("c'minimizeWindow", "MinimizeWindow_", "rl_bindings.h", [t|IO ()|]),
+       ("c'restoreWindow", "RestoreWindow_", "rl_bindings.h", [t|IO ()|]),
+       ("c'setWindowIcon", "SetWindowIcon_", "rl_bindings.h", [t|Ptr Image -> IO ()|]),
+       ("c'setWindowIcons", "SetWindowIcons_", "rl_bindings.h", [t|Ptr Image -> CInt -> IO ()|]),
+       ("c'setWindowTitle", "SetWindowTitle_", "rl_bindings.h", [t|CString -> IO ()|]),
+       ("c'setWindowPosition", "SetWindowPosition_", "rl_bindings.h", [t|CInt -> CInt -> IO ()|]),
+       ("c'setWindowMonitor", "SetWindowMonitor_", "rl_bindings.h", [t|CInt -> IO ()|]),
+       ("c'setWindowMinSize", "SetWindowMinSize_", "rl_bindings.h", [t|CInt -> CInt -> IO ()|]),
+       ("c'setWindowMaxSize", "SetWindowMaxSize_", "rl_bindings.h", [t|CInt -> CInt -> IO ()|]),
+       ("c'setWindowSize", "SetWindowSize_", "rl_bindings.h", [t|CInt -> CInt -> IO ()|]),
+       ("c'setWindowOpacity", "SetWindowOpacity_", "rl_bindings.h", [t|CFloat -> IO ()|]),
+       ("c'setWindowFocused", "SetWindowFocused_", "rl_bindings.h", [t|IO ()|]),
+       ("c'getWindowHandle", "GetWindowHandle_", "rl_bindings.h", [t|IO (Ptr ())|]),
+       ("c'getScreenWidth", "GetScreenWidth_", "rl_bindings.h", [t|IO CInt|]),
+       ("c'getScreenHeight", "GetScreenHeight_", "rl_bindings.h", [t|IO CInt|]),
+       ("c'getRenderWidth", "GetRenderWidth_", "rl_bindings.h", [t|IO CInt|]),
+       ("c'getRenderHeight", "GetRenderHeight_", "rl_bindings.h", [t|IO CInt|]),
+       ("c'getMonitorCount", "GetMonitorCount_", "rl_bindings.h", [t|IO CInt|]),
+       ("c'getCurrentMonitor", "GetCurrentMonitor_", "rl_bindings.h", [t|IO CInt|]),
+       ("c'getMonitorPosition", "GetMonitorPosition_", "rl_bindings.h", [t|CInt -> IO (Ptr Vector2)|]),
+       ("c'getMonitorWidth", "GetMonitorWidth_", "rl_bindings.h", [t|CInt -> IO CInt|]),
+       ("c'getMonitorHeight", "GetMonitorHeight_", "rl_bindings.h", [t|CInt -> IO CInt|]),
+       ("c'getMonitorPhysicalWidth", "GetMonitorPhysicalWidth_", "rl_bindings.h", [t|CInt -> IO CInt|]),
+       ("c'getMonitorPhysicalHeight", "GetMonitorPhysicalHeight_", "rl_bindings.h", [t|CInt -> IO CInt|]),
+       ("c'getMonitorRefreshRate", "GetMonitorRefreshRate_", "rl_bindings.h", [t|CInt -> IO CInt|]),
+       ("c'getWindowPosition", "GetWindowPosition_", "rl_bindings.h", [t|IO (Ptr Vector2)|]),
+       ("c'getWindowScaleDPI", "GetWindowScaleDPI_", "rl_bindings.h", [t|IO (Ptr Vector2)|]),
+       ("c'getMonitorName", "GetMonitorName_", "rl_bindings.h", [t|CInt -> IO CString|]),
+       ("c'setClipboardText", "SetClipboardText_", "rl_bindings.h", [t|CString -> IO ()|]),
+       ("c'getClipboardText", "GetClipboardText_", "rl_bindings.h", [t|IO CString|]),
+       ("c'enableEventWaiting", "EnableEventWaiting_", "rl_bindings.h", [t|IO ()|]),
+       ("c'disableEventWaiting", "DisableEventWaiting_", "rl_bindings.h", [t|IO ()|]),
+       ("c'swapScreenBuffer", "SwapScreenBuffer_", "rl_bindings.h", [t|IO ()|]),
+       ("c'pollInputEvents", "PollInputEvents_", "rl_bindings.h", [t|IO ()|]),
+       ("c'waitTime", "WaitTime_", "rl_bindings.h", [t|CDouble -> IO ()|]),
+       ("c'showCursor", "ShowCursor_", "rl_bindings.h", [t|IO ()|]),
+       ("c'hideCursor", "HideCursor_", "rl_bindings.h", [t|IO ()|]),
+       ("c'isCursorHidden", "IsCursorHidden_", "rl_bindings.h", [t|IO CBool|]),
+       ("c'enableCursor", "EnableCursor_", "rl_bindings.h", [t|IO ()|]),
+       ("c'disableCursor", "DisableCursor_", "rl_bindings.h", [t|IO ()|]),
+       ("c'isCursorOnScreen", "IsCursorOnScreen_", "rl_bindings.h", [t|IO CBool|]),
+       ("c'clearBackground", "ClearBackground_", "rl_bindings.h", [t|Ptr Color -> IO ()|]),
+       ("c'beginDrawing", "BeginDrawing_", "rl_bindings.h", [t|IO ()|]),
+       ("c'endDrawing", "EndDrawing_", "rl_bindings.h", [t|IO ()|]),
+       ("c'beginMode2D", "BeginMode2D_", "rl_bindings.h", [t|Ptr Camera2D -> IO ()|]),
+       ("c'endMode2D", "EndMode2D_", "rl_bindings.h", [t|IO ()|]),
+       ("c'beginMode3D", "BeginMode3D_", "rl_bindings.h", [t|Ptr Camera3D -> IO ()|]),
+       ("c'endMode3D", "EndMode3D_", "rl_bindings.h", [t|IO ()|]),
+       ("c'beginTextureMode", "BeginTextureMode_", "rl_bindings.h", [t|Ptr RenderTexture -> IO ()|]),
+       ("c'endTextureMode", "EndTextureMode_", "rl_bindings.h", [t|IO ()|]),
+       ("c'beginShaderMode", "BeginShaderMode_", "rl_bindings.h", [t|Ptr Shader -> IO ()|]),
+       ("c'endShaderMode", "EndShaderMode_", "rl_bindings.h", [t|IO ()|]),
+       ("c'beginBlendMode", "BeginBlendMode_", "rl_bindings.h", [t|CInt -> IO ()|]),
+       ("c'endBlendMode", "EndBlendMode_", "rl_bindings.h", [t|IO ()|]),
+       ("c'beginScissorMode", "BeginScissorMode_", "rl_bindings.h", [t|CInt -> CInt -> CInt -> CInt -> IO ()|]),
+       ("c'endScissorMode", "EndScissorMode_", "rl_bindings.h", [t|IO ()|]),
+       ("c'beginVrStereoMode", "BeginVrStereoMode_", "rl_bindings.h", [t|Ptr VrStereoConfig -> IO ()|]),
+       ("c'endVrStereoMode", "EndVrStereoMode_", "rl_bindings.h", [t|IO ()|]),
+       ("c'loadVrStereoConfig", "LoadVrStereoConfig_", "rl_bindings.h", [t|Ptr VrDeviceInfo -> IO (Ptr VrStereoConfig)|]),
+       ("c'unloadVrStereoConfig", "UnloadVrStereoConfig_", "rl_bindings.h", [t|Ptr VrStereoConfig -> IO ()|]),
+       ("c'loadShader", "LoadShader_", "rl_bindings.h", [t|CString -> CString -> IO (Ptr Shader)|]),
+       ("c'loadShaderFromMemory", "LoadShaderFromMemory_", "rl_bindings.h", [t|CString -> CString -> IO (Ptr Shader)|]),
+       ("c'isShaderReady", "IsShaderReady_", "rl_bindings.h", [t|Ptr Shader -> IO CBool|]),
+       ("c'getShaderLocation", "GetShaderLocation_", "rl_bindings.h", [t|Ptr Shader -> CString -> IO CInt|]),
+       ("c'getShaderLocationAttrib", "GetShaderLocationAttrib_", "rl_bindings.h", [t|Ptr Shader -> CString -> IO CInt|]),
+       ("c'setShaderValue", "SetShaderValue_", "rl_bindings.h", [t|Ptr Shader -> CInt -> Ptr () -> CInt -> IO ()|]),
+       ("c'setShaderValueV", "SetShaderValueV_", "rl_bindings.h", [t|Ptr Shader -> CInt -> Ptr () -> CInt -> CInt -> IO ()|]),
+       ("c'setShaderValueMatrix", "SetShaderValueMatrix_", "rl_bindings.h", [t|Ptr Shader -> CInt -> Ptr Matrix -> IO ()|]),
+       ("c'setShaderValueTexture", "SetShaderValueTexture_", "rl_bindings.h", [t|Ptr Shader -> CInt -> Ptr Texture -> IO ()|]),
+       ("c'unloadShader", "UnloadShader_", "rl_bindings.h", [t|Ptr Shader -> IO ()|]),
+       ("c'getScreenToWorldRay", "GetScreenToWorldRay_", "rl_bindings.h", [t|Ptr Vector2 -> Ptr Camera3D -> IO (Ptr Ray)|]),
+       ("c'getScreenToWorldRayEx", "GetScreenToWorldRayEx_", "rl_bindings.h", [t|Ptr Vector2 -> Ptr Camera3D -> CFloat -> CFloat -> IO (Ptr Ray)|]),
+       ("c'getCameraMatrix", "GetCameraMatrix_", "rl_bindings.h", [t|Ptr Camera3D -> IO (Ptr Matrix)|]),
+       ("c'getCameraMatrix2D", "GetCameraMatrix2D_", "rl_bindings.h", [t|Ptr Camera2D -> IO (Ptr Matrix)|]),
+       ("c'getWorldToScreen", "GetWorldToScreen_", "rl_bindings.h", [t|Ptr Vector3 -> Ptr Camera3D -> IO (Ptr Vector2)|]),
+       ("c'getScreenToWorld2D", "GetScreenToWorld2D_", "rl_bindings.h", [t|Ptr Vector2 -> Ptr Camera2D -> IO (Ptr Vector2)|]),
+       ("c'getWorldToScreenEx", "GetWorldToScreenEx_", "rl_bindings.h", [t|Ptr Vector3 -> Ptr Camera3D -> CInt -> CInt -> IO (Ptr Vector2)|]),
+       ("c'getWorldToScreen2D", "GetWorldToScreen2D_", "rl_bindings.h", [t|Ptr Vector2 -> Ptr Camera2D -> IO (Ptr Vector2)|]),
+       ("c'setTargetFPS", "SetTargetFPS_", "rl_bindings.h", [t|CInt -> IO ()|]),
+       ("c'getFPS", "GetFPS_", "rl_bindings.h", [t|IO CInt|]),
+       ("c'getFrameTime", "GetFrameTime_", "rl_bindings.h", [t|IO CFloat|]),
+       ("c'getTime", "GetTime_", "rl_bindings.h", [t|IO CDouble|]),
+       ("c'setRandomSeed", "SetRandomSeed_", "rl_bindings.h", [t|CUInt -> IO ()|]),
+       ("c'getRandomValue", "GetRandomValue_", "rl_bindings.h", [t|CInt -> CInt -> IO CInt|]),
+       ("c'loadRandomSequence", "LoadRandomSequence_", "rl_bindings.h", [t|CUInt -> CInt -> CInt -> IO (Ptr CInt)|]),
+       ("c'takeScreenshot", "TakeScreenshot_", "rl_bindings.h", [t|CString -> IO ()|]),
+       ("c'setConfigFlags", "SetConfigFlags_", "rl_bindings.h", [t|CUInt -> IO ()|]),
+       ("c'traceLog", "TraceLog_", "rl_bindings.h", [t|CInt -> CString -> IO ()|]), -- Uses varags, can't implement complete functionality
+       ("c'setTraceLogLevel", "SetTraceLogLevel_", "rl_bindings.h", [t|CInt -> IO ()|]),
+       ("c'memAlloc", "MemAlloc_", "rl_bindings.h", [t|CInt -> IO (Ptr ())|]),
+       ("c'memRealloc", "MemRealloc_", "rl_bindings.h", [t|Ptr () -> CInt -> IO (Ptr ())|]),
+       ("c'memFree", "MemFree_", "rl_bindings.h", [t|Ptr () -> IO ()|]),
+       ("c'openURL", "OpenURL_", "rl_bindings.h", [t|CString -> IO ()|]),
+       ("c'setTraceLogCallback", "SetTraceLogCallback_", "rl_bindings.h", [t|C'TraceLogCallback -> IO ()|]),
+       ("c'setLoadFileDataCallback", "SetLoadFileDataCallback_", "rl_bindings.h", [t|C'LoadFileDataCallback -> IO ()|]),
+       ("c'setSaveFileDataCallback", "SetSaveFileDataCallback_", "rl_bindings.h", [t|C'SaveFileDataCallback -> IO ()|]),
+       ("c'setLoadFileTextCallback", "SetLoadFileTextCallback_", "rl_bindings.h", [t|C'LoadFileTextCallback -> IO ()|]),
+       ("c'setSaveFileTextCallback", "SetSaveFileTextCallback_", "rl_bindings.h", [t|C'SaveFileTextCallback -> IO ()|]),
+       ("c'loadFileData", "LoadFileData_", "rl_bindings.h", [t|CString -> Ptr CInt -> IO (Ptr CUChar)|]),
+       ("c'unloadFileData", "UnloadFileData_", "rl_bindings.h", [t|Ptr CUChar -> IO ()|]),
+       ("c'saveFileData", "SaveFileData_", "rl_bindings.h", [t|CString -> Ptr () -> CInt -> IO CBool|]),
+       ("c'exportDataAsCode", "ExportDataAsCode_", "rl_bindings.h", [t|Ptr CUChar -> CInt -> CString -> IO CBool|]),
+       ("c'loadFileText", "LoadFileText_", "rl_bindings.h", [t|CString -> IO CString|]),
+       ("c'unloadFileText", "UnloadFileText_", "rl_bindings.h", [t|CString -> IO ()|]),
+       ("c'saveFileText", "SaveFileText_", "rl_bindings.h", [t|CString -> CString -> IO CBool|]),
+       ("c'fileExists", "FileExists_", "rl_bindings.h", [t|CString -> IO CBool|]),
+       ("c'directoryExists", "DirectoryExists_", "rl_bindings.h", [t|CString -> IO CBool|]),
+       ("c'isFileExtension", "IsFileExtension_", "rl_bindings.h", [t|CString -> CString -> IO CBool|]),
+       ("c'getFileLength", "GetFileLength_", "rl_bindings.h", [t|CString -> IO CBool|]),
+       ("c'getFileExtension", "GetFileExtension_", "rl_bindings.h", [t|CString -> IO CString|]),
+       ("c'getFileName", "GetFileName_", "rl_bindings.h", [t|CString -> IO CString|]),
+       ("c'getFileNameWithoutExt", "GetFileNameWithoutExt_", "rl_bindings.h", [t|CString -> IO CString|]),
+       ("c'getDirectoryPath", "GetDirectoryPath_", "rl_bindings.h", [t|CString -> IO CString|]),
+       ("c'getPrevDirectoryPath", "GetPrevDirectoryPath_", "rl_bindings.h", [t|CString -> IO CString|]),
+       ("c'getWorkingDirectory", "GetWorkingDirectory_", "rl_bindings.h", [t|IO CString|]),
+       ("c'getApplicationDirectory", "GetApplicationDirectory_", "rl_bindings.h", [t|IO CString|]),
+       ("c'changeDirectory", "ChangeDirectory_", "rl_bindings.h", [t|CString -> IO CBool|]),
+       ("c'isPathFile", "IsPathFile_", "rl_bindings.h", [t|CString -> IO CBool|]),
+       ("c'isFileNameValid", "IsFileNameValid_", "rl_bindings.h", [t|CString -> IO CBool|]),
+       ("c'loadDirectoryFiles", "LoadDirectoryFiles_", "rl_bindings.h", [t|CString -> IO (Ptr FilePathList)|]),
+       ("c'loadDirectoryFilesEx", "LoadDirectoryFilesEx_", "rl_bindings.h", [t|CString -> CString -> CInt -> IO (Ptr FilePathList)|]),
+       ("c'unloadDirectoryFiles", "UnloadDirectoryFiles_", "rl_bindings.h", [t|Ptr FilePathList -> IO ()|]),
+       ("c'isFileDropped", "IsFileDropped_", "rl_bindings.h", [t|IO CBool|]),
+       ("c'loadDroppedFiles", "LoadDroppedFiles_", "rl_bindings.h", [t|IO (Ptr FilePathList)|]),
+       ("c'unloadDroppedFiles", "UnloadDroppedFiles_", "rl_bindings.h", [t|Ptr FilePathList -> IO ()|]),
+       ("c'getFileModTime", "GetFileModTime_", "rl_bindings.h", [t|CString -> IO CLong|]),
+       ("c'compressData", "CompressData_", "rl_bindings.h", [t|Ptr CUChar -> CInt -> Ptr CInt -> IO (Ptr CUChar)|]),
+       ("c'decompressData", "DecompressData_", "rl_bindings.h", [t|Ptr CUChar -> CInt -> Ptr CInt -> IO (Ptr CUChar)|]),
+       ("c'encodeDataBase64", "EncodeDataBase64_", "rl_bindings.h", [t|Ptr CUChar -> CInt -> Ptr CInt -> IO CString|]),
+       ("c'decodeDataBase64", "DecodeDataBase64_", "rl_bindings.h", [t|Ptr CUChar -> Ptr CInt -> IO (Ptr CUChar)|]),
+       ("c'loadAutomationEventList", "LoadAutomationEventList_", "rl_bindings.h", [t|CString -> IO (Ptr AutomationEventList)|]),
+       ("c'exportAutomationEventList", "ExportAutomationEventList_", "rl_bindings.h", [t|Ptr AutomationEventList -> CString -> IO CBool|]),
+       ("c'setAutomationEventList", "SetAutomationEventList_", "rl_bindings.h", [t|Ptr AutomationEventList -> IO ()|]),
+       ("c'setAutomationEventBaseFrame", "SetAutomationEventBaseFrame_", "rl_bindings.h", [t|CInt -> IO ()|]),
+       ("c'startAutomationEventRecording", "StartAutomationEventRecording_", "rl_bindings.h", [t|IO ()|]),
+       ("c'stopAutomationEventRecording", "StopAutomationEventRecording_", "rl_bindings.h", [t|IO ()|]),
+       ("c'playAutomationEvent", "PlayAutomationEvent", "rl_bindings.h", [t|Ptr AutomationEvent -> IO ()|]),
+       ("c'isKeyPressed", "IsKeyPressed_", "rl_bindings.h", [t|CInt -> IO CBool|]),
+       ("c'isKeyPressedRepeat", "IsKeyPressedRepeat_", "rl_bindings.h", [t|CInt -> IO CBool|]),
+       ("c'isKeyDown", "IsKeyDown_", "rl_bindings.h", [t|CInt -> IO CBool|]),
+       ("c'isKeyReleased", "IsKeyReleased_", "rl_bindings.h", [t|CInt -> IO CBool|]),
+       ("c'isKeyUp", "IsKeyUp_", "rl_bindings.h", [t|CInt -> IO CBool|]),
+       ("c'setExitKey", "SetExitKey_", "rl_bindings.h", [t|CInt -> IO ()|]),
+       ("c'getKeyPressed", "GetKeyPressed_", "rl_bindings.h", [t|IO CInt|]),
+       ("c'getCharPressed", "GetCharPressed_", "rl_bindings.h", [t|IO CInt|]),
+       ("c'isGamepadAvailable", "IsGamepadAvailable_", "rl_bindings.h", [t|CInt -> IO CBool|]),
+       ("c'getGamepadName", "GetGamepadName_", "rl_bindings.h", [t|CInt -> IO CString|]),
+       ("c'isGamepadButtonPressed", "IsGamepadButtonPressed_", "rl_bindings.h", [t|CInt -> CInt -> IO CBool|]),
+       ("c'isGamepadButtonDown", "IsGamepadButtonDown_", "rl_bindings.h", [t|CInt -> CInt -> IO CBool|]),
+       ("c'isGamepadButtonReleased", "IsGamepadButtonReleased_", "rl_bindings.h", [t|CInt -> CInt -> IO CBool|]),
+       ("c'isGamepadButtonUp", "IsGamepadButtonUp_", "rl_bindings.h", [t|CInt -> CInt -> IO CBool|]),
+       ("c'getGamepadButtonPressed", "GetGamepadButtonPressed_", "rl_bindings.h", [t|IO CInt|]),
+       ("c'getGamepadAxisCount", "GetGamepadAxisCount_", "rl_bindings.h", [t|CInt -> IO CInt|]),
+       ("c'getGamepadAxisMovement", "GetGamepadAxisMovement_", "rl_bindings.h", [t|CInt -> CInt -> IO CFloat|]),
+       ("c'setGamepadMappings", "SetGamepadMappings_", "rl_bindings.h", [t|CString -> IO CInt|]),
+       ("c'setGamepadVibration", "SetGamepadVibration_", "rl_bindings.h", [t|CInt -> CFloat -> CFloat -> IO ()|]),
+       ("c'isMouseButtonPressed", "IsMouseButtonPressed_", "rl_bindings.h", [t|CInt -> IO CBool|]),
+       ("c'isMouseButtonDown", "IsMouseButtonDown_", "rl_bindings.h", [t|CInt -> IO CBool|]),
+       ("c'isMouseButtonReleased", "IsMouseButtonReleased_", "rl_bindings.h", [t|CInt -> IO CBool|]),
+       ("c'isMouseButtonUp", "IsMouseButtonUp_", "rl_bindings.h", [t|CInt -> IO CBool|]),
+       ("c'getMouseX", "GetMouseX_", "rl_bindings.h", [t|IO CInt|]),
+       ("c'getMouseY", "GetMouseY_", "rl_bindings.h", [t|IO CInt|]),
+       ("c'getMousePosition", "GetMousePosition_", "rl_bindings.h", [t|IO (Ptr Vector2)|]),
+       ("c'getMouseDelta", "GetMouseDelta_", "rl_bindings.h", [t|IO (Ptr Vector2)|]),
+       ("c'setMousePosition", "SetMousePosition_", "rl_bindings.h", [t|CInt -> CInt -> IO ()|]),
+       ("c'setMouseOffset", "SetMouseOffset_", "rl_bindings.h", [t|CInt -> CInt -> IO ()|]),
+       ("c'setMouseScale", "SetMouseScale_", "rl_bindings.h", [t|CFloat -> CFloat -> IO ()|]),
+       ("c'getMouseWheelMove", "GetMouseWheelMove_", "rl_bindings.h", [t|IO CFloat|]),
+       ("c'getMouseWheelMoveV", "GetMouseWheelMoveV_", "rl_bindings.h", [t|IO (Ptr Vector2)|]),
+       ("c'setMouseCursor", "SetMouseCursor_", "rl_bindings.h", [t|CInt -> IO ()|]),
+       ("c'getTouchX", "GetTouchX_", "rl_bindings.h", [t|IO CInt|]),
+       ("c'getTouchY", "GetTouchY_", "rl_bindings.h", [t|IO CInt|]),
+       ("c'getTouchPosition", "GetTouchPosition_", "rl_bindings.h", [t|CInt -> IO (Ptr Vector2)|]),
+       ("c'getTouchPointId", "GetTouchPointId_", "rl_bindings.h", [t|CInt -> IO CInt|]),
+       ("c'getTouchPointCount", "GetTouchPointCount_", "rl_bindings.h", [t|IO CInt|]),
+       ("c'setGesturesEnabled", "SetGesturesEnabled_", "rl_bindings.h", [t|CUInt -> IO ()|]),
+       ("c'isGestureDetected", "IsGestureDetected_", "rl_bindings.h", [t|CUInt -> IO CBool|]),
+       ("c'getGestureDetected", "GetGestureDetected_", "rl_bindings.h", [t|IO CInt|]),
+       ("c'getGestureHoldDuration", "GetGestureHoldDuration_", "rl_bindings.h", [t|IO CFloat|]),
+       ("c'getGestureDragVector", "GetGestureDragVector_", "rl_bindings.h", [t|IO (Ptr Vector2)|]),
+       ("c'getGestureDragAngle", "GetGestureDragAngle_", "rl_bindings.h", [t|IO CFloat|]),
+       ("c'getGesturePinchVector", "GetGesturePinchVector_", "rl_bindings.h", [t|IO (Ptr Vector2)|]),
+       ("c'getGesturePinchAngle", "GetGesturePinchAngle_", "rl_bindings.h", [t|IO CFloat|])
      ]
  )
 
@@ -1053,29 +1055,30 @@ setTraceLogLevel = c'setTraceLogLevel . fromIntegral . fromEnum
 openURL :: String -> IO ()
 openURL url = withCString url c'openURL
 
-setLoadFileDataCallback :: LoadFileDataCallback -> IO C'LoadFileDataCallback
+setTraceLogCallback :: TraceLogCallback -> IO ()
+setTraceLogCallback callback = do
+  c <- createTraceLogCallback callback
+  c'setTraceLogCallback c
+
+setLoadFileDataCallback :: LoadFileDataCallback -> IO ()
 setLoadFileDataCallback callback = do
   c <- createLoadFileDataCallback callback
   c'setLoadFileDataCallback c
-  return c
 
-setSaveFileDataCallback :: (Storable a) => SaveFileDataCallback a -> IO C'SaveFileDataCallback
+setSaveFileDataCallback :: (Storable a) => SaveFileDataCallback a -> IO ()
 setSaveFileDataCallback callback = do
   c <- createSaveFileDataCallback callback
   c'setSaveFileDataCallback c
-  return c
 
-setLoadFileTextCallback :: LoadFileTextCallback -> IO C'LoadFileTextCallback
+setLoadFileTextCallback :: LoadFileTextCallback -> IO ()
 setLoadFileTextCallback callback = do
   c <- createLoadFileTextCallback callback
   c'setLoadFileTextCallback c
-  return c
 
-setSaveFileTextCallback :: SaveFileTextCallback -> IO C'SaveFileTextCallback
+setSaveFileTextCallback :: SaveFileTextCallback -> IO ()
 setSaveFileTextCallback callback = do
   c <- createSaveFileTextCallback callback
   c'setSaveFileTextCallback c
-  return c
 
 loadFileData :: String -> IO [Integer]
 loadFileData fileName =
@@ -1401,36 +1404,33 @@ getGesturePinchAngle :: IO Float
 getGesturePinchAngle = realToFrac <$> c'getGesturePinchAngle
 
 foreign import ccall unsafe "wrapper"
+  mk'traceLogCallback ::
+    (CInt -> CString -> IO ()) -> IO C'TraceLogCallback
+
+foreign import ccall unsafe "wrapper"
   mk'loadFileDataCallback ::
     (CString -> Ptr CUInt -> IO (Ptr CUChar)) -> IO C'LoadFileDataCallback
-
--- foreign import ccall unsafe "dynamic"
---   mK'loadFileDataCallback ::
---     C'LoadFileDataCallback -> (CString -> Ptr CUInt -> IO (Ptr CUChar))
 
 foreign import ccall unsafe "wrapper"
   mk'saveFileDataCallback ::
     (CString -> Ptr () -> CUInt -> IO CInt) -> IO C'SaveFileDataCallback
 
--- foreign import ccall unsafe "dynamic"
---   mK'saveFileDataCallback ::
---     C'SaveFileDataCallback -> (CString -> Ptr () -> CUInt -> IO CInt)
-
 foreign import ccall unsafe "wrapper"
   mk'loadFileTextCallback ::
     (CString -> IO CString) -> IO C'LoadFileTextCallback
-
--- foreign import ccall unsafe "dynamic"
---   mK'loadFileTextCallback ::
---     C'LoadFileTextCallback -> (CString -> IO CString)
 
 foreign import ccall unsafe "wrapper"
   mk'saveFileTextCallback ::
     (CString -> CString -> IO CInt) -> IO C'SaveFileTextCallback
 
--- foreign import ccall unsafe "dynamic"
---   mK'saveFileTextCallback ::
---     C'SaveFileTextCallback -> (CString -> CString -> IO CInt)
+createTraceLogCallback :: TraceLogCallback -> IO C'TraceLogCallback
+createTraceLogCallback callback =
+  mk'traceLogCallback
+    (\logLevel text ->
+        do
+          t <- peekCString text
+          callback (toEnum (fromIntegral logLevel)) t
+    )
 
 createLoadFileDataCallback :: LoadFileDataCallback -> IO C'LoadFileDataCallback
 createLoadFileDataCallback callback =

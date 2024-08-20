@@ -2,9 +2,9 @@
 module Main where
 
 import Paths_h_raylib (getDataFileName)
-import Raylib.Core (clearBackground, initWindow, setTargetFPS, windowShouldClose, closeWindow, setLoadFileTextCallback, loadFileText)
+import Raylib.Core (clearBackground, initWindow, setTargetFPS, windowShouldClose, closeWindow, setLoadFileTextCallback, setTraceLogCallback, loadFileText)
 import Raylib.Core.Text (drawText)
-import Raylib.Util (drawing, raylibApplication, WindowResources, managed)
+import Raylib.Util (drawing, raylibApplication, WindowResources)
 import Raylib.Util.Colors (black, rayWhite)
 
 filePath :: String
@@ -14,9 +14,10 @@ type AppState = (String, WindowResources)
 
 startup :: IO AppState
 startup = do
+  setTraceLogCallback (\logLevel text -> putStrLn (show logLevel ++ ": " ++ text))
   window <- initWindow 600 450 "raylib [core] example - basic callbacks"
   setTargetFPS 60
-  _ <- managed window $ setLoadFileTextCallback (\s -> putStrLn ("opening file: " ++ s) >> readFile s)
+  setLoadFileTextCallback (\s -> putStrLn ("opening file: " ++ s) >> readFile s)
   text <- loadFileText =<< getDataFileName filePath
   return (text, window)
 

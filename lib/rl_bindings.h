@@ -10,6 +10,8 @@
 
 #include "rl_common.h"
 
+typedef void (*TraceLogCallback_)(int logLevel, char *text);
+
 void SetWindowIcon_(Image *a);
 
 Vector2 *GetMonitorPosition_(int a);
@@ -855,6 +857,8 @@ void *MemRealloc_(void *a, unsigned int b);
 void MemFree_(void *a);
 
 void OpenURL_(const char *a);
+
+void SetTraceLogCallback_(TraceLogCallback_ a);
 
 void SetLoadFileDataCallback_(LoadFileDataCallback a);
 

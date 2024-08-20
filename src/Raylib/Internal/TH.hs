@@ -38,7 +38,7 @@ import Language.Haskell.TH
     TypeQ,
     mkName,
     nameBase,
-    reify, Foreign (ImportF), Callconv (CCall), Safety (Safe, Unsafe),
+    reify, Foreign (ImportF), Callconv (CCall), Safety (Safe),
   )
 
 #endif
@@ -60,16 +60,16 @@ genLenses names = do
 --   means @foreign import@ statements. On web platforms, this means
 --   `callRaylibFunction` calls.
 genNative ::
-  -- | (@hsName@, @cName@, @cFile@, @funType@, @isSafe@)
-  [(String, String, String, TypeQ, Bool)] ->
+  -- | (@hsName@, @cName@, @cFile@, @funType@)
+  [(String, String, String, TypeQ)] ->
   DecsQ
 genNative funs = do
-  funs' <- mapM (\(a, b, c, d, e) -> (a,b,c,,e) <$> d) funs
+  funs' <- mapM (\(a, b, c, d) -> (a,b,c,) <$> d) funs
   return (genNative' funs')
   where
     genNative' [] = []
 #ifdef WEB_FFI
-    genNative' ((hsName, cName, _, funType, _) : xs) =
+    genNative' ((hsName, cName, _, funType) : xs) =
       [ -- hsName :: funType
         SigD name funType,
         -- hsName = callRaylibFunction "_cName"
@@ -80,7 +80,7 @@ genNative funs = do
       where
         name = mkName hsName
 #else
-    genNative' ((hsName, cName, cFile, funType, isSafe) : xs) =
+    genNative' ((hsName, cName, cFile, funType) : xs) =
       -- foreign import ccall safe/unsafe "cFile cName" hsName :: funType
-      ForeignD (ImportF CCall (if isSafe then Safe else Unsafe) (cFile ++ " " ++ cName) (mkName hsName) funType) : genNative' xs
+      ForeignD (ImportF CCall Safe (cFile ++ " " ++ cName) (mkName hsName) funType) : genNative' xs
 #endif

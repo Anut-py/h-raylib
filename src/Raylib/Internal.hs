@@ -150,16 +150,16 @@ defaultWindowResources = do
       }
 
 $( genNative
-     [ ("c'rlGetShaderIdDefault", "rlGetShaderIdDefault_", "rlgl_bindings.h", [t|IO CUInt|], False),
-       ("c'rlUnloadShaderProgram", "rlUnloadShaderProgram_", "rlgl_bindings.h", [t|CUInt -> IO ()|], False),
-       ("c'rlUnloadTexture", "rlUnloadTexture_", "rlgl_bindings.h", [t|CUInt -> IO ()|], False),
-       ("c'rlUnloadFramebuffer", "rlUnloadFramebuffer_", "rlgl_bindings.h", [t|CUInt -> IO ()|], False),
-       ("c'rlUnloadVertexArray", "rlUnloadVertexArray_", "rlgl_bindings.h", [t|CUInt -> IO ()|], False),
-       ("c'rlUnloadVertexBuffer", "rlUnloadVertexBuffer_", "rlgl_bindings.h", [t|CUInt -> IO ()|], False),
-       ("c'unloadMusicStreamData", "UnloadMusicStreamData", "rl_internal.h", [t|CInt -> Ptr () -> IO ()|], False),
-       ("c'unloadAudioBuffer", "UnloadAudioBuffer_", "rl_internal.h", [t|Ptr () -> IO ()|], False),
-       ("c'unloadAudioBufferAlias", "UnloadAudioBufferAlias", "rl_internal.h", [t|Ptr () -> IO ()|], False),
-       ("c'getPixelDataSize", "GetPixelDataSize_", "rl_bindings.h", [t|CInt -> CInt -> CInt -> IO CInt|], False)
+     [ ("c'rlGetShaderIdDefault", "rlGetShaderIdDefault_", "rlgl_bindings.h", [t|IO CUInt|]),
+       ("c'rlUnloadShaderProgram", "rlUnloadShaderProgram_", "rlgl_bindings.h", [t|CUInt -> IO ()|]),
+       ("c'rlUnloadTexture", "rlUnloadTexture_", "rlgl_bindings.h", [t|CUInt -> IO ()|]),
+       ("c'rlUnloadFramebuffer", "rlUnloadFramebuffer_", "rlgl_bindings.h", [t|CUInt -> IO ()|]),
+       ("c'rlUnloadVertexArray", "rlUnloadVertexArray_", "rlgl_bindings.h", [t|CUInt -> IO ()|]),
+       ("c'rlUnloadVertexBuffer", "rlUnloadVertexBuffer_", "rlgl_bindings.h", [t|CUInt -> IO ()|]),
+       ("c'unloadMusicStreamData", "UnloadMusicStreamData", "rl_internal.h", [t|CInt -> Ptr () -> IO ()|]),
+       ("c'unloadAudioBuffer", "UnloadAudioBuffer_", "rl_internal.h", [t|Ptr () -> IO ()|]),
+       ("c'unloadAudioBufferAlias", "UnloadAudioBufferAlias", "rl_internal.h", [t|Ptr () -> IO ()|]),
+       ("c'getPixelDataSize", "GetPixelDataSize_", "rl_bindings.h", [t|CInt -> CInt -> CInt -> IO CInt|])
      ]
  )
 

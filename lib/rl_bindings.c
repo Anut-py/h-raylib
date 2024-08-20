@@ -3,6 +3,7 @@
  */
 
 #include "rl_bindings.h"
+#include <stdio.h>
 
 RLBIND void SetWindowIcon_(Image *a)
 {
@@ -2360,6 +2361,20 @@ RLBIND void MemFree_(void *a)
 RLBIND void OpenURL_(const char *a)
 {
     OpenURL(a);
+}
+
+TraceLogCallback_ customCallback;
+
+void CustomCallback(int logLevel, const char *text, va_list args) {
+    size_t n = vsnprintf(NULL, 0, text, args) + 1;
+    char *buffer = malloc(n);
+    vsnprintf(buffer, n, text, args);
+    customCallback(logLevel, buffer);
+}
+
+RLBIND void SetTraceLogCallback_(TraceLogCallback_ a) {
+    customCallback = a;
+    SetTraceLogCallback(&CustomCallback);
 }
 
 RLBIND void SetLoadFileDataCallback_(LoadFileDataCallback a)

@@ -106,10 +106,12 @@ module Raylib.Types.Core
     p'automationEventList'events,
 
     -- * Callbacks
+    TraceLogCallback,
     LoadFileDataCallback,
     SaveFileDataCallback,
     LoadFileTextCallback,
     SaveFileTextCallback,
+    C'TraceLogCallback,
     C'LoadFileDataCallback,
     C'SaveFileDataCallback,
     C'LoadFileTextCallback,
@@ -1153,6 +1155,8 @@ instance Closeable AutomationEventListRef where
 -- core callbacks ---------------------
 ---------------------------------------
 
+type TraceLogCallback = TraceLogLevel -> String -> IO ()
+
 type LoadFileDataCallback = String -> IO [Integer]
 
 type SaveFileDataCallback a = String -> Ptr a -> Integer -> IO Bool
@@ -1160,6 +1164,8 @@ type SaveFileDataCallback a = String -> Ptr a -> Integer -> IO Bool
 type LoadFileTextCallback = String -> IO String
 
 type SaveFileTextCallback = String -> String -> IO Bool
+
+type C'TraceLogCallback = FunPtr (CInt -> CString -> IO ())
 
 type C'LoadFileDataCallback = FunPtr (CString -> Ptr CUInt -> IO (Ptr CUChar))
 
