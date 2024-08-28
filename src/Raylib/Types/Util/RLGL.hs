@@ -384,6 +384,14 @@ data RLShaderUniformDataType
     RLShaderUniformIVec3
   | -- | Shader uniform type: ivec4 (4 int)
     RLShaderUniformIVec4
+  | -- | Shader uniform type: unsigned int
+    RLShaderUniformUInt
+  | -- | Shader uniform type: uivec2 (2 unsigned int)
+    RLShaderUniformUIVec2
+  | -- | Shader uniform type: uivec3 (3 unsigned int)
+    RLShaderUniformUIVec3
+  | -- | Shader uniform type: uivec4 (4 unsigned int)
+    RLShaderUniformUIVec4
   | -- | Shader uniform type: sampler2d
     RLShaderUniformSampler2D
   deriving (Eq, Show, Enum)

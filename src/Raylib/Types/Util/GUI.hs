@@ -511,6 +511,8 @@ data GuiDropdownBoxProperty
     DropdownItemsSpacing
   | -- | DropdownBox arrow hidden
     DropdownArrowHidden
+  | -- | DropdownBox roll up flag (default rolls down)
+    DropdownRollUp
   deriving (Eq, Show)
 
 instance Enum GuiDropdownBoxProperty where
@@ -518,10 +520,12 @@ instance Enum GuiDropdownBoxProperty where
     ArrowPadding -> 16
     DropdownItemsSpacing -> 17
     DropdownArrowHidden -> 18
+    DropdownRollUp -> 19
   toEnum x = case x of
     16 -> ArrowPadding
     17 -> DropdownItemsSpacing
     18 -> DropdownArrowHidden
+    19 -> DropdownRollUp
     n -> error $ "(GuiDropdownBoxProperty.toEnum) Invalid value: " ++ show n
 
 instance Storable GuiDropdownBoxProperty where
@@ -880,7 +884,7 @@ data GuiIconName
   | IconLayers2
   | IconMLayers
   | IconMaps
-  | Icon228
+  | IconHot
   | Icon229
   | Icon230
   | Icon231
@@ -1140,7 +1144,7 @@ instance Enum GuiIconName where
     IconLayers2 -> 225
     IconMLayers -> 226
     IconMaps -> 227
-    Icon228 -> 228
+    IconHot -> 228
     Icon229 -> 229
     Icon230 -> 230
     Icon231 -> 231
@@ -1397,7 +1401,7 @@ instance Enum GuiIconName where
     225 -> IconLayers2
     226 -> IconMLayers
     227 -> IconMaps
-    228 -> Icon228
+    228 -> IconHot
     229 -> Icon229
     230 -> Icon230
     231 -> Icon231

@@ -282,8 +282,8 @@ drawCircleSectorLines center radius startAngle endAngle segments color =
     )
 
 drawCircleGradient :: Int -> Int -> Float -> Color -> Color -> IO ()
-drawCircleGradient centerX centerY radius color1 color2 =
-  withFreeable color1 (withFreeable color2 . c'drawCircleGradient (fromIntegral centerX) (fromIntegral centerY) (realToFrac radius))
+drawCircleGradient centerX centerY radius inner outer =
+  withFreeable inner (withFreeable outer . c'drawCircleGradient (fromIntegral centerX) (fromIntegral centerY) (realToFrac radius))
 
 drawCircleV :: Vector2 -> Float -> Color -> IO ()
 drawCircleV center radius color =
@@ -354,10 +354,10 @@ drawRectanglePro rect origin rotation color =
   withFreeable color (\c -> withFreeable rect (\r -> withFreeable origin (\o -> c'drawRectanglePro r o (realToFrac rotation) c)))
 
 drawRectangleGradientV :: Int -> Int -> Int -> Int -> Color -> Color -> IO ()
-drawRectangleGradientV posX posY width height color1 color2 =
+drawRectangleGradientV posX posY width height top bottom =
   withFreeable
-    color1
-    ( withFreeable color2
+    top
+    ( withFreeable bottom
         . c'drawRectangleGradientV
           (fromIntegral posX)
           (fromIntegral posY)
@@ -366,10 +366,10 @@ drawRectangleGradientV posX posY width height color1 color2 =
     )
 
 drawRectangleGradientH :: Int -> Int -> Int -> Int -> Color -> Color -> IO ()
-drawRectangleGradientH posX posY width height color1 color2 =
+drawRectangleGradientH posX posY width height left right =
   withFreeable
-    color1
-    ( withFreeable color2
+    left
+    ( withFreeable right
         . c'drawRectangleGradientH
           (fromIntegral posX)
           (fromIntegral posY)
@@ -378,17 +378,17 @@ drawRectangleGradientH posX posY width height color1 color2 =
     )
 
 drawRectangleGradientEx :: Rectangle -> Color -> Color -> Color -> Color -> IO ()
-drawRectangleGradientEx rect col1 col2 col3 col4 =
+drawRectangleGradientEx rect topLeft bottomLeft topRight bottomRight =
   withFreeable
     rect
     ( \r ->
         withFreeable
-          col1
+          topLeft
           ( \c1 ->
               withFreeable
-                col2
+                bottomLeft
                 ( \c2 ->
-                    withFreeable col3 (withFreeable col4 . c'drawRectangleGradientEx r c1 c2)
+                    withFreeable topRight (withFreeable bottomRight . c'drawRectangleGradientEx r c1 c2)
                 )
           )
     )

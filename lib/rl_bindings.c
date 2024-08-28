@@ -1444,6 +1444,16 @@ RLBIND void DrawModelWiresEx_(Model *a, Vector3 *b, Vector3 *c, float d, Vector3
     DrawModelWiresEx(*a, *b, *c, d, *e, *f);
 }
 
+RLBIND void DrawModelPoints_(Model *a, Vector3 *b, float c, Color *d)
+{
+    DrawModelPoints(*a, *b, c, *d);
+}
+
+RLBIND void DrawModelPointsEx_(Model *a, Vector3 *b, Vector3 *c, float d, Vector3 *e, Color *f)
+{
+    DrawModelPointsEx(*a, *b, *c, d, *e, *f);
+}
+
 RLBIND void DrawBoundingBox_(BoundingBox *a, Color *b)
 {
     DrawBoundingBox(*a, *b);

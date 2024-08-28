@@ -34,6 +34,8 @@ module Raylib.Core.Models
     drawModelEx,
     drawModelWires,
     drawModelWiresEx,
+    drawModelPoints,
+    drawModelPointsEx,
     drawBoundingBox,
     drawBillboard,
     drawBillboardRec,
@@ -107,6 +109,8 @@ module Raylib.Core.Models
     c'drawModelEx,
     c'drawModelWires,
     c'drawModelWiresEx,
+    c'drawModelPoints,
+    c'drawModelPointsEx,
     c'drawBoundingBox,
     c'drawBillboard,
     c'drawBillboardRec,
@@ -223,6 +227,8 @@ $( genNative
        ("c'drawModelEx", "DrawModelEx_", "rl_bindings.h", [t|Ptr Model -> Ptr Vector3 -> Ptr Vector3 -> CFloat -> Ptr Vector3 -> Ptr Color -> IO ()|]),
        ("c'drawModelWires", "DrawModelWires_", "rl_bindings.h", [t|Ptr Model -> Ptr Vector3 -> CFloat -> Ptr Color -> IO ()|]),
        ("c'drawModelWiresEx", "DrawModelWiresEx_", "rl_bindings.h", [t|Ptr Model -> Ptr Vector3 -> Ptr Vector3 -> CFloat -> Ptr Vector3 -> Ptr Color -> IO ()|]),
+       ("c'drawModelPoints", "DrawModelPoints_", "rl_bindings.h", [t|Ptr Model -> Ptr Vector3 -> CFloat -> Ptr Color -> IO ()|]),
+       ("c'drawModelPointsEx", "DrawModelPointsEx_", "rl_bindings.h", [t|Ptr Model -> Ptr Vector3 -> Ptr Vector3 -> CFloat -> Ptr Vector3 -> Ptr Color -> IO ()|]),
        ("c'drawBoundingBox", "DrawBoundingBox_", "rl_bindings.h", [t|Ptr BoundingBox -> Ptr Color -> IO ()|]),
        ("c'drawBillboard", "DrawBillboard_", "rl_bindings.h", [t|Ptr Camera3D -> Ptr Texture -> Ptr Vector3 -> CFloat -> Ptr Color -> IO ()|]),
        ("c'drawBillboardRec", "DrawBillboardRec_", "rl_bindings.h", [t|Ptr Camera3D -> Ptr Texture -> Ptr Rectangle -> Ptr Vector3 -> Ptr Vector2 -> Ptr Color -> IO ()|]),
@@ -368,6 +374,12 @@ drawModelWires model position scale tint = withFreeable model (\m -> withFreeabl
 
 drawModelWiresEx :: Model -> Vector3 -> Vector3 -> Float -> Vector3 -> Color -> IO ()
 drawModelWiresEx model position rotationAxis rotationAngle scale tint = withFreeable model (\m -> withFreeable position (\p -> withFreeable rotationAxis (\r -> withFreeable scale (withFreeable tint . c'drawModelWiresEx m p r (realToFrac rotationAngle)))))
+
+drawModelPoints :: Model -> Vector3 -> Float -> Color -> IO ()
+drawModelPoints model position scale tint = withFreeable model (\m -> withFreeable position (\p -> withFreeable tint (c'drawModelPoints m p (realToFrac scale))))
+
+drawModelPointsEx :: Model -> Vector3 -> Vector3 -> Float -> Vector3 -> Color -> IO ()
+drawModelPointsEx model position rotationAxis rotationAngle scale tint = withFreeable model (\m -> withFreeable position (\p -> withFreeable rotationAxis (\r -> withFreeable scale (withFreeable tint . c'drawModelPointsEx m p r (realToFrac rotationAngle)))))
 
 drawBoundingBox :: BoundingBox -> Color -> IO ()
 drawBoundingBox box color = withFreeable box (withFreeable color . c'drawBoundingBox)

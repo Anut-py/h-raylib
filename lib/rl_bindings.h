@@ -512,6 +512,10 @@ void DrawModelWires_(Model *a, Vector3 *b, float c, Color *d);
 
 void DrawModelWiresEx_(Model *a, Vector3 *b, Vector3 *c, float d, Vector3 *e, Color *f);
 
+void DrawModelPoints_(Model *a, Vector3 *b, float c, Color *d);
+
+void DrawModelPointsEx_(Model *a, Vector3 *b, Vector3 *c, float d, Vector3 *e, Color *f);
+
 void DrawBoundingBox_(BoundingBox *a, Color *b);
 
 void DrawBillboard_(Camera3D *a, Texture *b, Vector3 *c, float d, Color *e);
