@@ -133,6 +133,7 @@ module Raylib.Core
     getPrevDirectoryPath,
     getWorkingDirectory,
     getApplicationDirectory,
+    makeDirectory,
     changeDirectory,
     isPathFile,
     isFileNameValid,
@@ -334,6 +335,7 @@ module Raylib.Core
     c'getPrevDirectoryPath,
     c'getWorkingDirectory,
     c'getApplicationDirectory,
+    c'makeDirectory,
     c'changeDirectory,
     c'isPathFile,
     c'isFileNameValid,
@@ -620,6 +622,7 @@ $( genNative
        ("c'getPrevDirectoryPath", "GetPrevDirectoryPath_", "rl_bindings.h", [t|CString -> IO CString|]),
        ("c'getWorkingDirectory", "GetWorkingDirectory_", "rl_bindings.h", [t|IO CString|]),
        ("c'getApplicationDirectory", "GetApplicationDirectory_", "rl_bindings.h", [t|IO CString|]),
+       ("c'makeDirectory", "MakeDirectory_", "rl_bindings.h", [t|CString -> IO CInt|]),
        ("c'changeDirectory", "ChangeDirectory_", "rl_bindings.h", [t|CString -> IO CBool|]),
        ("c'isPathFile", "IsPathFile_", "rl_bindings.h", [t|CString -> IO CBool|]),
        ("c'isFileNameValid", "IsFileNameValid_", "rl_bindings.h", [t|CString -> IO CBool|]),
@@ -1140,6 +1143,9 @@ getWorkingDirectory = c'getWorkingDirectory >>= peekCString
 
 getApplicationDirectory :: IO String
 getApplicationDirectory = c'getApplicationDirectory >>= peekCString
+
+makeDirectory :: String -> IO Bool
+makeDirectory dirPath = (== 0) <$> withCString dirPath c'makeDirectory
 
 changeDirectory :: String -> IO Bool
 changeDirectory dir = toBool <$> withCString dir c'changeDirectory

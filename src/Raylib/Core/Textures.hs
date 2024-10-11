@@ -5,7 +5,6 @@ module Raylib.Core.Textures
   ( -- * High level
     loadImage,
     loadImageRaw,
-    loadImageSvg,
     loadImageAnim,
     loadImageAnimFromMemory,
     loadImageFromMemory,
@@ -108,6 +107,7 @@ module Raylib.Core.Textures
     colorContrast,
     colorAlpha,
     colorAlphaBlend,
+    colorLerp,
     getColor,
     getPixelColor,
     setPixelColor,
@@ -116,7 +116,6 @@ module Raylib.Core.Textures
     -- * Native
     c'loadImage,
     c'loadImageRaw,
-    c'loadImageSvg,
     c'loadImageAnim,
     c'loadImageAnimFromMemory,
     c'loadImageFromMemory,
@@ -221,6 +220,7 @@ module Raylib.Core.Textures
     c'colorContrast,
     c'colorAlpha,
     c'colorAlphaBlend,
+    c'colorLerp,
     c'getColor,
     c'getPixelColor,
     c'setPixelColor,
@@ -274,7 +274,6 @@ import Raylib.Types
 $( genNative
      [ ("c'loadImage", "LoadImage_", "rl_bindings.h", [t|CString -> IO (Ptr Image)|]),
        ("c'loadImageRaw", "LoadImageRaw_", "rl_bindings.h", [t|CString -> CInt -> CInt -> CInt -> CInt -> IO (Ptr Image)|]),
-       ("c'loadImageSvg", "LoadImageSvg_", "rl_bindings.h", [t|CString -> CInt -> CInt -> IO (Ptr Image)|]),
        ("c'loadImageAnim", "LoadImageAnim_", "rl_bindings.h", [t|CString -> Ptr CInt -> IO (Ptr Image)|]),
        ("c'loadImageAnimFromMemory", "LoadImageAnimFromMemory_", "rl_bindings.h", [t|CString -> Ptr CUChar -> CInt -> Ptr CInt -> IO (Ptr Image)|]),
        ("c'loadImageFromMemory", "LoadImageFromMemory_", "rl_bindings.h", [t|CString -> Ptr CUChar -> CInt -> IO (Ptr Image)|]),
@@ -379,6 +378,7 @@ $( genNative
        ("c'colorContrast", "ColorContrast_", "rl_bindings.h", [t|Ptr Color -> CFloat -> IO (Ptr Color)|]),
        ("c'colorAlpha", "ColorAlpha_", "rl_bindings.h", [t|Ptr Color -> CFloat -> IO (Ptr Color)|]),
        ("c'colorAlphaBlend", "ColorAlphaBlend_", "rl_bindings.h", [t|Ptr Color -> Ptr Color -> Ptr Color -> IO (Ptr Color)|]),
+       ("c'colorLerp", "ColorLerp_", "rl_bindings.h", [t|Ptr Color -> Ptr Color -> CFloat -> IO (Ptr Color)|]),
        ("c'getColor", "GetColor_", "rl_bindings.h", [t|CUInt -> IO (Ptr Color)|]),
        ("c'getPixelColor", "GetPixelColor_", "rl_bindings.h", [t|Ptr () -> CInt -> IO (Ptr Color)|]),
        ("c'setPixelColor", "SetPixelColor_", "rl_bindings.h", [t|Ptr () -> Ptr Color -> CInt -> IO ()|])
@@ -391,9 +391,6 @@ loadImage fileName = withCString fileName c'loadImage >>= pop
 loadImageRaw :: String -> Int -> Int -> Int -> Int -> IO Image
 loadImageRaw fileName width height format headerSize =
   withCString fileName (\str -> c'loadImageRaw str (fromIntegral width) (fromIntegral height) (fromIntegral $ fromEnum format) (fromIntegral headerSize)) >>= pop
-
-loadImageSvg :: String -> Int -> Int -> IO Image
-loadImageSvg fileNameOrString width height = withCString fileNameOrString (\s -> c'loadImageSvg s (fromIntegral width) (fromIntegral height)) >>= pop
 
 -- | Returns the animation and the number of frames in a tuple
 loadImageAnim :: String -> IO (Image, Int)
@@ -775,6 +772,9 @@ colorAlpha color alpha = unsafePerformIO $ withFreeable color (\c -> c'colorAlph
 
 colorAlphaBlend :: Color -> Color -> Color -> Color
 colorAlphaBlend dst src tint = unsafePerformIO $ withFreeable dst (\d -> withFreeable src (withFreeable tint . c'colorAlphaBlend d)) >>= pop
+
+colorLerp :: Color -> Color -> Float -> Color
+colorLerp color1 color2 factor = unsafePerformIO $ withFreeable color1 (\c1 -> withFreeable color2 (\c2 -> c'colorLerp c1 c2 (realToFrac factor))) >>= pop
 
 getColor :: Integer -> Color
 getColor hexValue = unsafePerformIO $ c'getColor (fromIntegral hexValue) >>= pop

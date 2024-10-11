@@ -240,8 +240,6 @@ Image *LoadImage_(char *a);
 
 Image *LoadImageRaw_(char *a, int b, int c, int d, int e);
 
-Image *LoadImageSvg_(char *a, int b, int c);
-
 Image *LoadImageAnim_(char *a, int *b);
 
 Image *LoadImageAnimFromMemory_(char *a, unsigned char *b, int c, int *d);
@@ -405,6 +403,8 @@ Color *ColorFromHSV_(float a, float b, float c);
 Color *ColorAlpha_(Color *a, float b);
 
 Color *ColorAlphaBlend_(Color *a, Color *b, Color *c);
+
+Color *ColorLerp_(Color *a, Color *b, float c);
 
 Color *GetColor_(unsigned int a);
 
@@ -573,6 +573,8 @@ void UpdateModelAnimation_(Model *a, ModelAnimation *b, int c);
 void UnloadModelAnimation_(ModelAnimation *a);
 
 bool IsModelAnimationValid_(Model *a, ModelAnimation *b);
+
+void UpdateModelAnimationBoneMatrices_(Model *a, ModelAnimation *b, int c);
 
 bool CheckCollisionSpheres_(Vector3 *a, float b, Vector3 *c, float d);
 
@@ -907,6 +909,8 @@ const char *GetPrevDirectoryPath_(const char *a);
 const char *GetWorkingDirectory_();
 
 const char *GetApplicationDirectory_();
+
+int MakeDirectory_(const char *a);
 
 bool ChangeDirectory_(const char *a);
 

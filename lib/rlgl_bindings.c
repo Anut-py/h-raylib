@@ -21,6 +21,11 @@ RLBIND void rlSetUniformMatrix_(int locIndex, Matrix *mat)
   rlSetUniformMatrix(locIndex, *mat);
 }
 
+RLBIND void rlSetUniformMatrices_(int locIndex, const Matrix *mat, int count)
+{
+  rlSetUniformMatrices(locIndex, mat, count);
+}
+
 RLBIND Matrix *rlGetMatrixProjectionStereo_(int eye)
 {
   Matrix *ptr = (Matrix *)malloc(sizeof(Matrix));

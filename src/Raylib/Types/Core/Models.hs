@@ -5,6 +5,7 @@
 module Raylib.Types.Core.Models
   ( -- * Enumerations
     MaterialMapIndex (..),
+    DefaultShaderAttributeLocation (..),
     ShaderLocationIndex (..),
     ShaderUniformDataType (..),
     ShaderUniformData (..),
@@ -134,6 +135,18 @@ data MaterialMapIndex
   | MaterialMapBrdf
   deriving (Eq, Show, Enum)
 
+data DefaultShaderAttributeLocation
+  = DefaultShaderAttribLocationPosition
+  | DefaultShaderAttribLocationTexcoord
+  | DefaultShaderAttribLocationNormal
+  | DefaultShaderAttribLocationColor
+  | DefaultShaderAttribLocationTangent
+  | DefaultShaderAttribLocationTexcoord2
+  | DefaultShaderAttribLocationIndices
+  | DefaultShaderAttribLocationBoneIds
+  | DefaultShaderAttribLocationBoneWeights
+  deriving (Eq, Show, Enum)
+
 data ShaderLocationIndex
   = ShaderLocVertexPosition
   | ShaderLocVertexTexcoord01
@@ -161,6 +174,9 @@ data ShaderLocationIndex
   | ShaderLocMapIrradiance
   | ShaderLocMapPrefilter
   | ShaderLocMapBrdf
+  | ShaderLocVertexBoneIds
+  | ShaderLocVertexBoneWeights
+  | ShaderLocBoneMatrices
   deriving (Eq, Show, Enum)
 
 data ShaderUniformDataType
@@ -325,13 +341,16 @@ data Mesh = Mesh
     mesh'animNormals :: Maybe [Vector3],
     mesh'boneIds :: Maybe [Word8],
     mesh'boneWeights :: Maybe [Float],
+    mesh'boneMatrices :: Maybe [Matrix],
+    mesh'boneCount :: Int,
     mesh'vaoId :: Integer,
+    -- | Use `toEnum` on `DefaultShaderAttributeLocation` for indices
     mesh'vboId :: Maybe [Integer]
   }
   deriving (Eq, Show)
 
 instance Storable Mesh where
-  sizeOf _ = 112
+  sizeOf _ = 120
   alignment _ = 8
   peek _p = do
     vertexCount <- fromIntegral <$> peek (p'mesh'vertexCount _p)
@@ -345,12 +364,14 @@ instance Storable Mesh where
     indices <- (map fromIntegral <$>) <$> (peekMaybeArray vertexCount =<< peek (p'mesh'indices _p))
     animVertices <- peekMaybeArray vertexCount =<< peek (p'mesh'animVertices _p)
     animNormals <- peekMaybeArray vertexCount =<< peek (p'mesh'animNormals _p)
-    boneIds <- (map fromIntegral <$>) <$> (peekMaybeArray (vertexCount * 4) =<< peek (p'mesh'boneIds _p))
-    boneWeights <- (map realToFrac <$>) <$> (peekMaybeArray (vertexCount * 4) =<< peek (p'mesh'boneWeights _p))
+    boneCount <- fromIntegral <$> peek (p'mesh'boneCount _p)
+    boneIds <- (map fromIntegral <$>) <$> (peekMaybeArray boneCount =<< peek (p'mesh'boneIds _p))
+    boneWeights <- (map realToFrac <$>) <$> (peekMaybeArray boneCount =<< peek (p'mesh'boneWeights _p))
+    boneMatrices <- peekMaybeArray boneCount =<< peek (p'mesh'boneMatrices _p)
     vaoId <- fromIntegral <$> peek (p'mesh'vaoId _p)
-    vboId <- (map fromIntegral <$>) <$> (peekMaybeArray 7 =<< peek (p'mesh'vboId _p))
-    return $ Mesh vertexCount triangleCount vertices texcoords texcoords2 normals tangents colors indices animVertices animNormals boneIds boneWeights vaoId vboId
-  poke _p (Mesh vertexCount triangleCount vertices texcoords texcoords2 normals tangents colors indices animVertices animNormals boneIds boneWeights vaoId vboId) = do
+    vboId <- (map fromIntegral <$>) <$> (peekMaybeArray 9 =<< peek (p'mesh'vboId _p))
+    return $ Mesh vertexCount triangleCount vertices texcoords texcoords2 normals tangents colors indices animVertices animNormals boneIds boneWeights boneMatrices boneCount vaoId vboId
+  poke _p (Mesh vertexCount triangleCount vertices texcoords texcoords2 normals tangents colors indices animVertices animNormals boneIds boneWeights boneMatrices boneCount vaoId vboId) = do
     poke (p'mesh'vertexCount _p) (fromIntegral vertexCount)
     poke (p'mesh'triangleCount _p) (fromIntegral triangleCount)
     poke (p'mesh'vertices _p) =<< newArray vertices
@@ -364,6 +385,8 @@ instance Storable Mesh where
     poke (p'mesh'animNormals _p) =<< newMaybeArray animNormals
     poke (p'mesh'boneIds _p) =<< newMaybeArray (map fromIntegral <$> boneIds)
     poke (p'mesh'boneWeights _p) =<< newMaybeArray (map realToFrac <$> boneWeights)
+    poke (p'mesh'boneMatrices _p) =<< newMaybeArray boneMatrices
+    poke (p'mesh'boneCount _p) (fromIntegral boneCount)
     poke (p'mesh'vaoId _p) (fromIntegral vaoId)
     poke (p'mesh'vboId _p) =<< newMaybeArray (map fromIntegral <$> vboId)
     return ()
@@ -420,20 +443,27 @@ p'mesh'animVertices = (`plusPtr` 64)
 p'mesh'animNormals :: Ptr Mesh -> Ptr (Ptr Vector3)
 p'mesh'animNormals = (`plusPtr` 72)
 
--- maybe array (mesh'vertexCount * 4)
+-- maybe array (mesh'boneCount)
 p'mesh'boneIds :: Ptr Mesh -> Ptr (Ptr CUChar)
 p'mesh'boneIds = (`plusPtr` 80)
 
--- maybe array (mesh'vertexCount * 4)
+-- maybe array (mesh'boneCount)
 p'mesh'boneWeights :: Ptr Mesh -> Ptr (Ptr CFloat)
 p'mesh'boneWeights = (`plusPtr` 88)
 
-p'mesh'vaoId :: Ptr Mesh -> Ptr CUInt
-p'mesh'vaoId = (`plusPtr` 96)
+-- maybe array (mesh'boneCount)
+p'mesh'boneMatrices :: Ptr Mesh -> Ptr (Ptr Matrix)
+p'mesh'boneMatrices = (`plusPtr` 96)
 
--- maybe array (7)
+p'mesh'boneCount :: Ptr Mesh -> Ptr CInt
+p'mesh'boneCount = (`plusPtr` 104)
+
+p'mesh'vaoId :: Ptr Mesh -> Ptr CUInt
+p'mesh'vaoId = (`plusPtr` 108)
+
+-- maybe array (9)
 p'mesh'vboId :: Ptr Mesh -> Ptr (Ptr CUInt)
-p'mesh'vboId = (`plusPtr` 104)
+p'mesh'vboId = (`plusPtr` 112)
 
 instance Freeable Mesh where
   rlFreeDependents _ ptr = do

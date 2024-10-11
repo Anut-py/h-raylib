@@ -12,6 +12,8 @@ void rlUnloadRenderBatch_(rlRenderBatch *batch);
 
 void rlSetUniformMatrix_(int locIndex, Matrix *mat);
 
+void rlSetUniformMatrices_(int locIndex, const Matrix *mat, int count);
+
 Matrix *rlGetMatrixProjectionStereo_(int eye);
 
 Matrix *rlGetMatrixViewOffsetStereo_(int eye);

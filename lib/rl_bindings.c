@@ -643,13 +643,6 @@ RLBIND Image *LoadImageRaw_(char *a, int b, int c, int d, int e)
     return ptr;
 }
 
-RLBIND Image *LoadImageSvg_(char *a, int b, int c)
-{
-    Image *ptr = (Image *)malloc(sizeof(Image));
-    *ptr = LoadImageSvg(a, b, c);
-    return ptr;
-}
-
 RLBIND Image *LoadImageAnim_(char *a, int *b)
 {
     Image *ptr = (Image *)malloc(sizeof(Image));
@@ -1145,6 +1138,13 @@ RLBIND Color *ColorAlphaBlend_(Color *a, Color *b, Color *c)
     return ptr;
 }
 
+RLBIND Color *ColorLerp_(Color *a, Color *b, float c)
+{
+    Color *ptr = (Color *)malloc(sizeof(Color));
+    *ptr = ColorLerp(*a, *b, c);
+    return ptr;
+}
+
 RLBIND Color *GetColor_(unsigned int a)
 {
     Color *ptr = (Color *)malloc(sizeof(Color));
@@ -1623,6 +1623,11 @@ RLBIND void UnloadModelAnimation_(ModelAnimation *a)
 RLBIND bool IsModelAnimationValid_(Model *a, ModelAnimation *b)
 {
     return IsModelAnimationValid(*a, *b);
+}
+
+RLBIND void UpdateModelAnimationBoneMatrices_(Model *a, ModelAnimation *b, int c)
+{
+    UpdateModelAnimationBoneMatrices(*a, *b, c);
 }
 
 RLBIND bool CheckCollisionSpheres_(Vector3 *a, float b, Vector3 *c, float d)
@@ -2375,14 +2380,16 @@ RLBIND void OpenURL_(const char *a)
 
 TraceLogCallback_ customCallback;
 
-void CustomCallback(int logLevel, const char *text, va_list args) {
+void CustomCallback(int logLevel, const char *text, va_list args)
+{
     size_t n = vsnprintf(NULL, 0, text, args) + 1;
     char *buffer = malloc(n);
     vsnprintf(buffer, n, text, args);
     customCallback(logLevel, buffer);
 }
 
-RLBIND void SetTraceLogCallback_(TraceLogCallback_ a) {
+RLBIND void SetTraceLogCallback_(TraceLogCallback_ a)
+{
     customCallback = a;
     SetTraceLogCallback(&CustomCallback);
 }
@@ -2495,6 +2502,11 @@ RLBIND const char *GetWorkingDirectory_()
 RLBIND const char *GetApplicationDirectory_()
 {
     return GetApplicationDirectory();
+}
+
+RLBIND int MakeDirectory_(const char *a)
+{
+    return MakeDirectory(a);
 }
 
 RLBIND bool ChangeDirectory_(const char *a)

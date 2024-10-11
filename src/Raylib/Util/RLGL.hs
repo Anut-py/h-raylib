@@ -169,6 +169,7 @@ module Raylib.Util.RLGL
     rlGetLocationAttrib,
     rlSetUniform,
     rlSetUniformMatrix,
+    rlSetUniformMatrices,
     rlSetUniformSampler,
     rlSetShader,
 
@@ -300,6 +301,7 @@ module Raylib.Util.RLGL
     c'rlGetLocationAttrib,
     c'rlSetUniform,
     c'rlSetUniformMatrix,
+    c'rlSetUniformMatrices,
     c'rlSetUniformSampler,
     c'rlSetShader,
     c'rlLoadComputeShaderProgram,
@@ -509,6 +511,7 @@ $( genNative
        ("c'rlGetLocationAttrib", "rlGetLocationAttrib_", "rlgl_bindings.h", [t|CUInt -> CString -> IO CInt|]),
        ("c'rlSetUniform", "rlSetUniform_", "rlgl_bindings.h", [t|CInt -> Ptr () -> CInt -> CInt -> IO ()|]),
        ("c'rlSetUniformMatrix", "rlSetUniformMatrix_", "rlgl_bindings.h", [t|CInt -> Ptr Matrix -> IO ()|]),
+       ("c'rlSetUniformMatrices", "rlSetUniformMatrices_", "rlgl_bindings.h", [t|CInt -> Ptr Matrix -> CInt -> IO ()|]),
        ("c'rlSetUniformSampler", "rlSetUniformSampler_", "rlgl_bindings.h", [t|CInt -> CUInt -> IO ()|]),
        ("c'rlSetShader", "rlSetShader_", "rlgl_bindings.h", [t|CUInt -> Ptr CInt -> IO ()|]),
        ("c'rlLoadComputeShaderProgram", "rlLoadComputeShaderProgram_", "rlgl_bindings.h", [t|CUInt -> IO CUInt|]),
@@ -1191,6 +1194,10 @@ rlSetUniform locIndex value = do
 -- | Set shader value matrix
 rlSetUniformMatrix :: Int -> Matrix -> IO ()
 rlSetUniformMatrix locIndex mat = withFreeable mat (c'rlSetUniformMatrix (fromIntegral locIndex))
+
+-- | Set shader value matrices
+rlSetUniformMatrices :: Int -> [Matrix] -> IO ()
+rlSetUniformMatrices locIndex mats = withFreeableArrayLen mats (\c m -> c'rlSetUniformMatrices (fromIntegral locIndex) m (fromIntegral c))
 
 -- | Set shader value sampler
 rlSetUniformSampler :: Int -> Integer -> IO ()

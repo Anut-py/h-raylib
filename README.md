@@ -109,7 +109,7 @@ If you want to request a feature, create an issue in the GitHub repo. Please che
 - When I try to compile an h-raylib program I get the error `Missing (or bad) C libraries: gcc_eh`
   - See [#36](https://github.com/Anut-py/h-raylib/issues/36)
 
-If you find a bug, please [create an issue on GitHub](https://github.com/Anut-py/h-raylib/issues).
+If you find a bug, please [create an issue on GitHub](https://github.com/Anut-py/h-raylib/issues). There are probably some bindings that are incomplete or do not work properly, so if something seems wrong then it is most likely a bug.
 
 If you have a question about the library that is not related to a bug, ask it on [GitHub discussions](https://github.com/Anut-py/h-raylib/discussions) or in the [Haskell GameDev Discord server](https://discord.gg/aKHNgxc59t).
 
