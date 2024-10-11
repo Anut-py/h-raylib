@@ -1,5 +1,20 @@
 # h-raylib changelog
 
+## Changelog guidelines (apply to `5.5.0.0` onward)
+
+Changes ported from the upstream raylib code are not mentioned unless they are breaking changes. Changes and bug fixes in the h-raylib API are mentioned, breaking and non-breaking. Internal changes that do not change the API or affect functionality are not mentioned (e.g. performance improvements).
+
+### Versioning scheme
+
+h-raylib's version numbers do not follow the usual format. The first two numbers in the version track the underlying C raylib version. For example, `5.1.x.x` versions use raylib 5.1 under the hood. The third number represents breaking changes (renamed/deleted functions or modules). The last number represents non-breaking changes (new functions or modules, bug fixes, etc). The safest version bound format to use is `h-raylib >=x.y.z.w && <x.y.(z+1)` (instead of the usual `^>=` bound).
+
+## Version 5.5.1.0
+_11 October 2024_
+
+- **BREAKING CHANGE**: `set*Callback` functions are no longer managed and do not return `IO C'*Callback` values
+- **BREAKING CHANGE**: Removed `loadImageSvg` (upstream change in raylib)
+- \[[#58](https://github.com/Anut-py/h-raylib/issues/58)\] Added support for `setTraceLogCallback`
+
 ## Version 5.5.0.0
 _12 July 2024_
 

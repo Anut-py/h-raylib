@@ -1,6 +1,6 @@
 cabal-version:      2.4
 name:               h-raylib
-version:            5.5.0.0
+version:            5.5.1.0
 synopsis:           Raylib bindings for Haskell
 category:           graphics
 description:
@@ -16,6 +16,10 @@ extra-doc-files:
   CONTRIBUTING.md
   DOCUMENTATION.md
   README.md
+
+-- Requires >= 9.6.5 on Mac because this bug fix is required: https://gitlab.haskell.org/ghc/ghc/-/merge_requests/12079
+-- Works with >= 9.2.8 on Windows
+tested-with: GHC >= 9.6.5
 
 extra-source-files:
   default.nix
@@ -108,14 +112,13 @@ common example-options
       , base
       , h-raylib
 
-    other-modules: Paths_h_raylib
-    autogen-modules: Paths_h_raylib
-
+    other-modules:    Paths_h_raylib
+    autogen-modules:  Paths_h_raylib
     other-extensions:
       BangPatterns
       TemplateHaskell
-      
-    ghc-options: -Wall
+
+    ghc-options:      -Wall
 
     if flag(platform-web)
       ghc-options:
@@ -257,8 +260,8 @@ library
     ScopedTypeVariables
     TemplateHaskell
     TemplateHaskellQuotes
-  
-  ghc-options: -Wall
+
+  ghc-options:      -Wall
 
   if (flag(platform-windows) || (flag(detect-platform) && os(windows)))
     if flag(mingw-cross)
@@ -310,8 +313,8 @@ library
 
   else
 
-  -- Unsupported OS, do nothing. If you can get it working on an
-  -- OS that isn't listed here, please add it here.
+  --   Unsupported OS, do nothing. If you can get it working on an
+  --   OS that isn't listed here, please add it here.
   if flag(platform-nixos)
     extra-libraries: raylib
 
@@ -322,7 +325,9 @@ library
     c-sources:   lib/web.c
 
   else
-    cc-options: -DPLATFORM_DESKTOP_GLFW -Wno-int-to-void-pointer-cast -Wno-int-conversion
+    cc-options:
+      -DPLATFORM_DESKTOP_GLFW -Wno-int-to-void-pointer-cast
+
     c-sources:
       lib/rgui_bindings.c
       lib/rl_bindings.c

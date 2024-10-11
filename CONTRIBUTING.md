@@ -12,27 +12,27 @@ You can use `./devtools.js [options]` (on Linux) or `node devtools.js [options]`
 
 [DOCUMENTATION.md](https://github.com/Anut-py/h-raylib/blob/master/DOCUMENTATION.md) has information that is specific to h-raylib.
 
-# h-raylib roadmap
+## h-raylib roadmap
 
 This is a list of features that may be added to this project. Contributors are welcome to help implement these.
 
-## Pending
+### Pending
 
 Items which have not yet been worked on. Feel free to work on one of these.
 
 - Bind `rgestures`
 
-## In progress
+### In progress
 
 - Add web build support \[[#4](https://github.com/Anut-py/h-raylib/issues/4)\]
 
-## Implemented
+### Implemented
 
 Items which have been completed but not published to hackage.
 
 (none)
 
-## Published
+### Published
 
 Items which have been published to hackage.
 
