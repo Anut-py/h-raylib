@@ -450,7 +450,8 @@ import Foreign.C
     withCString,
   )
 import Foreign.Ptr (nullPtr)
-import Raylib.Internal (WindowResources, defaultWindowResources, shaderLocations, unloadSingleAutomationEventList, unloadSingleShader, releaseNonAudioWindowResources)
+import GHC.IO (unsafePerformIO)
+import Raylib.Internal (WindowResources, defaultWindowResources, releaseNonAudioWindowResources, shaderLocations, unloadSingleAutomationEventList, unloadSingleShader)
 import Raylib.Internal.Foreign (configsToBitflag, pop, popCArray, popCString, withFreeable, withFreeableArray, withFreeableArrayLen, withMaybeCString)
 import Raylib.Internal.TH (genNative)
 import Raylib.Types
@@ -462,6 +463,7 @@ import Raylib.Types
     C'LoadFileTextCallback,
     C'SaveFileDataCallback,
     C'SaveFileTextCallback,
+    C'TraceLogCallback,
     Camera2D,
     Camera3D,
     Color,
@@ -485,15 +487,15 @@ import Raylib.Types
     ShaderUniformData,
     ShaderUniformDataV,
     Texture,
+    TraceLogCallback,
     TraceLogLevel,
     Vector2,
     Vector3,
     VrDeviceInfo,
     VrStereoConfig,
     unpackShaderUniformData,
-    unpackShaderUniformDataV, C'TraceLogCallback, TraceLogCallback,
+    unpackShaderUniformDataV,
   )
-import GHC.IO (unsafePerformIO)
 
 $( genNative
      [ ("c'initWindow", "InitWindow_", "rl_bindings.h", [t|CInt -> CInt -> CString -> IO ()|]),
@@ -1249,21 +1251,16 @@ computeCRC32 :: [Integer] -> IO Integer
 computeCRC32 contents = do
   withFreeableArrayLen
     (map fromIntegral contents)
-    (\size c -> fromIntegral <$> c'computeCRC32 c (fromIntegral $ size * sizeOf (0 :: CUChar)) ptr)
+    (\size c -> fromIntegral <$> c'computeCRC32 c (fromIntegral $ size * sizeOf (0 :: CUChar)))
 
 computeMD5 :: [Integer] -> IO [Integer]
 computeMD5 contents = do
   withFreeableArrayLen
     (map fromIntegral contents)
     ( \size c -> do
-        withFreeable
-          0
-          ( \ptr -> do
-              encoded <- c'computeMD5 c (fromIntegral $ size * sizeOf (0 :: CUChar)) ptr
-              encodedSize <- fromIntegral <$> peek ptr
-              arr <- peekArray encodedSize encoded
-              return $ map fromIntegral arr
-          )
+        encoded <- c'computeMD5 c (fromIntegral $ size * sizeOf (0 :: CUChar))
+        arr <- peekArray 4 encoded
+        return $ map fromIntegral arr
     )
 
 computeSHA1 :: [Integer] -> IO [Integer]
@@ -1271,14 +1268,9 @@ computeSHA1 contents = do
   withFreeableArrayLen
     (map fromIntegral contents)
     ( \size c -> do
-        withFreeable
-          0
-          ( \ptr -> do
-              encoded <- c'computeSHA1 c (fromIntegral $ size * sizeOf (0 :: CUChar)) ptr
-              encodedSize <- fromIntegral <$> peek ptr
-              arr <- peekArray encodedSize encoded
-              return $ map fromIntegral arr
-          )
+        encoded <- c'computeSHA1 c (fromIntegral $ size * sizeOf (0 :: CUChar))
+        arr <- peekArray 5 encoded
+        return $ map fromIntegral arr
     )
 
 loadAutomationEventList :: String -> IO AutomationEventList
@@ -1477,7 +1469,7 @@ foreign import ccall unsafe "wrapper"
 createTraceLogCallback :: TraceLogCallback -> IO C'TraceLogCallback
 createTraceLogCallback callback =
   mk'traceLogCallback
-    (\logLevel text ->
+    ( \logLevel text ->
         do
           t <- peekCString text
           callback (toEnum (fromIntegral logLevel)) t
