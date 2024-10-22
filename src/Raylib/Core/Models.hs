@@ -28,7 +28,7 @@ module Raylib.Core.Models
     loadModelFromMesh,
     loadModelFromMeshManaged,
     unloadModel,
-    isModelReady,
+    isModelValid,
     getModelBoundingBox,
     drawModel,
     drawModelEx,
@@ -63,7 +63,7 @@ module Raylib.Core.Models
     loadMaterials,
     unloadMaterial,
     loadMaterialDefault,
-    isMaterialReady,
+    isMaterialValid,
     setMaterialTexture,
     setModelMeshMaterial,
     loadModelAnimations,
@@ -103,7 +103,7 @@ module Raylib.Core.Models
     c'drawGrid,
     c'loadModel,
     c'loadModelFromMesh,
-    c'isModelReady,
+    c'isModelValid,
     c'unloadModel,
     c'getModelBoundingBox,
     c'drawModel,
@@ -138,7 +138,7 @@ module Raylib.Core.Models
     c'genMeshCubicmap,
     c'loadMaterials,
     c'loadMaterialDefault,
-    c'isMaterialReady,
+    c'isMaterialValid,
     c'unloadMaterial,
     c'setMaterialTexture,
     c'setModelMeshMaterial,
@@ -222,7 +222,7 @@ $( genNative
        ("c'drawGrid", "DrawGrid_", "rl_bindings.h", [t|CInt -> CFloat -> IO ()|]),
        ("c'loadModel", "LoadModel_", "rl_bindings.h", [t|CString -> IO (Ptr Model)|]),
        ("c'loadModelFromMesh", "LoadModelFromMesh_", "rl_bindings.h", [t|Ptr Mesh -> IO (Ptr Model)|]),
-       ("c'isModelReady", "IsModelReady_", "rl_bindings.h", [t|Ptr Model -> IO CBool|]),
+       ("c'isModelValid", "IsModelValid_", "rl_bindings.h", [t|Ptr Model -> IO CBool|]),
        ("c'unloadModel", "UnloadModel_", "rl_bindings.h", [t|Ptr Model -> IO ()|]),
        ("c'getModelBoundingBox", "GetModelBoundingBox_", "rl_bindings.h", [t|Ptr Model -> IO (Ptr BoundingBox)|]),
        ("c'drawModel", "DrawModel_", "rl_bindings.h", [t|Ptr Model -> Ptr Vector3 -> CFloat -> Ptr Color -> IO ()|]),
@@ -257,7 +257,7 @@ $( genNative
        ("c'genMeshCubicmap", "GenMeshCubicmap_", "rl_bindings.h", [t|Ptr Image -> Ptr Vector3 -> IO (Ptr Mesh)|]),
        ("c'loadMaterials", "LoadMaterials_", "rl_bindings.h", [t|CString -> Ptr CInt -> IO (Ptr Material)|]),
        ("c'loadMaterialDefault", "LoadMaterialDefault_", "rl_bindings.h", [t|IO (Ptr Material)|]),
-       ("c'isMaterialReady", "IsMaterialReady_", "rl_bindings.h", [t|Ptr Material -> IO CBool|]),
+       ("c'isMaterialValid", "IsMaterialValid_", "rl_bindings.h", [t|Ptr Material -> IO CBool|]),
        ("c'unloadMaterial", "UnloadMaterial_", "rl_bindings.h", [t|Ptr Material -> IO ()|]),
        ("c'setMaterialTexture", "SetMaterialTexture_", "rl_bindings.h", [t|Ptr Material -> CInt -> Ptr Texture -> IO ()|]),
        ("c'setModelMeshMaterial", "SetModelMeshMaterial_", "rl_bindings.h", [t|Ptr Model -> CInt -> CInt -> IO ()|]),
@@ -360,8 +360,8 @@ unloadModel model wr = do
   forM_ (model'meshes model) (`unloadMesh` wr)
   forM_ (model'materials model) (`unloadMaterial` wr)
 
-isModelReady :: Model -> IO Bool
-isModelReady model = toBool <$> withFreeable model c'isModelReady
+isModelValid :: Model -> IO Bool
+isModelValid model = toBool <$> withFreeable model c'isModelValid
 
 getModelBoundingBox :: Model -> IO BoundingBox
 getModelBoundingBox model = withFreeable model c'getModelBoundingBox >>= pop
@@ -485,8 +485,8 @@ unloadMaterial material wr = do
 loadMaterialDefault :: IO Material
 loadMaterialDefault = c'loadMaterialDefault >>= pop
 
-isMaterialReady :: Material -> IO Bool
-isMaterialReady material = toBool <$> withFreeable material c'isMaterialReady
+isMaterialValid :: Material -> IO Bool
+isMaterialValid material = toBool <$> withFreeable material c'isMaterialValid
 
 setMaterialTexture :: Material -> MaterialMapIndex -> Texture -> IO Material
 setMaterialTexture material mapType texture = withFreeable material (\m -> withFreeable texture (c'setMaterialTexture m (fromIntegral (fromEnum mapType))) >> peek m)

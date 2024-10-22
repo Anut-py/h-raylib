@@ -40,7 +40,7 @@ Shader *LoadShader_(char *a, char *b);
 
 Shader *LoadShaderFromMemory_(char *a, char *b);
 
-bool IsShaderReady_(Shader *a);
+bool IsShaderValid_(Shader *a);
 
 int GetShaderLocation_(Shader *a, char *b);
 
@@ -250,7 +250,7 @@ Image *LoadImageFromTexture_(Texture *a);
 
 Image *LoadImageFromScreen_();
 
-bool IsImageReady_(Image *a);
+bool IsImageValid_(Image *a);
 
 void UnloadImage_(Image *a);
 
@@ -360,11 +360,11 @@ Texture *LoadTextureCubemap_(Image *a, int b);
 
 RenderTexture *LoadRenderTexture_(int a, int b);
 
-bool IsTextureReady_(Texture *a);
+bool IsTextureValid_(Texture *a);
 
 void UnloadTexture_(Texture *a);
 
-bool IsRenderTextureReady_(RenderTexture *a);
+bool IsRenderTextureValid_(RenderTexture *a);
 
 void UnloadRenderTexture_(RenderTexture *a);
 
@@ -426,7 +426,7 @@ Font *LoadFontFromMemory_(char *a, unsigned char *b, int c, int d, int *e, int f
 
 Image *GenImageFontAtlas_(GlyphInfo *a, Rectangle **b, int c, int d, int e, int f);
 
-bool IsFontReady_(Font *a);
+bool IsFontValid_(Font *a);
 
 void UnloadFont_(Font *a);
 
@@ -498,7 +498,7 @@ Model *LoadModel_(char *a);
 
 Model *LoadModelFromMesh_(Mesh *a);
 
-bool IsModelReady_(Model *a);
+bool IsModelValid_(Model *a);
 
 void UnloadModel_(Model *a);
 
@@ -562,7 +562,7 @@ Mesh *GenMeshCubicmap_(Image *a, Vector3 *b);
 
 Material *LoadMaterialDefault_();
 
-bool IsMaterialReady_(Material *a);
+bool IsMaterialValid_(Material *a);
 
 void UnloadMaterial_(Material *a);
 
@@ -604,11 +604,11 @@ Sound *LoadSoundAlias_(Sound *a);
 
 void UpdateSound_(Sound *a, const void *b, int c);
 
-bool IsWaveReady_(Wave *a);
+bool IsWaveValid_(Wave *a);
 
 void UnloadWave_(Wave *a);
 
-bool IsSoundReady_(Sound *a);
+bool IsSoundValid_(Sound *a);
 
 void UnloadSound_(Sound *a);
 
@@ -642,7 +642,7 @@ Music *LoadMusicStream_(char *a);
 
 Music *LoadMusicStreamFromMemory_(char *a, unsigned char *b, int c);
 
-bool IsMusicReady_(Music *a);
+bool IsMusicValid_(Music *a);
 
 void UnloadMusicStream_(Music *a);
 
@@ -672,7 +672,7 @@ float GetMusicTimePlayed_(Music *a);
 
 AudioStream *LoadAudioStream_(unsigned int a, unsigned int b, unsigned int c);
 
-bool IsAudioStreamReady_(AudioStream *a);
+bool IsAudioStreamValid_(AudioStream *a);
 
 void UnloadAudioStream_(AudioStream *a);
 
@@ -930,6 +930,12 @@ char *EncodeDataBase64_(const unsigned char *a, int b, int *c);
 
 unsigned char *DecodeDataBase64_(const unsigned char *a, int *b);
 
+unsigned int ComputeCRC32_(unsigned char *a, int b);
+
+unsigned int *ComputeMD5_(unsigned char *a, int b);
+
+unsigned int *ComputeSHA1_(unsigned char *a, int b);
+
 void SetAutomationEventList_(AutomationEventList *a);
 
 void SetAutomationEventBaseFrame_(int a);
@@ -974,7 +980,7 @@ float GetGamepadAxisMovement_(int a, int b);
 
 int SetGamepadMappings_(const char *a);
 
-void SetGamepadVibration_(int a, float b, float c);
+void SetGamepadVibration_(int a, float b, float c, float d);
 
 bool IsMouseButtonPressed_(int a);
 

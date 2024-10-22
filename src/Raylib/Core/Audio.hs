@@ -17,8 +17,8 @@ module Raylib.Core.Audio
     unloadSoundAlias,
     updateSound,
     unloadSound,
-    isWaveReady,
-    isSoundReady,
+    isWaveValid,
+    isSoundValid,
     exportWave,
     exportWaveAsCode,
     playSound,
@@ -36,7 +36,7 @@ module Raylib.Core.Audio
     loadMusicStream,
     loadMusicStreamFromMemory,
     unloadMusicStream,
-    isMusicReady,
+    isMusicValid,
     playMusicStream,
     isMusicStreamPlaying,
     updateMusicStream,
@@ -51,7 +51,7 @@ module Raylib.Core.Audio
     getMusicTimePlayed,
     loadAudioStream,
     unloadAudioStream,
-    isAudioStreamReady,
+    isAudioStreamValid,
     updateAudioStream,
     isAudioStreamProcessed,
     playAudioStream,
@@ -81,9 +81,9 @@ module Raylib.Core.Audio
     c'loadSoundFromWave,
     c'loadSoundAlias,
     c'updateSound,
-    c'isWaveReady,
+    c'isWaveValid,
     c'unloadWave,
-    c'isSoundReady,
+    c'isSoundValid,
     c'unloadSound,
     c'unloadSoundAlias,
     c'exportWave,
@@ -103,7 +103,7 @@ module Raylib.Core.Audio
     c'unloadWaveSamples,
     c'loadMusicStream,
     c'loadMusicStreamFromMemory,
-    c'isMusicReady,
+    c'isMusicValid,
     c'unloadMusicStream,
     c'playMusicStream,
     c'isMusicStreamPlaying,
@@ -118,7 +118,7 @@ module Raylib.Core.Audio
     c'getMusicTimeLength,
     c'getMusicTimePlayed,
     c'loadAudioStream,
-    c'isAudioStreamReady,
+    c'isAudioStreamValid,
     c'unloadAudioStream,
     c'updateAudioStream,
     c'isAudioStreamProcessed,
@@ -182,9 +182,9 @@ $( genNative
        ("c'loadSoundFromWave", "LoadSoundFromWave_", "rl_bindings.h", [t|Ptr Wave -> IO (Ptr Sound)|]),
        ("c'loadSoundAlias", "LoadSoundAlias_", "rl_bindings.h", [t|Ptr Sound -> IO (Ptr Sound)|]),
        ("c'updateSound", "UpdateSound_", "rl_bindings.h", [t|Ptr Sound -> Ptr () -> CInt -> IO ()|]),
-       ("c'isWaveReady", "IsWaveReady_", "rl_bindings.h", [t|Ptr Wave -> IO CBool|]),
+       ("c'isWaveValid", "IsWaveValid_", "rl_bindings.h", [t|Ptr Wave -> IO CBool|]),
        ("c'unloadWave", "UnloadWave_", "rl_bindings.h", [t|Ptr Wave -> IO ()|]),
-       ("c'isSoundReady", "IsSoundReady_", "rl_bindings.h", [t|Ptr Sound -> IO CBool|]),
+       ("c'isSoundValid", "IsSoundValid_", "rl_bindings.h", [t|Ptr Sound -> IO CBool|]),
        ("c'unloadSound", "UnloadSound_", "rl_bindings.h", [t|Ptr Sound -> IO ()|]),
        ("c'unloadSoundAlias", "UnloadSoundAlias_", "rl_bindings.h", [t|Ptr Sound -> IO ()|]),
        ("c'exportWave", "ExportWave_", "rl_bindings.h", [t|Ptr Wave -> CString -> IO CBool|]),
@@ -204,7 +204,7 @@ $( genNative
        ("c'unloadWaveSamples", "UnloadWaveSamples_", "rl_bindings.h", [t|Ptr CFloat -> IO ()|]),
        ("c'loadMusicStream", "LoadMusicStream_", "rl_bindings.h", [t|CString -> IO (Ptr Music)|]),
        ("c'loadMusicStreamFromMemory", "LoadMusicStreamFromMemory_", "rl_bindings.h", [t|CString -> Ptr CUChar -> CInt -> IO (Ptr Music)|]),
-       ("c'isMusicReady", "IsMusicReady_", "rl_bindings.h", [t|Ptr Music -> IO CBool|]),
+       ("c'isMusicValid", "IsMusicValid_", "rl_bindings.h", [t|Ptr Music -> IO CBool|]),
        ("c'unloadMusicStream", "UnloadMusicStream_", "rl_bindings.h", [t|Ptr Music -> IO ()|]),
        ("c'playMusicStream", "PlayMusicStream_", "rl_bindings.h", [t|Ptr Music -> IO ()|]),
        ("c'isMusicStreamPlaying", "IsMusicStreamPlaying_", "rl_bindings.h", [t|Ptr Music -> IO CBool|]),
@@ -219,7 +219,7 @@ $( genNative
        ("c'getMusicTimeLength", "GetMusicTimeLength_", "rl_bindings.h", [t|Ptr Music -> IO CFloat|]),
        ("c'getMusicTimePlayed", "GetMusicTimePlayed_", "rl_bindings.h", [t|Ptr Music -> IO CFloat|]),
        ("c'loadAudioStream", "LoadAudioStream_", "rl_bindings.h", [t|CUInt -> CUInt -> CUInt -> IO (Ptr AudioStream)|]),
-       ("c'isAudioStreamReady", "IsAudioStreamReady_", "rl_bindings.h", [t|Ptr AudioStream -> IO CBool|]),
+       ("c'isAudioStreamValid", "IsAudioStreamValid_", "rl_bindings.h", [t|Ptr AudioStream -> IO CBool|]),
        ("c'unloadAudioStream", "UnloadAudioStream_", "rl_bindings.h", [t|Ptr AudioStream -> IO ()|]),
        ("c'updateAudioStream", "UpdateAudioStream_", "rl_bindings.h", [t|Ptr AudioStream -> Ptr () -> CInt -> IO ()|]),
        ("c'isAudioStreamProcessed", "IsAudioStreamProcessed_", "rl_bindings.h", [t|Ptr AudioStream -> IO CBool|]),
@@ -283,11 +283,11 @@ updateSound sound dataValue sampleCount = withFreeable sound (\s -> c'updateSoun
 unloadSound :: Sound -> WindowResources -> IO ()
 unloadSound sound = unloadAudioStream (sound'stream sound)
 
-isWaveReady :: Wave -> IO Bool
-isWaveReady wave = toBool <$> withFreeable wave c'isWaveReady
+isWaveValid :: Wave -> IO Bool
+isWaveValid wave = toBool <$> withFreeable wave c'isWaveValid
 
-isSoundReady :: Sound -> IO Bool
-isSoundReady sound = toBool <$> withFreeable sound c'isSoundReady
+isSoundValid :: Sound -> IO Bool
+isSoundValid sound = toBool <$> withFreeable sound c'isSoundValid
 
 exportWave :: Wave -> String -> IO Bool
 exportWave wave fileName = toBool <$> withFreeable wave (withCString fileName . c'exportWave)
@@ -349,8 +349,8 @@ loadMusicStreamFromMemory fileType streamData =
 unloadMusicStream :: Music -> WindowResources -> IO ()
 unloadMusicStream music = unloadSingleCtxDataPtr (fromEnum (music'ctxType music)) (music'ctxData music)
 
-isMusicReady :: Music -> IO Bool
-isMusicReady music = toBool <$> withFreeable music c'isMusicReady
+isMusicValid :: Music -> IO Bool
+isMusicValid music = toBool <$> withFreeable music c'isMusicValid
 
 playMusicStream :: Music -> IO ()
 playMusicStream music = withFreeable music c'playMusicStream
@@ -395,8 +395,8 @@ loadAudioStream sampleRate sampleSize channels = c'loadAudioStream (fromIntegral
 unloadAudioStream :: AudioStream -> WindowResources -> IO ()
 unloadAudioStream stream = unloadSingleAudioBuffer (castPtr $ audioStream'buffer stream)
 
-isAudioStreamReady :: AudioStream -> IO Bool
-isAudioStreamReady stream = toBool <$> withFreeable stream c'isAudioStreamReady
+isAudioStreamValid :: AudioStream -> IO Bool
+isAudioStreamValid stream = toBool <$> withFreeable stream c'isAudioStreamValid
 
 updateAudioStream :: AudioStream -> Ptr () -> Int -> IO ()
 updateAudioStream stream value frameCount = withFreeable stream (\s -> c'updateAudioStream s value (fromIntegral frameCount))

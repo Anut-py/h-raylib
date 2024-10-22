@@ -87,9 +87,9 @@ RLBIND Shader *LoadShaderFromMemory_(char *a, char *b)
     return ptr;
 }
 
-RLBIND bool IsShaderReady_(Shader *a)
+RLBIND bool IsShaderValid_(Shader *a)
 {
-    return IsShaderReady(*a);
+    return IsShaderValid(*a);
 }
 
 RLBIND int GetShaderLocation_(Shader *a, char *b)
@@ -678,9 +678,9 @@ RLBIND Image *LoadImageFromScreen_()
     return ptr;
 }
 
-RLBIND bool IsImageReady_(Image *a)
+RLBIND bool IsImageValid_(Image *a)
 {
-    return IsImageReady(*a);
+    return IsImageValid(*a);
 }
 
 RLBIND void UnloadImage_(Image *a)
@@ -993,9 +993,9 @@ RLBIND RenderTexture *LoadRenderTexture_(int a, int b)
     return ptr;
 }
 
-RLBIND bool IsTextureReady_(Texture *a)
+RLBIND bool IsTextureValid_(Texture *a)
 {
-    return IsTextureReady(*a);
+    return IsTextureValid(*a);
 }
 
 RLBIND void UnloadTexture_(Texture *a)
@@ -1003,9 +1003,9 @@ RLBIND void UnloadTexture_(Texture *a)
     UnloadTexture(*a);
 }
 
-RLBIND bool IsRenderTextureReady_(RenderTexture *a)
+RLBIND bool IsRenderTextureValid_(RenderTexture *a)
 {
-    return IsRenderTextureReady(*a);
+    return IsRenderTextureValid(*a);
 }
 
 RLBIND void UnloadRenderTexture_(RenderTexture *a)
@@ -1227,9 +1227,9 @@ RLBIND Image *GenImageFontAtlas_(GlyphInfo *a, Rectangle **b, int c, int d, int 
     return ptr;
 }
 
-RLBIND bool IsFontReady_(Font *a)
+RLBIND bool IsFontValid_(Font *a)
 {
-    return IsFontReady(*a);
+    return IsFontValid(*a);
 }
 
 RLBIND void UnloadFont_(Font *a)
@@ -1407,9 +1407,9 @@ RLBIND Model *LoadModelFromMesh_(Mesh *a)
     return ptr;
 }
 
-RLBIND bool IsModelReady_(Model *a)
+RLBIND bool IsModelValid_(Model *a)
 {
-    return IsModelReady(*a);
+    return IsModelValid(*a);
 }
 
 RLBIND void UnloadModel_(Model *a)
@@ -1595,9 +1595,9 @@ RLBIND Material *LoadMaterialDefault_()
     return ptr;
 }
 
-RLBIND bool IsMaterialReady_(Material *a)
+RLBIND bool IsMaterialValid_(Material *a)
 {
-    return IsMaterialReady(*a);
+    return IsMaterialValid(*a);
 }
 
 RLBIND void UnloadMaterial_(Material *a)
@@ -1720,9 +1720,9 @@ RLBIND void UpdateSound_(Sound *a, const void *b, int c)
     UpdateSound(*a, b, c);
 }
 
-RLBIND bool IsWaveReady_(Wave *a)
+RLBIND bool IsWaveValid_(Wave *a)
 {
-    return IsWaveReady(*a);
+    return IsWaveValid(*a);
 }
 
 RLBIND void UnloadWave_(Wave *a)
@@ -1730,9 +1730,9 @@ RLBIND void UnloadWave_(Wave *a)
     UnloadWave(*a);
 }
 
-RLBIND bool IsSoundReady_(Sound *a)
+RLBIND bool IsSoundValid_(Sound *a)
 {
-    return IsSoundReady(*a);
+    return IsSoundValid(*a);
 }
 
 RLBIND void UnloadSound_(Sound *a)
@@ -1821,9 +1821,9 @@ RLBIND Music *LoadMusicStreamFromMemory_(char *a, unsigned char *b, int c)
     return ptr;
 }
 
-RLBIND bool IsMusicReady_(Music *a)
+RLBIND bool IsMusicValid_(Music *a)
 {
-    return IsMusicReady(*a);
+    return IsMusicValid(*a);
 }
 
 RLBIND void UnloadMusicStream_(Music *a)
@@ -1898,9 +1898,9 @@ RLBIND AudioStream *LoadAudioStream_(unsigned int a, unsigned int b, unsigned in
     return ptr;
 }
 
-RLBIND bool IsAudioStreamReady_(AudioStream *a)
+RLBIND bool IsAudioStreamValid_(AudioStream *a)
 {
-    return IsAudioStreamReady(*a);
+    return IsAudioStreamValid(*a);
 }
 
 RLBIND void UnloadAudioStream_(AudioStream *a)
@@ -2554,6 +2554,21 @@ RLBIND unsigned char *DecodeDataBase64_(const unsigned char *a, int *b)
     return DecodeDataBase64(a, b);
 }
 
+RLBIND unsigned int ComputeCRC32_(unsigned char *a, int b)
+{
+    return ComputeCRC32(a, b);
+}
+
+RLBIND unsigned int *ComputeMD5_(unsigned char *a, int b)
+{
+    return ComputeMD5(a, b);
+}
+
+RLBIND unsigned int *ComputeSHA1_(unsigned char *a, int b)
+{
+    return ComputeSHA1(a, b);
+}
+
 RLBIND void SetAutomationEventList_(AutomationEventList *a)
 {
     SetAutomationEventList(a);
@@ -2664,9 +2679,9 @@ RLBIND int SetGamepadMappings_(const char *a)
     return SetGamepadMappings(a);
 }
 
-RLBIND void SetGamepadVibration_(int a, float b, float c)
+RLBIND void SetGamepadVibration_(int a, float b, float c, float d)
 {
-    SetGamepadVibration(a, b, c);
+    SetGamepadVibration(a, b, c, d);
 }
 
 RLBIND bool IsMouseButtonPressed_(int a)

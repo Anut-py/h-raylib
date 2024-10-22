@@ -1,6 +1,6 @@
 cabal-version:      2.4
 name:               h-raylib
-version:            5.5.1.0
+version:            5.5.2.0
 synopsis:           Raylib bindings for Haskell
 category:           graphics
 description:
@@ -239,7 +239,7 @@ library
     Raylib.Internal.Web.Processable
 
   build-depends:
-    , base              >=4.0      && <4.20
+    , base              >=4.0      && <4.21
     , bytestring        >=0.11.0   && <0.13
     , containers        >=0.6.0    && <0.7.0
     , exceptions        >=0.10.4   && <0.10.8

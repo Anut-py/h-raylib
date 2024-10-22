@@ -82,7 +82,7 @@ module Raylib.Core
     loadVrStereoConfig,
     loadShader,
     loadShaderFromMemory,
-    isShaderReady,
+    isShaderValid,
     getShaderLocation,
     getShaderLocationAttrib,
     setShaderValue,
@@ -146,6 +146,9 @@ module Raylib.Core
     decompressData,
     encodeDataBase64,
     decodeDataBase64,
+    computeCRC32,
+    computeMD5,
+    computeSHA1,
     loadAutomationEventList,
     newAutomationEventList,
     exportAutomationEventList,
@@ -282,7 +285,7 @@ module Raylib.Core
     c'unloadVrStereoConfig,
     c'loadShader,
     c'loadShaderFromMemory,
-    c'isShaderReady,
+    c'isShaderValid,
     c'getShaderLocation,
     c'getShaderLocationAttrib,
     c'setShaderValue,
@@ -350,6 +353,9 @@ module Raylib.Core
     c'decompressData,
     c'encodeDataBase64,
     c'decodeDataBase64,
+    c'computeCRC32,
+    c'computeMD5,
+    c'computeSHA1,
     c'loadAutomationEventList,
     c'exportAutomationEventList,
     c'setAutomationEventList,
@@ -568,7 +574,7 @@ $( genNative
        ("c'unloadVrStereoConfig", "UnloadVrStereoConfig_", "rl_bindings.h", [t|Ptr VrStereoConfig -> IO ()|]),
        ("c'loadShader", "LoadShader_", "rl_bindings.h", [t|CString -> CString -> IO (Ptr Shader)|]),
        ("c'loadShaderFromMemory", "LoadShaderFromMemory_", "rl_bindings.h", [t|CString -> CString -> IO (Ptr Shader)|]),
-       ("c'isShaderReady", "IsShaderReady_", "rl_bindings.h", [t|Ptr Shader -> IO CBool|]),
+       ("c'isShaderValid", "IsShaderValid_", "rl_bindings.h", [t|Ptr Shader -> IO CBool|]),
        ("c'getShaderLocation", "GetShaderLocation_", "rl_bindings.h", [t|Ptr Shader -> CString -> IO CInt|]),
        ("c'getShaderLocationAttrib", "GetShaderLocationAttrib_", "rl_bindings.h", [t|Ptr Shader -> CString -> IO CInt|]),
        ("c'setShaderValue", "SetShaderValue_", "rl_bindings.h", [t|Ptr Shader -> CInt -> Ptr () -> CInt -> IO ()|]),
@@ -637,6 +643,9 @@ $( genNative
        ("c'decompressData", "DecompressData_", "rl_bindings.h", [t|Ptr CUChar -> CInt -> Ptr CInt -> IO (Ptr CUChar)|]),
        ("c'encodeDataBase64", "EncodeDataBase64_", "rl_bindings.h", [t|Ptr CUChar -> CInt -> Ptr CInt -> IO CString|]),
        ("c'decodeDataBase64", "DecodeDataBase64_", "rl_bindings.h", [t|Ptr CUChar -> Ptr CInt -> IO (Ptr CUChar)|]),
+       ("c'computeCRC32", "ComputeCRC32_", "rl_bindings.h", [t|Ptr CUChar -> CInt -> IO CUInt|]),
+       ("c'computeMD5", "ComputeMD5_", "rl_bindings.h", [t|Ptr CUChar -> CInt -> IO (Ptr CUInt)|]),
+       ("c'computeSHA1", "ComputeSHA1_", "rl_bindings.h", [t|Ptr CUChar -> CInt -> IO (Ptr CUInt)|]),
        ("c'loadAutomationEventList", "LoadAutomationEventList_", "rl_bindings.h", [t|CString -> IO (Ptr AutomationEventList)|]),
        ("c'exportAutomationEventList", "ExportAutomationEventList_", "rl_bindings.h", [t|Ptr AutomationEventList -> CString -> IO CBool|]),
        ("c'setAutomationEventList", "SetAutomationEventList_", "rl_bindings.h", [t|Ptr AutomationEventList -> IO ()|]),
@@ -662,7 +671,7 @@ $( genNative
        ("c'getGamepadAxisCount", "GetGamepadAxisCount_", "rl_bindings.h", [t|CInt -> IO CInt|]),
        ("c'getGamepadAxisMovement", "GetGamepadAxisMovement_", "rl_bindings.h", [t|CInt -> CInt -> IO CFloat|]),
        ("c'setGamepadMappings", "SetGamepadMappings_", "rl_bindings.h", [t|CString -> IO CInt|]),
-       ("c'setGamepadVibration", "SetGamepadVibration_", "rl_bindings.h", [t|CInt -> CFloat -> CFloat -> IO ()|]),
+       ("c'setGamepadVibration", "SetGamepadVibration_", "rl_bindings.h", [t|CInt -> CFloat -> CFloat -> CFloat -> IO ()|]),
        ("c'isMouseButtonPressed", "IsMouseButtonPressed_", "rl_bindings.h", [t|CInt -> IO CBool|]),
        ("c'isMouseButtonDown", "IsMouseButtonDown_", "rl_bindings.h", [t|CInt -> IO CBool|]),
        ("c'isMouseButtonReleased", "IsMouseButtonReleased_", "rl_bindings.h", [t|CInt -> IO CBool|]),
@@ -939,8 +948,8 @@ loadShader vsFileName fsFileName = withMaybeCString vsFileName (withMaybeCString
 loadShaderFromMemory :: Maybe String -> Maybe String -> IO Shader
 loadShaderFromMemory vsCode fsCode = withMaybeCString vsCode (withMaybeCString fsCode . c'loadShaderFromMemory) >>= pop
 
-isShaderReady :: Shader -> IO Bool
-isShaderReady shader = toBool <$> withFreeable shader c'isShaderReady
+isShaderValid :: Shader -> IO Bool
+isShaderValid shader = toBool <$> withFreeable shader c'isShaderValid
 
 getShaderLocation :: Shader -> String -> WindowResources -> IO Int
 getShaderLocation shader uniformName wr = do
@@ -1236,6 +1245,42 @@ decodeDataBase64 encodedData = do
           )
     )
 
+computeCRC32 :: [Integer] -> IO Integer
+computeCRC32 contents = do
+  withFreeableArrayLen
+    (map fromIntegral contents)
+    (\size c -> fromIntegral <$> c'computeCRC32 c (fromIntegral $ size * sizeOf (0 :: CUChar)) ptr)
+
+computeMD5 :: [Integer] -> IO [Integer]
+computeMD5 contents = do
+  withFreeableArrayLen
+    (map fromIntegral contents)
+    ( \size c -> do
+        withFreeable
+          0
+          ( \ptr -> do
+              encoded <- c'computeMD5 c (fromIntegral $ size * sizeOf (0 :: CUChar)) ptr
+              encodedSize <- fromIntegral <$> peek ptr
+              arr <- peekArray encodedSize encoded
+              return $ map fromIntegral arr
+          )
+    )
+
+computeSHA1 :: [Integer] -> IO [Integer]
+computeSHA1 contents = do
+  withFreeableArrayLen
+    (map fromIntegral contents)
+    ( \size c -> do
+        withFreeable
+          0
+          ( \ptr -> do
+              encoded <- c'computeSHA1 c (fromIntegral $ size * sizeOf (0 :: CUChar)) ptr
+              encodedSize <- fromIntegral <$> peek ptr
+              arr <- peekArray encodedSize encoded
+              return $ map fromIntegral arr
+          )
+    )
+
 loadAutomationEventList :: String -> IO AutomationEventList
 loadAutomationEventList fileName = withCString fileName c'loadAutomationEventList >>= pop
 
@@ -1325,8 +1370,8 @@ getGamepadAxisMovement gamepad axis = realToFrac <$> c'getGamepadAxisMovement (f
 setGamepadMappings :: String -> IO Int
 setGamepadMappings mappings = fromIntegral <$> withCString mappings c'setGamepadMappings
 
-setGamepadVibration :: Int -> Float -> Float -> IO ()
-setGamepadVibration gamepad leftMotor rightMotor = c'setGamepadVibration (fromIntegral gamepad) (realToFrac leftMotor) (realToFrac rightMotor)
+setGamepadVibration :: Int -> Float -> Float -> Float -> IO ()
+setGamepadVibration gamepad leftMotor rightMotor duration = c'setGamepadVibration (fromIntegral gamepad) (realToFrac leftMotor) (realToFrac rightMotor) (realToFrac duration)
 
 isMouseButtonPressed :: MouseButton -> IO Bool
 isMouseButtonPressed button = toBool <$> c'isMouseButtonPressed (fromIntegral $ fromEnum button)

@@ -10,7 +10,7 @@ module Raylib.Core.Textures
     loadImageFromMemory,
     loadImageFromTexture,
     loadImageFromScreen,
-    isImageReady,
+    isImageValid,
     exportImage,
     exportImageToMemory,
     exportImageAsCode,
@@ -81,8 +81,8 @@ module Raylib.Core.Textures
     loadTextureFromImage,
     loadTextureCubemap,
     loadRenderTexture,
-    isTextureReady,
-    isRenderTextureReady,
+    isTextureValid,
+    isRenderTextureValid,
     unloadTexture,
     unloadRenderTexture,
     updateTexture,
@@ -121,7 +121,7 @@ module Raylib.Core.Textures
     c'loadImageFromMemory,
     c'loadImageFromTexture,
     c'loadImageFromScreen,
-    c'isImageReady,
+    c'isImageValid,
     c'unloadImage,
     c'exportImage,
     c'exportImageToMemory,
@@ -194,9 +194,9 @@ module Raylib.Core.Textures
     c'loadTextureFromImage,
     c'loadTextureCubemap,
     c'loadRenderTexture,
-    c'isTextureReady,
+    c'isTextureValid,
     c'unloadTexture,
-    c'isRenderTextureReady,
+    c'isRenderTextureValid,
     c'unloadRenderTexture,
     c'updateTexture,
     c'updateTextureRec,
@@ -279,7 +279,7 @@ $( genNative
        ("c'loadImageFromMemory", "LoadImageFromMemory_", "rl_bindings.h", [t|CString -> Ptr CUChar -> CInt -> IO (Ptr Image)|]),
        ("c'loadImageFromTexture", "LoadImageFromTexture_", "rl_bindings.h", [t|Ptr Texture -> IO (Ptr Image)|]),
        ("c'loadImageFromScreen", "LoadImageFromScreen_", "rl_bindings.h", [t|IO (Ptr Image)|]),
-       ("c'isImageReady", "IsImageReady_", "rl_bindings.h", [t|Ptr Image -> IO CBool|]),
+       ("c'isImageValid", "IsImageValid_", "rl_bindings.h", [t|Ptr Image -> IO CBool|]),
        ("c'unloadImage", "UnloadImage_", "rl_bindings.h", [t|Ptr Image -> IO ()|]),
        ("c'exportImage", "ExportImage_", "rl_bindings.h", [t|Ptr Image -> CString -> IO CBool|]),
        ("c'exportImageToMemory", "ExportImageToMemory_", "rl_bindings.h", [t|Ptr Image -> CString -> Ptr CInt -> IO (Ptr CUChar)|]),
@@ -352,9 +352,9 @@ $( genNative
        ("c'loadTextureFromImage", "LoadTextureFromImage_", "rl_bindings.h", [t|Ptr Image -> IO (Ptr Texture)|]),
        ("c'loadTextureCubemap", "LoadTextureCubemap_", "rl_bindings.h", [t|Ptr Image -> CInt -> IO (Ptr Texture)|]),
        ("c'loadRenderTexture", "LoadRenderTexture_", "rl_bindings.h", [t|CInt -> CInt -> IO (Ptr RenderTexture)|]),
-       ("c'isTextureReady", "IsTextureReady_", "rl_bindings.h", [t|Ptr Texture -> IO CBool|]),
+       ("c'isTextureValid", "IsTextureValid_", "rl_bindings.h", [t|Ptr Texture -> IO CBool|]),
        ("c'unloadTexture", "UnloadTexture_", "rl_bindings.h", [t|Ptr Texture -> IO ()|]),
-       ("c'isRenderTextureReady", "IsRenderTextureReady_", "rl_bindings.h", [t|Ptr RenderTexture -> IO CBool|]),
+       ("c'isRenderTextureValid", "IsRenderTextureValid_", "rl_bindings.h", [t|Ptr RenderTexture -> IO CBool|]),
        ("c'unloadRenderTexture", "UnloadRenderTexture_", "rl_bindings.h", [t|Ptr RenderTexture -> IO ()|]),
        ("c'updateTexture", "UpdateTexture_", "rl_bindings.h", [t|Ptr Texture -> Ptr () -> IO ()|]),
        ("c'updateTextureRec", "UpdateTextureRec_", "rl_bindings.h", [t|Ptr Texture -> Ptr Rectangle -> Ptr () -> IO ()|]),
@@ -435,8 +435,8 @@ loadImageFromTexture tex = withFreeable tex c'loadImageFromTexture >>= pop
 loadImageFromScreen :: IO Image
 loadImageFromScreen = c'loadImageFromScreen >>= pop
 
-isImageReady :: Image -> IO Bool
-isImageReady image = toBool <$> withFreeable image c'isImageReady
+isImageValid :: Image -> IO Bool
+isImageValid image = toBool <$> withFreeable image c'isImageValid
 
 exportImage :: Image -> String -> IO Bool
 exportImage image fileName = toBool <$> withFreeable image (withCString fileName . c'exportImage)
@@ -691,11 +691,11 @@ loadTextureCubemap image layout = withFreeable image (\i -> c'loadTextureCubemap
 loadRenderTexture :: Int -> Int -> IO RenderTexture
 loadRenderTexture width height = c'loadRenderTexture (fromIntegral width) (fromIntegral height) >>= pop
 
-isTextureReady :: Texture -> IO Bool
-isTextureReady texture = toBool <$> withFreeable texture c'isTextureReady
+isTextureValid :: Texture -> IO Bool
+isTextureValid texture = toBool <$> withFreeable texture c'isTextureValid
 
-isRenderTextureReady :: RenderTexture -> IO Bool
-isRenderTextureReady renderTexture = toBool <$> withFreeable renderTexture c'isRenderTextureReady
+isRenderTextureValid :: RenderTexture -> IO Bool
+isRenderTextureValid renderTexture = toBool <$> withFreeable renderTexture c'isRenderTextureValid
 
 -- | Unloads a `managed` texture from GPU memory (VRAM)
 unloadTexture :: Texture -> WindowResources -> IO ()

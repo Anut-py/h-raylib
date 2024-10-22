@@ -11,7 +11,7 @@ module Raylib.Core.Text
     loadFontData,
     genImageFontAtlas,
     unloadFont,
-    isFontReady,
+    isFontValid,
     exportFontAsCode,
     drawFPS,
     drawText,
@@ -41,7 +41,7 @@ module Raylib.Core.Text
     c'loadFontData,
     c'genImageFontAtlas,
     c'unloadFontData,
-    c'isFontReady,
+    c'isFontValid,
     c'unloadFont,
     c'exportFontAsCode,
     c'drawFPS,
@@ -106,7 +106,7 @@ $( genNative
        ("c'loadFontData", "LoadFontData_", "rl_bindings.h", [t|Ptr CUChar -> CInt -> CInt -> Ptr CInt -> CInt -> CInt -> IO (Ptr GlyphInfo)|]),
        ("c'genImageFontAtlas", "GenImageFontAtlas_", "rl_bindings.h", [t|Ptr GlyphInfo -> Ptr (Ptr Rectangle) -> CInt -> CInt -> CInt -> CInt -> IO (Ptr Image)|]),
        ("c'unloadFontData", "UnloadFontData_", "rl_bindings.h", [t|Ptr GlyphInfo -> CInt -> IO ()|]),
-       ("c'isFontReady", "IsFontReady_", "rl_bindings.h", [t|Ptr Font -> IO CBool|]),
+       ("c'isFontValid", "IsFontValid_", "rl_bindings.h", [t|Ptr Font -> IO CBool|]),
        ("c'unloadFont", "UnloadFont_", "rl_bindings.h", [t|Ptr Font -> IO ()|]),
        ("c'exportFontAsCode", "ExportFontAsCode_", "rl_bindings.h", [t|Ptr Font -> CString -> IO CBool|]),
        ("c'drawFPS", "DrawFPS_", "rl_bindings.h", [t|CInt -> CInt -> IO ()|]),
@@ -187,8 +187,8 @@ genImageFontAtlas chars recs glyphCount fontSize padding packMethod = withFreeab
 unloadFont :: Font -> WindowResources -> IO ()
 unloadFont font = unloadSingleTexture (texture'id $ font'texture font)
 
-isFontReady :: Font -> IO Bool
-isFontReady font = toBool <$> withFreeable font c'isFontReady
+isFontValid :: Font -> IO Bool
+isFontValid font = toBool <$> withFreeable font c'isFontValid
 
 exportFontAsCode :: Font -> String -> IO Bool
 exportFontAsCode font fileName = toBool <$> withFreeable font (withCString fileName . c'exportFontAsCode)
