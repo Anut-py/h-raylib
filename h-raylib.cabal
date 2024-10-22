@@ -243,7 +243,7 @@ library
     , bytestring        >=0.11.0   && <0.13
     , containers        >=0.6.0    && <0.7.0
     , exceptions        >=0.10.4   && <0.10.8
-    , lens              >=4.0      && <5.2.4
+    , lens              >=4.0      && <5.4
     , linear            >=1.22     && <1.23
     , template-haskell  >=2.16.0.0 && <2.23.0.0
     , text              >=2.0      && <2.2
