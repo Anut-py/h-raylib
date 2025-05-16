@@ -1,9 +1,10 @@
 {-# LANGUAGE TemplateHaskell #-}
+
 module Main where
 
-import Raylib.Core (clearBackground, initWindow, setTargetFPS, windowShouldClose, closeWindow)
+import Raylib.Core (clearBackground, closeWindow, initWindow, setTargetFPS, windowShouldClose)
 import Raylib.Core.Text (drawText)
-import Raylib.Util (drawing, raylibApplication, WindowResources)
+import Raylib.Util (WindowResources, drawing, raylibApplication)
 import Raylib.Util.Colors (lightGray, rayWhite)
 
 startup :: IO WindowResources
@@ -18,7 +19,8 @@ mainLoop window =
     ( do
         clearBackground rayWhite
         drawText "Basic raylib window" 30 40 18 lightGray
-    ) >> return window
+    )
+    >> return window
 
 shouldClose :: WindowResources -> IO Bool
 shouldClose _ = windowShouldClose

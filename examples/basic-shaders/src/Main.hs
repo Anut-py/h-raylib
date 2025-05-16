@@ -2,9 +2,10 @@
 
 module Main where
 
-import Paths_h_raylib (getDataFileName)
 import Control.Monad (when)
+import Foreign (ForeignPtr)
 import Numeric (showFFloat)
+import Paths_h_raylib (getDataFileName)
 import Raylib.Core
   ( beginDrawing,
     beginMode3D,
@@ -21,13 +22,16 @@ import Raylib.Core
     setTargetFPS,
   )
 import Raylib.Core.Camera (updateCamera)
-import Raylib.Core.Models (drawModel, drawSphereWires, genMeshCube, genMeshPlane, genMeshSphere, loadModelFromMesh)
+import Raylib.Core.Models (drawModel, drawSphereWires, genMeshCube, genMeshPlane, genMeshSphere, loadModelFromMeshManaged)
 import Raylib.Core.Text (drawText)
 import Raylib.Types
   ( Camera3D (Camera3D, camera3D'position),
     CameraMode (CameraModeFirstPerson),
     CameraProjection (CameraPerspective),
     KeyboardKey (KeyH, KeyJ, KeyU, KeyY),
+    Mesh,
+    Model,
+    Shader,
     ShaderUniformData
       ( ShaderUniformFloat,
         ShaderUniformVec3,
@@ -38,7 +42,7 @@ import Raylib.Types
     pattern Vector3,
     pattern Vector4,
   )
-import Raylib.Util (setMaterialShader, whileWindowOpen_, managed)
+import Raylib.Util (managed, setMaterialShader, whileWindowOpen_)
 import Raylib.Util.Colors (black, blue, lightGray, orange, white)
 
 assetsPath :: String
@@ -54,7 +58,7 @@ main = do
 
   vert <- getDataFileName (assetsPath ++ "lighting.vert")
   frag <- getDataFileName (assetsPath ++ "lighting.frag")
-  shader <- managed window $ loadShader (Just vert) (Just frag)
+  shader <- managed window $ loadShader (Just vert) (Just frag) :: IO (ForeignPtr Shader)
 
   let pointLightPosition = Vector3 0 3 2
   let pointLightColor = Vector4 1 1 1 1
@@ -70,17 +74,17 @@ main = do
   setShaderValue shader "ambientLightColor" (ShaderUniformVec4 ambientLightColor) window
   setShaderValue shader "ambientStrength" (ShaderUniformFloat ambientStrength) window
 
-  cubeMesh <- managed window $ genMeshCube 2 2 2
-  cubeModel' <- managed window $ loadModelFromMesh cubeMesh
-  let cubeModel = setMaterialShader cubeModel' 0 shader
+  cubeMesh <- managed window $ genMeshCube 2 2 2 :: IO (ForeignPtr Mesh)
+  cubeModel <- loadModelFromMeshManaged cubeMesh window :: IO (ForeignPtr Model)
+  _ <- setMaterialShader cubeModel 0 shader
 
-  sphereMesh <- managed window $ genMeshSphere 0.5 32 32
-  sphereModel' <- managed window $ loadModelFromMesh sphereMesh
-  let sphereModel = setMaterialShader sphereModel' 0 shader
+  sphereMesh <- managed window $ genMeshSphere 0.5 32 32 :: IO (ForeignPtr Mesh)
+  sphereModel <- loadModelFromMeshManaged sphereMesh window :: IO (ForeignPtr Model)
+  _ <- setMaterialShader sphereModel 0 shader
 
-  planeMesh <- managed window $ genMeshPlane 100 100 20 20
-  planeModel' <- managed window $ loadModelFromMesh planeMesh
-  let planeModel = setMaterialShader planeModel' 0 shader
+  planeMesh <- managed window $ genMeshPlane 100 100 20 20 :: IO (ForeignPtr Mesh)
+  planeModel <- loadModelFromMeshManaged planeMesh window :: IO (ForeignPtr Model)
+  _ <- setMaterialShader planeModel 0 shader
 
   whileWindowOpen_
     ( \(c, ls, ss) -> do

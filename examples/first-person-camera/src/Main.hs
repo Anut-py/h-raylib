@@ -3,7 +3,7 @@
 
 module Main where
 
-import Raylib.Core (initWindowUnmanaged, setTargetFPS, windowShouldClose, closeWindow, clearBackground, disableCursor)
+import Raylib.Core (clearBackground, closeWindow, disableCursor, initWindowUnmanaged, setTargetFPS, windowShouldClose)
 import Raylib.Core.Camera (updateCamera)
 import Raylib.Core.Models (drawCircle3D, drawCubeWiresV, drawLine3D)
 import Raylib.Core.Text (drawFPS)

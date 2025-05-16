@@ -1,3 +1,4 @@
+{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE TemplateHaskell #-}
 
 -- | Bindings to @rcamera@ (raylib.h)
@@ -12,10 +13,9 @@ module Raylib.Core.Camera
   )
 where
 
-import Foreign (Ptr, Storable (peek))
+import Foreign (Ptr)
 import Foreign.C (CFloat (..), CInt (..))
-import GHC.IO (unsafePerformIO)
-import Raylib.Internal.Foreign (withFreeable)
+import Raylib.Internal.Foreign (Mutable (peekMutated), PLike, TLike (..), withFreeable)
 import Raylib.Internal.TH (genNative)
 import Raylib.Types (Camera3D, CameraMode, Vector3)
 
@@ -25,21 +25,20 @@ $( genNative
      ]
  )
 
-updateCamera :: Camera3D -> CameraMode -> IO Camera3D
+updateCamera :: (PLike Camera3D camera3D, Mutable camera3D mut) => camera3D -> CameraMode -> IO mut
 updateCamera camera mode =
-  withFreeable
+  withTLike
     camera
     ( \c -> do
         c'updateCamera c (fromIntegral $ fromEnum mode)
-        peek c
+        peekMutated camera c
     )
 
-updateCameraPro :: Camera3D -> Vector3 -> Vector3 -> Float -> Camera3D
+updateCameraPro :: (PLike Camera3D camera3D, Mutable camera3D mut) => camera3D -> Vector3 -> Vector3 -> Float -> IO mut
 updateCameraPro camera movement rotation zoom =
-  unsafePerformIO $
-    withFreeable
-      camera
-      ( \c -> do
-          withFreeable movement (\m -> withFreeable rotation (\r -> c'updateCameraPro c m r (realToFrac zoom)))
-          peek c
-      )
+  withTLike
+    camera
+    ( \c -> do
+        withFreeable movement (\m -> withFreeable rotation (\r -> c'updateCameraPro c m r (realToFrac zoom)))
+        peekMutated camera c
+    )

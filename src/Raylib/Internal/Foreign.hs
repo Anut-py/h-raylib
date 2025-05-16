@@ -1,5 +1,9 @@
 {-# LANGUAGE CPP #-}
+{-# LANGUAGE ConstraintKinds #-}
+{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE TupleSections #-}
 
 -- |
 -- Miscellaneous utility functions for marshalling values to/from C. The most
@@ -9,6 +13,13 @@ module Raylib.Internal.Foreign
     p'free,
     freeMaybePtr,
     Freeable (..),
+    TLike (..),
+    Mutable (..),
+    ALike (..),
+    StringLike,
+    StringALike,
+    PLike,
+    PALike,
     rlFreeMaybeArray,
     pop,
     popCArray,
@@ -38,12 +49,15 @@ where
 import Control.Monad (forM_, unless)
 import Data.Bits ((.|.))
 import qualified Data.ByteString as BS
+import Data.Char (chr, ord)
 import Data.Maybe (fromMaybe)
 import qualified Data.Text as T
 import qualified Data.Text.Encoding as TE
-import Foreign (FunPtr, Ptr, Storable (peek, peekByteOff, poke, sizeOf), allocaBytes, castPtr, malloc, newArray, nullPtr, peekArray, plusPtr, pokeArray0, with, withArray, withArrayLen)
+import Data.Word (Word8)
+import Foreign (ForeignPtr, FunPtr, Ptr, Storable (peek, peekByteOff, poke, sizeOf), advancePtr, allocaBytes, castPtr, malloc, newArray, newForeignPtr_, nullPtr, peekArray, plusPtr, pokeArray0, with, withArray, withArrayLen, withForeignPtr)
 import Foreign.C (CFloat, CInt, CString, CUChar, CUInt, peekCString, withCString)
 import Foreign.C.Types (CBool, CChar, CShort, CUShort)
+import GHC.ForeignPtr (newConcForeignPtr)
 import Linear (V2, V3, V4)
 
 -- Internal utility functions
@@ -69,13 +83,12 @@ foreign import ccall "stdlib.h &free" p'free :: FunPtr (Ptr a -> IO ())
 freeMaybePtr :: Ptr () -> IO ()
 freeMaybePtr ptr = unless (ptr == nullPtr) (c'free ptr)
 
--- | A typeclass used internally to free complex data types. You will most
---   likely not have to use this directly. If you do need to implement it, you
---   can probably just stick with the default definitions of `rlFree` and
---   `rlFreeDependents`.
+-- | A typeclass used internally to free complex data types
 class Freeable a where
   -- | Frees the data \"dependent\" on a pointer, which usually means dynamic
   --   C arrays, i.e. more pointers
+  --
+  --   WARNING: This must not free the pointer itself!
   rlFreeDependents :: a -> Ptr a -> IO ()
   rlFreeDependents _ _ = return ()
 
@@ -116,6 +129,156 @@ instance Freeable (V2 a)
 instance Freeable (V3 a)
 
 instance Freeable (V4 a)
+
+-- | A typeclass to allow usage of Haskell values and pointers interchangeably.
+--   For example, @TLike (ForeignPtr X) X@ means a value of type X can be converted to
+--   and used as a @ForeignPtr X@.
+class TLike a b where
+  withTLike :: b -> (a -> IO c) -> IO c
+  popTLike :: a -> IO b
+  peekTLike :: a -> IO b
+
+-- | A typeclass to allow for mutation of values. For example, @Mutable X X@
+--   means mutating a value of type @X@ will result in a value of type @IO X@.
+--   @Mutable (Ptr X) ()@ means mutating a value of type @Ptr X@ will result
+--   in a value of type @IO ()@.
+class Mutable a b where
+  peekMutated :: (TLike c a) => a -> c -> IO b
+
+instance TLike CString String where
+  withTLike = withCString
+  popTLike = popCString
+  peekTLike = peekCString
+
+instance Mutable String String where
+  peekMutated _ = peekTLike
+
+instance (Freeable a, Storable a) => TLike (Ptr a) a where
+  withTLike = withFreeable
+  popTLike = pop
+  peekTLike = peek
+
+instance (Freeable a, Storable a) => Mutable a a where
+  peekMutated _ = peekTLike
+
+instance TLike (Ptr a) (Ptr a) where
+  withTLike = flip ($)
+  popTLike = return
+  peekTLike = return
+
+instance Mutable (Ptr a) () where
+  peekMutated _ _ = return ()
+
+instance (Storable a, Freeable a) => TLike (Ptr a) (ForeignPtr a) where
+  withTLike = withForeignPtr
+  popTLike ptr =
+    newConcForeignPtr
+      ptr
+      ( do
+          v <- peek ptr
+          rlFree v ptr
+      )
+  peekTLike = newForeignPtr_
+
+instance Mutable (ForeignPtr a) () where
+  peekMutated _ _ = return ()
+
+type StringLike = TLike CString
+
+type PLike a = TLike (Ptr a)
+
+-- | Similar to @TLike@ but for arrays. In particular, @(Int, Ptr X)@ can be
+--   passed as an argument to functions rather than @[X]@.
+class ALike a b where
+  withALikeLen :: b -> (Int -> a -> IO c) -> IO c
+  withALike :: b -> (a -> IO c) -> IO c
+  withALike x f = withALikeLen x (\_ p -> f p)
+  peekALike :: Int -> a -> IO b
+  popALike :: Int -> a -> IO b
+
+instance (Freeable a, Storable a) => ALike (Ptr a) [a] where
+  withALikeLen = withFreeableArrayLen
+  withALike = withFreeableArray
+  peekALike = peekArray
+  popALike = popCArray
+
+instance (Freeable a, Storable a) => ALike (Ptr a) (Int, Ptr a) where
+  withALikeLen = flip uncurry
+  withALike x f = f $ snd x
+  peekALike l p = return (l, p)
+  popALike l p = return (l, p)
+
+instance (Freeable a, Storable a) => ALike (Ptr a) (Int, ForeignPtr a) where
+  withALikeLen (l, x) f = withForeignPtr x (f l)
+  withALike = withForeignPtr . snd
+  peekALike l p = (l,) <$> newForeignPtr_ p
+  popALike l p =
+    (l,)
+      <$> newConcForeignPtr
+        p
+        ( forM_
+            [0 .. l - 1]
+            ( \i -> do
+                v <- peek (advancePtr p i)
+                rlFreeDependents v (advancePtr p i)
+            )
+            >> c'free (castPtr p)
+        )
+
+instance ALike (Ptr CUChar) [Word8] where
+  withALikeLen = withFreeableArrayLen . map fromIntegral
+  withALike = withFreeableArray . map fromIntegral
+  peekALike l p = map fromIntegral <$> peekArray l p
+  popALike l p = map fromIntegral <$> popCArray l p
+
+instance ALike (Ptr CChar) String where
+  withALikeLen = withFreeableArrayLen . map (fromIntegral . ord)
+  withALike = withFreeableArray . map (fromIntegral . ord)
+  peekALike l p = map (chr . fromIntegral) <$> peekArray l p
+  popALike l p = map (chr . fromIntegral) <$> popCArray l p
+
+instance ALike (Ptr CUShort) [Int] where
+  withALikeLen = withFreeableArrayLen . map fromIntegral
+  withALike = withFreeableArray . map fromIntegral
+  peekALike l p = map fromIntegral <$> peekArray l p
+  popALike l p = map fromIntegral <$> popCArray l p
+
+instance ALike (Ptr CUInt) [Integer] where
+  withALikeLen = withFreeableArrayLen . map fromIntegral
+  withALike = withFreeableArray . map fromIntegral
+  peekALike l p = map fromIntegral <$> peekArray l p
+  popALike l p = map fromIntegral <$> popCArray l p
+
+instance ALike (Ptr CInt) [Int] where
+  withALikeLen = withFreeableArrayLen . map fromIntegral
+  withALike = withFreeableArray . map fromIntegral
+  peekALike l p = map fromIntegral <$> peekArray l p
+  popALike l p = map fromIntegral <$> popCArray l p
+
+instance ALike (Ptr CFloat) [Float] where
+  withALikeLen = withFreeableArrayLen . map realToFrac
+  withALike = withFreeableArray . map realToFrac
+  peekALike l p = map realToFrac <$> peekArray l p
+  popALike l p = map realToFrac <$> popCArray l p
+
+instance ALike (Ptr CString) [String] where
+  withALikeLen ss f = helper [] ss
+    where
+      helper ps (x : xs) = withCString x (\p -> helper (p : ps) xs)
+      helper ps [] = withArray ps (f (length ss))
+  withALike ss f = helper [] ss
+    where
+      helper ps (x : xs) = withCString x (\p -> helper (p : ps) xs)
+      helper ps [] = withArray (reverse ps) f
+  peekALike l p = mapM peekCString =<< peekArray l p
+  popALike l p = do
+    v <- mapM popCString =<< peekArray l p
+    c'free (castPtr p)
+    return v
+
+type PALike a b = ALike (Ptr a) b
+
+type StringALike = ALike (Ptr CString)
 
 rlFreeMaybeArray :: (Freeable a, Storable a) => Maybe [a] -> Ptr a -> IO ()
 rlFreeMaybeArray Nothing _ = return ()
@@ -170,22 +333,19 @@ withFreeableArrayLen arr f = do
     )
 
 withFreeableArray2D :: (Freeable a, Storable a) => [[a]] -> (Ptr (Ptr a) -> IO b) -> IO b
-withFreeableArray2D arr func = do
-  arrays <- mapM newArray arr
-  ptr <- newArray arrays
-  res <- func ptr
-  forM_ (zip [0 ..] arrays) (\(i, a) -> rlFree (arr !! i) (castPtr a))
-  c'free $ castPtr ptr
-  return res
+withFreeableArray2D arr func = helper [] arr
+  where
+    helper ps (x : xs) = withFreeableArray x (\p -> helper (p : ps) xs)
+    helper ps [] = withArray (reverse ps) func
 
 configsToBitflag :: (Enum a) => [a] -> Integer
 configsToBitflag = fromIntegral . foldr folder (toEnum 0)
   where
     folder a b = fromEnum a .|. b
 
-withMaybe :: (Storable a) => Maybe a -> (Ptr a -> IO b) -> IO b
+withMaybe :: (Storable a, Freeable a) => Maybe a -> (Ptr a -> IO b) -> IO b
 withMaybe a f = case a of
-  (Just val) -> with val f
+  (Just val) -> withFreeable val f
   Nothing -> f nullPtr
 
 withMaybeCString :: Maybe String -> (CString -> IO b) -> IO b

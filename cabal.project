@@ -1,6 +1,4 @@
 packages: *.cabal
 
-optimization: 2
-
 package h-raylib
   flags: +examples

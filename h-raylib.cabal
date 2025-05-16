@@ -191,6 +191,7 @@ executable basic-audio
   import:         example-options
   hs-source-dirs: examples/basic-audio/src
   main-is:        Main.hs
+  ghc-options:    -threaded
 
 -- rlgl
 executable basic-rlgl

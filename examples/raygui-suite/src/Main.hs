@@ -2,20 +2,23 @@
 
 module Main where
 
-import Control.Monad (when, unless)
+import Control.Monad (unless, when)
 import Data.Maybe (fromJust, fromMaybe, isNothing)
 import Raylib.Core (clearBackground, closeWindow, initWindow, isKeyPressed, setTargetFPS, windowShouldClose)
 import Raylib.Types
-  ( GuiControl (Statusbar),
+  ( Color,
+    GuiControl (Statusbar),
     GuiControlProperty (TextPadding),
     GuiState (StateDisabled),
     GuiTextAlignmentVertical (TextAlignMiddle),
     KeyboardKey (KeyE, KeyU),
-    Rectangle (Rectangle), Color,
+    Rectangle (Rectangle),
   )
 import Raylib.Util (WindowResources, drawing, raylibApplication)
 import Raylib.Util.GUI
   ( guiButton,
+    guiCheckBox,
+    guiColorPicker,
     guiDisable,
     guiEnable,
     guiGetState,
@@ -34,7 +37,7 @@ import Raylib.Util.GUI
     guiStatusBar,
     guiTextBox,
     guiUnlock,
-    guiWindowBox, guiCheckBox, guiColorPicker,
+    guiWindowBox,
   )
 import Raylib.Util.GUI.Styles
   ( guiLoadStyleAmber,
@@ -302,7 +305,7 @@ mainLoop state = do
       unless (oldState == StateDisabled) guiEnable
 
       when (theme' /= theme ps) (themes !! (fromMaybe 0 theme'))
-      return $ state { page2 = ps { scroll = scroll', theme = theme', useCustomBackground = custom', customBackground = Just color' }}
+      return $ state {page2 = ps {scroll = scroll', theme = theme', useCustomBackground = custom', customBackground = Just color'}}
 
 shouldClose :: AppState -> IO Bool
 shouldClose = const windowShouldClose

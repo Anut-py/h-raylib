@@ -60,7 +60,7 @@ mainLoop (window, rWidth, pWidth, mState, playback, playing, recording, lRef) = 
             then
               ( do
                   l <- newAutomationEventList
-                  Just <$> managed window (setAutomationEventList l)
+                  Just <$> (managed window (setAutomationEventList l) :: IO AutomationEventListRef)
               )
             else return lRef
         when toggleRec $ if recording' then setAutomationEventBaseFrame 60 >> startAutomationEventRecording else stopAutomationEventRecording

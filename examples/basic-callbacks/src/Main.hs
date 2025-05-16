@@ -1,10 +1,11 @@
 {-# LANGUAGE TemplateHaskell #-}
+
 module Main where
 
 import Paths_h_raylib (getDataFileName)
-import Raylib.Core (clearBackground, initWindow, setTargetFPS, windowShouldClose, closeWindow, setLoadFileTextCallback, setTraceLogCallback, loadFileText)
+import Raylib.Core (clearBackground, closeWindow, initWindow, loadFileText, setLoadFileTextCallback, setTargetFPS, setTraceLogCallback, windowShouldClose)
 import Raylib.Core.Text (drawText)
-import Raylib.Util (drawing, raylibApplication, WindowResources)
+import Raylib.Util (WindowResources, drawing, raylibApplication)
 import Raylib.Util.Colors (black, rayWhite)
 
 filePath :: String
@@ -28,7 +29,8 @@ mainLoop (text, window) =
         clearBackground rayWhite
         drawText "File contents:" 30 40 24 black
         drawText text 30 70 24 black
-    ) >> return (text, window)
+    )
+    >> return (text, window)
 
 shouldClose :: AppState -> IO Bool
 shouldClose _ = windowShouldClose

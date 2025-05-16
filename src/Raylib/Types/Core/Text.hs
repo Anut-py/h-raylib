@@ -33,7 +33,7 @@ import Foreign
 import Foreign.C
   ( CInt (..),
   )
-import Raylib.Internal (Closeable(..))
+import Raylib.Internal (Closeable (..))
 import Raylib.Internal.Foreign (Freeable (rlFreeDependents), c'free, rlFree)
 import Raylib.Types.Core (Rectangle)
 import Raylib.Types.Core.Textures (Image, Texture, p'image'data)

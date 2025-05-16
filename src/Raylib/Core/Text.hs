@@ -1,3 +1,4 @@
+{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE TemplateHaskell #-}
 
 -- | Bindings to @rtext@
@@ -65,6 +66,7 @@ module Raylib.Core.Text
   )
 where
 
+import Control.Monad ((>=>))
 import Foreign (Ptr, Storable (peek, sizeOf), nullPtr, toBool)
 import Foreign.C
   ( CBool (..),
@@ -72,29 +74,31 @@ import Foreign.C
     CInt (..),
     CString,
     CUChar,
-    peekCString,
     withCString,
   )
 import Raylib.Internal (WindowResources, unloadSingleTexture)
 import Raylib.Internal.Foreign
-  ( pop,
-    popCArray,
-    popCString,
+  ( ALike (popALike, withALike, withALikeLen),
+    PALike,
+    PLike,
+    StringLike,
+    TLike (peekTLike, popTLike, withTLike),
+    pop,
     withFreeable,
-    withFreeableArray,
     withFreeableArray2D,
     withFreeableArrayLen,
   )
 import Raylib.Internal.TH (genNative)
 import Raylib.Types
   ( Color,
-    Font (font'texture),
+    Font,
     FontType,
     GlyphInfo,
     Image,
     Rectangle,
-    Texture (texture'id),
     Vector2,
+    p'font'texture,
+    p'texture'id,
   )
 
 $( genNative
@@ -130,117 +134,122 @@ $( genNative
      ]
  )
 
-getFontDefault :: IO Font
-getFontDefault = c'getFontDefault >>= pop
+getFontDefault :: (PLike Font font) => IO font
+getFontDefault = c'getFontDefault >>= popTLike
 
-loadFont :: String -> IO Font
-loadFont fileName = withCString fileName c'loadFont >>= pop
+loadFont :: (StringLike string, PLike Font font) => string -> IO font
+loadFont fileName = withTLike fileName c'loadFont >>= popTLike
 
-loadFontEx :: String -> Int -> Maybe [Int] -> IO Font
+loadFontEx :: (StringLike string, PLike Font font) => string -> Int -> Maybe [Int] -> IO font
 loadFontEx fileName fontSize codepoints =
-  withCString
+  withTLike
     fileName
     ( \f -> case codepoints of
         Just codepoints' -> withFreeableArrayLen (map fromIntegral codepoints') (\l c -> c'loadFontEx f (fromIntegral fontSize) c (fromIntegral l))
         Nothing -> c'loadFontEx f (fromIntegral fontSize) nullPtr 0
     )
-    >>= pop
+    >>= popTLike
 
-loadFontFromImage :: Image -> Color -> Int -> IO Font
-loadFontFromImage image key firstChar = withFreeable image (\i -> withFreeable key (\k -> c'loadFontFromImage i k (fromIntegral firstChar))) >>= pop
+loadFontFromImage :: (PLike Image image, PLike Font font) => image -> Color -> Int -> IO font
+loadFontFromImage image key firstChar = withTLike image (\i -> withFreeable key (\k -> c'loadFontFromImage i k (fromIntegral firstChar))) >>= popTLike
 
-loadFontFromMemory :: String -> [Integer] -> Int -> Maybe [Int] -> IO Font
+loadFontFromMemory :: (PALike CUChar contents, PLike Font font) => String -> contents -> Int -> Maybe [Int] -> IO font
 loadFontFromMemory fileType fileData fontSize codepoints =
   withCString
     fileType
     ( \t ->
-        withFreeableArrayLen
-          (map fromIntegral fileData)
+        withALikeLen
+          fileData
           ( \size d ->
               case codepoints of
                 Just codepoints' ->
                   withFreeableArrayLen
                     (map fromIntegral codepoints')
-                    ( \l c -> c'loadFontFromMemory t d (fromIntegral $ size * sizeOf (0 :: CUChar)) (fromIntegral fontSize) c (fromIntegral l)
-                    )
+                    (\l c -> c'loadFontFromMemory t d (fromIntegral $ size * sizeOf (0 :: CUChar)) (fromIntegral fontSize) c (fromIntegral l))
                 Nothing -> c'loadFontFromMemory t d (fromIntegral $ size * sizeOf (0 :: CUChar)) (fromIntegral fontSize) nullPtr 0
           )
     )
-    >>= pop
+    >>= popTLike
 
-loadFontData :: [Integer] -> Int -> Maybe [Int] -> FontType -> IO GlyphInfo
+loadFontData :: (PALike CUChar contents, PLike GlyphInfo glyphInfo) => contents -> Int -> Maybe [Int] -> FontType -> IO glyphInfo
 loadFontData fileData fontSize codepoints fontType =
-  withFreeableArrayLen
-    (map fromIntegral fileData)
+  withALikeLen
+    fileData
     ( \size d ->
         case codepoints of
           Just codepoints' ->
             withFreeableArrayLen (map fromIntegral codepoints') (\l c -> c'loadFontData d (fromIntegral (size * sizeOf (0 :: CUChar))) (fromIntegral fontSize) c (fromIntegral l) (fromIntegral (fromEnum fontType)))
           Nothing -> c'loadFontData d (fromIntegral (size * sizeOf (0 :: CUChar))) (fromIntegral fontSize) nullPtr 0 (fromIntegral (fromEnum fontType))
     )
-    >>= pop
+    >>= popTLike
 
-genImageFontAtlas :: [GlyphInfo] -> [[Rectangle]] -> Int -> Int -> Int -> Int -> IO Image
-genImageFontAtlas chars recs glyphCount fontSize padding packMethod = withFreeableArray chars (\c -> withFreeableArray2D recs (\r -> c'genImageFontAtlas c r (fromIntegral glyphCount) (fromIntegral fontSize) (fromIntegral padding) (fromIntegral packMethod))) >>= pop
+genImageFontAtlas :: (PALike GlyphInfo glyphInfos, PLike Image image) => glyphInfos -> [[Rectangle]] -> Int -> Int -> Int -> Int -> IO image
+genImageFontAtlas chars recs glyphCount fontSize padding packMethod = withALike chars (\c -> withFreeableArray2D recs (\r -> c'genImageFontAtlas c r (fromIntegral glyphCount) (fromIntegral fontSize) (fromIntegral padding) (fromIntegral packMethod))) >>= popTLike
 
 -- | Unloads a `managed` font from GPU memory (VRAM)
-unloadFont :: Font -> WindowResources -> IO ()
-unloadFont font = unloadSingleTexture (texture'id $ font'texture font)
+unloadFont :: (PLike Font font) => font -> WindowResources -> IO ()
+unloadFont font wr =
+  withTLike
+    font
+    ( \fontPtr -> do
+        tId <- peek (p'texture'id (p'font'texture fontPtr))
+        unloadSingleTexture tId wr
+    )
 
-isFontValid :: Font -> IO Bool
-isFontValid font = toBool <$> withFreeable font c'isFontValid
+isFontValid :: (PLike Font font) => font -> IO Bool
+isFontValid font = toBool <$> withTLike font c'isFontValid
 
-exportFontAsCode :: Font -> String -> IO Bool
-exportFontAsCode font fileName = toBool <$> withFreeable font (withCString fileName . c'exportFontAsCode)
+exportFontAsCode :: (PLike Font font, StringLike string) => font -> string -> IO Bool
+exportFontAsCode font fileName = toBool <$> withTLike font (withTLike fileName . c'exportFontAsCode)
 
 drawFPS :: Int -> Int -> IO ()
 drawFPS x y = c'drawFPS (fromIntegral x) (fromIntegral y)
 
-drawText :: String -> Int -> Int -> Int -> Color -> IO ()
-drawText text x y fontSize color = withCString text (\t -> withFreeable color (c'drawText t (fromIntegral x) (fromIntegral y) (fromIntegral fontSize)))
+drawText :: (StringLike string) => string -> Int -> Int -> Int -> Color -> IO ()
+drawText text x y fontSize color = withTLike text (\t -> withFreeable color (c'drawText t (fromIntegral x) (fromIntegral y) (fromIntegral fontSize)))
 
-drawTextEx :: Font -> String -> Vector2 -> Float -> Float -> Color -> IO ()
-drawTextEx font text position fontSize spacing tint = withFreeable font (\f -> withCString text (\t -> withFreeable position (\p -> withFreeable tint (c'drawTextEx f t p (realToFrac fontSize) (realToFrac spacing)))))
+drawTextEx :: (PLike Font font, StringLike string) => font -> string -> Vector2 -> Float -> Float -> Color -> IO ()
+drawTextEx font text position fontSize spacing tint = withTLike font (\f -> withTLike text (\t -> withFreeable position (\p -> withFreeable tint (c'drawTextEx f t p (realToFrac fontSize) (realToFrac spacing)))))
 
-drawTextPro :: Font -> String -> Vector2 -> Vector2 -> Float -> Float -> Float -> Color -> IO ()
-drawTextPro font text position origin rotation fontSize spacing tint = withFreeable font (\f -> withCString text (\t -> withFreeable position (\p -> withFreeable origin (\o -> withFreeable tint (c'drawTextPro f t p o (realToFrac rotation) (realToFrac fontSize) (realToFrac spacing))))))
+drawTextPro :: (PLike Font font, StringLike string) => font -> string -> Vector2 -> Vector2 -> Float -> Float -> Float -> Color -> IO ()
+drawTextPro font text position origin rotation fontSize spacing tint = withTLike font (\f -> withTLike text (\t -> withFreeable position (\p -> withFreeable origin (\o -> withFreeable tint (c'drawTextPro f t p o (realToFrac rotation) (realToFrac fontSize) (realToFrac spacing))))))
 
-drawTextCodepoint :: Font -> Int -> Vector2 -> Float -> Color -> IO ()
-drawTextCodepoint font codepoint position fontSize tint = withFreeable font (\f -> withFreeable position (\p -> withFreeable tint (c'drawTextCodepoint f (fromIntegral codepoint) p (realToFrac fontSize))))
+drawTextCodepoint :: (PLike Font font) => font -> Int -> Vector2 -> Float -> Color -> IO ()
+drawTextCodepoint font codepoint position fontSize tint = withTLike font (\f -> withFreeable position (\p -> withFreeable tint (c'drawTextCodepoint f (fromIntegral codepoint) p (realToFrac fontSize))))
 
-drawTextCodepoints :: Font -> [Int] -> Vector2 -> Float -> Float -> Color -> IO ()
-drawTextCodepoints font codepoints position fontSize spacing tint = withFreeable font (\f -> withFreeableArrayLen (map fromIntegral codepoints) (\count cp -> withFreeable position (\p -> withFreeable tint (c'drawTextCodepoints f cp (fromIntegral count) p (realToFrac fontSize) (realToFrac spacing)))))
+drawTextCodepoints :: (PLike Font font, PALike CInt codepoints) => font -> codepoints -> Vector2 -> Float -> Float -> Color -> IO ()
+drawTextCodepoints font codepoints position fontSize spacing tint = withTLike font (\f -> withALikeLen codepoints (\count cp -> withFreeable position (\p -> withFreeable tint (c'drawTextCodepoints f cp (fromIntegral count) p (realToFrac fontSize) (realToFrac spacing)))))
 
 setTextLineSpacing :: Int -> IO ()
 setTextLineSpacing = c'setTextLineSpacing . fromIntegral
 
-measureText :: String -> Int -> IO Int
-measureText text fontSize = fromIntegral <$> withCString text (\t -> c'measureText t (fromIntegral fontSize))
+measureText :: (StringLike string) => string -> Int -> IO Int
+measureText text fontSize = fromIntegral <$> withTLike text (\t -> c'measureText t (fromIntegral fontSize))
 
-measureTextEx :: Font -> String -> Float -> Float -> IO Vector2
-measureTextEx font text fontSize spacing = withFreeable font (\f -> withCString text (\t -> c'measureTextEx f t (realToFrac fontSize) (realToFrac spacing))) >>= pop
+measureTextEx :: (PLike Font font, StringLike string) => font -> string -> Float -> Float -> IO Vector2
+measureTextEx font text fontSize spacing = withTLike font (\f -> withTLike text (\t -> c'measureTextEx f t (realToFrac fontSize) (realToFrac spacing))) >>= pop
 
-getGlyphIndex :: Font -> Int -> IO Int
-getGlyphIndex font codepoint = fromIntegral <$> withFreeable font (\f -> c'getGlyphIndex f (fromIntegral codepoint))
+getGlyphIndex :: (PLike Font font) => font -> Int -> IO Int
+getGlyphIndex font codepoint = fromIntegral <$> withTLike font (\f -> c'getGlyphIndex f (fromIntegral codepoint))
 
-getGlyphInfo :: Font -> Int -> IO GlyphInfo
-getGlyphInfo font codepoint = withFreeable font (\f -> c'getGlyphInfo f (fromIntegral codepoint)) >>= pop
+getGlyphInfo :: (PLike Font font) => font -> Int -> IO GlyphInfo
+getGlyphInfo font codepoint = withTLike font (\f -> c'getGlyphInfo f (fromIntegral codepoint)) >>= pop
 
-getGlyphAtlasRec :: Font -> Int -> IO Rectangle
-getGlyphAtlasRec font codepoint = withFreeable font (\f -> c'getGlyphAtlasRec f (fromIntegral codepoint)) >>= pop
+getGlyphAtlasRec :: (PLike Font font) => font -> Int -> IO Rectangle
+getGlyphAtlasRec font codepoint = withTLike font (\f -> c'getGlyphAtlasRec f (fromIntegral codepoint)) >>= pop
 
-loadUTF8 :: [Integer] -> IO String
+loadUTF8 :: (PALike CInt codepoints, StringLike string) => codepoints -> IO string
 loadUTF8 codepoints =
-  withFreeableArrayLen
-    (map fromIntegral codepoints)
+  withALikeLen
+    codepoints
     ( \size c ->
         c'loadUTF8 c (fromIntegral size)
     )
-    >>= popCString
+    >>= popTLike
 
-loadCodepoints :: String -> IO [Int]
+loadCodepoints :: (StringLike string, PALike CInt codepoints) => string -> IO codepoints
 loadCodepoints text =
-  withCString
+  withTLike
     text
     ( \t ->
         withFreeable
@@ -248,16 +257,16 @@ loadCodepoints text =
           ( \n -> do
               res <- c'loadCodepoints t n
               num <- peek n
-              map fromIntegral <$> popCArray (fromIntegral num) res
+              popALike (fromIntegral num) res
           )
     )
 
-getCodepointCount :: String -> IO Int
-getCodepointCount text = fromIntegral <$> withCString text c'getCodepointCount
+getCodepointCount :: (StringLike string) => string -> IO Int
+getCodepointCount text = fromIntegral <$> withTLike text c'getCodepointCount
 
-getCodepointNext :: String -> IO (Int, Int)
+getCodepointNext :: (StringLike string) => string -> IO (Int, Int)
 getCodepointNext text =
-  withCString
+  withTLike
     text
     ( \t ->
         withFreeable
@@ -270,9 +279,9 @@ getCodepointNext text =
           )
     )
 
-getCodepointPrevious :: String -> IO (Int, Int)
+getCodepointPrevious :: (StringLike string) => string -> IO (Int, Int)
 getCodepointPrevious text =
-  withCString
+  withTLike
     text
     ( \t ->
         withFreeable
@@ -285,5 +294,5 @@ getCodepointPrevious text =
           )
     )
 
-codepointToUTF8 :: Int -> IO String
-codepointToUTF8 codepoint = withFreeable 0 (c'codepointToUTF8 $ fromIntegral codepoint) >>= peekCString
+codepointToUTF8 :: (StringLike string) => Int -> IO string
+codepointToUTF8 codepoint = withFreeable 0 (c'codepointToUTF8 (fromIntegral codepoint) >=> peekTLike)
