@@ -16,6 +16,7 @@ module Raylib.Internal.Foreign
     TLike (..),
     Mutable (..),
     ALike (..),
+    ComplexArray,
     StringLike,
     StringALike,
     PLike,
@@ -196,6 +197,10 @@ class ALike a b where
   peekALike :: Int -> a -> IO b
   popALike :: Int -> a -> IO b
 
+-- | Use this for `ForeignPtr` arrays of types with complex data, e.g. `Image`.
+--   Do not use this for numeric types; use a @(Int, ForeignPtr a)@ tuple instead.
+data ComplexArray a = ComplexArray Int (ForeignPtr a)
+
 instance (Freeable a, Storable a) => ALike (Ptr a) [a] where
   withALikeLen = withFreeableArrayLen
   withALike = withFreeableArray
@@ -212,8 +217,14 @@ instance (Freeable a, Storable a) => ALike (Ptr a) (Int, ForeignPtr a) where
   withALikeLen (l, x) f = withForeignPtr x (f l)
   withALike = withForeignPtr . snd
   peekALike l p = (l,) <$> newForeignPtr_ p
+  popALike l p = (l,) <$> newConcForeignPtr p (c'free (castPtr p))
+
+instance (Freeable a, Storable a) => ALike (Ptr a) (ComplexArray a) where
+  withALikeLen (ComplexArray l x) f = withForeignPtr x (f l)
+  withALike (ComplexArray _ x) = withForeignPtr x
+  peekALike l p = ComplexArray l <$> newForeignPtr_ p
   popALike l p =
-    (l,)
+    ComplexArray l
       <$> newConcForeignPtr
         p
         ( forM_
