@@ -45,7 +45,7 @@ data-files:
 
 source-repository head
   type:     git
-  location: git://github.com/Anut-py/h-raylib.git
+  location: https://github.com/Anut-py/h-raylib.git
 
 flag detect-platform
   description:
@@ -246,7 +246,7 @@ library
     , exceptions        >=0.10.4   && <0.11
     , lens              >=4.0      && <5.4
     , linear            >=1.22     && <1.24
-    , template-haskell  >=2.16.0.0 && <2.23.0.0
+    , template-haskell  >=2.16     && <2.23
     , text              >=2.0      && <2.2
 
   hs-source-dirs:   src
