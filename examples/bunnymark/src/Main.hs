@@ -1,8 +1,8 @@
 {-# LANGUAGE BangPatterns #-}
 {-# LANGUAGE TemplateHaskell #-}
 
--- Writing performant h-raylib code requires the use of pointers and other
--- un-Haskelly functionality. Unfortunately, this cannot be avoided.
+-- Writing performant h-raylib code requires the use of pointers. However,
+-- most h-raylib functions work fine with pointers.
 
 module Main where
 
@@ -22,8 +22,8 @@ import Foreign.C (CFloat)
 import Paths_h_raylib (getDataFileName)
 import Raylib.Core
   ( beginDrawing,
-    c'getMouseX,
-    c'getMouseY,
+    getMouseX,
+    getMouseY,
     getRandomValue,
     clearBackground,
     closeWindow,
@@ -118,8 +118,8 @@ startup = do
   setTargetFPS 60
   texPath' <- getDataFileName texPath
   -- Use `withForeignPtr` and `peek` when you need to access the underlying fields.
-  -- You don't need to worry about freeing it because `managed` takes care of that
-  -- automatically.
+  -- You don't need to worry about freeing/unloading it because `managed` takes
+  -- care of that automatically.
   texPtr <- managed wr $ loadTexture texPath'
 
   withForeignPtr
@@ -197,8 +197,8 @@ mainLoop state = do
         then do
           frameTime <- getFrameTime
           let newBunnies = min (round (10000 * frameTime)) (maxBunnies - bunniesCount state)
-          mx <- realToFrac <$> c'getMouseX
-          my <- realToFrac <$> c'getMouseY
+          mx <- getMouseX
+          my <- getMouseY
           forM_
             [bunniesCount state .. (bunniesCount state + newBunnies - 1)]
             ( \(!i) ->

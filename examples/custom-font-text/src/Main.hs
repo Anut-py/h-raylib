@@ -2,7 +2,7 @@
 
 module Main where
 
-import Foreign (Ptr, fromBool)
+import Foreign (ForeignPtr, fromBool)
 import Paths_h_raylib (getDataFileName)
 import Raylib.Core (clearBackground, isKeyPressed)
 import Raylib.Core.Text (drawText, drawTextEx, loadFont)
@@ -21,7 +21,7 @@ main = do
     "raylib [text] example - custom font text"
     60
     ( \window -> do
-        mainFont <- managed window $ loadFont =<< getDataFileName mainFontPath :: IO (Ptr Font)
+        mainFont <- managed window $ loadFont =<< getDataFileName mainFontPath :: IO (ForeignPtr Font)
 
         whileWindowOpen_
           ( \size -> do

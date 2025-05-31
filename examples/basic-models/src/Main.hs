@@ -24,7 +24,7 @@ main = do
     ( \window -> do
         disableCursor
 
-        mesh <- managed window $ genMeshCube 2 3 4 :: IO Mesh
+        mesh <- managed window $ genMeshCube 2 3 4 :: IO (ForeignPtr Mesh)
         cubeModel <- loadModelFromMeshManaged mesh window :: IO (ForeignPtr Model)
         customModel <- managed window $ loadModel =<< getDataFileName modelPath :: IO (ForeignPtr Model)
 
