@@ -2,12 +2,13 @@
 
 module Main where
 
+import Foreign (ForeignPtr)
 import Paths_h_raylib (getDataFileName)
 import Raylib.Core (clearBackground, disableCursor)
 import Raylib.Core.Camera (updateCamera)
-import Raylib.Core.Models (drawGrid, drawModel, genMeshCube, loadModel, loadModelFromMesh)
-import Raylib.Types (Camera3D (Camera3D), CameraMode (CameraModeFirstPerson), CameraProjection (CameraPerspective), pattern Vector3)
-import Raylib.Util (drawing, mode3D, whileWindowOpen_, withWindow, managed)
+import Raylib.Core.Models (drawGrid, drawModel, genMeshCube, loadModel, loadModelFromMeshManaged)
+import Raylib.Types (Camera3D (Camera3D), CameraMode (CameraModeFirstPerson), CameraProjection (CameraPerspective), Mesh, Model, pattern Vector3)
+import Raylib.Util (drawing, managed, mode3D, whileWindowOpen_, withWindow)
 import Raylib.Util.Colors (orange, white)
 
 modelPath :: String
@@ -23,9 +24,9 @@ main = do
     ( \window -> do
         disableCursor
 
-        mesh <- managed window $ genMeshCube 2 3 4
-        cubeModel <- managed window $ loadModelFromMesh mesh
-        customModel <- managed window $ loadModel =<< getDataFileName modelPath
+        mesh <- managed window $ genMeshCube 2 3 4 :: IO (ForeignPtr Mesh)
+        cubeModel <- loadModelFromMeshManaged mesh window :: IO (ForeignPtr Model)
+        customModel <- managed window $ loadModel =<< getDataFileName modelPath :: IO (ForeignPtr Model)
 
         let camera = Camera3D (Vector3 3 2 3) (Vector3 0 0 0) (Vector3 0 1 0) 70 CameraPerspective
 

@@ -35,6 +35,7 @@ module Raylib.Internal
     unloadAudioBufferAliases,
     unloadAutomationEventLists,
     unloadFunPtrs,
+    unloadFinalizers,
 
     -- * Adding resources
     addShaderId,
@@ -47,6 +48,7 @@ module Raylib.Internal
     addAudioBufferAlias,
     addAutomationEventList,
     addFunPtr,
+    addFinalizer,
 
     -- * Native unload functions
     c'rlUnloadShaderProgram,
@@ -66,14 +68,15 @@ module Raylib.Internal
   )
 where
 
-import Control.Monad (forM_, unless, when)
+import Control.Monad (forM_, unless, when, (<=<))
 import Data.IORef (IORef, modifyIORef, newIORef, readIORef)
 import Data.List (delete)
 import Data.Map (Map)
 import qualified Data.Map as Map
-import Foreign (FunPtr, Ptr, Storable (peekByteOff), free, freeHaskellFunPtr, castFunPtr)
+import Foreign (ForeignPtr, FunPtr, Ptr, Storable (peek, peekByteOff), castFunPtr, finalizeForeignPtr, free, freeHaskellFunPtr, withForeignPtr)
 import Foreign.C (CInt (..), CUInt (..))
 import GHC.IO (unsafePerformIO)
+import Raylib.Internal.Foreign (Freeable (..))
 import Raylib.Internal.TH (genNative)
 
 #ifdef WEB_FFI
@@ -81,6 +84,20 @@ import Raylib.Internal.TH (genNative)
 import Raylib.Internal.Web.Native (callRaylibFunction)
 
 #endif
+
+$( genNative
+     [ ("c'rlGetShaderIdDefault", "rlGetShaderIdDefault_", "rlgl_bindings.h", [t|IO CUInt|]),
+       ("c'rlUnloadShaderProgram", "rlUnloadShaderProgram_", "rlgl_bindings.h", [t|CUInt -> IO ()|]),
+       ("c'rlUnloadTexture", "rlUnloadTexture_", "rlgl_bindings.h", [t|CUInt -> IO ()|]),
+       ("c'rlUnloadFramebuffer", "rlUnloadFramebuffer_", "rlgl_bindings.h", [t|CUInt -> IO ()|]),
+       ("c'rlUnloadVertexArray", "rlUnloadVertexArray_", "rlgl_bindings.h", [t|CUInt -> IO ()|]),
+       ("c'rlUnloadVertexBuffer", "rlUnloadVertexBuffer_", "rlgl_bindings.h", [t|CUInt -> IO ()|]),
+       ("c'unloadMusicStreamData", "UnloadMusicStreamData", "rl_internal.h", [t|CInt -> Ptr () -> IO ()|]),
+       ("c'unloadAudioBuffer", "UnloadAudioBuffer_", "rl_internal.h", [t|Ptr () -> IO ()|]),
+       ("c'unloadAudioBufferAlias", "UnloadAudioBufferAlias", "rl_internal.h", [t|Ptr () -> IO ()|]),
+       ("c'getPixelDataSize", "GetPixelDataSize_", "rl_bindings.h", [t|CInt -> CInt -> CInt -> IO CInt|])
+     ]
+ )
 
 -- | Tracks all raylib resources which cannot be immediately freed.
 --
@@ -97,18 +114,38 @@ data WindowResources = WindowResources
     audioBuffers :: IORef [Ptr ()],
     audioBufferAliases :: IORef [Ptr ()],
     automationEventLists :: IORef [Ptr ()],
-    funPtrs :: IORef [FunPtr ()]
+    funPtrs :: IORef [FunPtr ()],
+    finalizers :: IORef [IO ()]
   }
 
 -- | Typeclass to conveniently release resources
 class Closeable a where
   -- | Release a resource; this is only necessary when using an unmanaged resource
   --
-  --   WARNING: Do not use this on a managed resource, doing so will cause it to be freed twice
+  --   WARNING: Do not use this on a managed resource, doing so will attempt
+  --   to free it twice
   close :: a -> IO ()
 
   -- | Add an unmanaged resource to a `WindowResources` handle to be freed later
   addToWindowResources :: WindowResources -> a -> IO ()
+
+instance {-# OVERLAPPABLE #-} (Closeable a, Freeable a, Storable a) => Closeable (Ptr a) where
+  close x = do
+    v <- peek x
+    close v
+    rlFree v x
+  addToWindowResources window x = do
+    addToWindowResources window =<< peek x
+    addFinalizer
+      ( do
+          v <- peek x
+          rlFree v x
+      )
+      window
+
+instance {-# OVERLAPPABLE #-} (Closeable a, Freeable a, Storable a) => Closeable (ForeignPtr a) where
+  close x = withForeignPtr x (close <=< peek) >> finalizeForeignPtr x
+  addToWindowResources window x = withForeignPtr x (addToWindowResources window <=< peek) >> addFinalizer (finalizeForeignPtr x) window
 
 instance {-# OVERLAPPABLE #-} (Closeable a) => Closeable [a] where
   close xs = forM_ xs close
@@ -134,6 +171,7 @@ defaultWindowResources = do
   aliases <- newIORef []
   eventLists <- newIORef []
   fPtrs <- newIORef []
+  fins <- newIORef []
   return
     WindowResources
       { shaderIds = sIds,
@@ -146,22 +184,9 @@ defaultWindowResources = do
         audioBuffers = aBufs,
         audioBufferAliases = aliases,
         automationEventLists = eventLists,
-        funPtrs = fPtrs
+        funPtrs = fPtrs,
+        finalizers = fins
       }
-
-$( genNative
-     [ ("c'rlGetShaderIdDefault", "rlGetShaderIdDefault_", "rlgl_bindings.h", [t|IO CUInt|]),
-       ("c'rlUnloadShaderProgram", "rlUnloadShaderProgram_", "rlgl_bindings.h", [t|CUInt -> IO ()|]),
-       ("c'rlUnloadTexture", "rlUnloadTexture_", "rlgl_bindings.h", [t|CUInt -> IO ()|]),
-       ("c'rlUnloadFramebuffer", "rlUnloadFramebuffer_", "rlgl_bindings.h", [t|CUInt -> IO ()|]),
-       ("c'rlUnloadVertexArray", "rlUnloadVertexArray_", "rlgl_bindings.h", [t|CUInt -> IO ()|]),
-       ("c'rlUnloadVertexBuffer", "rlUnloadVertexBuffer_", "rlgl_bindings.h", [t|CUInt -> IO ()|]),
-       ("c'unloadMusicStreamData", "UnloadMusicStreamData", "rl_internal.h", [t|CInt -> Ptr () -> IO ()|]),
-       ("c'unloadAudioBuffer", "UnloadAudioBuffer_", "rl_internal.h", [t|Ptr () -> IO ()|]),
-       ("c'unloadAudioBufferAlias", "UnloadAudioBufferAlias", "rl_internal.h", [t|Ptr () -> IO ()|]),
-       ("c'getPixelDataSize", "GetPixelDataSize_", "rl_bindings.h", [t|CInt -> CInt -> CInt -> IO CInt|])
-     ]
- )
 
 unloadSingleShader :: (Integral a) => a -> WindowResources -> IO ()
 unloadSingleShader sId' wr = do
@@ -342,6 +367,17 @@ unloadFunPtrs wr = do
         putStrLn $ "INFO: h-raylib successfully auto-unloaded `FunPtr`s (" ++ show l ++ " in total)"
     )
 
+unloadFinalizers :: WindowResources -> IO ()
+unloadFinalizers wr = do
+  vals <- readIORef (finalizers wr)
+  let l = length vals
+  when
+    (l > 0)
+    ( do
+        sequence_ vals
+        putStrLn $ "INFO: h-raylib successfully invoked finalizers (" ++ show l ++ " in total)"
+    )
+
 addShaderId :: (Integral a) => a -> WindowResources -> IO ()
 addShaderId sId' wr = do
   modifyIORef (shaderIds wr) (\xs -> if sId `elem` xs then xs else sId : xs)
@@ -395,8 +431,12 @@ addFunPtr :: FunPtr () -> WindowResources -> IO ()
 addFunPtr fPtr wr = do
   modifyIORef (funPtrs wr) (\xs -> if fPtr `elem` xs then xs else fPtr : xs)
 
+addFinalizer :: IO () -> WindowResources -> IO ()
+addFinalizer fin wr = do
+  modifyIORef (finalizers wr) (fin :)
+
 instance Closeable (FunPtr a) where
-  close fun = freeHaskellFunPtr fun
+  close = freeHaskellFunPtr
   addToWindowResources window fun = addFunPtr (castFunPtr fun) window
 
 releaseNonAudioWindowResources :: WindowResources -> IO ()
@@ -408,6 +448,7 @@ releaseNonAudioWindowResources wr = do
   unloadVboIds wr
   unloadAutomationEventLists wr
   unloadFunPtrs wr
+  unloadFinalizers wr
 
 releaseAudioWindowResources :: WindowResources -> IO ()
 releaseAudioWindowResources wr = do

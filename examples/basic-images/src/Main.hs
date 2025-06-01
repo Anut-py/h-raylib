@@ -1,4 +1,5 @@
 {-# LANGUAGE PatternSynonyms #-}
+
 module Main where
 
 import Paths_h_raylib (getDataFileName)
@@ -12,8 +13,8 @@ import Raylib.Core.Textures
     loadRenderTexture,
     loadTextureFromImage,
   )
-import Raylib.Types (Rectangle (Rectangle), RenderTexture (renderTexture'texture), pattern Vector2)
-import Raylib.Util (drawing, textureMode, whileWindowOpen0, withWindow, managed)
+import Raylib.Types (Image, Rectangle (Rectangle), RenderTexture (renderTexture'texture), Texture, pattern Vector2)
+import Raylib.Util (drawing, managed, textureMode, whileWindowOpen0, withWindow)
 import Raylib.Util.Colors (black, lightGray, orange, white)
 
 logoPath :: String
@@ -27,9 +28,9 @@ main = do
     "raylib [textures] example - basic images"
     60
     ( \window -> do
-        texture <- managed window $ loadTextureFromImage =<< genImagePerlinNoise 600 450 20 20 2
-        logo <- managed window $ loadTextureFromImage =<< loadImage =<< getDataFileName logoPath
-        rt <- managed window $ loadRenderTexture 200 200
+        texture <- managed window $ loadTextureFromImage =<< (genImagePerlinNoise 600 450 20 20 2 :: IO Image) :: IO Texture
+        logo <- managed window $ loadTextureFromImage =<< (loadImage =<< getDataFileName logoPath :: IO Image) :: IO Texture
+        rt <- managed window $ loadRenderTexture 200 200 :: IO RenderTexture
 
         whileWindowOpen0
           ( drawing

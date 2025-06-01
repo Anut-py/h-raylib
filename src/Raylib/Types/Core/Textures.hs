@@ -41,6 +41,7 @@ module Raylib.Types.Core.Textures
   )
 where
 
+import Control.Monad (when)
 import Foreign
   ( Ptr,
     Storable (alignment, peek, poke, sizeOf),
@@ -55,10 +56,9 @@ import Foreign.C
     CUChar,
     CUInt,
   )
-import Raylib.Internal (getPixelDataSize, Closeable (..), c'rlUnloadTexture, addTextureId, c'rlUnloadFramebuffer, addFrameBuffer)
+import Raylib.Internal (Closeable (..), addFrameBuffer, addTextureId, c'rlUnloadFramebuffer, c'rlUnloadTexture, getPixelDataSize)
 import Raylib.Internal.Foreign (Freeable (rlFreeDependents), c'free)
 import Raylib.Types.Core (Rectangle)
-import Control.Monad (when)
 
 ---------------------------------------
 -- textures enums ---------------------

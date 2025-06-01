@@ -1,3 +1,4 @@
+{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE ForeignFunctionInterface #-}
 {-# LANGUAGE TemplateHaskell #-}
 
@@ -143,7 +144,7 @@ module Raylib.Core.Audio
   )
 where
 
-import Foreign (Ptr, Storable (peek, sizeOf), castPtr, toBool, castFunPtr)
+import Foreign (Ptr, Storable (peek, sizeOf), castFunPtr, castPtr, toBool)
 import Foreign.C
   ( CBool (..),
     CFloat (..),
@@ -153,21 +154,29 @@ import Foreign.C
     CUInt (..),
     withCString,
   )
-import Raylib.Internal (WindowResources, unloadSingleAudioBuffer, unloadSingleAudioBufferAlias, unloadSingleCtxDataPtr, addFunPtr, unloadSingleFunPtr, releaseAudioWindowResources)
+import Raylib.Internal (WindowResources, addFunPtr, releaseAudioWindowResources, unloadSingleAudioBuffer, unloadSingleAudioBufferAlias, unloadSingleCtxDataPtr, unloadSingleFunPtr)
 import Raylib.Internal.Foreign
-  ( pop,
-    popCArray,
-    withFreeable,
-    withFreeableArrayLen,
+  ( ALike (..),
+    Mutable (peekMutated),
+    PALike,
+    PLike,
+    StringLike,
+    TLike (..),
   )
 import Raylib.Internal.TH (genNative)
 import Raylib.Types
   ( AudioCallback,
-    AudioStream (audioStream'buffer),
+    AudioStream,
     C'AudioCallback,
-    Music (music'ctxData, music'ctxType),
-    Sound (sound'stream),
-    Wave (wave'channels, wave'frameCount),
+    Music,
+    Sound,
+    Wave,
+    p'audioStream'buffer,
+    p'music'ctxData,
+    p'music'ctxType,
+    p'sound'stream,
+    p'wave'channels,
+    p'wave'frameCount,
   )
 
 $( genNative
@@ -257,183 +266,208 @@ setMasterVolume volume = c'setMasterVolume (realToFrac volume)
 getMasterVolume :: IO Float
 getMasterVolume = realToFrac <$> c'getMasterVolume
 
-loadWave :: String -> IO Wave
-loadWave fileName = withCString fileName c'loadWave >>= pop
+loadWave :: (StringLike string, PLike Wave wave) => string -> IO wave
+loadWave fileName = withTLike fileName c'loadWave >>= popTLike
 
-loadWaveFromMemory :: String -> [Integer] -> IO Wave
-loadWaveFromMemory fileType fileData = withCString fileType (\f -> withFreeableArrayLen (map fromIntegral fileData) (\size d -> c'loadWaveFromMemory f d (fromIntegral $ size * sizeOf (0 :: CUChar)))) >>= pop
+loadWaveFromMemory :: (PALike CUChar contents, PLike Wave wave) => String -> contents -> IO wave
+loadWaveFromMemory fileType fileData = withCString fileType (\f -> withALikeLen fileData (\size d -> c'loadWaveFromMemory f d (fromIntegral $ size * sizeOf (0 :: CUChar)))) >>= popTLike
 
-loadSound :: String -> IO Sound
-loadSound fileName = withCString fileName c'loadSound >>= pop
+loadSound :: (StringLike string, PLike Sound sound) => string -> IO sound
+loadSound fileName = withTLike fileName c'loadSound >>= popTLike
 
-loadSoundFromWave :: Wave -> IO Sound
-loadSoundFromWave wave = withFreeable wave c'loadSoundFromWave >>= pop
+loadSoundFromWave :: (PLike Wave wave, PLike Sound sound) => wave -> IO sound
+loadSoundFromWave wave = withTLike wave c'loadSoundFromWave >>= popTLike
 
-loadSoundAlias :: Sound -> IO Sound
-loadSoundAlias source = withFreeable source c'loadSoundAlias >>= pop
+loadSoundAlias :: (PLike Sound sound1, PLike Sound sound2) => sound1 -> IO sound2
+loadSoundAlias source = withTLike source c'loadSoundAlias >>= popTLike
 
 -- | Unloads a `managed` sound alias from RAM
-unloadSoundAlias :: Sound -> WindowResources -> IO ()
-unloadSoundAlias sound = unloadSingleAudioBufferAlias (castPtr (audioStream'buffer (sound'stream sound)))
+unloadSoundAlias :: (PLike Sound sound) => sound -> WindowResources -> IO ()
+unloadSoundAlias sound wr =
+  withTLike
+    sound
+    ( \soundPtr -> do
+        buf <- castPtr <$> peek (p'audioStream'buffer (p'sound'stream soundPtr))
+        unloadSingleAudioBufferAlias buf wr
+    )
 
-updateSound :: Sound -> Ptr () -> Int -> IO ()
-updateSound sound dataValue sampleCount = withFreeable sound (\s -> c'updateSound s dataValue (fromIntegral sampleCount))
+updateSound :: (PLike Sound sound) => sound -> Ptr () -> Int -> IO ()
+updateSound sound dataValue sampleCount = withTLike sound (\s -> c'updateSound s dataValue (fromIntegral sampleCount))
 
 -- | Unloads a `managed` sound from RAM
-unloadSound :: Sound -> WindowResources -> IO ()
-unloadSound sound = unloadAudioStream (sound'stream sound)
+unloadSound :: (PLike Sound sound) => sound -> WindowResources -> IO ()
+unloadSound sound wr =
+  withTLike
+    sound
+    ( \soundPtr -> do
+        stream <- peek (p'sound'stream soundPtr)
+        unloadAudioStream stream wr
+    )
 
-isWaveValid :: Wave -> IO Bool
-isWaveValid wave = toBool <$> withFreeable wave c'isWaveValid
+isWaveValid :: (PLike Wave wave) => wave -> IO Bool
+isWaveValid wave = toBool <$> withTLike wave c'isWaveValid
 
-isSoundValid :: Sound -> IO Bool
-isSoundValid sound = toBool <$> withFreeable sound c'isSoundValid
+isSoundValid :: (PLike Sound sound) => sound -> IO Bool
+isSoundValid sound = toBool <$> withTLike sound c'isSoundValid
 
-exportWave :: Wave -> String -> IO Bool
-exportWave wave fileName = toBool <$> withFreeable wave (withCString fileName . c'exportWave)
+exportWave :: (PLike Wave wave, StringLike string) => wave -> string -> IO Bool
+exportWave wave fileName = toBool <$> withTLike wave (withTLike fileName . c'exportWave)
 
-exportWaveAsCode :: Wave -> String -> IO Bool
-exportWaveAsCode wave fileName = toBool <$> withFreeable wave (withCString fileName . c'exportWaveAsCode)
+exportWaveAsCode :: (PLike Wave wave, StringLike string) => wave -> string -> IO Bool
+exportWaveAsCode wave fileName = toBool <$> withTLike wave (withTLike fileName . c'exportWaveAsCode)
 
-playSound :: Sound -> IO ()
-playSound sound = withFreeable sound c'playSound
+playSound :: (PLike Sound sound) => sound -> IO ()
+playSound sound = withTLike sound c'playSound
 
-stopSound :: Sound -> IO ()
-stopSound sound = withFreeable sound c'stopSound
+stopSound :: (PLike Sound sound) => sound -> IO ()
+stopSound sound = withTLike sound c'stopSound
 
-pauseSound :: Sound -> IO ()
-pauseSound sound = withFreeable sound c'pauseSound
+pauseSound :: (PLike Sound sound) => sound -> IO ()
+pauseSound sound = withTLike sound c'pauseSound
 
-resumeSound :: Sound -> IO ()
-resumeSound sound = withFreeable sound c'resumeSound
+resumeSound :: (PLike Sound sound) => sound -> IO ()
+resumeSound sound = withTLike sound c'resumeSound
 
-isSoundPlaying :: Sound -> IO Bool
-isSoundPlaying sound = toBool <$> withFreeable sound c'isSoundPlaying
+isSoundPlaying :: (PLike Sound sound) => sound -> IO Bool
+isSoundPlaying sound = toBool <$> withTLike sound c'isSoundPlaying
 
-setSoundVolume :: Sound -> Float -> IO ()
-setSoundVolume sound volume = withFreeable sound (\s -> c'setSoundVolume s (realToFrac volume))
+setSoundVolume :: (PLike Sound sound) => sound -> Float -> IO ()
+setSoundVolume sound volume = withTLike sound (\s -> c'setSoundVolume s (realToFrac volume))
 
-setSoundPitch :: Sound -> Float -> IO ()
-setSoundPitch sound pitch = withFreeable sound (\s -> c'setSoundPitch s (realToFrac pitch))
+setSoundPitch :: (PLike Sound sound) => sound -> Float -> IO ()
+setSoundPitch sound pitch = withTLike sound (\s -> c'setSoundPitch s (realToFrac pitch))
 
-setSoundPan :: Sound -> Float -> IO ()
-setSoundPan sound pan = withFreeable sound (\s -> c'setSoundPan s (realToFrac pan))
+setSoundPan :: (PLike Sound sound) => sound -> Float -> IO ()
+setSoundPan sound pan = withTLike sound (\s -> c'setSoundPan s (realToFrac pan))
 
-waveCopy :: Wave -> IO Wave
-waveCopy wave = withFreeable wave c'waveCopy >>= pop
+waveCopy :: (PLike Wave wave) => wave -> IO wave
+waveCopy wave = withTLike wave c'waveCopy >>= popTLike
 
-waveCrop :: Wave -> Int -> Int -> IO Wave
-waveCrop wave initFrame finalFrame = do
-  new <- waveCopy wave
-  withFreeable new (\w -> c'waveCrop w (fromIntegral initFrame) (fromIntegral finalFrame) >> peek w)
+waveCrop :: (PLike Wave wave, Mutable wave mut) => wave -> Int -> Int -> IO mut
+waveCrop wave initFrame finalFrame = withTLike wave (\w -> c'waveCrop w (fromIntegral initFrame) (fromIntegral finalFrame) >> peekMutated wave w)
 
-waveFormat :: Wave -> Int -> Int -> Int -> IO ()
-waveFormat wave sampleRate sampleSize channels = do
-  new <- waveCopy wave
-  withFreeable new (\n -> c'waveFormat n (fromIntegral sampleRate) (fromIntegral sampleSize) (fromIntegral channels))
+waveFormat :: (PLike Wave wave, Mutable wave mut) => wave -> Int -> Int -> Int -> IO mut
+waveFormat wave sampleRate sampleSize channels = withTLike wave (\w -> c'waveFormat w (fromIntegral sampleRate) (fromIntegral sampleSize) (fromIntegral channels) >> peekMutated wave w)
 
-loadWaveSamples :: Wave -> IO [Float]
+loadWaveSamples :: (PLike Wave wave, PALike CFloat samples) => wave -> IO samples
 loadWaveSamples wave =
-  withFreeable
+  withTLike
     wave
-    (\w -> map realToFrac <$> (popCArray (fromIntegral $ wave'frameCount wave * wave'channels wave) =<< c'loadWaveSamples w))
+    ( \wavePtr -> do
+        fc <- peek (p'wave'frameCount wavePtr)
+        c <- peek (p'wave'channels wavePtr)
+        popALike (fromIntegral $ fc * c) =<< c'loadWaveSamples wavePtr
+    )
 
-loadMusicStream :: String -> IO Music
-loadMusicStream fileName = withCString fileName c'loadMusicStream >>= pop
+loadMusicStream :: (StringLike string, PLike Music music) => string -> IO music
+loadMusicStream fileName = withTLike fileName c'loadMusicStream >>= popTLike
 
-loadMusicStreamFromMemory :: String -> [Integer] -> IO Music
+loadMusicStreamFromMemory :: (PALike CUChar contents, PLike Music music) => String -> contents -> IO music
 loadMusicStreamFromMemory fileType streamData =
-  withCString fileType (\t -> withFreeableArrayLen (map fromIntegral streamData) (\size d -> c'loadMusicStreamFromMemory t d (fromIntegral $ size * sizeOf (0 :: CUChar)))) >>= pop
+  withCString fileType (\t -> withALikeLen streamData (\size d -> c'loadMusicStreamFromMemory t d (fromIntegral $ size * sizeOf (0 :: CUChar)))) >>= popTLike
 
 -- | Unloads a `managed` music stream from RAM
-unloadMusicStream :: Music -> WindowResources -> IO ()
-unloadMusicStream music = unloadSingleCtxDataPtr (fromEnum (music'ctxType music)) (music'ctxData music)
+unloadMusicStream :: (PLike Music music) => music -> WindowResources -> IO ()
+unloadMusicStream music wr =
+  withTLike
+    music
+    ( \musicPtr -> do
+        ct <- peek (p'music'ctxType musicPtr)
+        cd <- peek (p'music'ctxData musicPtr)
+        unloadSingleCtxDataPtr (fromEnum ct) cd wr
+    )
 
-isMusicValid :: Music -> IO Bool
-isMusicValid music = toBool <$> withFreeable music c'isMusicValid
+isMusicValid :: (PLike Music music) => music -> IO Bool
+isMusicValid music = toBool <$> withTLike music c'isMusicValid
 
-playMusicStream :: Music -> IO ()
-playMusicStream music = withFreeable music c'playMusicStream
+playMusicStream :: (PLike Music music) => music -> IO ()
+playMusicStream music = withTLike music c'playMusicStream
 
-isMusicStreamPlaying :: Music -> IO Bool
-isMusicStreamPlaying music = toBool <$> withFreeable music c'isMusicStreamPlaying
+isMusicStreamPlaying :: (PLike Music music) => music -> IO Bool
+isMusicStreamPlaying music = toBool <$> withTLike music c'isMusicStreamPlaying
 
-updateMusicStream :: Music -> IO ()
-updateMusicStream music = withFreeable music c'updateMusicStream
+updateMusicStream :: (PLike Music music) => music -> IO ()
+updateMusicStream music = withTLike music c'updateMusicStream
 
-stopMusicStream :: Music -> IO ()
-stopMusicStream music = withFreeable music c'stopMusicStream
+stopMusicStream :: (PLike Music music) => music -> IO ()
+stopMusicStream music = withTLike music c'stopMusicStream
 
-pauseMusicStream :: Music -> IO ()
-pauseMusicStream music = withFreeable music c'pauseMusicStream
+pauseMusicStream :: (PLike Music music) => music -> IO ()
+pauseMusicStream music = withTLike music c'pauseMusicStream
 
-resumeMusicStream :: Music -> IO ()
-resumeMusicStream music = withFreeable music c'resumeMusicStream
+resumeMusicStream :: (PLike Music music) => music -> IO ()
+resumeMusicStream music = withTLike music c'resumeMusicStream
 
-seekMusicStream :: Music -> Float -> IO ()
-seekMusicStream music position = withFreeable music (\m -> c'seekMusicStream m (realToFrac position))
+seekMusicStream :: (PLike Music music) => music -> Float -> IO ()
+seekMusicStream music position = withTLike music (\m -> c'seekMusicStream m (realToFrac position))
 
-setMusicVolume :: Music -> Float -> IO ()
-setMusicVolume music volume = withFreeable music (\m -> c'setMusicVolume m (realToFrac volume))
+setMusicVolume :: (PLike Music music) => music -> Float -> IO ()
+setMusicVolume music volume = withTLike music (\m -> c'setMusicVolume m (realToFrac volume))
 
-setMusicPitch :: Music -> Float -> IO ()
-setMusicPitch music pitch = withFreeable music (\m -> c'setMusicPitch m (realToFrac pitch))
+setMusicPitch :: (PLike Music music) => music -> Float -> IO ()
+setMusicPitch music pitch = withTLike music (\m -> c'setMusicPitch m (realToFrac pitch))
 
-setMusicPan :: Music -> Float -> IO ()
-setMusicPan music pan = withFreeable music (\m -> c'setMusicPan m (realToFrac pan))
+setMusicPan :: (PLike Music music) => music -> Float -> IO ()
+setMusicPan music pan = withTLike music (\m -> c'setMusicPan m (realToFrac pan))
 
-getMusicTimeLength :: Music -> IO Float
-getMusicTimeLength music = realToFrac <$> withFreeable music c'getMusicTimeLength
+getMusicTimeLength :: (PLike Music music) => music -> IO Float
+getMusicTimeLength music = realToFrac <$> withTLike music c'getMusicTimeLength
 
-getMusicTimePlayed :: Music -> IO Float
-getMusicTimePlayed music = realToFrac <$> withFreeable music c'getMusicTimePlayed
+getMusicTimePlayed :: (PLike Music music) => music -> IO Float
+getMusicTimePlayed music = realToFrac <$> withTLike music c'getMusicTimePlayed
 
-loadAudioStream :: Integer -> Integer -> Integer -> IO AudioStream
-loadAudioStream sampleRate sampleSize channels = c'loadAudioStream (fromIntegral sampleRate) (fromIntegral sampleSize) (fromIntegral channels) >>= pop
+loadAudioStream :: (PLike AudioStream audioStream) => Integer -> Integer -> Integer -> IO audioStream
+loadAudioStream sampleRate sampleSize channels = c'loadAudioStream (fromIntegral sampleRate) (fromIntegral sampleSize) (fromIntegral channels) >>= popTLike
 
 -- | Unloads a `managed` audio stream from RAM
-unloadAudioStream :: AudioStream -> WindowResources -> IO ()
-unloadAudioStream stream = unloadSingleAudioBuffer (castPtr $ audioStream'buffer stream)
+unloadAudioStream :: (PLike AudioStream audioStream) => audioStream -> WindowResources -> IO ()
+unloadAudioStream stream wr =
+  withTLike
+    stream
+    ( \streamPtr -> do
+        buf <- peek (p'audioStream'buffer streamPtr)
+        unloadSingleAudioBuffer (castPtr buf) wr
+    )
 
-isAudioStreamValid :: AudioStream -> IO Bool
-isAudioStreamValid stream = toBool <$> withFreeable stream c'isAudioStreamValid
+isAudioStreamValid :: (PLike AudioStream audioStream) => audioStream -> IO Bool
+isAudioStreamValid stream = toBool <$> withTLike stream c'isAudioStreamValid
 
-updateAudioStream :: AudioStream -> Ptr () -> Int -> IO ()
-updateAudioStream stream value frameCount = withFreeable stream (\s -> c'updateAudioStream s value (fromIntegral frameCount))
+updateAudioStream :: (PLike AudioStream audioStream) => audioStream -> Ptr () -> Int -> IO ()
+updateAudioStream stream value frameCount = withTLike stream (\s -> c'updateAudioStream s value (fromIntegral frameCount))
 
-isAudioStreamProcessed :: AudioStream -> IO Bool
-isAudioStreamProcessed stream = toBool <$> withFreeable stream c'isAudioStreamProcessed
+isAudioStreamProcessed :: (PLike AudioStream audioStream) => audioStream -> IO Bool
+isAudioStreamProcessed stream = toBool <$> withTLike stream c'isAudioStreamProcessed
 
-playAudioStream :: AudioStream -> IO ()
-playAudioStream stream = withFreeable stream c'playAudioStream
+playAudioStream :: (PLike AudioStream audioStream) => audioStream -> IO ()
+playAudioStream stream = withTLike stream c'playAudioStream
 
-pauseAudioStream :: AudioStream -> IO ()
-pauseAudioStream stream = withFreeable stream c'pauseAudioStream
+pauseAudioStream :: (PLike AudioStream audioStream) => audioStream -> IO ()
+pauseAudioStream stream = withTLike stream c'pauseAudioStream
 
-resumeAudioStream :: AudioStream -> IO ()
-resumeAudioStream stream = withFreeable stream c'resumeAudioStream
+resumeAudioStream :: (PLike AudioStream audioStream) => audioStream -> IO ()
+resumeAudioStream stream = withTLike stream c'resumeAudioStream
 
-isAudioStreamPlaying :: AudioStream -> IO Bool
-isAudioStreamPlaying stream = toBool <$> withFreeable stream c'isAudioStreamPlaying
+isAudioStreamPlaying :: (PLike AudioStream audioStream) => audioStream -> IO Bool
+isAudioStreamPlaying stream = toBool <$> withTLike stream c'isAudioStreamPlaying
 
-stopAudioStream :: AudioStream -> IO ()
-stopAudioStream stream = withFreeable stream c'stopAudioStream
+stopAudioStream :: (PLike AudioStream audioStream) => audioStream -> IO ()
+stopAudioStream stream = withTLike stream c'stopAudioStream
 
-setAudioStreamVolume :: AudioStream -> Float -> IO ()
-setAudioStreamVolume stream volume = withFreeable stream (\s -> c'setAudioStreamVolume s (realToFrac volume))
+setAudioStreamVolume :: (PLike AudioStream audioStream) => audioStream -> Float -> IO ()
+setAudioStreamVolume stream volume = withTLike stream (\s -> c'setAudioStreamVolume s (realToFrac volume))
 
-setAudioStreamPitch :: AudioStream -> Float -> IO ()
-setAudioStreamPitch stream pitch = withFreeable stream (\s -> c'setAudioStreamPitch s (realToFrac pitch))
+setAudioStreamPitch :: (PLike AudioStream audioStream) => audioStream -> Float -> IO ()
+setAudioStreamPitch stream pitch = withTLike stream (\s -> c'setAudioStreamPitch s (realToFrac pitch))
 
-setAudioStreamPan :: AudioStream -> Float -> IO ()
-setAudioStreamPan stream pan = withFreeable stream (\s -> c'setAudioStreamPan s (realToFrac pan))
+setAudioStreamPan :: (PLike AudioStream audioStream) => audioStream -> Float -> IO ()
+setAudioStreamPan stream pan = withTLike stream (\s -> c'setAudioStreamPan s (realToFrac pan))
 
 setAudioStreamBufferSizeDefault :: Int -> IO ()
 setAudioStreamBufferSizeDefault = c'setAudioStreamBufferSizeDefault . fromIntegral
 
-setAudioStreamCallback :: AudioStream -> AudioCallback -> WindowResources -> IO C'AudioCallback
+setAudioStreamCallback :: (PLike AudioStream audioStream) => audioStream -> AudioCallback -> WindowResources -> IO C'AudioCallback
 setAudioStreamCallback stream callback window =
-  withFreeable
+  withTLike
     stream
     ( \s ->
         do
@@ -443,9 +477,9 @@ setAudioStreamCallback stream callback window =
           return c
     )
 
-attachAudioStreamProcessor :: AudioStream -> AudioCallback -> WindowResources -> IO C'AudioCallback
+attachAudioStreamProcessor :: (PLike AudioStream audioStream) => audioStream -> AudioCallback -> WindowResources -> IO C'AudioCallback
 attachAudioStreamProcessor stream callback window =
-  withFreeable
+  withTLike
     stream
     ( \s ->
         do
@@ -455,9 +489,9 @@ attachAudioStreamProcessor stream callback window =
           return c
     )
 
-detachAudioStreamProcessor :: AudioStream -> C'AudioCallback -> WindowResources -> IO ()
+detachAudioStreamProcessor :: (PLike AudioStream audioStream) => audioStream -> C'AudioCallback -> WindowResources -> IO ()
 detachAudioStreamProcessor stream callback window =
-  withFreeable stream (`c'detachAudioStreamProcessor` callback) >> unloadSingleFunPtr (castFunPtr callback) window
+  withTLike stream (`c'detachAudioStreamProcessor` callback) >> unloadSingleFunPtr (castFunPtr callback) window
 
 attachAudioMixedProcessor :: AudioCallback -> WindowResources -> IO C'AudioCallback
 attachAudioMixedProcessor callback window =

@@ -1,3 +1,5 @@
+{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TemplateHaskell #-}
 
 -- | Bindings to @rmodels@
@@ -160,22 +162,25 @@ module Raylib.Core.Models
 where
 
 import Control.Monad (forM_)
-import Foreign (Ptr, Storable (peek), fromBool, peekArray, toBool, with)
+import Foreign (Ptr, Storable (peek), advancePtr, fromBool, nullPtr, toBool)
 import Foreign.C
   ( CBool (..),
     CFloat (..),
     CInt (..),
     CString,
-    withCString,
   )
 import GHC.IO (unsafePerformIO)
-import Raylib.Internal (WindowResources, unloadSingleShader, unloadSingleTexture, unloadSingleVaoId, unloadSingleVboIdList, addToWindowResources)
+import Raylib.Internal (WindowResources, addToWindowResources, unloadSingleShader, unloadSingleTexture, unloadSingleVaoId, unloadSingleVboIdList)
 import Raylib.Internal.Foreign
-  ( pop,
-    popCArray,
+  ( ALike (peekALike, popALike, withALike, withALikeLen),
+    Mutable (peekMutated),
+    PALike,
+    PLike,
+    StringLike,
+    TLike (peekTLike, popTLike, withTLike),
+    peekMaybeArray,
+    pop,
     withFreeable,
-    withFreeableArray,
-    withFreeableArrayLen,
   )
 import Raylib.Internal.TH (genNative)
 import Raylib.Types
@@ -183,19 +188,29 @@ import Raylib.Types
     Camera3D,
     Color,
     Image,
-    Material (material'maps, material'shader),
-    MaterialMap (materialMap'texture),
+    Material,
+    MaterialMapIndex,
     Matrix,
-    Mesh (mesh'vaoId, mesh'vboId),
-    Model (model'materials, model'meshes),
+    Mesh,
+    Model,
     ModelAnimation,
     Ray,
     RayCollision,
     Rectangle,
-    Shader (shader'id),
-    Texture (texture'id),
+    Texture,
     Vector2,
-    Vector3, MaterialMapIndex,
+    Vector3,
+    p'material'maps,
+    p'material'shader,
+    p'materialMap'texture,
+    p'mesh'vaoId,
+    p'mesh'vboId,
+    p'model'materialCount,
+    p'model'materials,
+    p'model'meshCount,
+    p'model'meshes,
+    p'shader'id,
+    p'texture'id,
   )
 
 $( genNative
@@ -290,8 +305,8 @@ drawCircle3D center radius rotationAxis rotationAngle color = withFreeable cente
 drawTriangle3D :: Vector3 -> Vector3 -> Vector3 -> Color -> IO ()
 drawTriangle3D v1 v2 v3 color = withFreeable v1 (\p1 -> withFreeable v2 (\p2 -> withFreeable v3 (withFreeable color . c'drawTriangle3D p1 p2)))
 
-drawTriangleStrip3D :: [Vector3] -> Int -> Color -> IO ()
-drawTriangleStrip3D points pointCount color = withFreeableArray points (\p -> withFreeable color (c'drawTriangleStrip3D p (fromIntegral pointCount)))
+drawTriangleStrip3D :: (PALike Vector3 points) => points -> Int -> Color -> IO ()
+drawTriangleStrip3D points pointCount color = withALike points (\p -> withFreeable color (c'drawTriangleStrip3D p (fromIntegral pointCount)))
 
 drawCube :: Vector3 -> Float -> Float -> Float -> Color -> IO ()
 drawCube position width height _length color = withFreeable position (\p -> withFreeable color (c'drawCube p (realToFrac width) (realToFrac height) (realToFrac _length)))
@@ -341,127 +356,149 @@ drawRay ray color = withFreeable ray (withFreeable color . c'drawRay)
 drawGrid :: Int -> Float -> IO ()
 drawGrid slices spacing = c'drawGrid (fromIntegral slices) (realToFrac spacing)
 
-loadModel :: String -> IO Model
-loadModel fileName = withCString fileName c'loadModel >>= pop
+loadModel :: (StringLike string, PLike Model model) => string -> IO model
+loadModel fileName = withTLike fileName c'loadModel >>= popTLike
 
 -- | Use `loadModelFromMeshManaged` for a resource-managed version
-loadModelFromMesh :: Mesh -> IO Model
-loadModelFromMesh mesh = with mesh c'loadModelFromMesh >>= pop
+--
+--   WARNING: Do not use this with `managed`
+loadModelFromMesh :: (PLike Mesh mesh, PLike Model model) => mesh -> IO model
+loadModelFromMesh mesh = withTLike mesh c'loadModelFromMesh >>= popTLike
 
-loadModelFromMeshManaged :: Mesh -> WindowResources -> IO Model
+loadModelFromMeshManaged :: (PLike Mesh mesh, PLike Model model) => mesh -> WindowResources -> IO model
 loadModelFromMeshManaged mesh wr = do
   model <- loadModelFromMesh mesh
-  forM_ (model'materials model) (addToWindowResources wr)
+  withTLike
+    model
+    ( \modelPtr -> do
+        matCount :: Int <- fromIntegral <$> peek (p'model'materialCount modelPtr)
+        mats <- peek (p'model'materials modelPtr)
+        forM_ [0 .. matCount - 1] (addToWindowResources wr . advancePtr mats)
+    )
   return model
 
 -- | Unloads a `managed` model from GPU memory (VRAM)
-unloadModel :: Model -> WindowResources -> IO ()
-unloadModel model wr = do
-  forM_ (model'meshes model) (`unloadMesh` wr)
-  forM_ (model'materials model) (`unloadMaterial` wr)
+unloadModel :: (PLike Model model) => model -> WindowResources -> IO ()
+unloadModel model wr =
+  withTLike
+    model
+    ( \modelPtr -> do
+        meshCount :: Int <- fromIntegral <$> peek (p'model'meshCount modelPtr)
+        matCount :: Int <- fromIntegral <$> peek (p'model'materialCount modelPtr)
+        meshes <- peek (p'model'meshes modelPtr)
+        mats <- peek (p'model'materials modelPtr)
+        forM_ [0 .. meshCount - 1] (addToWindowResources wr . advancePtr meshes)
+        forM_ [0 .. matCount - 1] (addToWindowResources wr . advancePtr mats)
+    )
 
-isModelValid :: Model -> IO Bool
-isModelValid model = toBool <$> withFreeable model c'isModelValid
+isModelValid :: (PLike Model model) => model -> IO Bool
+isModelValid model = toBool <$> withTLike model c'isModelValid
 
-getModelBoundingBox :: Model -> IO BoundingBox
-getModelBoundingBox model = withFreeable model c'getModelBoundingBox >>= pop
+getModelBoundingBox :: (PLike Model model) => model -> IO BoundingBox
+getModelBoundingBox model = withTLike model c'getModelBoundingBox >>= pop
 
-drawModel :: Model -> Vector3 -> Float -> Color -> IO ()
-drawModel model position scale tint = withFreeable model (\m -> withFreeable position (\p -> withFreeable tint (c'drawModel m p (realToFrac scale))))
+drawModel :: (PLike Model model) => model -> Vector3 -> Float -> Color -> IO ()
+drawModel model position scale tint = withTLike model (\m -> withFreeable position (\p -> withFreeable tint (c'drawModel m p (realToFrac scale))))
 
-drawModelEx :: Model -> Vector3 -> Vector3 -> Float -> Vector3 -> Color -> IO ()
-drawModelEx model position rotationAxis rotationAngle scale tint = withFreeable model (\m -> withFreeable position (\p -> withFreeable rotationAxis (\r -> withFreeable scale (withFreeable tint . c'drawModelEx m p r (realToFrac rotationAngle)))))
+drawModelEx :: (PLike Model model) => model -> Vector3 -> Vector3 -> Float -> Vector3 -> Color -> IO ()
+drawModelEx model position rotationAxis rotationAngle scale tint = withTLike model (\m -> withFreeable position (\p -> withFreeable rotationAxis (\r -> withFreeable scale (withFreeable tint . c'drawModelEx m p r (realToFrac rotationAngle)))))
 
-drawModelWires :: Model -> Vector3 -> Float -> Color -> IO ()
-drawModelWires model position scale tint = withFreeable model (\m -> withFreeable position (\p -> withFreeable tint (c'drawModelWires m p (realToFrac scale))))
+drawModelWires :: (PLike Model model) => model -> Vector3 -> Float -> Color -> IO ()
+drawModelWires model position scale tint = withTLike model (\m -> withFreeable position (\p -> withFreeable tint (c'drawModelWires m p (realToFrac scale))))
 
-drawModelWiresEx :: Model -> Vector3 -> Vector3 -> Float -> Vector3 -> Color -> IO ()
-drawModelWiresEx model position rotationAxis rotationAngle scale tint = withFreeable model (\m -> withFreeable position (\p -> withFreeable rotationAxis (\r -> withFreeable scale (withFreeable tint . c'drawModelWiresEx m p r (realToFrac rotationAngle)))))
+drawModelWiresEx :: (PLike Model model) => model -> Vector3 -> Vector3 -> Float -> Vector3 -> Color -> IO ()
+drawModelWiresEx model position rotationAxis rotationAngle scale tint = withTLike model (\m -> withFreeable position (\p -> withFreeable rotationAxis (\r -> withFreeable scale (withFreeable tint . c'drawModelWiresEx m p r (realToFrac rotationAngle)))))
 
-drawModelPoints :: Model -> Vector3 -> Float -> Color -> IO ()
-drawModelPoints model position scale tint = withFreeable model (\m -> withFreeable position (\p -> withFreeable tint (c'drawModelPoints m p (realToFrac scale))))
+drawModelPoints :: (PLike Model model) => model -> Vector3 -> Float -> Color -> IO ()
+drawModelPoints model position scale tint = withTLike model (\m -> withFreeable position (\p -> withFreeable tint (c'drawModelPoints m p (realToFrac scale))))
 
-drawModelPointsEx :: Model -> Vector3 -> Vector3 -> Float -> Vector3 -> Color -> IO ()
-drawModelPointsEx model position rotationAxis rotationAngle scale tint = withFreeable model (\m -> withFreeable position (\p -> withFreeable rotationAxis (\r -> withFreeable scale (withFreeable tint . c'drawModelPointsEx m p r (realToFrac rotationAngle)))))
+drawModelPointsEx :: (PLike Model model) => model -> Vector3 -> Vector3 -> Float -> Vector3 -> Color -> IO ()
+drawModelPointsEx model position rotationAxis rotationAngle scale tint = withTLike model (\m -> withFreeable position (\p -> withFreeable rotationAxis (\r -> withFreeable scale (withFreeable tint . c'drawModelPointsEx m p r (realToFrac rotationAngle)))))
 
 drawBoundingBox :: BoundingBox -> Color -> IO ()
 drawBoundingBox box color = withFreeable box (withFreeable color . c'drawBoundingBox)
 
-drawBillboard :: Camera3D -> Texture -> Vector3 -> Float -> Color -> IO ()
-drawBillboard camera texture position size tint = withFreeable camera (\c -> withFreeable texture (\t -> withFreeable position (\p -> withFreeable tint (c'drawBillboard c t p (realToFrac size)))))
+drawBillboard :: (PLike Camera3D camera3D, PLike Texture texture) => camera3D -> texture -> Vector3 -> Float -> Color -> IO ()
+drawBillboard camera texture position size tint = withTLike camera (\c -> withTLike texture (\t -> withFreeable position (\p -> withFreeable tint (c'drawBillboard c t p (realToFrac size)))))
 
-drawBillboardRec :: Camera3D -> Texture -> Rectangle -> Vector3 -> Vector2 -> Color -> IO ()
-drawBillboardRec camera texture source position size tint = withFreeable camera (\c -> withFreeable texture (\t -> withFreeable source (\s -> withFreeable position (\p -> withFreeable size (withFreeable tint . c'drawBillboardRec c t s p)))))
+drawBillboardRec :: (PLike Camera3D camera3D, PLike Texture texture) => camera3D -> texture -> Rectangle -> Vector3 -> Vector2 -> Color -> IO ()
+drawBillboardRec camera texture source position size tint = withTLike camera (\c -> withTLike texture (\t -> withFreeable source (\s -> withFreeable position (\p -> withFreeable size (withFreeable tint . c'drawBillboardRec c t s p)))))
 
-drawBillboardPro :: Camera3D -> Texture -> Rectangle -> Vector3 -> Vector3 -> Vector2 -> Vector2 -> Float -> Color -> IO ()
-drawBillboardPro camera texture source position up size origin rotation tint = withFreeable camera (\c -> withFreeable texture (\t -> withFreeable source (\s -> withFreeable position (\p -> withFreeable up (\u -> withFreeable size (\sz -> withFreeable origin (\o -> withFreeable tint (c'drawBillboardPro c t s p u sz o (realToFrac rotation)))))))))
+drawBillboardPro :: (PLike Camera3D camera3D, PLike Texture texture) => camera3D -> texture -> Rectangle -> Vector3 -> Vector3 -> Vector2 -> Vector2 -> Float -> Color -> IO ()
+drawBillboardPro camera texture source position up size origin rotation tint = withTLike camera (\c -> withTLike texture (\t -> withFreeable source (\s -> withFreeable position (\p -> withFreeable up (\u -> withFreeable size (\sz -> withFreeable origin (\o -> withFreeable tint (c'drawBillboardPro c t s p u sz o (realToFrac rotation)))))))))
 
-uploadMesh :: Mesh -> Bool -> IO Mesh
-uploadMesh mesh dynamic = withFreeable mesh (\m -> c'uploadMesh m (fromBool dynamic) >> peek m)
+uploadMesh :: (PLike Mesh mesh) => mesh -> Bool -> IO mesh
+uploadMesh mesh dynamic = withTLike mesh (\m -> c'uploadMesh m (fromBool dynamic) >> peekTLike m)
 
-updateMeshBuffer :: Mesh -> Int -> Ptr () -> Int -> Int -> IO ()
-updateMeshBuffer mesh index dataValue dataSize offset = withFreeable mesh (\m -> c'updateMeshBuffer m (fromIntegral index) dataValue (fromIntegral dataSize) (fromIntegral offset))
+updateMeshBuffer :: (PLike Mesh mesh) => mesh -> Int -> Ptr () -> Int -> Int -> IO ()
+updateMeshBuffer mesh index dataValue dataSize offset = withTLike mesh (\m -> c'updateMeshBuffer m (fromIntegral index) dataValue (fromIntegral dataSize) (fromIntegral offset))
 
 -- | Unloads a `managed` mesh from GPU memory (VRAM)
-unloadMesh :: Mesh -> WindowResources -> IO ()
-unloadMesh mesh wr = do
-  unloadSingleVaoId (mesh'vaoId mesh) wr
-  unloadSingleVboIdList (mesh'vboId mesh) wr
+unloadMesh :: (PLike Mesh mesh) => mesh -> WindowResources -> IO ()
+unloadMesh mesh wr =
+  withTLike
+    mesh
+    ( \meshPtr -> do
+        vao <- peek (p'mesh'vaoId meshPtr)
+        vbo <- peekMaybeArray 9 =<< peek (p'mesh'vboId meshPtr)
+        unloadSingleVaoId vao wr
+        unloadSingleVboIdList vbo wr
+    )
 
-drawMesh :: Mesh -> Material -> Matrix -> IO ()
-drawMesh mesh material transform = withFreeable mesh (\m -> withFreeable material (withFreeable transform . c'drawMesh m))
+drawMesh :: (PLike Mesh mesh, PLike Material material, PLike Matrix matrix) => mesh -> material -> matrix -> IO ()
+drawMesh mesh material transform = withTLike mesh (\m -> withTLike material (withTLike transform . c'drawMesh m))
 
-drawMeshInstanced :: Mesh -> Material -> [Matrix] -> IO ()
-drawMeshInstanced mesh material transforms = withFreeable mesh (\m -> withFreeable material (\mat -> withFreeableArrayLen transforms (\size t -> c'drawMeshInstanced m mat t (fromIntegral size))))
+drawMeshInstanced :: (PLike Mesh mesh, PLike Material material, PALike Matrix matrices) => mesh -> material -> matrices -> IO ()
+drawMeshInstanced mesh material transforms = withTLike mesh (\m -> withTLike material (\mat -> withALikeLen transforms (\size t -> c'drawMeshInstanced m mat t (fromIntegral size))))
 
-exportMesh :: Mesh -> String -> IO Bool
-exportMesh mesh fileName = toBool <$> withFreeable mesh (withCString fileName . c'exportMesh)
+exportMesh :: (PLike Mesh mesh, StringLike string) => mesh -> string -> IO Bool
+exportMesh mesh fileName = toBool <$> withTLike mesh (withTLike fileName . c'exportMesh)
 
-exportMeshAsCode :: Mesh -> String -> IO Bool
-exportMeshAsCode mesh fileName = toBool <$> withFreeable mesh (withCString fileName . c'exportMeshAsCode)
+exportMeshAsCode :: (PLike Mesh mesh, StringLike string) => mesh -> string -> IO Bool
+exportMeshAsCode mesh fileName = toBool <$> withTLike mesh (withTLike fileName . c'exportMeshAsCode)
 
-getMeshBoundingBox :: Mesh -> IO BoundingBox
-getMeshBoundingBox mesh = withFreeable mesh c'getMeshBoundingBox >>= pop
+getMeshBoundingBox :: (PLike Mesh mesh) => mesh -> IO BoundingBox
+getMeshBoundingBox mesh = withTLike mesh c'getMeshBoundingBox >>= pop
 
-genMeshTangents :: Mesh -> IO Mesh
-genMeshTangents mesh = withFreeable mesh (\m -> c'genMeshTangents m >> peek m)
+genMeshTangents :: (PLike Mesh mesh, Mutable mesh mut) => mesh -> IO mut
+genMeshTangents mesh = withTLike mesh (\m -> c'genMeshTangents m >> peekMutated mesh m)
 
-genMeshPoly :: Int -> Float -> IO Mesh
-genMeshPoly sides radius = c'genMeshPoly (fromIntegral sides) (realToFrac radius) >>= pop
+genMeshPoly :: (PLike Mesh mesh) => Int -> Float -> IO mesh
+genMeshPoly sides radius = c'genMeshPoly (fromIntegral sides) (realToFrac radius) >>= popTLike
 
-genMeshPlane :: Float -> Float -> Int -> Int -> IO Mesh
-genMeshPlane width _length resX resZ = c'genMeshPlane (realToFrac width) (realToFrac _length) (fromIntegral resX) (fromIntegral resZ) >>= pop
+genMeshPlane :: (PLike Mesh mesh) => Float -> Float -> Int -> Int -> IO mesh
+genMeshPlane width _length resX resZ = c'genMeshPlane (realToFrac width) (realToFrac _length) (fromIntegral resX) (fromIntegral resZ) >>= popTLike
 
-genMeshCube :: Float -> Float -> Float -> IO Mesh
-genMeshCube width height _length = c'genMeshCube (realToFrac width) (realToFrac height) (realToFrac _length) >>= pop
+genMeshCube :: (PLike Mesh mesh) => Float -> Float -> Float -> IO mesh
+genMeshCube width height _length = c'genMeshCube (realToFrac width) (realToFrac height) (realToFrac _length) >>= popTLike
 
-genMeshSphere :: Float -> Int -> Int -> IO Mesh
-genMeshSphere radius rings slices = c'genMeshSphere (realToFrac radius) (fromIntegral rings) (fromIntegral slices) >>= pop
+genMeshSphere :: (PLike Mesh mesh) => Float -> Int -> Int -> IO mesh
+genMeshSphere radius rings slices = c'genMeshSphere (realToFrac radius) (fromIntegral rings) (fromIntegral slices) >>= popTLike
 
-genMeshHemiSphere :: Float -> Int -> Int -> IO Mesh
-genMeshHemiSphere radius rings slices = c'genMeshHemiSphere (realToFrac radius) (fromIntegral rings) (fromIntegral slices) >>= pop
+genMeshHemiSphere :: (PLike Mesh mesh) => Float -> Int -> Int -> IO mesh
+genMeshHemiSphere radius rings slices = c'genMeshHemiSphere (realToFrac radius) (fromIntegral rings) (fromIntegral slices) >>= popTLike
 
-genMeshCylinder :: Float -> Float -> Int -> IO Mesh
-genMeshCylinder radius height slices = c'genMeshCylinder (realToFrac radius) (realToFrac height) (fromIntegral slices) >>= pop
+genMeshCylinder :: (PLike Mesh mesh) => Float -> Float -> Int -> IO mesh
+genMeshCylinder radius height slices = c'genMeshCylinder (realToFrac radius) (realToFrac height) (fromIntegral slices) >>= popTLike
 
-genMeshCone :: Float -> Float -> Int -> IO Mesh
-genMeshCone radius height slices = c'genMeshCone (realToFrac radius) (realToFrac height) (fromIntegral slices) >>= pop
+genMeshCone :: (PLike Mesh mesh) => Float -> Float -> Int -> IO mesh
+genMeshCone radius height slices = c'genMeshCone (realToFrac radius) (realToFrac height) (fromIntegral slices) >>= popTLike
 
-genMeshTorus :: Float -> Float -> Int -> Int -> IO Mesh
-genMeshTorus radius size radSeg sides = c'genMeshTorus (realToFrac radius) (realToFrac size) (fromIntegral radSeg) (fromIntegral sides) >>= pop
+genMeshTorus :: (PLike Mesh mesh) => Float -> Float -> Int -> Int -> IO mesh
+genMeshTorus radius size radSeg sides = c'genMeshTorus (realToFrac radius) (realToFrac size) (fromIntegral radSeg) (fromIntegral sides) >>= popTLike
 
-genMeshKnot :: Float -> Float -> Int -> Int -> IO Mesh
-genMeshKnot radius size radSeg sides = c'genMeshKnot (realToFrac radius) (realToFrac size) (fromIntegral radSeg) (fromIntegral sides) >>= pop
+genMeshKnot :: (PLike Mesh mesh) => Float -> Float -> Int -> Int -> IO mesh
+genMeshKnot radius size radSeg sides = c'genMeshKnot (realToFrac radius) (realToFrac size) (fromIntegral radSeg) (fromIntegral sides) >>= popTLike
 
-genMeshHeightmap :: Image -> Vector3 -> IO Mesh
-genMeshHeightmap heightmap size = withFreeable heightmap (withFreeable size . c'genMeshHeightmap) >>= pop
+genMeshHeightmap :: (PLike Image image, PLike Mesh mesh) => image -> Vector3 -> IO mesh
+genMeshHeightmap heightmap size = withTLike heightmap (withFreeable size . c'genMeshHeightmap) >>= popTLike
 
-genMeshCubicmap :: Image -> Vector3 -> IO Mesh
-genMeshCubicmap cubicmap cubeSize = withFreeable cubicmap (withFreeable cubeSize . c'genMeshCubicmap) >>= pop
+genMeshCubicmap :: (PLike Image image, PLike Mesh mesh) => image -> Vector3 -> IO mesh
+genMeshCubicmap cubicmap cubeSize = withTLike cubicmap (withFreeable cubeSize . c'genMeshCubicmap) >>= popTLike
 
-loadMaterials :: String -> IO [Material]
+loadMaterials :: (StringLike string, PALike Material materials) => string -> IO materials
 loadMaterials fileName =
-  withCString
+  withTLike
     fileName
     ( \f ->
         withFreeable
@@ -469,34 +506,46 @@ loadMaterials fileName =
           ( \n -> do
               ptr <- c'loadMaterials f n
               num <- peek n
-              materials <- popCArray (fromIntegral num) ptr
-              return materials
+              popALike (fromIntegral num) ptr
           )
     )
 
 -- | Unloads a `managed` material from GPU memory (VRAM)
-unloadMaterial :: Material -> WindowResources -> IO ()
-unloadMaterial material wr = do
-  unloadSingleShader (shader'id $ material'shader material) wr
-  case material'maps material of
-    Nothing -> return ()
-    (Just maps) -> forM_ maps (\m -> unloadSingleTexture (texture'id $ materialMap'texture m) wr)
+unloadMaterial :: (PLike Material material) => material -> WindowResources -> IO ()
+unloadMaterial material wr =
+  withTLike
+    material
+    ( \materialPtr -> do
+        sId <- peek (p'shader'id (p'material'shader materialPtr))
+        unloadSingleShader sId wr
 
-loadMaterialDefault :: IO Material
-loadMaterialDefault = c'loadMaterialDefault >>= pop
+        maps <- peek (p'material'maps materialPtr)
+        if maps == nullPtr
+          then return ()
+          else
+            forM_
+              [0 .. 11]
+              ( \i -> do
+                  tId <- peek (p'texture'id (p'materialMap'texture (advancePtr maps i)))
+                  unloadSingleTexture tId wr
+              )
+    )
 
-isMaterialValid :: Material -> IO Bool
-isMaterialValid material = toBool <$> withFreeable material c'isMaterialValid
+loadMaterialDefault :: (PLike Material material) => IO material
+loadMaterialDefault = c'loadMaterialDefault >>= popTLike
 
-setMaterialTexture :: Material -> MaterialMapIndex -> Texture -> IO Material
-setMaterialTexture material mapType texture = withFreeable material (\m -> withFreeable texture (c'setMaterialTexture m (fromIntegral (fromEnum mapType))) >> peek m)
+isMaterialValid :: (PLike Material material) => material -> IO Bool
+isMaterialValid material = toBool <$> withTLike material c'isMaterialValid
 
-setModelMeshMaterial :: Model -> Int -> Int -> IO Model
-setModelMeshMaterial model meshId materialId = withFreeable model (\m -> c'setModelMeshMaterial m (fromIntegral meshId) (fromIntegral materialId) >> peek m)
+setMaterialTexture :: (PLike Material material, PLike Texture texture) => material -> MaterialMapIndex -> texture -> IO material
+setMaterialTexture material mapType texture = withTLike material (\m -> withTLike texture (c'setMaterialTexture m (fromIntegral (fromEnum mapType))) >> peekTLike m)
 
-loadModelAnimations :: String -> IO [ModelAnimation]
+setModelMeshMaterial :: (PLike Model model) => model -> Int -> Int -> IO model
+setModelMeshMaterial model meshId materialId = withTLike model (\m -> c'setModelMeshMaterial m (fromIntegral meshId) (fromIntegral materialId) >> peekTLike m)
+
+loadModelAnimations :: (StringLike string, PALike ModelAnimation modelAnimations) => string -> IO modelAnimations
 loadModelAnimations fileName =
-  withCString
+  withTLike
     fileName
     ( \f ->
         withFreeable
@@ -504,18 +553,18 @@ loadModelAnimations fileName =
           ( \n -> do
               ptr <- c'loadModelAnimations f n
               num <- peek n
-              peekArray (fromIntegral num) ptr
+              peekALike (fromIntegral num) ptr
           )
     )
 
-updateModelAnimation :: Model -> ModelAnimation -> Int -> IO ()
-updateModelAnimation model animation frame = withFreeable model (\m -> withFreeable animation (\a -> c'updateModelAnimation m a (fromIntegral frame)))
+updateModelAnimation :: (PLike Model model, PLike ModelAnimation modelAnimation) => model -> modelAnimation -> Int -> IO ()
+updateModelAnimation model animation frame = withTLike model (\m -> withTLike animation (\a -> c'updateModelAnimation m a (fromIntegral frame)))
 
-isModelAnimationValid :: Model -> ModelAnimation -> IO Bool
-isModelAnimationValid model animation = toBool <$> withFreeable model (withFreeable animation . c'isModelAnimationValid)
+isModelAnimationValid :: (PLike Model model, PLike ModelAnimation modelAnimation) => model -> modelAnimation -> IO Bool
+isModelAnimationValid model animation = toBool <$> withTLike model (withTLike animation . c'isModelAnimationValid)
 
-updateModelAnimationBoneMatrices :: Model -> ModelAnimation -> Int -> IO ()
-updateModelAnimationBoneMatrices model animation frame = withFreeable model (\m -> withFreeable animation (\a -> c'updateModelAnimationBoneMatrices m a (fromIntegral frame)))
+updateModelAnimationBoneMatrices :: (PLike Model model, PLike ModelAnimation modelAnimation) => model -> modelAnimation -> Int -> IO ()
+updateModelAnimationBoneMatrices model animation frame = withTLike model (\m -> withTLike animation (\a -> c'updateModelAnimationBoneMatrices m a (fromIntegral frame)))
 
 checkCollisionSpheres :: Vector3 -> Float -> Vector3 -> Float -> Bool
 checkCollisionSpheres center1 radius1 center2 radius2 = toBool $ unsafePerformIO (withFreeable center1 (\c1 -> withFreeable center2 (\c2 -> c'checkCollisionSpheres c1 (realToFrac radius1) c2 (realToFrac radius2))))

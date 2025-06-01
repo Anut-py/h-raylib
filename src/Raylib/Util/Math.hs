@@ -1,6 +1,8 @@
-{-# LANGUAGE PatternSynonyms #-}
-{-# LANGUAGE TypeSynonymInstances #-}
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE PatternSynonyms #-}
+{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
+
+{-# HLINT ignore "Parenthesize unary negation" #-}
 
 -- | Bindings to @raymath@
 --
@@ -97,7 +99,8 @@ module Raylib.Util.Math
 where
 
 import Data.Foldable (foldl')
-import Raylib.Types (Matrix (..), Quaternion, Vector2, pattern Vector2, Vector3, pattern Vector3, Vector4, pattern Vector4)
+import Raylib.Types (Matrix (..), Quaternion, Vector2, Vector3, Vector4, pattern Vector2, pattern Vector3, pattern Vector4)
+
 epsilon :: Float
 epsilon = 0.000001
 
@@ -257,11 +260,11 @@ class Vector a where
 
   -- | Vector additive inverse
   additiveInverse :: a -> a
-  additiveInverse v = mapV negate v
+  additiveInverse = mapV negate
 
   -- | Vector multiplicative inverse
   multiplicativeInverse :: a -> a
-  multiplicativeInverse v = mapV (1 /) v
+  multiplicativeInverse = mapV (1 /)
 
   -- | Squared magnitude of a vector
   magnitudeSqr :: a -> Float
@@ -318,7 +321,7 @@ class Vector a where
     -- | Upper bound
     a ->
     a
-  vectorClamp v low high = zipWithV3 clamp v low high
+  vectorClamp = zipWithV3 clamp
 
   -- | Clamp the magnitude of a vector to a range
   vectorClampValue ::
@@ -335,11 +338,11 @@ class Vector a where
 
   -- | Min value for each pair of components
   vectorMin :: a -> a -> a
-  vectorMin v1 v2 = zipWithV min v1 v2
+  vectorMin = zipWithV min
 
   -- | Max value for each pair of components
   vectorMax :: a -> a -> a
-  vectorMax v1 v2 = zipWithV max v1 v2
+  vectorMax = zipWithV max
 
 instance Vector Vector2 where
   asList (Vector2 x y) = [x, y]
@@ -950,10 +953,10 @@ matrixDecompose (Matrix m0 m4 m8 m12 m1 m5 m9 m13 m2 m6 m10 m14 m3 m7 m11 m15) =
     h = m6
     i = m10
     translation = Vector3 m12 m13 m14
-    a' = e*i - f*h
-    b' = f*g - d*i
-    c' = d*h - e*g
-    det = a*a' + b*b' + c*c'
+    a' = e * i - f * h
+    b' = f * g - d * i
+    c' = d * h - e * g
+    det = a * a' + b * b' + c * c'
     abc = Vector3 a b c
     def = Vector3 d e f
     ghi = Vector3 g h i

@@ -6,8 +6,8 @@
 --   /NOTE: This module is only used when building for the web/
 module Raylib.Internal.Web.Processable (ProcessedParam (..), ParamType (..), Processable (..)) where
 
-import Foreign (Ptr, FunPtr, Storable (poke, sizeOf), castPtr, malloc)
-import Foreign.C (CChar, CDouble, CFloat, CInt, CLong, CUChar, CUInt, CBool)
+import Foreign (FunPtr, Ptr, Storable (poke, sizeOf), castPtr, malloc)
+import Foreign.C (CBool, CChar, CDouble, CFloat, CInt, CLong, CUChar, CUInt)
 
 data ParamType = SignedIntParam | UnsignedIntParam | FloatParam | VoidParam deriving (Enum)
 

@@ -83,7 +83,7 @@ import Foreign.C
     CUChar,
     CUInt,
   )
-import Raylib.Internal (Closeable (..), c'unloadAudioBuffer, addAudioBuffer, c'unloadMusicStreamData, addCtxData)
+import Raylib.Internal (Closeable (..), addAudioBuffer, addCtxData, c'unloadAudioBuffer, c'unloadMusicStreamData)
 import Raylib.Internal.Foreign (Freeable (rlFreeDependents), c'free, peekMaybe, peekStaticArray, pokeMaybe, pokeStaticArray)
 
 ---------------------------------------
@@ -225,7 +225,7 @@ instance Storable RAudioBuffer where
         let formatIn =
               case converter of
                 [] -> error "invalid miniaudio converter"
-                x:_ -> x
+                x : _ -> x
         funPtr <- peek (p'rAudioBuffer'callback ptr)
         let callback = if funPtr == nullFunPtr then Nothing else Just funPtr
         processor <- peekMaybe (p'rAudioBuffer'processor ptr)

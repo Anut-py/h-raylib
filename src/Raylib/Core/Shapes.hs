@@ -1,5 +1,6 @@
-{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE PatternSynonyms #-}
+{-# LANGUAGE TemplateHaskell #-}
 
 -- | Bindings to @rshapes@
 module Raylib.Core.Shapes
@@ -137,11 +138,10 @@ module Raylib.Core.Shapes
     c'checkCollisionLines,
     c'checkCollisionPointLine,
     c'checkCollisionCircleLine,
-    c'getCollisionRec
+    c'getCollisionRec,
   )
 where
 
-import Data.List (genericLength)
 import Foreign (Ptr, Storable (peek), toBool)
 import Foreign.C
   ( CBool (..),
@@ -149,7 +149,7 @@ import Foreign.C
     CInt (..),
   )
 import GHC.IO (unsafePerformIO)
-import Raylib.Internal.Foreign (pop, withFreeable, withFreeableArray, withFreeableArrayLen)
+import Raylib.Internal.Foreign (ALike (withALikeLen), PALike, PLike, TLike (popTLike, withTLike), pop, withFreeable)
 import Raylib.Internal.TH (genNative)
 import Raylib.Types (Color, Rectangle, Texture, Vector2, pattern Vector2)
 
@@ -223,11 +223,11 @@ $( genNative
      ]
  )
 
-setShapesTexture :: Texture -> Rectangle -> IO ()
-setShapesTexture tex source = withFreeable tex (withFreeable source . c'setShapesTexture)
+setShapesTexture :: (PLike Texture texture) => texture -> Rectangle -> IO ()
+setShapesTexture tex source = withTLike tex (withFreeable source . c'setShapesTexture)
 
-getShapesTexture :: IO Texture
-getShapesTexture = c'getShapesTexture >>= pop
+getShapesTexture :: (PLike Texture texture) => IO texture
+getShapesTexture = c'getShapesTexture >>= popTLike
 
 getShapesTextureRectangle :: IO Rectangle
 getShapesTextureRectangle = c'getShapesTextureRectangle >>= pop
@@ -249,8 +249,8 @@ drawLineEx :: Vector2 -> Vector2 -> Float -> Color -> IO ()
 drawLineEx start end thickness color =
   withFreeable start (\s -> withFreeable end (\e -> withFreeable color (c'drawLineEx s e (realToFrac thickness))))
 
-drawLineStrip :: [Vector2] -> Color -> IO ()
-drawLineStrip points color = withFreeableArray points (\p -> withFreeable color $ c'drawLineStrip p (genericLength points))
+drawLineStrip :: (PALike Vector2 points) => points -> Color -> IO ()
+drawLineStrip points color = withALikeLen points (\s p -> withFreeable color $ c'drawLineStrip p (fromIntegral s))
 
 drawLineBezier :: Vector2 -> Vector2 -> Float -> Color -> IO ()
 drawLineBezier start end thickness color =
@@ -266,8 +266,7 @@ drawCircleSector center radius startAngle endAngle segments color =
     ( \c ->
         withFreeable
           color
-          ( c'drawCircleSector c (realToFrac radius) (realToFrac startAngle) (realToFrac endAngle) (fromIntegral segments)
-          )
+          (c'drawCircleSector c (realToFrac radius) (realToFrac startAngle) (realToFrac endAngle) (fromIntegral segments))
     )
 
 drawCircleSectorLines :: Vector2 -> Float -> Float -> Float -> Int -> Color -> IO ()
@@ -277,8 +276,7 @@ drawCircleSectorLines center radius startAngle endAngle segments color =
     ( \c ->
         withFreeable
           color
-          ( c'drawCircleSectorLines c (realToFrac radius) (realToFrac startAngle) (realToFrac endAngle) (fromIntegral segments)
-          )
+          (c'drawCircleSectorLines c (realToFrac radius) (realToFrac startAngle) (realToFrac endAngle) (fromIntegral segments))
     )
 
 drawCircleGradient :: Int -> Int -> Float -> Color -> Color -> IO ()
@@ -420,8 +418,7 @@ drawTriangle v1 v2 v3 color =
     ( \p1 ->
         withFreeable
           v2
-          ( \p2 -> withFreeable v3 (withFreeable color . c'drawTriangle p1 p2)
-          )
+          (\p2 -> withFreeable v3 (withFreeable color . c'drawTriangle p1 p2))
     )
 
 drawTriangleLines :: Vector2 -> Vector2 -> Vector2 -> Color -> IO ()
@@ -431,16 +428,15 @@ drawTriangleLines v1 v2 v3 color =
     ( \p1 ->
         withFreeable
           v2
-          ( \p2 -> withFreeable v3 (withFreeable color . c'drawTriangleLines p1 p2)
-          )
+          (\p2 -> withFreeable v3 (withFreeable color . c'drawTriangleLines p1 p2))
     )
 
-drawTriangleFan :: [Vector2] -> Color -> IO ()
-drawTriangleFan points color = withFreeableArray points (\p -> withFreeable color $ c'drawTriangleFan p (genericLength points))
+drawTriangleFan :: (PALike Vector2 points) => points -> Color -> IO ()
+drawTriangleFan points color = withALikeLen points (\s p -> withFreeable color $ c'drawTriangleFan p (fromIntegral s))
 
-drawTriangleStrip :: [Vector2] -> Color -> IO ()
+drawTriangleStrip :: (PALike Vector2 points) => points -> Color -> IO ()
 drawTriangleStrip points color =
-  withFreeableArray points (\p -> withFreeable color $ c'drawTriangleStrip p (genericLength points))
+  withALikeLen points (\s p -> withFreeable color $ c'drawTriangleStrip p (fromIntegral s))
 
 drawPoly :: Vector2 -> Int -> Float -> Float -> Color -> IO ()
 drawPoly center sides radius rotation color =
@@ -464,20 +460,20 @@ drawPolyLinesEx center sides radius rotation thickness color =
             (realToFrac thickness)
     )
 
-drawSplineLinear :: [Vector2] -> Float -> Color -> IO ()
-drawSplineLinear points thick color = withFreeableArrayLen points (\l p -> withFreeable color (c'drawSplineLinear p (fromIntegral l) (realToFrac thick)))
+drawSplineLinear :: (PALike Vector2 points) => points -> Float -> Color -> IO ()
+drawSplineLinear points thick color = withALikeLen points (\l p -> withFreeable color (c'drawSplineLinear p (fromIntegral l) (realToFrac thick)))
 
-drawSplineBasis :: [Vector2] -> Float -> Color -> IO ()
-drawSplineBasis points thick color = withFreeableArrayLen points (\l p -> withFreeable color (c'drawSplineBasis p (fromIntegral l) (realToFrac thick)))
+drawSplineBasis :: (PALike Vector2 points) => points -> Float -> Color -> IO ()
+drawSplineBasis points thick color = withALikeLen points (\l p -> withFreeable color (c'drawSplineBasis p (fromIntegral l) (realToFrac thick)))
 
-drawSplineCatmullRom :: [Vector2] -> Float -> Color -> IO ()
-drawSplineCatmullRom points thick color = withFreeableArrayLen points (\l p -> withFreeable color (c'drawSplineCatmullRom p (fromIntegral l) (realToFrac thick)))
+drawSplineCatmullRom :: (PALike Vector2 points) => points -> Float -> Color -> IO ()
+drawSplineCatmullRom points thick color = withALikeLen points (\l p -> withFreeable color (c'drawSplineCatmullRom p (fromIntegral l) (realToFrac thick)))
 
-drawSplineBezierQuadratic :: [Vector2] -> Float -> Color -> IO ()
-drawSplineBezierQuadratic points thick color = withFreeableArrayLen points (\l p -> withFreeable color (c'drawSplineBezierQuadratic p (fromIntegral l) (realToFrac thick)))
+drawSplineBezierQuadratic :: (PALike Vector2 points) => points -> Float -> Color -> IO ()
+drawSplineBezierQuadratic points thick color = withALikeLen points (\l p -> withFreeable color (c'drawSplineBezierQuadratic p (fromIntegral l) (realToFrac thick)))
 
-drawSplineBezierCubic :: [Vector2] -> Float -> Color -> IO ()
-drawSplineBezierCubic points thick color = withFreeableArrayLen points (\l p -> withFreeable color (c'drawSplineBezierCubic p (fromIntegral l) (realToFrac thick)))
+drawSplineBezierCubic :: (PALike Vector2 points) => points -> Float -> Color -> IO ()
+drawSplineBezierCubic points thick color = withALikeLen points (\l p -> withFreeable color (c'drawSplineBezierCubic p (fromIntegral l) (realToFrac thick)))
 
 drawSplineSegmentLinear :: Vector2 -> Vector2 -> Float -> Color -> IO ()
 drawSplineSegmentLinear p1 p2 thick color = withFreeable p1 (\q1 -> withFreeable p2 (\q2 -> withFreeable color (c'drawSplineSegmentLinear q1 q2 (realToFrac thick))))
@@ -532,9 +528,9 @@ checkCollisionPointTriangle :: Vector2 -> Vector2 -> Vector2 -> Vector2 -> Bool
 checkCollisionPointTriangle point p1 p2 p3 =
   unsafePerformIO $ toBool <$> withFreeable point (\p -> withFreeable p1 (\ptr1 -> withFreeable p2 (withFreeable p3 . c'checkCollisionPointTriangle p ptr1)))
 
-checkCollisionPointPoly :: Vector2 -> [Vector2] -> Bool
+checkCollisionPointPoly :: (PALike Vector2 points) => Vector2 -> points -> IO Bool
 checkCollisionPointPoly point points =
-  unsafePerformIO $ toBool <$> withFreeableArrayLen points (\l ps -> withFreeable point (\p -> c'checkCollisionPointPoly p ps (fromIntegral l)))
+  toBool <$> withALikeLen points (\l ps -> withFreeable point (\p -> c'checkCollisionPointPoly p ps (fromIntegral l)))
 
 -- | If a collision is found, returns @Just collisionPoint@, otherwise returns @Nothing@
 checkCollisionLines :: Vector2 -> Vector2 -> Vector2 -> Vector2 -> Maybe Vector2

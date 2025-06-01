@@ -6,6 +6,7 @@ import Control.Monad (when)
 import Raylib.Core (clearBackground, disableCursor, getWorldToScreen)
 import Raylib.Core.Camera (updateCamera)
 import Raylib.Core.Models (drawBoundingBox, getRayCollisionQuad)
+import Raylib.Core.Shapes (drawCircleV)
 import Raylib.Core.Text (drawFPS)
 import Raylib.Types
   ( BoundingBox (BoundingBox),
@@ -17,7 +18,6 @@ import Raylib.Types
   )
 import Raylib.Util (cameraDirectionRay, drawing, mode3D, whileWindowOpen_, withWindow)
 import Raylib.Util.Colors (black, red, white)
-import Raylib.Core.Shapes (drawCircleV)
 
 main :: IO ()
 main = do

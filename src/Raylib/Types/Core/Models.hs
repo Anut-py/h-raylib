@@ -520,7 +520,8 @@ instance Closeable Shader where
   close shader = do
     shaderIdDefault <- c'rlGetShaderIdDefault
     unless (sId == shaderIdDefault) (c'rlUnloadShaderProgram sId)
-    where sId = fromIntegral (shader'id shader)
+    where
+      sId = fromIntegral (shader'id shader)
   addToWindowResources window shader = addShaderId (shader'id shader) window
 
 p'shader'id :: Ptr Shader -> Ptr CUInt

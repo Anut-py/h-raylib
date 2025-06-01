@@ -1,4 +1,5 @@
 {-# LANGUAGE CPP #-}
+{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE TemplateHaskellQuotes #-}
 
 -- | Utility functions that may be useful for an h-raylib application
@@ -37,19 +38,22 @@ where
 import Control.Monad (void)
 import Control.Monad.Catch (MonadMask, bracket, bracket_)
 import Control.Monad.IO.Class (MonadIO (liftIO))
+import Foreign (Storable (peek, poke), advancePtr)
+import Language.Haskell.TH.Syntax (Name (Name), OccName (OccName))
 import Raylib.Core (beginBlendMode, beginDrawing, beginMode2D, beginMode3D, beginScissorMode, beginShaderMode, beginTextureMode, beginVrStereoMode, closeWindow, endBlendMode, endDrawing, endMode2D, endMode3D, endScissorMode, endShaderMode, endTextureMode, endVrStereoMode, initWindow, setTargetFPS, windowShouldClose)
-import Raylib.Internal (WindowResources, Closeable (..), managed)
-import Raylib.Internal.Foreign (Freeable (..))
+import Raylib.Internal (Closeable (..), WindowResources, managed)
+import Raylib.Internal.Foreign (Freeable (..), PLike, TLike (peekTLike, withTLike))
 import Raylib.Types
   ( BlendMode,
     Camera2D,
     Camera3D (camera3D'position, camera3D'target),
-    Material (material'shader),
-    Model (model'materials),
+    Model,
     Ray (Ray),
     RenderTexture,
     Shader,
     VrStereoConfig,
+    p'material'shader,
+    p'model'materials,
   )
 import Raylib.Util.Math (Vector (vectorNormalize, (|-|)))
 
@@ -57,12 +61,10 @@ import Raylib.Util.Math (Vector (vectorNormalize, (|-|)))
 
 import Foreign (Ptr, castPtrToStablePtr, castStablePtrToPtr, deRefStablePtr, freeStablePtr, newStablePtr)
 import Language.Haskell.TH (Body (NormalB), Callconv (CCall), Clause (Clause), Dec (ForeignD, FunD, SigD), DecsQ, Exp (AppE, VarE), Foreign (ExportF), Name, Pat (VarP), Q, Type (AppT, ArrowT, ConT, TupleT), mkName, ppr, reifyType)
-import Language.Haskell.TH.Syntax (Name (Name), OccName (OccName))
 
 #else
 
-import Language.Haskell.TH (Name, DecsQ, Type (AppT, ConT, ArrowT, TupleT), Q, reifyType, mkName, ppr, Dec (SigD, FunD), Clause (Clause), Body (NormalB), Exp (VarE, AppE))
-import Language.Haskell.TH.Syntax (Name (Name), OccName (OccName))
+import Language.Haskell.TH (DecsQ, Type (AppT, ConT, ArrowT, TupleT), Q, reifyType, mkName, ppr, Dec (SigD, FunD), Clause (Clause), Body (NormalB), Exp (VarE, AppE))
 
 #endif
 
@@ -85,16 +87,16 @@ withWindow w h title fps = bracket (liftIO $ initWindow w h title <* setTargetFP
 drawing :: (MonadIO m, MonadMask m) => m b -> m b
 drawing = bracket_ (liftIO beginDrawing) (liftIO endDrawing)
 
-mode2D :: (MonadIO m, MonadMask m) => Camera2D -> m b -> m b
+mode2D :: (MonadIO m, MonadMask m, PLike Camera2D camera2D) => camera2D -> m b -> m b
 mode2D camera = bracket_ (liftIO (beginMode2D camera)) (liftIO endMode2D)
 
-mode3D :: (MonadIO m, MonadMask m) => Camera3D -> m b -> m b
+mode3D :: (MonadIO m, MonadMask m, PLike Camera3D camera3D) => camera3D -> m b -> m b
 mode3D camera = bracket_ (liftIO (beginMode3D camera)) (liftIO endMode3D)
 
-textureMode :: (MonadIO m, MonadMask m) => RenderTexture -> m b -> m b
+textureMode :: (MonadIO m, MonadMask m, PLike RenderTexture renderTexture) => renderTexture -> m b -> m b
 textureMode rt = bracket_ (liftIO (beginTextureMode rt)) (liftIO endTextureMode)
 
-shaderMode :: (MonadIO m, MonadMask m) => Shader -> m b -> m b
+shaderMode :: (MonadIO m, MonadMask m, PLike Shader shader) => shader -> m b -> m b
 shaderMode shader = bracket_ (liftIO (beginShaderMode shader)) (liftIO endShaderMode)
 
 blendMode :: (MonadIO m, MonadMask m) => BlendMode -> m b -> m b
@@ -103,7 +105,7 @@ blendMode bm = bracket_ (liftIO (beginBlendMode bm)) (liftIO endBlendMode)
 scissorMode :: (MonadIO m, MonadMask m) => Int -> Int -> Int -> Int -> m b -> m b
 scissorMode x y width height = bracket_ (liftIO (beginScissorMode x y width height)) (liftIO endScissorMode)
 
-vrStereoMode :: (MonadIO m, MonadMask m) => VrStereoConfig -> m b -> m b
+vrStereoMode :: (MonadIO m, MonadMask m, PLike VrStereoConfig vrStereoConfig) => vrStereoConfig -> m b -> m b
 vrStereoMode config = bracket_ (liftIO (beginVrStereoMode config)) (liftIO endVrStereoMode)
 
 -- | Gets the direction of a camera as a ray.
@@ -307,22 +309,31 @@ whileWindowOpen0 ::
   m ()
 whileWindowOpen0 f = whileWindowOpen (const f) ()
 
--- | Sets the shader of a material at a specific index (WARNING: This will fail
--- if the index provided is out of bounds).
+-- | Sets the shader of a material at a specific index
+--
+--   WARNING: This will fail if the index provided is out of bounds
 setMaterialShader ::
+  (PLike Model model, PLike Shader shader) =>
   -- | The model to operate on
-  Model ->
+  model ->
   -- | The index of the material
   Int ->
   -- | The shader to use
-  Shader ->
+  shader ->
   -- | The modified model
-  Model
-setMaterialShader model matIdx shader = model {model'materials = setIdx mats matIdx newMat}
-  where
-    mats = model'materials model
-    newMat = (mats !! matIdx) {material'shader = shader}
-    setIdx l i v = take i l ++ [v] ++ drop (i + 1) l
+  IO model
+setMaterialShader model matIdx shader =
+  withTLike
+    model
+    ( \modelPtr ->
+        withTLike
+          shader
+          ( \shaderPtr -> do
+              mats <- peek (p'model'materials modelPtr)
+              poke (p'material'shader (advancePtr mats matIdx)) =<< peek shaderPtr
+              peekTLike modelPtr
+          )
+    )
 
 -- | True if the program is running in GHCi
 inGHCi :: Bool

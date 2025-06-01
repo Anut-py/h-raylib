@@ -1,5 +1,6 @@
-{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE PatternSynonyms #-}
+{-# LANGUAGE TemplateHaskell #-}
 
 -- |
 -- Bindings to @raygui@
@@ -226,15 +227,13 @@ import Foreign.C
     CFloat (..),
     CInt (..),
     CString,
-    CUInt (..),
-    newCString,
-    peekCString,
-    withCString,
+    CUInt,
   )
 import Raylib.Core.Textures (colorToInt, getColor)
-import Raylib.Internal.Foreign (pop, popCArray, popCString, withCStringBuffer, withFreeable, withFreeableArrayLen, withMaybe, withMaybeCString)
+import Raylib.Internal.Foreign (ALike (peekALike, popALike, withALikeLen), Mutable (peekMutated), PALike, PLike, StringALike, StringLike, TLike (popTLike, withTLike), withCStringBuffer, withFreeable, withMaybe, withMaybeCString)
 import Raylib.Internal.TH (genNative)
-import Raylib.Types (Color (Color), Font, GuiControl (Default), GuiControlProperty (..), GuiDefaultProperty (..), GuiIconName, GuiState, GuiTextAlignment, GuiTextAlignmentVertical, GuiTextWrapMode, Rectangle (Rectangle), Vector2, pattern Vector2, Vector3, pattern Vector3)
+import Raylib.Types (Color (Color), Font, GuiControl (Default), GuiControlProperty (..), GuiDefaultProperty (..), GuiIconName, GuiState, GuiTextAlignment, GuiTextAlignmentVertical, GuiTextWrapMode, Rectangle (Rectangle), Vector2, Vector3, pattern Vector2, pattern Vector3)
+
 $( genNative
      [ ("c'guiEnable", "GuiEnable_", "rgui_bindings.h", [t|IO ()|]),
        ("c'guiDisable", "GuiDisable_", "rgui_bindings.h", [t|IO ()|]),
@@ -329,12 +328,12 @@ guiGetState :: IO GuiState
 guiGetState = toEnum . fromIntegral <$> c'guiGetState
 
 -- | Set gui custom font (global state)
-guiSetFont :: Font -> IO ()
-guiSetFont font = withFreeable font c'guiSetFont
+guiSetFont :: (PLike Font font) => font -> IO ()
+guiSetFont font = withTLike font c'guiSetFont
 
 -- | Get gui custom font (global state)
-guiGetFont :: IO Font
-guiGetFont = c'guiGetFont >>= pop
+guiGetFont :: (PLike Font font) => IO font
+guiGetFont = c'guiGetFont >>= popTLike
 
 -- | Set style property as `Int`
 guiSetStyle :: (Enum e) => GuiControl -> e -> Int -> IO ()
@@ -581,8 +580,8 @@ guiGetStyleTextWrapMode :: IO GuiTextWrapMode
 guiGetStyleTextWrapMode = guiGetStyleE Default TextWrapMode
 
 -- | Load style file over global style variable (.rgs)
-guiLoadStyle :: String -> IO ()
-guiLoadStyle fileName = withCString fileName c'guiLoadStyle
+guiLoadStyle :: (StringLike string) => string -> IO ()
+guiLoadStyle fileName = withTLike fileName c'guiLoadStyle
 
 -- | Load style default over global style
 guiLoadStyleDefault :: IO ()
@@ -597,32 +596,31 @@ guiDisableTooltip :: IO ()
 guiDisableTooltip = c'guiDisableTooltip
 
 -- | Set tooltip string
-guiSetTooltip :: String -> IO ()
-guiSetTooltip tooltip = withCString tooltip c'guiSetTooltip
+guiSetTooltip :: (StringLike string) => string -> IO ()
+guiSetTooltip tooltip = withTLike tooltip c'guiSetTooltip
 
 -- | Get text with icon id prepended (if supported)
-guiIconText :: GuiIconName -> String -> IO String
-guiIconText icon text = withCString text (c'guiIconText (fromIntegral (fromEnum icon)) >=> peekCString)
+guiIconText :: (StringLike string, Mutable string mut) => GuiIconName -> string -> IO mut
+guiIconText icon text = withTLike text (c'guiIconText (fromIntegral (fromEnum icon)) >=> peekMutated text)
 
 -- | Set default icon drawing size
 guiSetIconScale :: Int -> IO ()
 guiSetIconScale = c'guiSetIconScale . fromIntegral
 
--- | Get raygui icons raw pointer (8192 bytes)
-guiGetIcons :: IO (Ptr CUInt)
-guiGetIcons = c'guiGetIcons
+-- | Get raygui icons raw pointer
+guiGetIcons :: (PALike CUInt contents) => IO contents
+guiGetIcons = c'guiGetIcons >>= peekALike 2048
 
 -- | Load raygui icons file (.rgi) into internal icons data
 guiLoadIcons ::
-  String ->
+  (StringLike string, StringALike strings) =>
+  string ->
   Bool ->
   -- | The number of icons in the file
   Int ->
-  IO [String]
-guiLoadIcons fileName loadIconsName count = do
-  raw <- withCString fileName (\f -> c'guiLoadIcons f (fromBool loadIconsName))
-  cStrings <- popCArray count raw
-  mapM popCString cStrings
+  IO strings
+guiLoadIcons fileName loadIconsName count =
+  popALike count =<< withTLike fileName (\f -> c'guiLoadIcons f (fromBool loadIconsName))
 
 -- | Draw icon using pixel size at specified position
 guiDrawIcon :: GuiIconName -> Int -> Int -> Int -> Color -> IO ()
@@ -650,8 +648,9 @@ guiPanel bounds text = void (withFreeable bounds (withMaybeCString text . c'guiP
 
 -- | Tab Bar control
 guiTabBar ::
+  (StringALike strings) =>
   Rectangle ->
-  [String] ->
+  strings ->
   -- | The currently active tab's index, use `Nothing` if creating the tab bar
   --   for the first time
   Maybe Int ->
@@ -659,12 +658,11 @@ guiTabBar ::
   --   element is the tab whose close button is pressed (if any)
   IO (Int, Maybe Int)
 guiTabBar bounds tabNames active = do
-  cStrings <- mapM newCString tabNames
   withFreeable
     bounds
     ( \b ->
-        withFreeableArrayLen
-          cStrings
+        withALikeLen
+          tabNames
           ( \l t ->
               withFreeable
                 (fromIntegral (fromMaybe 0 active))
@@ -716,8 +714,8 @@ guiScrollPanel bounds text content scroll view =
     )
 
 -- | Label control
-guiLabel :: Rectangle -> String -> IO ()
-guiLabel bounds text = void (withFreeable bounds (withCString text . c'guiLabel))
+guiLabel :: (StringLike string) => Rectangle -> string -> IO ()
+guiLabel bounds text = void (withFreeable bounds (withTLike text . c'guiLabel))
 
 -- | Button control, returns true when clicked
 guiButton :: Rectangle -> Maybe String -> IO Bool
@@ -733,21 +731,23 @@ guiToggle bounds text active = toBool <$> withFreeable bounds (\b -> withMaybeCS
 
 -- | Toggle Group control
 guiToggleGroup ::
+  (StringLike string) =>
   Rectangle ->
   -- | The names of the toggles, separated with semicolons
-  String ->
+  string ->
   -- | The currently active toggle's index, use `Nothing` if creating the
   --   toggle group for the first time
   Maybe Int ->
   -- | The updated active toggle index
   IO Int
-guiToggleGroup bounds text active = fromIntegral <$> withFreeable bounds (\b -> withCString text (\t -> withFreeable (fromIntegral (fromMaybe 0 active)) (\a -> c'guiToggleGroup b t a >> peek a)))
+guiToggleGroup bounds text active = fromIntegral <$> withFreeable bounds (\b -> withTLike text (\t -> withFreeable (fromIntegral (fromMaybe 0 active)) (\a -> c'guiToggleGroup b t a >> peek a)))
 
 -- | Toggle Slider control
 guiToggleSlider ::
+  (StringLike string) =>
   Rectangle ->
   -- | The names of the toggles, separated with semicolons
-  String ->
+  string ->
   -- | The currently active toggle's index, use `Nothing` if creating the
   --   toggle slider for the first time
   Maybe Int ->
@@ -758,7 +758,7 @@ guiToggleSlider bounds text active =
   withFreeable
     bounds
     ( \b ->
-        withCString
+        withTLike
           text
           ( \t ->
               withFreeable
@@ -783,21 +783,23 @@ guiCheckBox bounds text checked = toBool <$> withFreeable bounds (\b -> withMayb
 
 -- | Combo Box control
 guiComboBox ::
+  (StringLike string) =>
   Rectangle ->
   -- | The names of the combobox options, separated with semicolons
-  String ->
+  string ->
   -- | The currently active option's index, use `Nothing` if creating the
   --   combobox for the first time
   Maybe Int ->
   -- | The updated active option index
   IO Int
-guiComboBox bounds text active = fromIntegral <$> withFreeable bounds (\b -> withCString text (\t -> withFreeable (fromIntegral (fromMaybe 0 active)) (\a -> c'guiComboBox b t a >> peek a)))
+guiComboBox bounds text active = fromIntegral <$> withFreeable bounds (\b -> withTLike text (\t -> withFreeable (fromIntegral (fromMaybe 0 active)) (\a -> c'guiComboBox b t a >> peek a)))
 
 -- | Dropdown Box control
 guiDropdownBox ::
+  (StringLike string) =>
   Rectangle ->
   -- | The names of the dropdown options, separated with semicolons
-  String ->
+  string ->
   -- | The currently active option's index, use `Nothing` if creating the
   --   dropdown for the first time
   Maybe Int ->
@@ -811,7 +813,7 @@ guiDropdownBox bounds text active editMode =
   withFreeable
     bounds
     ( \b ->
-        withCString
+        withTLike
           text
           ( \t ->
               withFreeable
@@ -948,8 +950,7 @@ guiTextBox bounds text bufferSize editMode =
         withCStringBuffer
           text
           bufferSize
-          ( \s t -> toBool <$> c'guiTextBox b t (fromIntegral s) (fromBool editMode)
-          )
+          (\s t -> toBool <$> c'guiTextBox b t (fromIntegral s) (fromBool editMode))
     )
 
 -- | Slider control
@@ -1050,12 +1051,12 @@ guiProgressBar bounds textLeft textRight value minValue maxValue =
       )
 
 -- | Status Bar control, shows info text
-guiStatusBar :: Rectangle -> String -> IO ()
-guiStatusBar bounds text = void (withFreeable bounds (withCString text . c'guiStatusBar))
+guiStatusBar :: (StringLike string) => Rectangle -> string -> IO ()
+guiStatusBar bounds text = void (withFreeable bounds (withTLike text . c'guiStatusBar))
 
 -- | Dummy control for placeholders
-guiDummyRec :: Rectangle -> String -> IO ()
-guiDummyRec bounds text = void (withFreeable bounds (withCString text . c'guiDummyRec))
+guiDummyRec :: (StringLike string) => Rectangle -> string -> IO ()
+guiDummyRec bounds text = void (withFreeable bounds (withTLike text . c'guiDummyRec))
 
 -- | Grid control
 guiGrid ::
@@ -1071,8 +1072,7 @@ guiGrid bounds spacing subdivs =
         withFreeable
           (Vector2 (-1) (-1))
           ( \v ->
-              ( \cell -> if cell == Vector2 (-1) (-1) then Nothing else Just cell
-              )
+              (\cell -> if cell == Vector2 (-1) (-1) then Nothing else Just cell)
                 <$> ( c'guiGrid b nullPtr (realToFrac spacing) (fromIntegral subdivs) v
                         >> peek v
                     )
@@ -1081,9 +1081,10 @@ guiGrid bounds spacing subdivs =
 
 -- | List View control
 guiListView ::
+  (StringLike string) =>
   Rectangle ->
   -- | The names of the list options, separated with semicolons
-  String ->
+  string ->
   -- | Current scroll index
   Int ->
   -- | Currently selected option index (active index)
@@ -1095,7 +1096,7 @@ guiListView bounds text scrollIndex active =
   withFreeable
     bounds
     ( \b ->
-        withCString
+        withTLike
           text
           ( \t ->
               withFreeable
@@ -1115,9 +1116,10 @@ guiListView bounds text scrollIndex active =
 
 -- | List View with extended parameters
 guiListViewEx ::
+  (StringALike strings) =>
   Rectangle ->
   -- | The names of the list options
-  [String] ->
+  strings ->
   -- | Current scroll index
   Int ->
   -- | Currently selected option index (active index)
@@ -1129,12 +1131,11 @@ guiListViewEx ::
   --   focus index
   IO (Int, Maybe Int, Maybe Int)
 guiListViewEx bounds text scrollIndex active focus = do
-  cStrings <- mapM newCString text
   withFreeable
     bounds
     ( \b ->
-        withFreeableArrayLen
-          cStrings
+        withALikeLen
+          text
           ( \c t ->
               withFreeable
                 (fromIntegral scrollIndex)
@@ -1158,11 +1159,12 @@ guiListViewEx bounds text scrollIndex active focus = do
 
 -- | Message Box control, displays a message
 guiMessageBox ::
+  (StringLike string1, StringLike string2) =>
   Rectangle ->
   Maybe String ->
-  String ->
+  string1 ->
   -- | Button labels separated by semicolons
-  String ->
+  string2 ->
   -- | The index of the clicked button, if any (0 = close message box,
   --   1,2,... = custom button)
   IO (Maybe Int)
@@ -1173,10 +1175,10 @@ guiMessageBox bounds title message buttons =
         withMaybeCString
           title
           ( \t ->
-              withCString
+              withTLike
                 message
                 ( \m ->
-                    withCString
+                    withTLike
                       buttons
                       ( \bu -> do
                           res <- c'guiMessageBox b t m bu
@@ -1188,11 +1190,12 @@ guiMessageBox bounds title message buttons =
 
 -- | Text Input Box control, ask for text, supports secret
 guiTextInputBox ::
+  (StringLike string1, StringLike string2) =>
   Rectangle ->
   Maybe String ->
-  String ->
+  string1 ->
   -- | Button names, separated by semicolons
-  String ->
+  string2 ->
   -- | Current text box value
   String ->
   -- | Text box buffer size; if `Nothing`, then it will automatically allocate
@@ -1215,10 +1218,10 @@ guiTextInputBox bounds title message buttons value bufferSize secret = do
           withMaybeCString
             title
             ( \t ->
-                withCString
+                withTLike
                   message
                   ( \m ->
-                      withCString
+                      withTLike
                         buttons
                         ( \bu ->
                             withCStringBuffer
@@ -1253,8 +1256,7 @@ guiColorPicker bounds color =
     ( \b ->
         withFreeable
           (fromMaybe (Color 200 0 0 255) color)
-          ( \c -> c'guiColorPicker b nullPtr c >> peek c
-          )
+          (\c -> c'guiColorPicker b nullPtr c >> peek c)
     )
 
 -- | Color Panel control
@@ -1271,8 +1273,7 @@ guiColorPanel bounds color =
     ( \b ->
         withFreeable
           (fromMaybe (Color 200 0 0 255) color)
-          ( \c -> c'guiColorPanel b nullPtr c >> peek c
-          )
+          (\c -> c'guiColorPanel b nullPtr c >> peek c)
     )
 
 -- | Color Bar Alpha control
@@ -1289,8 +1290,7 @@ guiColorBarAlpha bounds alpha =
       ( \b ->
           withFreeable
             (realToFrac alpha)
-            ( \a -> c'guiColorBarAlpha b nullPtr a >> peek a
-            )
+            (\a -> c'guiColorBarAlpha b nullPtr a >> peek a)
       )
 
 -- | Color Bar Hue control
@@ -1307,8 +1307,7 @@ guiColorBarHue bounds hue =
       ( \b ->
           withFreeable
             (realToFrac hue)
-            ( \h -> c'guiColorBarHue b nullPtr h >> peek h
-            )
+            (\h -> c'guiColorBarHue b nullPtr h >> peek h)
       )
 
 -- | Color Picker control that avoids conversion to RGB on each call (multiple color controls)
@@ -1325,8 +1324,7 @@ guiColorPickerHSV bounds color =
     ( \b ->
         withFreeable
           (fromMaybe (Vector3 (200.0 / 255.0) 0 0) color)
-          ( \c -> c'guiColorPickerHSV b nullPtr c >> peek c
-          )
+          (\c -> c'guiColorPickerHSV b nullPtr c >> peek c)
     )
 
 -- | Color Panel control that updates Hue-Saturation-Value color value, used by guiColorPickerHSV
@@ -1343,6 +1341,5 @@ guiColorPanelHSV bounds color =
     ( \b ->
         withFreeable
           (fromMaybe (Vector3 (200.0 / 255.0) 0 0) color)
-          ( \c -> c'guiColorPanelHSV b nullPtr c >> peek c
-          )
+          (\c -> c'guiColorPanelHSV b nullPtr c >> peek c)
     )

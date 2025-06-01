@@ -1,32 +1,32 @@
 {-# LANGUAGE BangPatterns #-}
 {-# LANGUAGE TemplateHaskell #-}
 
--- Writing performant h-raylib code requires the use of pointers and other
--- un-Haskelly functionality. Unfortunately, this cannot be avoided.
+-- Writing performant h-raylib code requires the use of pointers. However,
+-- most h-raylib functions work fine with pointers.
 
 module Main where
 
-import Paths_h_raylib (getDataFileName)
 import Control.Monad (forM_, when)
 import Foreign
   ( ForeignPtr,
     Ptr,
     Storable (alignment, peek, poke, sizeOf),
     advancePtr,
-    free,
     mallocForeignPtrArray,
     peek,
     plusPtr,
     poke,
     withForeignPtr,
   )
-import Foreign.C (CFloat, withCString)
+import Foreign.C (CFloat)
+import Paths_h_raylib (getDataFileName)
 import Raylib.Core
   ( beginDrawing,
-    c'getMouseX,
-    c'getMouseY,
-    c'getRandomValue,
+    getMouseX,
+    getMouseY,
+    getRandomValue,
     clearBackground,
+    closeWindow,
     endDrawing,
     getFrameTime,
     getScreenHeight,
@@ -34,13 +34,13 @@ import Raylib.Core
     initWindow,
     isMouseButtonDown,
     setTargetFPS,
-    windowShouldClose, closeWindow,
+    windowShouldClose,
   )
 import Raylib.Core.Shapes (drawRectangle)
 import Raylib.Core.Text (drawFPS, drawText)
-import Raylib.Core.Textures (c'drawTexture, c'loadTexture, c'unloadTexture)
+import Raylib.Core.Textures (drawTexture, loadTexture)
 import Raylib.Types (Color (Color), MouseButton (MouseButtonLeft), Texture, p'texture'height, p'texture'width)
-import Raylib.Util (raylibApplication)
+import Raylib.Util (WindowResources, managed, raylibApplication)
 import Raylib.Util.Colors (black, green, maroon, rayWhite)
 
 texPath :: String
@@ -102,38 +102,48 @@ p'color :: Ptr Bunny -> Ptr Color
 p'color = (`plusPtr` (4 * cfs))
 
 data AppState = AppState
-  { texBunny :: !(Ptr Texture),
+  { texBunny :: !(ForeignPtr Texture),
     halfTexWidth :: !CFloat,
     halfTexHeight :: !CFloat,
-    bunnies :: !(ForeignPtr Bunny), -- Store the bunnies as a pointer (C-style array) because Haskell linked lists are extremely slow
-    bunniesCount :: !Int
+    -- Store the bunnies as a pointer (C-style array) because Haskell linked lists are extremely slow.
+    -- For actual applications a `vector` is probably more practical.
+    bunnies :: !(ForeignPtr Bunny),
+    bunniesCount :: !Int,
+    window :: !WindowResources
   }
-  deriving (Show, Eq)
 
 startup :: IO AppState
 startup = do
-  _ <- initWindow 800 450 "raylib [textures] example - bunnymark"
+  wr <- initWindow 800 450 "raylib [textures] example - bunnymark"
   setTargetFPS 60
   texPath' <- getDataFileName texPath
-  texPtr <- withCString texPath' c'loadTexture
-  -- Use `peek` when you need to access the underlying fields
+  -- Use `withForeignPtr` and `peek` when you need to access the underlying fields.
+  -- You don't need to worry about freeing/unloading it because `managed` takes
+  -- care of that automatically.
+  texPtr <- managed wr $ loadTexture texPath'
 
-  -- This could be rewritten as
-  --   tex <- peek texPtr
-  --   let tWidth = texture'width tex
-  --   ...
-  -- but the code below is faster as it doesn't have to load the entire structure into Haskell
-  tWidth <- peek (p'texture'width texPtr)
-  tHeight <- peek (p'texture'height texPtr)
-  bunniesPtr <- mallocForeignPtrArray maxBunnies
-  return
-    ( AppState
-        { texBunny = texPtr,
-          bunnies = bunniesPtr,
-          halfTexWidth = fromIntegral tWidth / 2,
-          halfTexHeight = fromIntegral tHeight / 2,
-          bunniesCount = 0
-        }
+  withForeignPtr
+    texPtr
+    (\p -> do
+      -- This could be rewritten as
+      --   tex <- peek p
+      --   let tWidth = texture'width tex
+      --   ...
+      -- but the code below is faster as it doesn't have to load the entire structure into Haskell
+      tWidth <- peek (p'texture'width p)
+      tHeight <- peek (p'texture'height p)
+      bunniesPtr <- mallocForeignPtrArray maxBunnies
+
+      return
+        ( AppState
+            { texBunny = texPtr,
+              bunnies = bunniesPtr,
+              halfTexWidth = fromIntegral tWidth / 2,
+              halfTexHeight = fromIntegral tHeight / 2,
+              bunniesCount = 0,
+              window = wr
+            }
+        )
     )
 
 mainLoop :: AppState -> IO AppState
@@ -153,7 +163,7 @@ mainLoop state = do
             -- Advancing the bunny pointer to access the fields
             _px <- peek $ p'px bunny
             _py <- peek $ p'py bunny
-            c'drawTexture (texBunny state) (floor _px) (floor _py) (p'color bunny)
+            drawTexture (texBunny state) (floor _px) (floor _py) =<< peek (p'color bunny)
       )
     drawRectangle 0 0 screenWidth 40 black
     drawText ("bunnies: " ++ show (bunniesCount state)) 120 10 20 green
@@ -187,19 +197,19 @@ mainLoop state = do
         then do
           frameTime <- getFrameTime
           let newBunnies = min (round (10000 * frameTime)) (maxBunnies - bunniesCount state)
-          mx <- realToFrac <$> c'getMouseX
-          my <- realToFrac <$> c'getMouseY
+          mx <- fromIntegral <$> getMouseX
+          my <- fromIntegral <$> getMouseY
           forM_
             [bunniesCount state .. (bunniesCount state + newBunnies - 1)]
             ( \(!i) ->
                 do
                   -- Creating elements uses `poke`, just like writing
                   let bunny = advancePtr bptr i
-                  xSpeed <- (/ 60) . fromIntegral <$> c'getRandomValue (-250) 250
-                  ySpeed <- (/ 60) . fromIntegral <$> c'getRandomValue (-250) 250
-                  r <- fromIntegral <$> c'getRandomValue 50 240
-                  g <- fromIntegral <$> c'getRandomValue 80 240
-                  b <- fromIntegral <$> c'getRandomValue 100 240
+                  xSpeed <- (/ 60) . fromIntegral <$> getRandomValue (-250) 250
+                  ySpeed <- (/ 60) . fromIntegral <$> getRandomValue (-250) 250
+                  r <- fromIntegral <$> getRandomValue 50 240
+                  g <- fromIntegral <$> getRandomValue 80 240
+                  b <- fromIntegral <$> getRandomValue 100 240
 
                   poke (p'px bunny) mx
                   poke (p'py bunny) my
@@ -214,10 +224,6 @@ shouldClose :: AppState -> IO Bool
 shouldClose _ = windowShouldClose
 
 teardown :: AppState -> IO ()
-teardown state = do
-  -- Unload and free functions have to be manually called
-  c'unloadTexture (texBunny state)
-  free (texBunny state)
-  closeWindow Nothing
+teardown state = closeWindow (Just (window state))
 
 $(raylibApplication 'startup 'mainLoop 'shouldClose 'teardown)

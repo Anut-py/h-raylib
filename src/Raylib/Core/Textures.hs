@@ -1,3 +1,4 @@
+{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE TemplateHaskell #-}
 
 -- | Bindings to @rtextures@
@@ -14,6 +15,14 @@ module Raylib.Core.Textures
     exportImage,
     exportImageToMemory,
     exportImageAsCode,
+
+    -- ** Image generation
+
+    --
+
+    -- | WARNING: When these functions return `Ptr`, you must manually free
+    --   the pointer. Using `ForeignPtr` is recommended as the pointer will
+    --   automatically be freed.
     genImageColor,
     genImageGradientLinear,
     genImageGradientRadial,
@@ -227,8 +236,6 @@ module Raylib.Core.Textures
   )
 where
 
-import Control.Monad ((<=<))
-import Data.Word (Word8)
 import Foreign
   ( Ptr,
     Storable (peek, sizeOf),
@@ -247,28 +254,36 @@ import GHC.IO (unsafePerformIO)
 import Raylib.Internal (WindowResources, unloadSingleFrameBuffer, unloadSingleTexture)
 import qualified Raylib.Internal as I
 import Raylib.Internal.Foreign
-  ( pop,
-    popCArray,
+  ( ALike (popALike, withALikeLen),
+    Mutable (peekMutated),
+    PALike,
+    PLike,
+    StringLike,
+    TLike (popTLike, withTLike),
+    pop,
     withFreeable,
-    withFreeableArray,
-    withFreeableArrayLen,
   )
 import Raylib.Internal.TH (genNative)
 import Raylib.Types
   ( Color,
     CubemapLayout,
     Font,
-    Image (image'height, image'width),
+    Image,
     NPatchInfo,
     PixelFormat,
     Rectangle,
-    RenderTexture (renderTexture'id, renderTexture'texture),
-    Texture (texture'id),
+    RenderTexture,
+    Texture,
     TextureFilter,
     TextureWrap,
     Vector2,
     Vector3,
     Vector4,
+    p'image'height,
+    p'image'width,
+    p'renderTexture'id,
+    p'renderTexture'texture,
+    p'texture'id,
   )
 
 $( genNative
@@ -385,65 +400,65 @@ $( genNative
      ]
  )
 
-loadImage :: String -> IO Image
-loadImage fileName = withCString fileName c'loadImage >>= pop
+loadImage :: (StringLike string, PLike Image image) => string -> IO image
+loadImage fileName = withTLike fileName c'loadImage >>= popTLike
 
-loadImageRaw :: String -> Int -> Int -> Int -> Int -> IO Image
+loadImageRaw :: (StringLike string, PLike Image image) => string -> Int -> Int -> Int -> Int -> IO image
 loadImageRaw fileName width height format headerSize =
-  withCString fileName (\str -> c'loadImageRaw str (fromIntegral width) (fromIntegral height) (fromIntegral $ fromEnum format) (fromIntegral headerSize)) >>= pop
+  withTLike fileName (\str -> c'loadImageRaw str (fromIntegral width) (fromIntegral height) (fromIntegral $ fromEnum format) (fromIntegral headerSize)) >>= popTLike
 
 -- | Returns the animation and the number of frames in a tuple
-loadImageAnim :: String -> IO (Image, Int)
+loadImageAnim :: (StringLike string, PLike Image image) => string -> IO (image, Int)
 loadImageAnim fileName =
   withFreeable
     0
     ( \frames ->
-        withCString
+        withTLike
           fileName
           ( \fn -> do
-              img <- c'loadImageAnim fn frames >>= pop
+              img <- c'loadImageAnim fn frames >>= popTLike
               frameNum <- fromIntegral <$> peek frames
               return (img, frameNum)
           )
     )
 
-loadImageAnimFromMemory :: String -> [Integer] -> IO (Image, Int)
+loadImageAnimFromMemory :: (PALike CUChar contents, PLike Image image) => String -> contents -> IO (image, Int)
 loadImageAnimFromMemory fileType fileData =
   withCString
     fileType
     ( \ft ->
-        withFreeableArrayLen
-          (map fromIntegral fileData)
+        withALikeLen
+          fileData
           ( \size fd ->
               withFreeable
                 (0 :: CInt)
                 ( \frames -> do
-                    img <- c'loadImageAnimFromMemory ft fd (fromIntegral $ size * sizeOf (0 :: CUChar)) frames >>= pop
+                    img <- c'loadImageAnimFromMemory ft fd (fromIntegral $ size * sizeOf (0 :: CUChar)) frames >>= popTLike
                     frameNum <- fromIntegral <$> peek frames
                     return (img, frameNum)
                 )
           )
     )
 
-loadImageFromMemory :: String -> [Integer] -> IO Image
+loadImageFromMemory :: (PALike CUChar contents, PLike Image image) => String -> contents -> IO image
 loadImageFromMemory fileType fileData =
-  withCString fileType (\ft -> withFreeableArrayLen (map fromIntegral fileData) (\size fd -> c'loadImageFromMemory ft fd (fromIntegral $ size * sizeOf (0 :: CUChar)))) >>= pop
+  withCString fileType (\ft -> withALikeLen fileData (\size fd -> c'loadImageFromMemory ft fd (fromIntegral $ size * sizeOf (0 :: CUChar)))) >>= popTLike
 
-loadImageFromTexture :: Texture -> IO Image
-loadImageFromTexture tex = withFreeable tex c'loadImageFromTexture >>= pop
+loadImageFromTexture :: (PLike Texture texture, PLike Image image) => texture -> IO image
+loadImageFromTexture tex = withTLike tex c'loadImageFromTexture >>= popTLike
 
-loadImageFromScreen :: IO Image
-loadImageFromScreen = c'loadImageFromScreen >>= pop
+loadImageFromScreen :: (PLike Image image) => IO image
+loadImageFromScreen = c'loadImageFromScreen >>= popTLike
 
-isImageValid :: Image -> IO Bool
-isImageValid image = toBool <$> withFreeable image c'isImageValid
+isImageValid :: (PLike Image image) => image -> IO Bool
+isImageValid image = toBool <$> withTLike image c'isImageValid
 
-exportImage :: Image -> String -> IO Bool
-exportImage image fileName = toBool <$> withFreeable image (withCString fileName . c'exportImage)
+exportImage :: (PLike Image image, StringLike string) => image -> string -> IO Bool
+exportImage image fileName = toBool <$> withTLike image (withTLike fileName . c'exportImage)
 
-exportImageToMemory :: Image -> String -> IO [Word8]
+exportImageToMemory :: (PLike Image image, PALike CUChar contents) => image -> String -> IO contents
 exportImageToMemory image fileType =
-  withFreeable
+  withTLike
     image
     ( \i ->
         withCString
@@ -454,149 +469,153 @@ exportImageToMemory image fileType =
                 ( \s -> do
                     bytes <- c'exportImageToMemory i t s
                     size <- fromIntegral <$> peek s
-                    map (\(CUChar x) -> x) <$> popCArray size bytes
+                    popALike size bytes
                 )
           )
     )
 
-exportImageAsCode :: Image -> String -> IO Bool
+exportImageAsCode :: (PLike Image image, StringLike string) => image -> string -> IO Bool
 exportImageAsCode image fileName =
-  toBool <$> withFreeable image (withCString fileName . c'exportImageAsCode)
+  toBool <$> withTLike image (withTLike fileName . c'exportImageAsCode)
 
-genImageColor :: Int -> Int -> Color -> IO Image
+genImageColor :: (PLike Image image) => Int -> Int -> Color -> IO image
 genImageColor width height color =
-  withFreeable color (c'genImageColor (fromIntegral width) (fromIntegral height)) >>= pop
+  withFreeable color (c'genImageColor (fromIntegral width) (fromIntegral height)) >>= popTLike
 
-genImageGradientLinear :: Int -> Int -> Int -> Color -> Color -> IO Image
+genImageGradientLinear :: (PLike Image image) => Int -> Int -> Int -> Color -> Color -> IO image
 genImageGradientLinear width height direction start end =
-  withFreeable start (withFreeable end . c'genImageGradientLinear (fromIntegral width) (fromIntegral height) (fromIntegral direction)) >>= pop
+  withFreeable start (withFreeable end . c'genImageGradientLinear (fromIntegral width) (fromIntegral height) (fromIntegral direction)) >>= popTLike
 
-genImageGradientRadial :: Int -> Int -> Float -> Color -> Color -> IO Image
+genImageGradientRadial :: (PLike Image image) => Int -> Int -> Float -> Color -> Color -> IO image
 genImageGradientRadial width height density inner outer =
-  withFreeable inner (withFreeable outer . c'genImageGradientRadial (fromIntegral width) (fromIntegral height) (realToFrac density)) >>= pop
+  withFreeable inner (withFreeable outer . c'genImageGradientRadial (fromIntegral width) (fromIntegral height) (realToFrac density)) >>= popTLike
 
-genImageGradientSquare :: Int -> Int -> Float -> Color -> Color -> IO Image
+genImageGradientSquare :: (PLike Image image) => Int -> Int -> Float -> Color -> Color -> IO image
 genImageGradientSquare width height density inner outer =
-  withFreeable inner (withFreeable outer . c'genImageGradientSquare (fromIntegral width) (fromIntegral height) (realToFrac density)) >>= pop
+  withFreeable inner (withFreeable outer . c'genImageGradientSquare (fromIntegral width) (fromIntegral height) (realToFrac density)) >>= popTLike
 
-genImageChecked :: Int -> Int -> Int -> Int -> Color -> Color -> IO Image
+genImageChecked :: (PLike Image image) => Int -> Int -> Int -> Int -> Color -> Color -> IO image
 genImageChecked width height checksX checksY col1 col2 =
-  withFreeable col1 (withFreeable col2 . c'genImageChecked (fromIntegral width) (fromIntegral height) (fromIntegral checksX) (fromIntegral checksY)) >>= pop
+  withFreeable col1 (withFreeable col2 . c'genImageChecked (fromIntegral width) (fromIntegral height) (fromIntegral checksX) (fromIntegral checksY)) >>= popTLike
 
-genImageWhiteNoise :: Int -> Int -> Float -> IO Image
+genImageWhiteNoise :: (PLike Image image) => Int -> Int -> Float -> IO image
 genImageWhiteNoise width height factor =
-  c'genImageWhiteNoise (fromIntegral width) (fromIntegral height) (realToFrac factor) >>= pop
+  c'genImageWhiteNoise (fromIntegral width) (fromIntegral height) (realToFrac factor) >>= popTLike
 
-genImagePerlinNoise :: Int -> Int -> Int -> Int -> Float -> IO Image
-genImagePerlinNoise width height offsetX offsetY scale = c'genImagePerlinNoise (fromIntegral width) (fromIntegral height) (fromIntegral offsetX) (fromIntegral offsetY) (realToFrac scale) >>= pop
+genImagePerlinNoise :: (PLike Image image) => Int -> Int -> Int -> Int -> Float -> IO image
+genImagePerlinNoise width height offsetX offsetY scale = c'genImagePerlinNoise (fromIntegral width) (fromIntegral height) (fromIntegral offsetX) (fromIntegral offsetY) (realToFrac scale) >>= popTLike
 
-genImageCellular :: Int -> Int -> Int -> IO Image
+genImageCellular :: (PLike Image image) => Int -> Int -> Int -> IO image
 genImageCellular width height tileSize =
-  c'genImageCellular (fromIntegral width) (fromIntegral height) (fromIntegral tileSize) >>= pop
+  c'genImageCellular (fromIntegral width) (fromIntegral height) (fromIntegral tileSize) >>= popTLike
 
-genImageText :: Int -> Int -> String -> IO Image
+genImageText :: (PLike Image image) => Int -> Int -> String -> IO image
 genImageText width height text =
-  withCString text (c'genImageText (fromIntegral width) (fromIntegral height)) >>= pop
+  withCString text (c'genImageText (fromIntegral width) (fromIntegral height)) >>= popTLike
 
-imageFromImage :: Image -> Rectangle -> IO Image
-imageFromImage image rect = withFreeable image (withFreeable rect . c'imageFromImage) >>= pop
+imageFromImage :: (PLike Image image) => image -> Rectangle -> IO image
+imageFromImage image rect = withTLike image (withFreeable rect . c'imageFromImage) >>= popTLike
 
-imageFromChannel :: Image -> Int -> IO Image
-imageFromChannel image channel = withFreeable image (\i -> c'imageFromChannel i (fromIntegral channel)) >>= pop
+imageFromChannel :: (PLike Image image) => image -> Int -> IO image
+imageFromChannel image channel = withTLike image (\i -> c'imageFromChannel i (fromIntegral channel)) >>= popTLike
 
-imageText :: String -> Int -> Color -> IO Image
+imageText :: (StringLike string, PLike Image image) => string -> Int -> Color -> IO image
 imageText text fontSize color =
-  withCString text (\t -> withFreeable color (c'imageText t (fromIntegral fontSize))) >>= pop
+  withTLike text (\t -> withFreeable color (c'imageText t (fromIntegral fontSize))) >>= popTLike
 
-imageTextEx :: Font -> String -> Float -> Float -> Color -> IO Image
+imageTextEx :: (PLike Font font, StringLike string, PLike Image image) => font -> string -> Float -> Float -> Color -> IO image
 imageTextEx font text fontSize spacing tint =
-  withFreeable font (\f -> withCString text (\t -> withFreeable tint (c'imageTextEx f t (realToFrac fontSize) (realToFrac spacing)))) >>= pop
+  withTLike font (\f -> withTLike text (\t -> withFreeable tint (c'imageTextEx f t (realToFrac fontSize) (realToFrac spacing)))) >>= popTLike
 
-imageFormat :: Image -> PixelFormat -> IO Image
+imageFormat :: (PLike Image image, Mutable image mut) => image -> PixelFormat -> IO mut
 imageFormat image newFormat =
-  withFreeable image (\i -> c'imageFormat i (fromIntegral $ fromEnum newFormat) >> peek i)
+  withTLike image (\i -> c'imageFormat i (fromIntegral $ fromEnum newFormat) >> peekMutated image i)
 
-imageToPOT :: Image -> Color -> IO Image
-imageToPOT image color = withFreeable image (\i -> withFreeable color (c'imageToPOT i) >> peek i)
+imageToPOT :: (PLike Image image, Mutable image mut) => image -> Color -> IO mut
+imageToPOT image color = withTLike image (\i -> withFreeable color (c'imageToPOT i) >> peekMutated image i)
 
-imageCrop :: Image -> Rectangle -> IO Image
-imageCrop image crop = withFreeable image (\i -> withFreeable crop (c'imageCrop i) >> peek i)
+imageCrop :: (PLike Image image, Mutable image mut) => image -> Rectangle -> IO mut
+imageCrop image crop = withTLike image (\i -> withFreeable crop (c'imageCrop i) >> peekMutated image i)
 
-imageAlphaCrop :: Image -> Float -> IO Image
-imageAlphaCrop image threshold = withFreeable image (\i -> c'imageAlphaCrop i (realToFrac threshold) >> peek i)
+imageAlphaCrop :: (PLike Image image, Mutable image mut) => image -> Float -> IO mut
+imageAlphaCrop image threshold = withTLike image (\i -> c'imageAlphaCrop i (realToFrac threshold) >> peekMutated image i)
 
-imageAlphaClear :: Image -> Color -> Float -> IO Image
-imageAlphaClear image color threshold = withFreeable image (\i -> withFreeable color (\c -> c'imageAlphaClear i c (realToFrac threshold) >> peek i))
+imageAlphaClear :: (PLike Image image, Mutable image mut) => image -> Color -> Float -> IO mut
+imageAlphaClear image color threshold = withTLike image (\i -> withFreeable color (\c -> c'imageAlphaClear i c (realToFrac threshold) >> peekMutated image i))
 
-imageAlphaMask :: Image -> Image -> IO Image
-imageAlphaMask image alphaMask = withFreeable image (\i -> withFreeable alphaMask (c'imageAlphaMask i) >> peek i)
+imageAlphaMask :: (PLike Image image1, PLike Image image2, Mutable image1 mut) => image1 -> image2 -> IO mut
+imageAlphaMask image alphaMask = withTLike image (\i -> withTLike alphaMask (c'imageAlphaMask i) >> peekMutated image i)
 
-imageAlphaPremultiply :: Image -> IO Image
-imageAlphaPremultiply image = withFreeable image (\i -> c'imageAlphaPremultiply i >> peek i)
+imageAlphaPremultiply :: (PLike Image image, Mutable image mut) => image -> IO mut
+imageAlphaPremultiply image = withTLike image (\i -> c'imageAlphaPremultiply i >> peekMutated image i)
 
-imageBlurGaussian :: Image -> Int -> IO Image
-imageBlurGaussian image blurSize = withFreeable image (\i -> c'imageBlurGaussian i (fromIntegral blurSize) >> peek i)
+imageBlurGaussian :: (PLike Image image, Mutable image mut) => image -> Int -> IO mut
+imageBlurGaussian image blurSize = withTLike image (\i -> c'imageBlurGaussian i (fromIntegral blurSize) >> peekMutated image i)
 
-imageKernelConvolution :: Image -> [Float] -> IO Image
-imageKernelConvolution image kernel = withFreeable image (\i -> withFreeableArray (map realToFrac kernel :: [CFloat]) (\k -> c'imageKernelConvolution i k (fromIntegral $ length kernel) >> peek i))
+imageKernelConvolution :: (PLike Image image, PALike CFloat kernel, Mutable image mut) => image -> kernel -> IO mut
+imageKernelConvolution image kernel = withTLike image (\i -> withALikeLen kernel (\l k -> c'imageKernelConvolution i k (fromIntegral l) >> peekMutated image i))
 
-imageResize :: Image -> Int -> Int -> IO Image
-imageResize image newWidth newHeight = withFreeable image (\i -> c'imageResize i (fromIntegral newWidth) (fromIntegral newHeight) >> peek i)
+imageResize :: (PLike Image image, Mutable image mut) => image -> Int -> Int -> IO mut
+imageResize image newWidth newHeight = withTLike image (\i -> c'imageResize i (fromIntegral newWidth) (fromIntegral newHeight) >> peekMutated image i)
 
-imageResizeNN :: Image -> Int -> Int -> IO Image
-imageResizeNN image newWidth newHeight = withFreeable image (\i -> c'imageResizeNN i (fromIntegral newWidth) (fromIntegral newHeight) >> peek i)
+imageResizeNN :: (PLike Image image, Mutable image mut) => image -> Int -> Int -> IO mut
+imageResizeNN image newWidth newHeight = withTLike image (\i -> c'imageResizeNN i (fromIntegral newWidth) (fromIntegral newHeight) >> peekMutated image i)
 
-imageResizeCanvas :: Image -> Int -> Int -> Int -> Int -> Color -> IO Image
-imageResizeCanvas image newWidth newHeight offsetX offsetY fill = withFreeable image (\i -> withFreeable fill (c'imageResizeCanvas i (fromIntegral newWidth) (fromIntegral newHeight) (fromIntegral offsetX) (fromIntegral offsetY)) >> peek i)
+imageResizeCanvas :: (PLike Image image, Mutable image mut) => image -> Int -> Int -> Int -> Int -> Color -> IO mut
+imageResizeCanvas image newWidth newHeight offsetX offsetY fill = withTLike image (\i -> withFreeable fill (c'imageResizeCanvas i (fromIntegral newWidth) (fromIntegral newHeight) (fromIntegral offsetX) (fromIntegral offsetY)) >> peekMutated image i)
 
-imageMipmaps :: Image -> IO Image
-imageMipmaps image = withFreeable image (\i -> c'imageMipmaps i >> peek i)
+imageMipmaps :: (PLike Image image, Mutable image mut) => image -> IO mut
+imageMipmaps image = withTLike image (\i -> c'imageMipmaps i >> peekMutated image i)
 
-imageDither :: Image -> Int -> Int -> Int -> Int -> IO Image
-imageDither image rBpp gBpp bBpp aBpp = withFreeable image (\i -> c'imageDither i (fromIntegral rBpp) (fromIntegral gBpp) (fromIntegral bBpp) (fromIntegral aBpp) >> peek i)
+imageDither :: (PLike Image image, Mutable image mut) => image -> Int -> Int -> Int -> Int -> IO mut
+imageDither image rBpp gBpp bBpp aBpp = withTLike image (\i -> c'imageDither i (fromIntegral rBpp) (fromIntegral gBpp) (fromIntegral bBpp) (fromIntegral aBpp) >> peekMutated image i)
 
-imageFlipVertical :: Image -> IO Image
-imageFlipVertical image = withFreeable image (\i -> c'imageFlipVertical i >> peek i)
+imageFlipVertical :: (PLike Image image, Mutable image mut) => image -> IO mut
+imageFlipVertical image = withTLike image (\i -> c'imageFlipVertical i >> peekMutated image i)
 
-imageFlipHorizontal :: Image -> IO Image
-imageFlipHorizontal image = withFreeable image (\i -> c'imageFlipHorizontal i >> peek i)
+imageFlipHorizontal :: (PLike Image image, Mutable image mut) => image -> IO mut
+imageFlipHorizontal image = withTLike image (\i -> c'imageFlipHorizontal i >> peekMutated image i)
 
-imageRotate :: Image -> Int -> IO Image
-imageRotate image degrees = withFreeable image (\i -> c'imageRotate i (fromIntegral degrees) >> peek i)
+imageRotate :: (PLike Image image, Mutable image mut) => image -> Int -> IO mut
+imageRotate image degrees = withTLike image (\i -> c'imageRotate i (fromIntegral degrees) >> peekMutated image i)
 
-imageRotateCW :: Image -> IO Image
-imageRotateCW image = withFreeable image (\i -> c'imageRotateCW i >> peek i)
+imageRotateCW :: (PLike Image image, Mutable image mut) => image -> IO mut
+imageRotateCW image = withTLike image (\i -> c'imageRotateCW i >> peekMutated image i)
 
-imageRotateCCW :: Image -> IO Image
-imageRotateCCW image = withFreeable image (\i -> c'imageRotateCCW i >> peek i)
+imageRotateCCW :: (PLike Image image, Mutable image mut) => image -> IO mut
+imageRotateCCW image = withTLike image (\i -> c'imageRotateCCW i >> peekMutated image i)
 
-imageColorTint :: Image -> Color -> IO Image
-imageColorTint image color = withFreeable image (\i -> withFreeable color (c'imageColorTint i) >> peek i)
+imageColorTint :: (PLike Image image, Mutable image mut) => image -> Color -> IO mut
+imageColorTint image color = withTLike image (\i -> withFreeable color (c'imageColorTint i) >> peekMutated image i)
 
-imageColorInvert :: Image -> IO Image
-imageColorInvert image = withFreeable image (\i -> c'imageColorInvert i >> peek i)
+imageColorInvert :: (PLike Image image, Mutable image mut) => image -> IO mut
+imageColorInvert image = withTLike image (\i -> c'imageColorInvert i >> peekMutated image i)
 
-imageColorGrayscale :: Image -> IO Image
-imageColorGrayscale image = withFreeable image (\i -> c'imageColorGrayscale i >> peek i)
+imageColorGrayscale :: (PLike Image image, Mutable image mut) => image -> IO mut
+imageColorGrayscale image = withTLike image (\i -> c'imageColorGrayscale i >> peekMutated image i)
 
-imageColorContrast :: Image -> Float -> IO Image
-imageColorContrast image contrast = withFreeable image (\i -> c'imageColorContrast i (realToFrac contrast) >> peek i)
+imageColorContrast :: (PLike Image image, Mutable image mut) => image -> Float -> IO mut
+imageColorContrast image contrast = withTLike image (\i -> c'imageColorContrast i (realToFrac contrast) >> peekMutated image i)
 
-imageColorBrightness :: Image -> Int -> IO Image
-imageColorBrightness image brightness = withFreeable image (\i -> c'imageColorBrightness i (fromIntegral brightness) >> peek i)
+imageColorBrightness :: (PLike Image image, Mutable image mut) => image -> Int -> IO mut
+imageColorBrightness image brightness = withTLike image (\i -> c'imageColorBrightness i (fromIntegral brightness) >> peekMutated image i)
 
-imageColorReplace :: Image -> Color -> Color -> IO Image
-imageColorReplace image color replace = withFreeable image (\i -> withFreeable color (withFreeable replace . c'imageColorReplace i) >> peek i)
+imageColorReplace :: (PLike Image image, Mutable image mut) => image -> Color -> Color -> IO mut
+imageColorReplace image color replace = withTLike image (\i -> withFreeable color (withFreeable replace . c'imageColorReplace i) >> peekMutated image i)
 
-loadImageColors :: Image -> IO [Color]
+loadImageColors :: (PLike Image image, PALike Color colors) => image -> IO colors
 loadImageColors image =
-  withFreeable
+  withTLike
     image
-    (popCArray (fromIntegral $ image'width image * image'height image) <=< c'loadImageColors)
+    ( \i -> do
+        w <- fromIntegral <$> peek (p'image'width i)
+        h <- fromIntegral <$> peek (p'image'height i)
+        popALike (w * h) =<< c'loadImageColors i
+    )
 
-loadImagePalette :: Image -> Int -> IO [Color]
+loadImagePalette :: (PLike Image image, PALike Color colors) => image -> Int -> IO colors
 loadImagePalette image maxPaletteSize =
-  withFreeable
+  withTLike
     image
     ( \i -> do
         (palette, num) <-
@@ -607,138 +626,150 @@ loadImagePalette image maxPaletteSize =
                 s <- peek size
                 return (cols, s)
             )
-        popCArray (fromIntegral num) palette
+        popALike (fromIntegral num) palette
     )
 
-getImageAlphaBorder :: Image -> Float -> IO Rectangle
-getImageAlphaBorder image threshold = withFreeable image (\i -> c'getImageAlphaBorder i (realToFrac threshold)) >>= pop
+getImageAlphaBorder :: (PLike Image image) => image -> Float -> IO Rectangle
+getImageAlphaBorder image threshold = withTLike image (\i -> c'getImageAlphaBorder i (realToFrac threshold)) >>= pop
 
-getImageColor :: Image -> Int -> Int -> IO Color
-getImageColor image x y = withFreeable image (\i -> c'getImageColor i (fromIntegral x) (fromIntegral y)) >>= pop
+getImageColor :: (PLike Image image) => image -> Int -> Int -> IO Color
+getImageColor image x y = withTLike image (\i -> c'getImageColor i (fromIntegral x) (fromIntegral y)) >>= pop
 
-imageClearBackground :: Image -> Color -> IO Image
-imageClearBackground image color = withFreeable image (\i -> withFreeable color (c'imageClearBackground i) >> peek i)
+imageClearBackground :: (PLike Image image, Mutable image mut) => image -> Color -> IO mut
+imageClearBackground image color = withTLike image (\i -> withFreeable color (c'imageClearBackground i) >> peekMutated image i)
 
-imageDrawPixel :: Image -> Int -> Int -> Color -> IO Image
-imageDrawPixel image x y color = withFreeable image (\i -> withFreeable color (c'imageDrawPixel i (fromIntegral x) (fromIntegral y)) >> peek i)
+imageDrawPixel :: (PLike Image image, Mutable image mut) => image -> Int -> Int -> Color -> IO mut
+imageDrawPixel image x y color = withTLike image (\i -> withFreeable color (c'imageDrawPixel i (fromIntegral x) (fromIntegral y)) >> peekMutated image i)
 
-imageDrawPixelV :: Image -> Vector2 -> Color -> IO Image
-imageDrawPixelV image position color = withFreeable image (\i -> withFreeable position (withFreeable color . c'imageDrawPixelV i) >> peek i)
+imageDrawPixelV :: (PLike Image image, Mutable image mut) => image -> Vector2 -> Color -> IO mut
+imageDrawPixelV image position color = withTLike image (\i -> withFreeable position (withFreeable color . c'imageDrawPixelV i) >> peekMutated image i)
 
-imageDrawLine :: Image -> Int -> Int -> Int -> Int -> Color -> IO Image
-imageDrawLine image startPosX startPosY endPosX endPosY color = withFreeable image (\i -> withFreeable color (c'imageDrawLine i (fromIntegral startPosX) (fromIntegral startPosY) (fromIntegral endPosX) (fromIntegral endPosY)) >> peek i)
+imageDrawLine :: (PLike Image image, Mutable image mut) => image -> Int -> Int -> Int -> Int -> Color -> IO mut
+imageDrawLine image startPosX startPosY endPosX endPosY color = withTLike image (\i -> withFreeable color (c'imageDrawLine i (fromIntegral startPosX) (fromIntegral startPosY) (fromIntegral endPosX) (fromIntegral endPosY)) >> peekMutated image i)
 
-imageDrawLineV :: Image -> Vector2 -> Vector2 -> Color -> IO Image
-imageDrawLineV image start end color = withFreeable image (\i -> withFreeable start (\s -> withFreeable end (withFreeable color . c'imageDrawLineV i s)) >> peek i)
+imageDrawLineV :: (PLike Image image, Mutable image mut) => image -> Vector2 -> Vector2 -> Color -> IO mut
+imageDrawLineV image start end color = withTLike image (\i -> withFreeable start (\s -> withFreeable end (withFreeable color . c'imageDrawLineV i s)) >> peekMutated image i)
 
-imageDrawCircle :: Image -> Int -> Int -> Int -> Color -> IO Image
-imageDrawCircle image centerX centerY radius color = withFreeable image (\i -> withFreeable color (c'imageDrawCircle i (fromIntegral centerX) (fromIntegral centerY) (fromIntegral radius)) >> peek i)
+imageDrawCircle :: (PLike Image image, Mutable image mut) => image -> Int -> Int -> Int -> Color -> IO mut
+imageDrawCircle image centerX centerY radius color = withTLike image (\i -> withFreeable color (c'imageDrawCircle i (fromIntegral centerX) (fromIntegral centerY) (fromIntegral radius)) >> peekMutated image i)
 
-imageDrawCircleV :: Image -> Vector2 -> Int -> Color -> IO Image
-imageDrawCircleV image center radius color = withFreeable image (\i -> withFreeable center (\c -> withFreeable color (c'imageDrawCircleV i c (fromIntegral radius))) >> peek i)
+imageDrawCircleV :: (PLike Image image, Mutable image mut) => image -> Vector2 -> Int -> Color -> IO mut
+imageDrawCircleV image center radius color = withTLike image (\i -> withFreeable center (\c -> withFreeable color (c'imageDrawCircleV i c (fromIntegral radius))) >> peekMutated image i)
 
-imageDrawCircleLines :: Image -> Int -> Int -> Int -> Color -> IO Image
-imageDrawCircleLines image centerX centerY radius color = withFreeable image (\i -> withFreeable color (c'imageDrawCircleLines i (fromIntegral centerX) (fromIntegral centerY) (fromIntegral radius)) >> peek i)
+imageDrawCircleLines :: (PLike Image image, Mutable image mut) => image -> Int -> Int -> Int -> Color -> IO mut
+imageDrawCircleLines image centerX centerY radius color = withTLike image (\i -> withFreeable color (c'imageDrawCircleLines i (fromIntegral centerX) (fromIntegral centerY) (fromIntegral radius)) >> peekMutated image i)
 
-imageDrawCircleLinesV :: Image -> Vector2 -> Int -> Color -> IO Image
-imageDrawCircleLinesV image center radius color = withFreeable image (\i -> withFreeable center (\c -> withFreeable color (c'imageDrawCircleLinesV i c (fromIntegral radius))) >> peek i)
+imageDrawCircleLinesV :: (PLike Image image, Mutable image mut) => image -> Vector2 -> Int -> Color -> IO mut
+imageDrawCircleLinesV image center radius color = withTLike image (\i -> withFreeable center (\c -> withFreeable color (c'imageDrawCircleLinesV i c (fromIntegral radius))) >> peekMutated image i)
 
-imageDrawRectangle :: Image -> Int -> Int -> Int -> Int -> Color -> IO Image
-imageDrawRectangle image posX posY width height color = withFreeable image (\i -> withFreeable color (c'imageDrawRectangle i (fromIntegral posX) (fromIntegral posY) (fromIntegral width) (fromIntegral height)) >> peek i)
+imageDrawRectangle :: (PLike Image image, Mutable image mut) => image -> Int -> Int -> Int -> Int -> Color -> IO mut
+imageDrawRectangle image posX posY width height color = withTLike image (\i -> withFreeable color (c'imageDrawRectangle i (fromIntegral posX) (fromIntegral posY) (fromIntegral width) (fromIntegral height)) >> peekMutated image i)
 
-imageDrawRectangleV :: Image -> Vector2 -> Vector2 -> Color -> IO Image
-imageDrawRectangleV image position size color = withFreeable image (\i -> withFreeable position (\p -> withFreeable size (withFreeable color . c'imageDrawRectangleV i p)) >> peek i)
+imageDrawRectangleV :: (PLike Image image, Mutable image mut) => image -> Vector2 -> Vector2 -> Color -> IO mut
+imageDrawRectangleV image position size color = withTLike image (\i -> withFreeable position (\p -> withFreeable size (withFreeable color . c'imageDrawRectangleV i p)) >> peekMutated image i)
 
-imageDrawRectangleRec :: Image -> Rectangle -> Color -> IO Image
-imageDrawRectangleRec image rectangle color = withFreeable image (\i -> withFreeable rectangle (withFreeable color . c'imageDrawRectangleRec i) >> peek i)
+imageDrawRectangleRec :: (PLike Image image, Mutable image mut) => image -> Rectangle -> Color -> IO mut
+imageDrawRectangleRec image rectangle color = withTLike image (\i -> withFreeable rectangle (withFreeable color . c'imageDrawRectangleRec i) >> peekMutated image i)
 
-imageDrawRectangleLines :: Image -> Rectangle -> Int -> Color -> IO Image
-imageDrawRectangleLines image rectangle thickness color = withFreeable image (\i -> withFreeable rectangle (\r -> withFreeable color (c'imageDrawRectangleLines i r (fromIntegral thickness))) >> peek i)
+imageDrawRectangleLines :: (PLike Image image, Mutable image mut) => image -> Rectangle -> Int -> Color -> IO mut
+imageDrawRectangleLines image rectangle thickness color = withTLike image (\i -> withFreeable rectangle (\r -> withFreeable color (c'imageDrawRectangleLines i r (fromIntegral thickness))) >> peekMutated image i)
 
-imageDrawTriangle :: Image -> Vector2 -> Vector2 -> Vector2 -> Color -> IO Image
-imageDrawTriangle image v1 v2 v3 color = withFreeable image (\i -> withFreeable v1 (\p1 -> withFreeable v2 (\p2 -> withFreeable v3 (\p3 -> withFreeable color (\c -> c'imageDrawTriangle i p1 p2 p3 c)))) >> peek i)
+imageDrawTriangle :: (PLike Image image, Mutable image mut) => image -> Vector2 -> Vector2 -> Vector2 -> Color -> IO mut
+imageDrawTriangle image v1 v2 v3 color = withTLike image (\i -> withFreeable v1 (\p1 -> withFreeable v2 (\p2 -> withFreeable v3 (\p3 -> withFreeable color (\c -> c'imageDrawTriangle i p1 p2 p3 c)))) >> peekMutated image i)
 
-imageDrawTriangleEx :: Image -> Vector2 -> Vector2 -> Vector2 -> Color -> Color -> Color -> IO Image
-imageDrawTriangleEx image v1 v2 v3 c1 c2 c3 = withFreeable image (\i -> withFreeable v1 (\p1 -> withFreeable v2 (\p2 -> withFreeable v3 (\p3 -> withFreeable c1 (\q1 -> withFreeable c2 (\q2 -> withFreeable c3 (\q3 -> c'imageDrawTriangleEx i p1 p2 p3 q1 q2 q3)))))) >> peek i)
+imageDrawTriangleEx :: (PLike Image image, Mutable image mut) => image -> Vector2 -> Vector2 -> Vector2 -> Color -> Color -> Color -> IO mut
+imageDrawTriangleEx image v1 v2 v3 c1 c2 c3 = withTLike image (\i -> withFreeable v1 (\p1 -> withFreeable v2 (\p2 -> withFreeable v3 (\p3 -> withFreeable c1 (\q1 -> withFreeable c2 (\q2 -> withFreeable c3 (\q3 -> c'imageDrawTriangleEx i p1 p2 p3 q1 q2 q3)))))) >> peekMutated image i)
 
-imageDrawTriangleLines :: Image -> Vector2 -> Vector2 -> Vector2 -> Color -> IO Image
-imageDrawTriangleLines image v1 v2 v3 color = withFreeable image (\i -> withFreeable v1 (\p1 -> withFreeable v2 (\p2 -> withFreeable v3 (\p3 -> withFreeable color (\c -> c'imageDrawTriangleLines i p1 p2 p3 c)))) >> peek i)
+imageDrawTriangleLines :: (PLike Image image, Mutable image mut) => image -> Vector2 -> Vector2 -> Vector2 -> Color -> IO mut
+imageDrawTriangleLines image v1 v2 v3 color = withTLike image (\i -> withFreeable v1 (\p1 -> withFreeable v2 (\p2 -> withFreeable v3 (\p3 -> withFreeable color (\c -> c'imageDrawTriangleLines i p1 p2 p3 c)))) >> peekMutated image i)
 
-imageDrawTriangleFan :: Image -> [Vector2] -> Color -> IO Image
-imageDrawTriangleFan image points color = withFreeable image (\i -> withFreeableArrayLen points (\l p -> withFreeable color (c'imageDrawTriangleFan i p (fromIntegral l))) >> peek i)
+imageDrawTriangleFan :: (PLike Image image, PALike Vector2 points, Mutable image mut) => image -> points -> Color -> IO mut
+imageDrawTriangleFan image points color = withTLike image (\i -> withALikeLen points (\l p -> withFreeable color (c'imageDrawTriangleFan i p (fromIntegral l))) >> peekMutated image i)
 
-imageDrawTriangleStrip :: Image -> [Vector2] -> Color -> IO Image
-imageDrawTriangleStrip image points color = withFreeable image (\i -> withFreeableArrayLen points (\l p -> withFreeable color (c'imageDrawTriangleStrip i p (fromIntegral l))) >> peek i)
+imageDrawTriangleStrip :: (PLike Image image, PALike Vector2 points, Mutable image mut) => image -> points -> Color -> IO mut
+imageDrawTriangleStrip image points color = withTLike image (\i -> withALikeLen points (\l p -> withFreeable color (c'imageDrawTriangleStrip i p (fromIntegral l))) >> peekMutated image i)
 
-imageDraw :: Image -> Image -> Rectangle -> Rectangle -> Color -> IO Image
-imageDraw image source srcRec dstRec tint = withFreeable image (\i -> withFreeable source (\s -> withFreeable srcRec (\sr -> withFreeable dstRec (withFreeable tint . c'imageDraw i s sr))) >> peek i)
+imageDraw :: (PLike Image image1, PLike Image image2, Mutable image1 mut) => image1 -> image2 -> Rectangle -> Rectangle -> Color -> IO mut
+imageDraw image source srcRec dstRec tint = withTLike image (\i -> withTLike source (\s -> withFreeable srcRec (\sr -> withFreeable dstRec (withFreeable tint . c'imageDraw i s sr))) >> peekMutated image i)
 
-imageDrawText :: Image -> String -> Int -> Int -> Int -> Color -> IO Image
-imageDrawText image text x y fontSize color = withFreeable image (\i -> withCString text (\t -> withFreeable color (c'imageDrawText i t (fromIntegral x) (fromIntegral y) (fromIntegral fontSize))) >> peek i)
+imageDrawText :: (PLike Image image, StringLike string, Mutable image mut) => image -> string -> Int -> Int -> Int -> Color -> IO mut
+imageDrawText image text x y fontSize color = withTLike image (\i -> withTLike text (\t -> withFreeable color (c'imageDrawText i t (fromIntegral x) (fromIntegral y) (fromIntegral fontSize))) >> peekMutated image i)
 
-imageDrawTextEx :: Image -> Font -> String -> Vector2 -> Float -> Float -> Color -> IO Image
-imageDrawTextEx image font text position fontSize spacing tint = withFreeable image (\i -> withFreeable font (\f -> withCString text (\t -> withFreeable position (\p -> withFreeable tint (c'imageDrawTextEx i f t p (realToFrac fontSize) (realToFrac spacing))))) >> peek i)
+imageDrawTextEx :: (PLike Image image, PLike Font font, StringLike string, Mutable image mut) => image -> font -> string -> Vector2 -> Float -> Float -> Color -> IO mut
+imageDrawTextEx image font text position fontSize spacing tint = withTLike image (\i -> withTLike font (\f -> withTLike text (\t -> withFreeable position (\p -> withFreeable tint (c'imageDrawTextEx i f t p (realToFrac fontSize) (realToFrac spacing))))) >> peekMutated image i)
 
-loadTexture :: String -> IO Texture
-loadTexture fileName = withCString fileName c'loadTexture >>= pop
+loadTexture :: (StringLike string, PLike Texture texture) => string -> IO texture
+loadTexture fileName = withTLike fileName c'loadTexture >>= popTLike
 
-loadTextureFromImage :: Image -> IO Texture
-loadTextureFromImage image = withFreeable image c'loadTextureFromImage >>= pop
+loadTextureFromImage :: (PLike Image image, PLike Texture texture) => image -> IO texture
+loadTextureFromImage image = withTLike image c'loadTextureFromImage >>= popTLike
 
-loadTextureCubemap :: Image -> CubemapLayout -> IO Texture
-loadTextureCubemap image layout = withFreeable image (\i -> c'loadTextureCubemap i (fromIntegral $ fromEnum layout)) >>= pop
+loadTextureCubemap :: (PLike Image image, PLike Texture texture) => image -> CubemapLayout -> IO texture
+loadTextureCubemap image layout = withTLike image (\i -> c'loadTextureCubemap i (fromIntegral $ fromEnum layout)) >>= popTLike
 
-loadRenderTexture :: Int -> Int -> IO RenderTexture
-loadRenderTexture width height = c'loadRenderTexture (fromIntegral width) (fromIntegral height) >>= pop
+loadRenderTexture :: (PLike RenderTexture renderTexture) => Int -> Int -> IO renderTexture
+loadRenderTexture width height = c'loadRenderTexture (fromIntegral width) (fromIntegral height) >>= popTLike
 
-isTextureValid :: Texture -> IO Bool
-isTextureValid texture = toBool <$> withFreeable texture c'isTextureValid
+isTextureValid :: (PLike Texture texture) => texture -> IO Bool
+isTextureValid texture = toBool <$> withTLike texture c'isTextureValid
 
-isRenderTextureValid :: RenderTexture -> IO Bool
-isRenderTextureValid renderTexture = toBool <$> withFreeable renderTexture c'isRenderTextureValid
+isRenderTextureValid :: (PLike RenderTexture renderTexture) => renderTexture -> IO Bool
+isRenderTextureValid renderTexture = toBool <$> withTLike renderTexture c'isRenderTextureValid
 
 -- | Unloads a `managed` texture from GPU memory (VRAM)
-unloadTexture :: Texture -> WindowResources -> IO ()
-unloadTexture texture = unloadSingleTexture (texture'id texture)
+unloadTexture :: (PLike Texture texture) => texture -> WindowResources -> IO ()
+unloadTexture texture wr =
+  withTLike
+    texture
+    ( \t -> do
+        tId <- peek (p'texture'id t)
+        unloadSingleTexture tId wr
+    )
 
 -- | Unloads a `managed` render texture from GPU memory (VRAM)
-unloadRenderTexture :: RenderTexture -> WindowResources -> IO ()
-unloadRenderTexture renderTexture wr = do
-  unloadSingleTexture (texture'id $ renderTexture'texture renderTexture) wr
-  unloadSingleFrameBuffer (renderTexture'id renderTexture) wr
+unloadRenderTexture :: (PLike RenderTexture renderTexture) => renderTexture -> WindowResources -> IO ()
+unloadRenderTexture renderTexture wr =
+  withTLike
+    renderTexture
+    ( \rt -> do
+        tId <- peek (p'texture'id (p'renderTexture'texture rt))
+        rtId <- peek (p'renderTexture'id rt)
+        unloadSingleTexture tId wr
+        unloadSingleFrameBuffer rtId wr
+    )
 
-updateTexture :: Texture -> Ptr () -> IO ()
-updateTexture texture pixels = withFreeable texture (\t -> c'updateTexture t pixels)
+updateTexture :: (PLike Texture texture) => texture -> Ptr () -> IO ()
+updateTexture texture pixels = withTLike texture (\t -> c'updateTexture t pixels)
 
-updateTextureRec :: Texture -> Rectangle -> Ptr () -> IO ()
-updateTextureRec texture rect pixels = withFreeable texture (\t -> withFreeable rect (\r -> c'updateTextureRec t r pixels))
+updateTextureRec :: (PLike Texture texture) => texture -> Rectangle -> Ptr () -> IO ()
+updateTextureRec texture rect pixels = withTLike texture (\t -> withFreeable rect (\r -> c'updateTextureRec t r pixels))
 
-genTextureMipmaps :: Texture -> IO Texture
-genTextureMipmaps texture = withFreeable texture (\t -> c'genTextureMipmaps t >> peek t)
+genTextureMipmaps :: (PLike Texture texture, Mutable texture mut) => texture -> IO mut
+genTextureMipmaps texture = withTLike texture (\t -> c'genTextureMipmaps t >> peekMutated texture t)
 
-setTextureFilter :: Texture -> TextureFilter -> IO Texture
-setTextureFilter texture filterType = withFreeable texture (\t -> c'setTextureFilter t (fromIntegral $ fromEnum filterType) >> peek t)
+setTextureFilter :: (PLike Texture texture, Mutable texture mut) => texture -> TextureFilter -> IO mut
+setTextureFilter texture filterType = withTLike texture (\t -> c'setTextureFilter t (fromIntegral $ fromEnum filterType) >> peekMutated texture t)
 
-setTextureWrap :: Texture -> TextureWrap -> IO Texture
-setTextureWrap texture wrap = withFreeable texture (\t -> c'setTextureWrap t (fromIntegral $ fromEnum wrap) >> peek t)
+setTextureWrap :: (PLike Texture texture, Mutable texture mut) => texture -> TextureWrap -> IO mut
+setTextureWrap texture wrap = withTLike texture (\t -> c'setTextureWrap t (fromIntegral $ fromEnum wrap) >> peekMutated texture t)
 
-drawTexture :: Texture -> Int -> Int -> Color -> IO ()
-drawTexture texture x y tint = withFreeable texture (\t -> withFreeable tint (c'drawTexture t (fromIntegral x) (fromIntegral y)))
+drawTexture :: (PLike Texture texture) => texture -> Int -> Int -> Color -> IO ()
+drawTexture texture x y tint = withTLike texture (\t -> withFreeable tint (c'drawTexture t (fromIntegral x) (fromIntegral y)))
 
-drawTextureV :: Texture -> Vector2 -> Color -> IO ()
-drawTextureV texture position color = withFreeable texture (\t -> withFreeable position (withFreeable color . c'drawTextureV t))
+drawTextureV :: (PLike Texture texture) => texture -> Vector2 -> Color -> IO ()
+drawTextureV texture position color = withTLike texture (\t -> withFreeable position (withFreeable color . c'drawTextureV t))
 
-drawTextureEx :: Texture -> Vector2 -> Float -> Float -> Color -> IO ()
-drawTextureEx texture position rotation scale tint = withFreeable texture (\t -> withFreeable position (\p -> withFreeable tint (c'drawTextureEx t p (realToFrac rotation) (realToFrac scale))))
+drawTextureEx :: (PLike Texture texture) => texture -> Vector2 -> Float -> Float -> Color -> IO ()
+drawTextureEx texture position rotation scale tint = withTLike texture (\t -> withFreeable position (\p -> withFreeable tint (c'drawTextureEx t p (realToFrac rotation) (realToFrac scale))))
 
-drawTextureRec :: Texture -> Rectangle -> Vector2 -> Color -> IO ()
-drawTextureRec texture source position tint = withFreeable texture (\t -> withFreeable source (\s -> withFreeable position (withFreeable tint . c'drawTextureRec t s)))
+drawTextureRec :: (PLike Texture texture) => texture -> Rectangle -> Vector2 -> Color -> IO ()
+drawTextureRec texture source position tint = withTLike texture (\t -> withFreeable source (\s -> withFreeable position (withFreeable tint . c'drawTextureRec t s)))
 
-drawTexturePro :: Texture -> Rectangle -> Rectangle -> Vector2 -> Float -> Color -> IO ()
-drawTexturePro texture source dest origin rotation tint = withFreeable texture (\t -> withFreeable source (\s -> withFreeable dest (\d -> withFreeable origin (\o -> withFreeable tint (c'drawTexturePro t s d o (realToFrac rotation))))))
+drawTexturePro :: (PLike Texture texture) => texture -> Rectangle -> Rectangle -> Vector2 -> Float -> Color -> IO ()
+drawTexturePro texture source dest origin rotation tint = withTLike texture (\t -> withFreeable source (\s -> withFreeable dest (\d -> withFreeable origin (\o -> withFreeable tint (c'drawTexturePro t s d o (realToFrac rotation))))))
 
-drawTextureNPatch :: Texture -> NPatchInfo -> Rectangle -> Vector2 -> Float -> Color -> IO ()
-drawTextureNPatch texture nPatchInfo dest origin rotation tint = withFreeable texture (\t -> withFreeable nPatchInfo (\n -> withFreeable dest (\d -> withFreeable origin (\o -> withFreeable tint (c'drawTextureNPatch t n d o (realToFrac rotation))))))
+drawTextureNPatch :: (PLike Texture texture) => texture -> NPatchInfo -> Rectangle -> Vector2 -> Float -> Color -> IO ()
+drawTextureNPatch texture nPatchInfo dest origin rotation tint = withTLike texture (\t -> withFreeable nPatchInfo (\n -> withFreeable dest (\d -> withFreeable origin (\o -> withFreeable tint (c'drawTextureNPatch t n d o (realToFrac rotation))))))
 
 fade :: Color -> Float -> Color
 fade color alpha = unsafePerformIO $ withFreeable color (\c -> c'fade c (realToFrac alpha)) >>= pop

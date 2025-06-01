@@ -1,7 +1,7 @@
 {-# LANGUAGE DeriveAnyClass #-}
+{-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE PatternSynonyms #-}
 {-# LANGUAGE TypeSynonymInstances #-}
-{-# LANGUAGE FlexibleInstances #-}
 
 -- | Bindings for types used in all raylib modules
 module Raylib.Types.Core
@@ -140,10 +140,9 @@ import Foreign.C
     newCString,
     peekCString,
   )
-import Linear (V2(V2), V3(V3), V4(V4))
-import Raylib.Internal (Closeable(..), _unloadAutomationEventList, addAutomationEventList)
+import Linear (V2 (V2), V3 (V3), V4 (V4))
+import Raylib.Internal (Closeable (..), addAutomationEventList, _unloadAutomationEventList)
 import Raylib.Internal.Foreign (Freeable (rlFreeDependents), c'free, peekStaticArray, pokeStaticArray)
-
 
 ---------------------------------------
 -- core enums -------------------------
@@ -659,14 +658,15 @@ instance Enum Gesture where
 -- core structures --------------------
 ---------------------------------------
 
-
 type Vector2 = V2 Float
 
 pattern Vector2 :: Float -> Float -> Vector2
 pattern Vector2
-  { vector2'x ,
+  { vector2'x,
     vector2'y
-  } = V2 vector2'x vector2'y
+  } =
+  V2 vector2'x vector2'y
+
 {-# COMPLETE Vector2 :: V2 #-}
 
 p'vector2'x :: Ptr Vector2 -> Ptr CFloat
@@ -679,10 +679,12 @@ type Vector3 = V3 Float
 
 pattern Vector3 :: Float -> Float -> Float -> Vector3
 pattern Vector3
-  { vector3'x ,
-    vector3'y ,
+  { vector3'x,
+    vector3'y,
     vector3'z
-  } = V3 vector3'x vector3'y vector3'z
+  } =
+  V3 vector3'x vector3'y vector3'z
+
 {-# COMPLETE Vector3 :: V3 #-}
 
 p'vector3'x :: Ptr Vector3 -> Ptr CFloat
@@ -702,7 +704,9 @@ pattern Vector4
     vector4'y,
     vector4'z,
     vector4'w
-  } = V4 vector4'x vector4'y vector4'z vector4'w
+  } =
+  V4 vector4'x vector4'y vector4'z vector4'w
+
 {-# COMPLETE Vector4 :: V4 #-}
 
 vectorToColor :: Vector4 -> Color

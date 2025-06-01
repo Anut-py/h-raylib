@@ -1,4 +1,6 @@
+{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE ForeignFunctionInterface #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TemplateHaskell #-}
 
 -- | Bindings to @rcore@
@@ -438,6 +440,7 @@ import Foreign
   )
 import Foreign.C
   ( CBool (..),
+    CChar,
     CDouble (..),
     CFloat (..),
     CInt (..),
@@ -452,7 +455,7 @@ import Foreign.C
 import Foreign.Ptr (nullPtr)
 import GHC.IO (unsafePerformIO)
 import Raylib.Internal (WindowResources, defaultWindowResources, releaseNonAudioWindowResources, shaderLocations, unloadSingleAutomationEventList, unloadSingleShader)
-import Raylib.Internal.Foreign (configsToBitflag, pop, popCArray, popCString, withFreeable, withFreeableArray, withFreeableArrayLen, withMaybeCString)
+import Raylib.Internal.Foreign (ALike (peekALike, popALike, withALike, withALikeLen), PALike, PLike, StringLike, TLike (peekTLike, popTLike, withTLike), configsToBitflag, pop, withFreeable, withMaybeCString)
 import Raylib.Internal.TH (genNative)
 import Raylib.Types
   ( AutomationEvent,
@@ -483,7 +486,7 @@ import Raylib.Types
     RenderTexture,
     SaveFileDataCallback,
     SaveFileTextCallback,
-    Shader (shader'id),
+    Shader,
     ShaderUniformData,
     ShaderUniformDataV,
     Texture,
@@ -493,6 +496,7 @@ import Raylib.Types
     Vector3,
     VrDeviceInfo,
     VrStereoConfig,
+    p'shader'id,
     unpackShaderUniformData,
     unpackShaderUniformDataV,
   )
@@ -773,11 +777,11 @@ minimizeWindow = c'minimizeWindow
 restoreWindow :: IO ()
 restoreWindow = c'restoreWindow
 
-setWindowIcon :: Image -> IO ()
-setWindowIcon image = withFreeable image c'setWindowIcon
+setWindowIcon :: (PLike Image image) => image -> IO ()
+setWindowIcon image = withTLike image c'setWindowIcon
 
-setWindowIcons :: [Image] -> IO ()
-setWindowIcons images = withFreeableArrayLen images (\l ptr -> c'setWindowIcons ptr (fromIntegral l))
+setWindowIcons :: (PALike Image images) => images -> IO ()
+setWindowIcons images = withALikeLen images (\l ptr -> c'setWindowIcons ptr (fromIntegral l))
 
 setWindowTitle :: String -> IO ()
 setWindowTitle title = withCString title c'setWindowTitle
@@ -890,8 +894,8 @@ disableCursor = c'disableCursor
 isCursorOnScreen :: IO Bool
 isCursorOnScreen = toBool <$> c'isCursorOnScreen
 
-clearBackground :: Color -> IO ()
-clearBackground color = withFreeable color c'clearBackground
+clearBackground :: (PLike Color color) => color -> IO ()
+clearBackground color = withTLike color c'clearBackground
 
 beginDrawing :: IO ()
 beginDrawing = c'beginDrawing
@@ -899,26 +903,26 @@ beginDrawing = c'beginDrawing
 endDrawing :: IO ()
 endDrawing = c'endDrawing
 
-beginMode2D :: Camera2D -> IO ()
-beginMode2D camera = withFreeable camera c'beginMode2D
+beginMode2D :: (PLike Camera2D camera2D) => camera2D -> IO ()
+beginMode2D camera = withTLike camera c'beginMode2D
 
 endMode2D :: IO ()
 endMode2D = c'endMode2D
 
-beginMode3D :: Camera3D -> IO ()
-beginMode3D camera = withFreeable camera c'beginMode3D
+beginMode3D :: (PLike Camera3D camera3D) => camera3D -> IO ()
+beginMode3D camera = withTLike camera c'beginMode3D
 
 endMode3D :: IO ()
 endMode3D = c'endMode3D
 
-beginTextureMode :: RenderTexture -> IO ()
-beginTextureMode renderTexture = withFreeable renderTexture c'beginTextureMode
+beginTextureMode :: (PLike RenderTexture renderTexture) => renderTexture -> IO ()
+beginTextureMode renderTexture = withTLike renderTexture c'beginTextureMode
 
 endTextureMode :: IO ()
 endTextureMode = c'endTextureMode
 
-beginShaderMode :: Shader -> IO ()
-beginShaderMode shader = withFreeable shader c'beginShaderMode
+beginShaderMode :: (PLike Shader shader) => shader -> IO ()
+beginShaderMode shader = withTLike shader c'beginShaderMode
 
 endShaderMode :: IO ()
 endShaderMode = c'endShaderMode
@@ -935,103 +939,112 @@ beginScissorMode x y width height = c'beginScissorMode (fromIntegral x) (fromInt
 endScissorMode :: IO ()
 endScissorMode = c'endScissorMode
 
-beginVrStereoMode :: VrStereoConfig -> IO ()
-beginVrStereoMode config = withFreeable config c'beginVrStereoMode
+beginVrStereoMode :: (PLike VrStereoConfig vrStereoConfig) => vrStereoConfig -> IO ()
+beginVrStereoMode config = withTLike config c'beginVrStereoMode
 
 endVrStereoMode :: IO ()
 endVrStereoMode = c'endVrStereoMode
 
-loadVrStereoConfig :: VrDeviceInfo -> IO VrStereoConfig
-loadVrStereoConfig deviceInfo = withFreeable deviceInfo c'loadVrStereoConfig >>= pop
+loadVrStereoConfig :: (PLike VrStereoConfig vrStereoConfig) => VrDeviceInfo -> IO vrStereoConfig
+loadVrStereoConfig deviceInfo = withFreeable deviceInfo c'loadVrStereoConfig >>= popTLike
 
-loadShader :: Maybe String -> Maybe String -> IO Shader
-loadShader vsFileName fsFileName = withMaybeCString vsFileName (withMaybeCString fsFileName . c'loadShader) >>= pop
+loadShader :: (PLike Shader shader) => Maybe String -> Maybe String -> IO shader
+loadShader vsFileName fsFileName = withMaybeCString vsFileName (withMaybeCString fsFileName . c'loadShader) >>= popTLike
 
-loadShaderFromMemory :: Maybe String -> Maybe String -> IO Shader
-loadShaderFromMemory vsCode fsCode = withMaybeCString vsCode (withMaybeCString fsCode . c'loadShaderFromMemory) >>= pop
+loadShaderFromMemory :: (PLike Shader shader) => Maybe String -> Maybe String -> IO shader
+loadShaderFromMemory vsCode fsCode = withMaybeCString vsCode (withMaybeCString fsCode . c'loadShaderFromMemory) >>= popTLike
 
-isShaderValid :: Shader -> IO Bool
-isShaderValid shader = toBool <$> withFreeable shader c'isShaderValid
+isShaderValid :: (PLike Shader shader) => shader -> IO Bool
+isShaderValid shader = toBool <$> withTLike shader c'isShaderValid
 
-getShaderLocation :: Shader -> String -> WindowResources -> IO Int
-getShaderLocation shader uniformName wr = do
-  let sId = shader'id shader
-  let sLocs = shaderLocations wr
-  locs <- readIORef sLocs
-  case Map.lookup sId locs of
-    Nothing -> do
-      idx <- locIdx
-      let newMap = Map.fromList [(uniformName, idx)]
-      modifyIORef' sLocs (Map.insert sId newMap)
-      return idx
-    Just m -> case Map.lookup uniformName m of
-      Nothing -> do
-        idx <- locIdx
-        let newMap = Map.insert uniformName idx m
-        modifyIORef' sLocs (Map.insert sId newMap)
-        return idx
-      Just val -> return val
-  where
-    locIdx = fromIntegral <$> withFreeable shader (withCString uniformName . c'getShaderLocation)
+getShaderLocation :: (PLike Shader shader) => shader -> String -> WindowResources -> IO Int
+getShaderLocation shader uniformName wr =
+  withTLike
+    shader
+    ( \shaderPtr -> do
+        sId <- fromIntegral <$> peek (p'shader'id shaderPtr)
+        let sLocs = shaderLocations wr
+            locIdx = fromIntegral <$> withCString uniformName (c'getShaderLocation shaderPtr)
+        locs <- readIORef sLocs
+        case Map.lookup sId locs of
+          Nothing -> do
+            idx <- locIdx
+            let newMap = Map.fromList [(uniformName, idx)]
+            modifyIORef' sLocs (Map.insert sId newMap)
+            return idx
+          Just m -> case Map.lookup uniformName m of
+            Nothing -> do
+              idx <- locIdx
+              let newMap = Map.insert uniformName idx m
+              modifyIORef' sLocs (Map.insert sId newMap)
+              return idx
+            Just val -> return val
+    )
 
-getShaderLocationAttrib :: Shader -> String -> IO Int
-getShaderLocationAttrib shader attribName = fromIntegral <$> withFreeable shader (withCString attribName . c'getShaderLocationAttrib)
+getShaderLocationAttrib :: (PLike Shader shader) => shader -> String -> IO Int
+getShaderLocationAttrib shader attribName = fromIntegral <$> withTLike shader (withCString attribName . c'getShaderLocationAttrib)
 
-setShaderValue :: Shader -> String -> ShaderUniformData -> WindowResources -> IO ()
+setShaderValue :: (PLike Shader shader) => shader -> String -> ShaderUniformData -> WindowResources -> IO ()
 setShaderValue shader uniformName value wr = do
   idx <- getShaderLocation shader uniformName wr
   nativeSetShaderValue shader idx value
 
-setShaderValueV :: Shader -> String -> ShaderUniformDataV -> WindowResources -> IO ()
+setShaderValueV :: (PLike Shader shader) => shader -> String -> ShaderUniformDataV -> WindowResources -> IO ()
 setShaderValueV shader uniformName values wr = do
   idx <- getShaderLocation shader uniformName wr
   nativeSetShaderValueV shader idx values
 
-nativeSetShaderValue :: Shader -> Int -> ShaderUniformData -> IO ()
+nativeSetShaderValue :: (PLike Shader shader) => shader -> Int -> ShaderUniformData -> IO ()
 nativeSetShaderValue shader locIndex value = do
   (uniformType, fptr) <- unpackShaderUniformData value
-  withFreeable shader (\s -> withForeignPtr fptr (\ptr -> c'setShaderValue s (fromIntegral locIndex) ptr (fromIntegral $ fromEnum uniformType)))
+  withTLike shader (\s -> withForeignPtr fptr (\ptr -> c'setShaderValue s (fromIntegral locIndex) ptr (fromIntegral $ fromEnum uniformType)))
   finalizeForeignPtr fptr
 
-nativeSetShaderValueV :: Shader -> Int -> ShaderUniformDataV -> IO ()
+nativeSetShaderValueV :: (PLike Shader shader) => shader -> Int -> ShaderUniformDataV -> IO ()
 nativeSetShaderValueV shader locIndex values = do
   (uniformType, fptr, l) <- unpackShaderUniformDataV values
-  withFreeable shader (\s -> withForeignPtr fptr (\ptr -> c'setShaderValueV s (fromIntegral locIndex) ptr (fromIntegral $ fromEnum uniformType) (fromIntegral l)))
+  withTLike shader (\s -> withForeignPtr fptr (\ptr -> c'setShaderValueV s (fromIntegral locIndex) ptr (fromIntegral $ fromEnum uniformType) (fromIntegral l)))
   finalizeForeignPtr fptr
 
-setShaderValueMatrix :: Shader -> Int -> Matrix -> IO ()
-setShaderValueMatrix shader locIndex mat = withFreeable shader (\s -> withFreeable mat (c'setShaderValueMatrix s (fromIntegral locIndex)))
+setShaderValueMatrix :: (PLike Shader shader) => shader -> Int -> Matrix -> IO ()
+setShaderValueMatrix shader locIndex mat = withTLike shader (\s -> withFreeable mat (c'setShaderValueMatrix s (fromIntegral locIndex)))
 
-setShaderValueTexture :: Shader -> Int -> Texture -> IO ()
-setShaderValueTexture shader locIndex tex = withFreeable shader (\s -> withFreeable tex (c'setShaderValueTexture s (fromIntegral locIndex)))
+setShaderValueTexture :: (PLike Shader shader) => shader -> Int -> Texture -> IO ()
+setShaderValueTexture shader locIndex tex = withTLike shader (\s -> withFreeable tex (c'setShaderValueTexture s (fromIntegral locIndex)))
 
 -- | Unloads a `managed` shader from GPU memory (VRAM)
-unloadShader :: Shader -> WindowResources -> IO ()
-unloadShader shader = unloadSingleShader (shader'id shader)
+unloadShader :: (PLike Shader shader) => shader -> WindowResources -> IO ()
+unloadShader shader wr =
+  withTLike
+    shader
+    ( \shaderPtr -> do
+        sId <- peek (p'shader'id shaderPtr)
+        unloadSingleShader sId wr
+    )
 
-getScreenToWorldRay :: Vector2 -> Camera3D -> IO Ray
-getScreenToWorldRay position camera = withFreeable position (withFreeable camera . c'getScreenToWorldRay) >>= pop
+getScreenToWorldRay :: (PLike Camera3D camera3D) => Vector2 -> camera3D -> IO Ray
+getScreenToWorldRay position camera = withFreeable position (withTLike camera . c'getScreenToWorldRay) >>= pop
 
-getScreenToWorldRayEx :: Vector2 -> Camera3D -> Float -> Float -> Ray
-getScreenToWorldRayEx position camera width height = unsafePerformIO $ withFreeable position (\p -> withFreeable camera (\c -> c'getScreenToWorldRayEx p c (realToFrac width) (realToFrac height))) >>= pop
+getScreenToWorldRayEx :: (PLike Camera3D camera3D) => Vector2 -> camera3D -> Float -> Float -> Ray
+getScreenToWorldRayEx position camera width height = unsafePerformIO $ withFreeable position (\p -> withTLike camera (\c -> c'getScreenToWorldRayEx p c (realToFrac width) (realToFrac height))) >>= pop
 
-getCameraMatrix :: Camera3D -> Matrix
-getCameraMatrix camera = unsafePerformIO $ withFreeable camera c'getCameraMatrix >>= pop
+getCameraMatrix :: (PLike Camera3D camera3D, PLike Matrix matrix) => camera3D -> matrix
+getCameraMatrix camera = unsafePerformIO $ withTLike camera c'getCameraMatrix >>= popTLike
 
-getCameraMatrix2D :: Camera2D -> Matrix
-getCameraMatrix2D camera = unsafePerformIO $ withFreeable camera c'getCameraMatrix2D >>= pop
+getCameraMatrix2D :: (PLike Camera2D camera2D, PLike Matrix matrix) => camera2D -> matrix
+getCameraMatrix2D camera = unsafePerformIO $ withTLike camera c'getCameraMatrix2D >>= popTLike
 
-getWorldToScreen :: Vector3 -> Camera3D -> IO Vector2
-getWorldToScreen position camera = withFreeable position (withFreeable camera . c'getWorldToScreen) >>= pop
+getWorldToScreen :: (PLike Camera3D camera3D) => Vector3 -> camera3D -> IO Vector2
+getWorldToScreen position camera = withFreeable position (withTLike camera . c'getWorldToScreen) >>= pop
 
-getWorldToScreenEx :: Vector3 -> Camera3D -> Int -> Int -> Vector2
-getWorldToScreenEx position camera width height = unsafePerformIO $ withFreeable position (\p -> withFreeable camera (\c -> c'getWorldToScreenEx p c (fromIntegral width) (fromIntegral height))) >>= pop
+getWorldToScreenEx :: (PLike Camera3D camera3D) => Vector3 -> camera3D -> Int -> Int -> Vector2
+getWorldToScreenEx position camera width height = unsafePerformIO $ withFreeable position (\p -> withTLike camera (\c -> c'getWorldToScreenEx p c (fromIntegral width) (fromIntegral height))) >>= pop
 
-getWorldToScreen2D :: Vector2 -> Camera2D -> Vector2
-getWorldToScreen2D position camera = unsafePerformIO $ withFreeable position (withFreeable camera . c'getWorldToScreen2D) >>= pop
+getWorldToScreen2D :: (PLike Camera2D camera2D) => Vector2 -> camera2D -> Vector2
+getWorldToScreen2D position camera = unsafePerformIO $ withFreeable position (withTLike camera . c'getWorldToScreen2D) >>= pop
 
-getScreenToWorld2D :: Vector2 -> Camera2D -> Vector2
-getScreenToWorld2D position camera = unsafePerformIO $ withFreeable position (withFreeable camera . c'getScreenToWorld2D) >>= pop
+getScreenToWorld2D :: (PLike Camera2D camera2D) => Vector2 -> camera2D -> Vector2
+getScreenToWorld2D position camera = unsafePerformIO $ withFreeable position (withTLike camera . c'getScreenToWorld2D) >>= pop
 
 setTargetFPS :: Int -> IO ()
 setTargetFPS fps = c'setTargetFPS $ fromIntegral fps
@@ -1051,23 +1064,23 @@ setRandomSeed seed = c'setRandomSeed $ fromIntegral seed
 getRandomValue :: Int -> Int -> IO Int
 getRandomValue minVal maxVal = fromIntegral <$> c'getRandomValue (fromIntegral minVal) (fromIntegral maxVal)
 
-loadRandomSequence :: Integer -> Int -> Int -> IO [Int]
-loadRandomSequence count rMin rMax = map fromIntegral <$> (popCArray (fromIntegral count) =<< c'loadRandomSequence (fromIntegral count) (fromIntegral rMin) (fromIntegral rMax))
+loadRandomSequence :: (PALike CInt sequence) => Integer -> Int -> Int -> IO sequence
+loadRandomSequence count rMin rMax = popALike (fromIntegral count) =<< c'loadRandomSequence (fromIntegral count) (fromIntegral rMin) (fromIntegral rMax)
 
-takeScreenshot :: String -> IO ()
-takeScreenshot fileName = withCString fileName c'takeScreenshot
+takeScreenshot :: (StringLike string) => string -> IO ()
+takeScreenshot fileName = withTLike fileName c'takeScreenshot
 
 setConfigFlags :: [ConfigFlag] -> IO ()
 setConfigFlags flags = c'setConfigFlags $ fromIntegral $ configsToBitflag flags
 
-traceLog :: TraceLogLevel -> String -> IO ()
-traceLog logLevel text = withCString text $ c'traceLog $ fromIntegral $ fromEnum logLevel
+traceLog :: (StringLike string) => TraceLogLevel -> string -> IO ()
+traceLog logLevel text = withTLike text $ c'traceLog $ fromIntegral $ fromEnum logLevel
 
 setTraceLogLevel :: TraceLogLevel -> IO ()
 setTraceLogLevel = c'setTraceLogLevel . fromIntegral . fromEnum
 
-openURL :: String -> IO ()
-openURL url = withCString url c'openURL
+openURL :: (StringLike string) => string -> IO ()
+openURL url = withTLike url c'openURL
 
 setTraceLogCallback :: TraceLogCallback -> IO ()
 setTraceLogCallback callback = do
@@ -1094,193 +1107,185 @@ setSaveFileTextCallback callback = do
   c <- createSaveFileTextCallback callback
   c'setSaveFileTextCallback c
 
-loadFileData :: String -> IO [Integer]
+loadFileData :: (StringLike string, PALike CUChar contents) => string -> IO contents
 loadFileData fileName =
   withFreeable
     0
     ( \size -> do
-        withCString
+        withTLike
           fileName
           ( \path -> do
               ptr <- c'loadFileData path size
               arrSize <- fromIntegral <$> peek size
-              map fromIntegral <$> popCArray arrSize ptr
+              popALike arrSize ptr
           )
     )
 
-saveFileData :: (Storable a) => String -> Ptr a -> Integer -> IO Bool
+saveFileData :: (StringLike string, PALike CUChar contents) => string -> contents -> Integer -> IO Bool
 saveFileData fileName contents bytesToWrite =
-  toBool <$> withCString fileName (\s -> c'saveFileData s (castPtr contents) (fromIntegral bytesToWrite))
+  toBool <$> withTLike fileName (\s -> withALike contents (\(c :: Ptr CUChar) -> c'saveFileData s (castPtr c) (fromIntegral bytesToWrite)))
 
-exportDataAsCode :: [Integer] -> Integer -> String -> IO Bool
+exportDataAsCode :: (PALike CUChar contents, StringLike string) => contents -> Integer -> string -> IO Bool
 exportDataAsCode contents size fileName =
-  toBool <$> withFreeableArray (map fromInteger contents) (\c -> withCString fileName (c'exportDataAsCode c (fromIntegral size)))
+  toBool <$> withALike contents (\(c :: Ptr CUChar) -> withTLike fileName (c'exportDataAsCode (castPtr c) (fromIntegral size)))
 
-loadFileText :: String -> IO String
-loadFileText fileName = withCString fileName c'loadFileText >>= popCString
+loadFileText :: (StringLike string1, StringLike string2) => string1 -> IO string2
+loadFileText fileName = withTLike fileName c'loadFileText >>= popTLike
 
-saveFileText :: String -> String -> IO Bool
-saveFileText fileName text = toBool <$> withCString fileName (withCString text . c'saveFileText)
+saveFileText :: (StringLike string1, StringLike string2) => string1 -> string2 -> IO Bool
+saveFileText fileName text = toBool <$> withTLike fileName (withTLike text . c'saveFileText)
 
-fileExists :: String -> IO Bool
-fileExists fileName = toBool <$> withCString fileName c'fileExists
+fileExists :: (StringLike string) => string -> IO Bool
+fileExists fileName = toBool <$> withTLike fileName c'fileExists
 
-directoryExists :: String -> IO Bool
-directoryExists dirPath = toBool <$> withCString dirPath c'directoryExists
+directoryExists :: (StringLike string) => string -> IO Bool
+directoryExists dirPath = toBool <$> withTLike dirPath c'directoryExists
 
-isFileExtension :: String -> String -> IO Bool
-isFileExtension fileName ext = toBool <$> withCString fileName (withCString ext . c'isFileExtension)
+isFileExtension :: (StringLike string1, StringLike string2) => string1 -> string2 -> IO Bool
+isFileExtension fileName ext = toBool <$> withTLike fileName (withTLike ext . c'isFileExtension)
 
-getFileLength :: String -> IO Bool
-getFileLength fileName = toBool <$> withCString fileName c'getFileLength
+getFileLength :: (StringLike string) => string -> IO Bool
+getFileLength fileName = toBool <$> withTLike fileName c'getFileLength
 
-getFileExtension :: String -> IO String
-getFileExtension fileName = withCString fileName c'getFileExtension >>= peekCString
+getFileExtension :: (StringLike string1, StringLike string2) => string1 -> IO string2
+getFileExtension fileName = withTLike fileName c'getFileExtension >>= peekTLike
 
-getFileName :: String -> IO String
-getFileName filePath = withCString filePath c'getFileName >>= peekCString
+getFileName :: (StringLike string1, StringLike string2) => string1 -> IO string2
+getFileName filePath = withTLike filePath c'getFileName >>= peekTLike
 
-getFileNameWithoutExt :: String -> IO String
-getFileNameWithoutExt fileName = withCString fileName c'getFileNameWithoutExt >>= peekCString
+getFileNameWithoutExt :: (StringLike string1, StringLike string2) => string1 -> IO string2
+getFileNameWithoutExt fileName = withTLike fileName c'getFileNameWithoutExt >>= peekTLike
 
-getDirectoryPath :: String -> IO String
-getDirectoryPath filePath = withCString filePath c'getDirectoryPath >>= peekCString
+getDirectoryPath :: (StringLike string1, StringLike string2) => string1 -> IO string2
+getDirectoryPath filePath = withTLike filePath c'getDirectoryPath >>= peekTLike
 
-getPrevDirectoryPath :: String -> IO String
-getPrevDirectoryPath dirPath = withCString dirPath c'getPrevDirectoryPath >>= peekCString
+getPrevDirectoryPath :: (StringLike string1, StringLike string2) => string1 -> IO string2
+getPrevDirectoryPath dirPath = withTLike dirPath c'getPrevDirectoryPath >>= peekTLike
 
-getWorkingDirectory :: IO String
-getWorkingDirectory = c'getWorkingDirectory >>= peekCString
+getWorkingDirectory :: (StringLike string) => IO string
+getWorkingDirectory = c'getWorkingDirectory >>= peekTLike
 
-getApplicationDirectory :: IO String
-getApplicationDirectory = c'getApplicationDirectory >>= peekCString
+getApplicationDirectory :: (StringLike string) => IO string
+getApplicationDirectory = c'getApplicationDirectory >>= peekTLike
 
-makeDirectory :: String -> IO Bool
-makeDirectory dirPath = (== 0) <$> withCString dirPath c'makeDirectory
+makeDirectory :: (StringLike string) => string -> IO Bool
+makeDirectory dirPath = (== 0) <$> withTLike dirPath c'makeDirectory
 
-changeDirectory :: String -> IO Bool
-changeDirectory dir = toBool <$> withCString dir c'changeDirectory
+changeDirectory :: (StringLike string) => string -> IO Bool
+changeDirectory dir = toBool <$> withTLike dir c'changeDirectory
 
-isPathFile :: String -> IO Bool
-isPathFile path = toBool <$> withCString path c'isPathFile
+isPathFile :: (StringLike string) => string -> IO Bool
+isPathFile path = toBool <$> withTLike path c'isPathFile
 
-isFileNameValid :: String -> IO Bool
-isFileNameValid path = toBool <$> withCString path c'isFileNameValid
+isFileNameValid :: (StringLike string) => string -> IO Bool
+isFileNameValid path = toBool <$> withTLike path c'isFileNameValid
 
-loadDirectoryFiles :: String -> IO FilePathList
-loadDirectoryFiles dirPath = withCString dirPath c'loadDirectoryFiles >>= pop
+loadDirectoryFiles :: (StringLike string, PLike FilePathList filePathList) => string -> IO filePathList
+loadDirectoryFiles dirPath = withTLike dirPath c'loadDirectoryFiles >>= popTLike
 
-loadDirectoryFilesEx :: String -> String -> Bool -> IO FilePathList
+loadDirectoryFilesEx :: (StringLike string1, StringLike string2, PLike FilePathList filePathList) => string1 -> string2 -> Bool -> IO filePathList
 loadDirectoryFilesEx basePath filterStr scanSubdirs =
-  withCString basePath (\b -> withCString filterStr (\f -> c'loadDirectoryFilesEx b f (fromBool scanSubdirs))) >>= pop
+  withTLike basePath (\b -> withTLike filterStr (\f -> c'loadDirectoryFilesEx b f (fromBool scanSubdirs))) >>= popTLike
 
 isFileDropped :: IO Bool
 isFileDropped = toBool <$> c'isFileDropped
 
-loadDroppedFiles :: IO FilePathList
-loadDroppedFiles = do
-  ptr <- c'loadDroppedFiles
-  val <- peek ptr
-  c'unloadDroppedFiles ptr
-  return val
+loadDroppedFiles :: (PLike FilePathList filePathList) => IO filePathList
+loadDroppedFiles = popTLike =<< c'loadDroppedFiles
 
-getFileModTime :: String -> IO Integer
-getFileModTime fileName = fromIntegral <$> withCString fileName c'getFileModTime
+getFileModTime :: (StringLike string) => string -> IO Integer
+getFileModTime fileName = fromIntegral <$> withTLike fileName c'getFileModTime
 
-compressData :: [Integer] -> IO [Integer]
+compressData :: (PALike CUChar contents1, PALike CUChar contents2) => contents1 -> IO contents2
 compressData contents = do
-  withFreeableArrayLen
-    (map fromIntegral contents)
+  withALikeLen
+    contents
     ( \size c -> do
         withFreeable
           0
           ( \ptr -> do
               compressed <- c'compressData c (fromIntegral $ size * sizeOf (0 :: CUChar)) ptr
               compressedSize <- fromIntegral <$> peek ptr
-              arr <- peekArray compressedSize compressed
-              return $ map fromIntegral arr
+              peekALike compressedSize compressed
           )
     )
 
-decompressData :: [Integer] -> IO [Integer]
+decompressData :: (PALike CUChar contents1, PALike CUChar contents2) => contents1 -> IO contents2
 decompressData compressedData = do
-  withFreeableArrayLen
-    (map fromIntegral compressedData)
+  withALikeLen
+    compressedData
     ( \size c -> do
         withFreeable
           0
           ( \ptr -> do
               decompressed <- c'decompressData c (fromIntegral $ size * sizeOf (0 :: CUChar)) ptr
               decompressedSize <- fromIntegral <$> peek ptr
-              arr <- peekArray decompressedSize decompressed
-              return $ map fromIntegral arr
+              peekALike decompressedSize decompressed
           )
     )
 
-encodeDataBase64 :: [Integer] -> IO [Integer]
+encodeDataBase64 :: (PALike CUChar contents, PALike CChar string) => contents -> IO string
 encodeDataBase64 contents = do
-  withFreeableArrayLen
-    (map fromIntegral contents)
+  withALikeLen
+    contents
     ( \size c -> do
         withFreeable
           0
           ( \ptr -> do
               encoded <- c'encodeDataBase64 c (fromIntegral $ size * sizeOf (0 :: CUChar)) ptr
               encodedSize <- fromIntegral <$> peek ptr
-              arr <- peekArray encodedSize encoded
-              return $ map fromIntegral arr
+              peekALike encodedSize encoded
           )
     )
 
-decodeDataBase64 :: [Integer] -> IO [Integer]
+decodeDataBase64 :: (PALike CChar string, PALike CUChar contents) => string -> IO contents
 decodeDataBase64 encodedData = do
-  withFreeableArray
-    (map fromIntegral encodedData)
-    ( \c -> do
+  withALike
+    encodedData
+    ( \(c :: Ptr CChar) -> do
         withFreeable
           0
           ( \ptr -> do
-              decoded <- c'decodeDataBase64 c ptr
+              decoded <- c'decodeDataBase64 (castPtr c) ptr
               decodedSize <- fromIntegral <$> peek ptr
-              arr <- peekArray decodedSize decoded
-              return $ map fromIntegral arr
+              peekALike decodedSize decoded
           )
     )
 
-computeCRC32 :: [Integer] -> IO Integer
+computeCRC32 :: (PALike CUChar contents) => contents -> IO Integer
 computeCRC32 contents = do
-  withFreeableArrayLen
-    (map fromIntegral contents)
+  withALikeLen
+    contents
     (\size c -> fromIntegral <$> c'computeCRC32 c (fromIntegral $ size * sizeOf (0 :: CUChar)))
 
-computeMD5 :: [Integer] -> IO [Integer]
+computeMD5 :: (PALike CUChar contents) => contents -> IO [Integer]
 computeMD5 contents = do
-  withFreeableArrayLen
-    (map fromIntegral contents)
+  withALikeLen
+    contents
     ( \size c -> do
         encoded <- c'computeMD5 c (fromIntegral $ size * sizeOf (0 :: CUChar))
         arr <- peekArray 4 encoded
         return $ map fromIntegral arr
     )
 
-computeSHA1 :: [Integer] -> IO [Integer]
+computeSHA1 :: (PALike CUChar contents) => contents -> IO [Integer]
 computeSHA1 contents = do
-  withFreeableArrayLen
-    (map fromIntegral contents)
+  withALikeLen
+    contents
     ( \size c -> do
         encoded <- c'computeSHA1 c (fromIntegral $ size * sizeOf (0 :: CUChar))
         arr <- peekArray 5 encoded
         return $ map fromIntegral arr
     )
 
-loadAutomationEventList :: String -> IO AutomationEventList
-loadAutomationEventList fileName = withCString fileName c'loadAutomationEventList >>= pop
+loadAutomationEventList :: (StringLike string) => string -> IO AutomationEventList
+loadAutomationEventList fileName = withTLike fileName c'loadAutomationEventList >>= pop
 
 newAutomationEventList :: IO AutomationEventList
 newAutomationEventList = c'loadAutomationEventList nullPtr >>= pop
 
-exportAutomationEventList :: AutomationEventList -> String -> IO Bool
-exportAutomationEventList list fileName = toBool <$> withFreeable list (withCString fileName . c'exportAutomationEventList)
+exportAutomationEventList :: (PLike AutomationEventList automationEventList, StringLike string) => automationEventList -> string -> IO Bool
+exportAutomationEventList list fileName = toBool <$> withTLike list (withTLike fileName . c'exportAutomationEventList)
 
 setAutomationEventList :: AutomationEventList -> IO AutomationEventListRef
 setAutomationEventList list = do
@@ -1298,8 +1303,8 @@ startAutomationEventRecording = c'startAutomationEventRecording
 stopAutomationEventRecording :: IO ()
 stopAutomationEventRecording = c'stopAutomationEventRecording
 
-playAutomationEvent :: AutomationEvent -> IO ()
-playAutomationEvent event = withFreeable event c'playAutomationEvent
+playAutomationEvent :: (PLike AutomationEvent automationEvent) => automationEvent -> IO ()
+playAutomationEvent event = withTLike event c'playAutomationEvent
 
 peekAutomationEventList :: AutomationEventListRef -> IO AutomationEventList
 peekAutomationEventList = peek
