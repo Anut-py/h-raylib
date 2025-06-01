@@ -246,7 +246,7 @@ library
     , exceptions        >=0.10.4   && <0.11
     , lens              >=4.0      && <5.4
     , linear            >=1.22     && <1.24
-    , template-haskell  >=2.16     && <2.23
+    , template-haskell  >=2.16     && <2.24
     , text              >=2.0      && <2.2
 
   hs-source-dirs:   src
