@@ -197,8 +197,8 @@ mainLoop state = do
         then do
           frameTime <- getFrameTime
           let newBunnies = min (round (10000 * frameTime)) (maxBunnies - bunniesCount state)
-          mx <- getMouseX
-          my <- getMouseY
+          mx <- fromIntegral <$> getMouseX
+          my <- fromIntegral <$> getMouseY
           forM_
             [bunniesCount state .. (bunniesCount state + newBunnies - 1)]
             ( \(!i) ->
