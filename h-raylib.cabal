@@ -101,6 +101,11 @@ flag ghci
   default:     False
   manual:      True
 
+flag disable-lens
+  description: Exclude the lens dependency and Raylib.Util.Lenses
+  default:     False
+  manual:      True
+
 common example-options
   default-language: Haskell2010
 
@@ -229,24 +234,35 @@ library
     Raylib.Util.Colors
     Raylib.Util.GUI
     Raylib.Util.GUI.Styles
-    Raylib.Util.Lenses
     Raylib.Util.Math
     Raylib.Util.RLGL
+
+  if !flag(disable-lens)
+    exposed-modules:
+      Raylib.Util.Lenses
 
   other-modules:
     Raylib.Internal.TH
     Raylib.Internal.Web.Native
     Raylib.Internal.Web.Processable
 
+  if !flag(disable-lens)
+    other-modules:
+      Raylib.Util.Lenses.TH
+  
   build-depends:
     , base              >=4.0      && <4.22
     , bytestring        >=0.11.0   && <0.13
-    , containers        >=0.6.0    && <0.7
+    , containers        >=0.6.0    && <0.9
     , exceptions        >=0.10.4   && <0.11
-    , lens              >=4.0      && <5.4
     , linear            >=1.22     && <1.24
-    , template-haskell  >=2.16.0.0 && <2.23.0.0
+    , template-haskell  >=2.16.0.0 && <2.24
     , text              >=2.0      && <2.2
+  
+  
+  if !flag(disable-lens)
+    build-depends:
+      , lens              >=4.0      && <5.4
 
   hs-source-dirs:   src
   default-language: Haskell2010
