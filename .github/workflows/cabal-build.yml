@@ -17,7 +17,8 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        ghc-version: ["9.8", "9.6", "9.2"]
+        ghc-version: ["9.12", "9.10", "9.6", "9.2"]
+        lens: [true, false]
         exclude:
           - os: macos-latest
             ghc-version: "9.2"
@@ -43,33 +44,18 @@ jobs:
           sudo apt install -y x11proto-xext-dev libx11-dev xorg-dev freeglut3-dev
 
       - name: Configure the build
+        if: matrix.lens
         run: |
           cabal configure --enable-tests --enable-benchmarks --disable-documentation
           cabal build --dry-run
         # The last step generates dist-newstyle/cache/plan.json for the cache key.
 
-      # IMPT: Uncomment when adding steps after cabal build
-      # - name: Restore cached dependencies
-      #   uses: actions/cache/restore@v4
-      #   id: cache
-      #   env:
-      #     key: ${{ runner.os }}-ghc-${{ steps.setup.outputs.ghc-version }}-cabal-${{ steps.setup.outputs.cabal-version }}
-      #   with:
-      #     path: ${{ steps.setup.outputs.cabal-store }}
-      #     key: ${{ env.key }}-plan-${{ hashFiles('**/plan.json') }}
-      #     restore-keys: ${{ env.key }}-
-
-      # - name: Install dependencies
-      #   run: cabal build all --only-dependencies
-
-      # # Cache dependencies already here, so that we do not have to rebuild them should the subsequent steps fail.
-      # - name: Save cached dependencies
-      #   uses: actions/cache/save@v4
-      #   # Caches are immutable, trying to save with the same key would error.
-      #   if: ${{ steps.cache.outputs.cache-primary-key != steps.cache.outputs.cache-matched-key }}
-      #   with:
-      #     path: ${{ steps.setup.outputs.cabal-store }}
-      #     key: ${{ steps.cache.outputs.cache-primary-key }}
+      - name: Configure the build (no lens)
+        if: ${{ !matrix.lens }}
+        run: |
+          cabal configure --enable-tests --enable-benchmarks --disable-documentation -fdisable-lens
+          cabal build --dry-run
+        # The last step generates dist-newstyle/cache/plan.json for the cache key.
 
       - name: Build
         run: cabal build all

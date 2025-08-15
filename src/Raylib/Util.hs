@@ -35,7 +35,6 @@ module Raylib.Util
 where
 
 import Control.Monad (void)
-import Control.Monad.Catch (MonadMask, bracket, bracket_)
 import Control.Monad.IO.Class (MonadIO (liftIO))
 import Raylib.Core (beginBlendMode, beginDrawing, beginMode2D, beginMode3D, beginScissorMode, beginShaderMode, beginTextureMode, beginVrStereoMode, closeWindow, endBlendMode, endDrawing, endMode2D, endMode3D, endScissorMode, endShaderMode, endTextureMode, endVrStereoMode, initWindow, setTargetFPS, windowShouldClose)
 import Raylib.Internal (WindowResources, Closeable (..), managed)
@@ -52,6 +51,7 @@ import Raylib.Types
     VrStereoConfig,
   )
 import Raylib.Util.Math (Vector (vectorNormalize, (|-|)))
+import Control.Exception (bracket, bracket_)
 
 #ifdef WEB_FFI
 
@@ -66,10 +66,11 @@ import Language.Haskell.TH.Syntax (Name (Name), OccName (OccName))
 
 #endif
 
+
+
 -- | NOTE: Only for native targets. If your program is intended to
 --         run on the web, use `raylibApplication` instead.
 withWindow ::
-  (MonadIO m, MonadMask m) =>
   -- | Window width
   Int ->
   -- | Window height
@@ -78,32 +79,32 @@ withWindow ::
   String ->
   -- | Target FPS
   Int ->
-  (WindowResources -> m b) ->
-  m b
+  (WindowResources -> IO b) ->
+  IO b
 withWindow w h title fps = bracket (liftIO $ initWindow w h title <* setTargetFPS fps) (liftIO . closeWindow . Just)
 
-drawing :: (MonadIO m, MonadMask m) => m b -> m b
+drawing :: IO b -> IO b
 drawing = bracket_ (liftIO beginDrawing) (liftIO endDrawing)
 
-mode2D :: (MonadIO m, MonadMask m) => Camera2D -> m b -> m b
+mode2D :: Camera2D -> IO b -> IO b
 mode2D camera = bracket_ (liftIO (beginMode2D camera)) (liftIO endMode2D)
 
-mode3D :: (MonadIO m, MonadMask m) => Camera3D -> m b -> m b
+mode3D :: Camera3D -> IO b -> IO b
 mode3D camera = bracket_ (liftIO (beginMode3D camera)) (liftIO endMode3D)
 
-textureMode :: (MonadIO m, MonadMask m) => RenderTexture -> m b -> m b
+textureMode :: RenderTexture -> IO b -> IO b
 textureMode rt = bracket_ (liftIO (beginTextureMode rt)) (liftIO endTextureMode)
 
-shaderMode :: (MonadIO m, MonadMask m) => Shader -> m b -> m b
+shaderMode :: Shader -> IO b -> IO b
 shaderMode shader = bracket_ (liftIO (beginShaderMode shader)) (liftIO endShaderMode)
 
-blendMode :: (MonadIO m, MonadMask m) => BlendMode -> m b -> m b
+blendMode :: BlendMode -> IO b -> IO b
 blendMode bm = bracket_ (liftIO (beginBlendMode bm)) (liftIO endBlendMode)
 
-scissorMode :: (MonadIO m, MonadMask m) => Int -> Int -> Int -> Int -> m b -> m b
+scissorMode :: Int -> Int -> Int -> Int -> IO b -> IO b
 scissorMode x y width height = bracket_ (liftIO (beginScissorMode x y width height)) (liftIO endScissorMode)
 
-vrStereoMode :: (MonadIO m, MonadMask m) => VrStereoConfig -> m b -> m b
+vrStereoMode :: VrStereoConfig -> IO b -> IO b
 vrStereoMode config = bracket_ (liftIO (beginVrStereoMode config)) (liftIO endVrStereoMode)
 
 -- | Gets the direction of a camera as a ray.

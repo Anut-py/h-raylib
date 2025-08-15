@@ -254,14 +254,13 @@ library
     , base              >=4.0      && <4.22
     , bytestring        >=0.11.0   && <0.13
     , containers        >=0.6.0    && <0.9
-    , exceptions        >=0.10.4   && <0.11
-    , linear            >=1.22     && <1.24
     , template-haskell  >=2.16.0.0 && <2.24
     , text              >=2.0      && <2.2
   
   
   if !flag(disable-lens)
     build-depends:
+      , linear            >=1.22     && <1.24
       , lens              >=4.0      && <5.4
 
   hs-source-dirs:   src
@@ -379,3 +378,6 @@ library
 
   if flag(ghci)
     cpp-options: -DGHCI
+  
+  if flag(disable-lens)
+    cpp-options: -DDISABLE_LENS
