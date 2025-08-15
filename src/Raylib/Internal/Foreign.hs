@@ -44,7 +44,12 @@ import qualified Data.Text.Encoding as TE
 import Foreign (FunPtr, Ptr, Storable (peek, peekByteOff, poke, sizeOf), allocaBytes, castPtr, malloc, newArray, nullPtr, peekArray, plusPtr, pokeArray0, with, withArray, withArrayLen)
 import Foreign.C (CFloat, CInt, CString, CUChar, CUInt, peekCString, withCString)
 import Foreign.C.Types (CBool, CChar, CShort, CUShort)
+
+#ifndef DISABLE_LENS
+
 import Linear (V2, V3, V4)
+
+#endif
 
 -- Internal utility functions
 
@@ -111,11 +116,15 @@ instance (Freeable a, Storable a) => Freeable [a] where
           let val = arr !! i in rlFreeDependents val (plusPtr ptr (i * sizeOf val))
       )
 
+#ifndef DISABLE_LENS
+
 instance Freeable (V2 a)
 
 instance Freeable (V3 a)
 
 instance Freeable (V4 a)
+
+#endif
 
 rlFreeMaybeArray :: (Freeable a, Storable a) => Maybe [a] -> Ptr a -> IO ()
 rlFreeMaybeArray Nothing _ = return ()

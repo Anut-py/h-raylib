@@ -5,7 +5,7 @@
 module Raylib.Util.Lenses where
 
 import Control.Lens (Lens', lens)
-import Raylib.Internal.TH (genLenses)
+import Raylib.Util.Lenses.TH (genLenses)
 import qualified Raylib.Types as RL
 
 $( genLenses
