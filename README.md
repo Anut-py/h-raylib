@@ -81,6 +81,9 @@ package h-raylib
 The flags `platform-windows`, `platform-mac`, `platform-linux`, and `platform-bsd` are also
 supported if you want to build for a different platform.
 
+If you prefer not to use the `lens` package, you may enable the `disable-lens` flag. This
+removes the dependency on `lens` and disables `Raylib.Util.Lenses`.
+
 ## Running in GHCi
 
 You can use this library in GHCi just like any other library, but you will need to add `--constraint="h-raylib +ghci"` to the command. For example, in the root folder of this repository, you could use the command below to use the library through GHCi.

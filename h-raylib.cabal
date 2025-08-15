@@ -1,6 +1,6 @@
 cabal-version:      2.4
 name:               h-raylib
-version:            5.5.2.1
+version:            5.5.3.0
 synopsis:           Raylib bindings for Haskell
 category:           graphics
 description:
@@ -340,7 +340,7 @@ library
 
   else
     cc-options:
-      -DPLATFORM_DESKTOP_GLFW -Wno-int-to-void-pointer-cast
+      -DPLATFORM_DESKTOP_GLFW -Wno-int-to-void-pointer-cast -Wno-discarded-qualifiers
 
     c-sources:
       lib/rgui_bindings.c

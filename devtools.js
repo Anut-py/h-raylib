@@ -306,7 +306,7 @@ if (process.argv.includes("-u") || process.argv.includes("--nix-update")) {
   log(logLevel.INFO, `Building and running project in ${extractPath}`);
 
   spawnSync(
-    `cd ${extractPath} && sh ${path.join(extractPath, "run-all-examples.sh")}`,
+    `cd ${extractPath} && bash ${path.join(extractPath, "run-all-examples.sh")}`,
     {
       shell: true,
       stdio: "inherit",

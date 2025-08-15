@@ -8,6 +8,13 @@ Changes ported from the upstream raylib code are not mentioned unless they are b
 
 h-raylib's version numbers do not follow the usual format. The first two numbers in the version track the underlying C raylib version. For example, `5.1.x.x` versions use raylib 5.1 under the hood. The third number represents breaking changes (renamed/deleted functions or modules). The last number represents non-breaking changes (new functions or modules, bug fixes, etc). The safest version bound format to use is `h-raylib >=x.y.z.w && <x.y.(z+1)` (instead of the usual `^>=` bound).
 
+## Version 5.5.3.0
+_14 August 2025_
+
+- **BREAKING CHANGE**: Bracket functions now only work with the `IO` monad
+- Added the `disable-lens` flag
+- Loosened version bounds
+
 ## Version 5.5.2.1
 _28 October 2024_
 
