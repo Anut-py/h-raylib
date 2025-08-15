@@ -12,7 +12,7 @@ h-raylib's version numbers do not follow the usual format. The first two numbers
 _14 August 2025_
 
 - **BREAKING CHANGE**: Bracket functions now only work with the `IO` monad
-- Added the `disable-lens` flag
+- \[[#60](https://github.com/Anut-py/h-raylib/issues/60)\] Added the `disable-lens` flag
 - Loosened version bounds
 
 ## Version 5.5.2.1
