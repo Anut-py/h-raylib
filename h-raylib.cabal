@@ -45,7 +45,7 @@ data-files:
 
 source-repository head
   type:     git
-  location: git://github.com/Anut-py/h-raylib.git
+  location: https://github.com/Anut-py/h-raylib.git
 
 flag detect-platform
   description:
