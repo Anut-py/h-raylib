@@ -24,7 +24,7 @@ jobs:
           submodules: recursive
           
       - name: Set up Nix
-        uses: cachix/install-nix-action@v22
+        uses: cachix/install-nix-action@v31
         id: setup
           
       - name: Install dependencies on ubuntu
