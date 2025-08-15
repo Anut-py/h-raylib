@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   cabal-build:
-    name: GHC ${{ matrix.ghc-version }} on ${{ matrix.os }}
+    name: "GHC ${{ matrix.ghc-version }} on ${{ matrix.os }} (lens: ${{ matrix.lens }})"
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
