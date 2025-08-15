@@ -96,6 +96,7 @@ module Raylib.Util.Math
   )
 where
 
+import Data.Foldable (foldl')
 import Raylib.Types (Matrix (..), Quaternion, Vector2, pattern Vector2, Vector3, pattern Vector3, Vector4, pattern Vector4)
 epsilon :: Float
 epsilon = 0.000001
