@@ -2382,8 +2382,20 @@ TraceLogCallback_ customCallback;
 
 void CustomCallback(int logLevel, const char *text, va_list args)
 {
-    char *formatted = TextFormat(text, args);
+    va_list args_copy;
+    va_copy(args_copy, args);
+
+    int len = vsnprintf(NULL, 0, text, args_copy);
+    va_end(args_copy);
+
+    if (len < 0) return;
+
+    char *formatted = malloc(len + 1);
+
+    vsnprintf(formatted, len + 1, text, args);
     customCallback(logLevel, formatted);
+
+    free(formatted);
 }
 
 RLBIND void SetTraceLogCallback_(TraceLogCallback_ a)
