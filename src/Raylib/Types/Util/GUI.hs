@@ -56,7 +56,7 @@ data GuiState
   | StateFocused
   | StatePressed
   | StateDisabled
-  deriving (Eq, Show)
+  deriving (Eq, Show, Read)
 
 instance Enum GuiState where
   fromEnum x = case x of
@@ -84,7 +84,7 @@ data GuiTextAlignment
   = TextAlignLeft
   | TextAlignCenter
   | TextAlignRight
-  deriving (Eq, Show)
+  deriving (Eq, Show, Read)
 
 instance Enum GuiTextAlignment where
   fromEnum x = case x of
@@ -110,7 +110,7 @@ data GuiTextAlignmentVertical
   = TextAlignTop
   | TextAlignMiddle
   | TextAlignBottom
-  deriving (Eq, Show)
+  deriving (Eq, Show, Read)
 
 instance Enum GuiTextAlignmentVertical where
   fromEnum x = case x of
@@ -136,7 +136,7 @@ data GuiTextWrapMode
   = TextWrapNone
   | TextWrapChar
   | TextWrapWord
-  deriving (Eq, Show)
+  deriving (Eq, Show, Read)
 
 instance Enum GuiTextWrapMode where
   fromEnum x = case x of
@@ -180,7 +180,7 @@ data GuiControl
   | Colorpicker
   | Scrollbar
   | Statusbar
-  deriving (Eq, Show)
+  deriving (Eq, Show, Read)
 
 instance Enum GuiControl where
   fromEnum x = case x of
@@ -259,7 +259,7 @@ data GuiControlProperty
     TextPadding
   | -- | Control text horizontal alignment inside control text bound (after border and padding)
     TextAlignment
-  deriving (Eq, Show)
+  deriving (Eq, Show, Read)
 
 instance Enum GuiControlProperty where
   fromEnum x = case x of
@@ -320,7 +320,7 @@ data GuiDefaultProperty
     TextAlignmentVertical
   | -- | Text wrap-mode inside text bounds
     TextWrapMode
-  deriving (Eq, Show)
+  deriving (Eq, Show, Read)
 
 instance Enum GuiDefaultProperty where
   fromEnum x = case x of
@@ -353,7 +353,7 @@ instance Storable GuiDefaultProperty where
 data GuiToggleProperty
   = -- | ToggleGroup separation between toggles
     GroupPadding
-  deriving (Eq, Show)
+  deriving (Eq, Show, Read)
 
 instance Enum GuiToggleProperty where
   fromEnum x = case x of
@@ -376,7 +376,7 @@ data GuiSliderProperty
     SliderWidth
   | -- | Slider/SliderBar internal bar padding
     SliderPadding
-  deriving (Eq, Show)
+  deriving (Eq, Show, Read)
 
 instance Enum GuiSliderProperty where
   fromEnum x = case x of
@@ -399,7 +399,7 @@ instance Storable GuiSliderProperty where
 data GuiProgressBarProperty
   = -- | ProgressBar internal padding
     ProgressPadding
-  deriving (Eq, Show)
+  deriving (Eq, Show, Read)
 
 instance Enum GuiProgressBarProperty where
   fromEnum x = case x of
@@ -430,7 +430,7 @@ data GuiScrollBarProperty
     ScrollPadding
   | -- | ScrollBar scrolling speed
     ScrollSpeed
-  deriving (Eq, Show)
+  deriving (Eq, Show, Read)
 
 instance Enum GuiScrollBarProperty where
   fromEnum x = case x of
@@ -461,7 +461,7 @@ instance Storable GuiScrollBarProperty where
 data GuiCheckBoxProperty
   = -- | CheckBox internal check padding
     CheckPadding
-  deriving (Eq, Show)
+  deriving (Eq, Show, Read)
 
 instance Enum GuiCheckBoxProperty where
   fromEnum x = case x of
@@ -484,7 +484,7 @@ data GuiComboBoxProperty
     ComboButtonWidth
   | -- | ComboBox button separation
     ComboButtonSpacing
-  deriving (Eq, Show)
+  deriving (Eq, Show, Read)
 
 instance Enum GuiComboBoxProperty where
   fromEnum x = case x of
@@ -513,7 +513,7 @@ data GuiDropdownBoxProperty
     DropdownArrowHidden
   | -- | DropdownBox roll up flag (default rolls down)
     DropdownRollUp
-  deriving (Eq, Show)
+  deriving (Eq, Show, Read)
 
 instance Enum GuiDropdownBoxProperty where
   fromEnum x = case x of
@@ -540,7 +540,7 @@ instance Storable GuiDropdownBoxProperty where
 data GuiTextBoxProperty
   = -- | TextBox in read-only mode: 0-text editable, 1-text no-editable
     TextReadonly
-  deriving (Eq, Show)
+  deriving (Eq, Show, Read)
 
 instance Enum GuiTextBoxProperty where
   fromEnum x = case x of
@@ -563,7 +563,7 @@ data GuiSpinnerProperty
     SpinButtonWidth
   | -- | Spinner buttons separation
     SpinButtonSpacing
-  deriving (Eq, Show)
+  deriving (Eq, Show, Read)
 
 instance Enum GuiSpinnerProperty where
   fromEnum x = case x of
@@ -594,7 +594,7 @@ data GuiListViewProperty
     ScrollbarSide
   | -- | ListView items border width
     ListItemsBorderWidth
-  deriving (Eq, Show)
+  deriving (Eq, Show, Read)
 
 instance Enum GuiListViewProperty where
   fromEnum x = case x of
@@ -630,7 +630,7 @@ data GuiColorPickerProperty
     HuebarSelectorHeight
   | -- | ColorPicker right hue bar selector overflow
     HuebarSelectorOverflow
-  deriving (Eq, Show)
+  deriving (Eq, Show, Read)
 
 instance Enum GuiColorPickerProperty where
   fromEnum x = case x of
@@ -912,7 +912,7 @@ data GuiIconName
   | Icon253
   | Icon254
   | Icon255
-  deriving (Eq, Show)
+  deriving (Eq, Show, Read)
 
 instance Enum GuiIconName where
   fromEnum x = case x of
@@ -1454,7 +1454,7 @@ data GuiStyleProp = GuiStyleProp
     -- | Property value
     guiStyleProp'propertyValue :: Int
   }
-  deriving (Eq, Show, Freeable)
+  deriving (Eq, Show, Read, Freeable)
 
 instance Storable GuiStyleProp where
   sizeOf _ = 8

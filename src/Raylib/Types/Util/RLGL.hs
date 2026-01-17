@@ -79,7 +79,7 @@ data RLGLVersion
     RLOpenGL43
   | -- | OpenGL ES 2.0 (GLSL 100)
     RLOpenGLES20
-  deriving (Eq, Show)
+  deriving (Eq, Show, Read)
 
 instance Enum RLGLVersion where
   fromEnum n = case n of
@@ -123,7 +123,7 @@ data RLTraceLogLevel
     RLLogFatal
   | -- | Disable logging
     RLLogNone
-  deriving (Eq, Show, Enum)
+  deriving (Eq, Show, Read, Enum)
 
 instance Storable RLTraceLogLevel where
   sizeOf _ = 4
@@ -184,7 +184,7 @@ data RLPixelFormat
     RLPixelFormatCompressedAstc4x4Rgba
   | -- | 2 bpp
     RLPixelFormatCompressedAstc8x8Rgba
-  deriving (Eq, Show)
+  deriving (Eq, Show, Read)
 
 instance Enum RLPixelFormat where
   fromEnum n = case n of
@@ -264,7 +264,7 @@ data RLTextureFilter
     RLTextureFilterAnisotropic8x
   | -- | Anisotropic filtering 16x
     RLTextureFilterAnisotropic16x
-  deriving (Eq, Show, Enum)
+  deriving (Eq, Show, Read, Enum)
 
 instance Storable RLTextureFilter where
   sizeOf _ = 4
@@ -292,7 +292,7 @@ data RLBlendMode
     RlBlendCustom
   | -- | Blend textures using custom src/dst factors (use rlSetBlendFactorsSeparate())
     RlBlendCustomSeparate
-  deriving (Eq, Show, Enum)
+  deriving (Eq, Show, Read, Enum)
 
 instance Storable RLBlendMode where
   sizeOf _ = 4
@@ -356,7 +356,7 @@ data RLShaderLocationIndex
     RLShaderLocMapPrefilter
   | -- | Shader location: sampler2d texture: brdf
     RLShaderLocMapBRDF
-  deriving (Eq, Show, Enum)
+  deriving (Eq, Show, Read, Enum)
 
 instance Storable RLShaderLocationIndex where
   sizeOf _ = 4
@@ -394,7 +394,7 @@ data RLShaderUniformDataType
     RLShaderUniformUIVec4
   | -- | Shader uniform type: sampler2d
     RLShaderUniformSampler2D
-  deriving (Eq, Show, Enum)
+  deriving (Eq, Show, Read, Enum)
 
 instance Storable RLShaderUniformDataType where
   sizeOf _ = 4
@@ -414,7 +414,7 @@ data RLShaderAttributeDataType
     RLShaderAttribVec3
   | -- | Shader attribute type: vec4 (4 float)
     RLShaderAttribVec4
-  deriving (Eq, Show, Enum)
+  deriving (Eq, Show, Read, Enum)
 
 instance Storable RLShaderAttributeDataType where
   sizeOf _ = 4
@@ -447,7 +447,7 @@ data RLFramebufferAttachType
     RLAttachmentDepth
   | -- | Framebuffer attachment type: stencil
     RLAttachmentStencil
-  deriving (Eq, Show)
+  deriving (Eq, Show, Read)
 
 instance Enum RLFramebufferAttachType where
   fromEnum n = case n of
@@ -501,7 +501,7 @@ data RLFramebufferAttachTextureType
     RLAttachmentTexture2D
   | -- | Framebuffer texture attachment type: renderbuffer
     RLAttachmentRenderBuffer
-  deriving (Eq, Show)
+  deriving (Eq, Show, Read)
 
 instance Enum RLFramebufferAttachTextureType where
   fromEnum n = case n of
@@ -537,7 +537,7 @@ instance Storable RLFramebufferAttachTextureType where
 data RLCullMode
   = RLCullFaceFront
   | RLCullFaceBack
-  deriving (Eq, Show, Enum)
+  deriving (Eq, Show, Read, Enum)
 
 instance Storable RLCullMode where
   sizeOf _ = 4
@@ -555,7 +555,7 @@ data RLMatrixMode
     RLProjection
   | -- | GL_TEXTURE
     RLTexture
-  deriving (Eq, Show)
+  deriving (Eq, Show, Read)
 
 instance Enum RLMatrixMode where
   fromEnum n = case n of
@@ -585,7 +585,7 @@ data RLDrawMode
     RLTriangles
   | -- | GL_QUADS
     RLQuads
-  deriving (Eq, Show)
+  deriving (Eq, Show, Read)
 
 instance Enum RLDrawMode where
   fromEnum n = case n of
@@ -633,7 +633,7 @@ data RLTextureParam
     RLTextureParamFilterAnisotropic
   | -- | Texture mipmap bias, percentage ratio (custom identifier)
     RLTextureParamMipmapBiasRatio
-  deriving (Eq, Show)
+  deriving (Eq, Show, Read)
 
 instance Enum RLTextureParam where
   fromEnum n = case n of
@@ -681,7 +681,7 @@ data RLShaderType
     RLVertexShader
   | -- | GL_COMPUTE_SHADER
     RLComputeShader
-  deriving (Eq, Show)
+  deriving (Eq, Show, Read)
 
 instance Enum RLShaderType where
   fromEnum n = case n of
@@ -723,7 +723,7 @@ data RLBufferHint
     RLBufferHintDynamicRead
   | -- | GL_DYNAMIC_COPY
     RLBufferHintDynamicCopy
-  deriving (Eq, Show)
+  deriving (Eq, Show, Read)
 
 instance Enum RLBufferHint where
   fromEnum n = case n of
@@ -765,7 +765,7 @@ data RLBitField
     RLGLDepthBuffer
   | -- | GL_STENCIL_BUFFER_BIT
     RLGLStencilBuffer
-  deriving (Eq, Show)
+  deriving (Eq, Show, Read)
 
 instance Enum RLBitField where
   fromEnum n = case n of
@@ -810,7 +810,7 @@ data RLVertexBuffer = RLVertexBuffer
     -- | OpenGL Vertex Buffer Objects id (5 types of vertex data)
     rlVertexBuffer'vboId :: [Integer]
   }
-  deriving (Eq, Show)
+  deriving (Eq, Show, Read)
 
 instance Storable RLVertexBuffer where
   sizeOf _ = 72
@@ -888,7 +888,7 @@ data RLDrawCall = RLDrawCall
     -- | Texture id to be used on the draw -> Used to create new draw call if changed
     rlDrawCall'textureId :: Integer
   }
-  deriving (Eq, Show, Freeable)
+  deriving (Eq, Show, Read, Freeable)
 
 instance Storable RLDrawCall where
   sizeOf _ = 16
@@ -933,7 +933,7 @@ data RLRenderBatch = RLRenderBatch
     -- | Current depth value for next draw
     rlRenderBatch'currentDepth :: Float
   }
-  deriving (Eq, Show)
+  deriving (Eq, Show, Read)
 
 instance Storable RLRenderBatch where
   sizeOf _ = 32

@@ -55,7 +55,7 @@ data GlyphInfo = GlyphInfo
     glyphInfo'advanceX :: Int,
     glyphInfo'image :: Image
   }
-  deriving (Eq, Show)
+  deriving (Eq, Show, Read)
 
 instance Storable GlyphInfo where
   sizeOf _ = 40
@@ -101,7 +101,7 @@ data Font = Font
     font'recs :: [Rectangle],
     font'glyphs :: [GlyphInfo]
   }
-  deriving (Eq, Show)
+  deriving (Eq, Show, Read)
 
 instance Storable Font where
   sizeOf _ = 48

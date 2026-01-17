@@ -99,7 +99,7 @@ data MusicContextType
   | MusicAudioQOA
   | MusicModuleXM
   | MusicModuleMOD
-  deriving (Eq, Show, Enum)
+  deriving (Eq, Show, Read, Enum)
 
 instance Storable MusicContextType where
   sizeOf _ = 4
@@ -112,7 +112,7 @@ instance Storable MusicContextType where
 data AudioBufferUsage
   = AudioBufferUsageStatic
   | AudioBufferUsageStream
-  deriving (Eq, Show, Enum)
+  deriving (Eq, Show, Read, Enum)
 
 instance Storable AudioBufferUsage where
   sizeOf _ = 4
@@ -133,7 +133,7 @@ data Wave = Wave
     wave'channels :: Integer,
     wave'data :: [Int]
   }
-  deriving (Eq, Show)
+  deriving (Eq, Show, Read)
 
 instance Storable Wave where
   sizeOf _ = 24

@@ -49,7 +49,7 @@ data CameraMode
   | CameraModeThirdPerson
   deriving (Enum)
 
-data CameraProjection = CameraPerspective | CameraOrthographic deriving (Eq, Show, Enum)
+data CameraProjection = CameraPerspective | CameraOrthographic deriving (Eq, Show, Read, Enum)
 
 instance Storable CameraProjection where
   sizeOf _ = 4
@@ -70,7 +70,7 @@ data Camera3D = Camera3D
     camera3D'fovy :: Float,
     camera3D'projection :: CameraProjection
   }
-  deriving (Eq, Show, Freeable)
+  deriving (Eq, Show, Read, Freeable)
 
 instance Storable Camera3D where
   sizeOf _ = 44
@@ -113,7 +113,7 @@ data Camera2D = Camera2D
     camera2D'rotation :: Float,
     camera2D'zoom :: Float
   }
-  deriving (Eq, Show, Freeable)
+  deriving (Eq, Show, Read, Freeable)
 
 instance Storable Camera2D where
   sizeOf _ = 24

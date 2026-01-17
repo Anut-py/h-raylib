@@ -90,7 +90,7 @@ data PixelFormat
   | PixelFormatCompressedPvrtRgba
   | PixelFormatCompressedAstc4x4Rgba
   | PixelFormatCompressedAstc8x8Rgba
-  deriving (Eq, Show)
+  deriving (Eq, Show, Read)
 
 instance Storable PixelFormat where
   sizeOf _ = 4
@@ -182,7 +182,7 @@ data CubemapLayout
   | CubemapLayoutPanorama
   deriving (Enum)
 
-data NPatchLayout = NPatchNinePatch | NPatchThreePatchVertical | NPatchThreePatchHorizontal deriving (Eq, Show, Enum)
+data NPatchLayout = NPatchNinePatch | NPatchThreePatchVertical | NPatchThreePatchHorizontal deriving (Eq, Show, Read, Enum)
 
 instance Storable NPatchLayout where
   sizeOf _ = 4
@@ -203,7 +203,7 @@ data Image = Image
     image'mipmaps :: Int,
     image'format :: PixelFormat
   }
-  deriving (Eq, Show)
+  deriving (Eq, Show, Read)
 
 instance Storable Image where
   sizeOf _ = 24
@@ -250,7 +250,7 @@ data Texture = Texture
     texture'mipmaps :: Int,
     texture'format :: PixelFormat
   }
-  deriving (Eq, Show, Freeable)
+  deriving (Eq, Show, Read, Freeable)
 
 instance Storable Texture where
   sizeOf _ = 20
@@ -298,7 +298,7 @@ data RenderTexture = RenderTexture
     renderTexture'texture :: Texture,
     renderTexture'depth :: Texture
   }
-  deriving (Eq, Show, Freeable)
+  deriving (Eq, Show, Read, Freeable)
 
 instance Storable RenderTexture where
   sizeOf _ = 44
@@ -342,7 +342,7 @@ data NPatchInfo = NPatchInfo
     nPatchInfo'bottom :: Int,
     nPatchInfo'layout :: NPatchLayout
   }
-  deriving (Eq, Show, Freeable)
+  deriving (Eq, Show, Read, Freeable)
 
 instance Storable NPatchInfo where
   sizeOf _ = 36

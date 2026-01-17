@@ -172,7 +172,7 @@ data ConfigFlag
   | BorderlessWindowedMode
   | Msaa4xHint
   | InterlacedHint
-  deriving (Eq, Show, Freeable)
+  deriving (Eq, Show, Read, Freeable)
 
 instance Enum ConfigFlag where
   fromEnum g = case g of
@@ -212,7 +212,7 @@ instance Enum ConfigFlag where
     n -> error $ "(ConfigFlag.toEnum) Invalid value: " ++ show n
 
 data TraceLogLevel = LogAll | LogTrace | LogDebug | LogInfo | LogWarning | LogError | LogFatal | LogNone
-  deriving (Eq, Show, Enum)
+  deriving (Eq, Show, Read, Enum)
 
 data KeyboardKey
   = KeyNull
@@ -325,7 +325,7 @@ data KeyboardKey
   | KeyMenu
   | KeyVolumeUp
   | KeyVolumeDown
-  deriving (Eq, Show)
+  deriving (Eq, Show, Read)
 
 instance Enum KeyboardKey where
   fromEnum k = case k of
@@ -563,7 +563,7 @@ data MouseButton
   | MouseButtonExtra
   | MouseButtonForward
   | MouseButtonBack
-  deriving (Eq, Show, Enum, Bounded)
+  deriving (Eq, Show, Read, Enum, Bounded)
 
 data MouseCursor
   = MouseCursorDefault
@@ -577,7 +577,7 @@ data MouseCursor
   | MouseCursorResizeNESW
   | MouseCursorResizeAll
   | MouseCursorNotAllowed
-  deriving (Eq, Show, Enum, Bounded)
+  deriving (Eq, Show, Read, Enum, Bounded)
 
 data GamepadButton
   = GamepadButtonUnknown
@@ -598,7 +598,7 @@ data GamepadButton
   | GamepadButtonMiddleRight
   | GamepadButtonLeftThumb
   | GamepadButtonRightThumb
-  deriving (Eq, Show, Enum, Bounded)
+  deriving (Eq, Show, Read, Enum, Bounded)
 
 data GamepadAxis
   = GamepadAxisLeftX
@@ -607,7 +607,7 @@ data GamepadAxis
   | GamepadAxisRightY
   | GamepadAxisLeftTrigger
   | GamepadAxisRightTrigger
-  deriving (Eq, Show, Enum, Bounded)
+  deriving (Eq, Show, Read, Enum, Bounded)
 
 data BlendMode
   = BlendAlpha
@@ -632,7 +632,7 @@ data Gesture
   | GestureSwipeDown
   | GesturePinchIn
   | GesturePinchOut
-  deriving (Show, Eq)
+  deriving (Show, Read, Eq)
 
 instance Enum Gesture where
   fromEnum n = case n of
@@ -671,7 +671,7 @@ pattern Vector4 :: Float -> Float -> Float -> Float -> Vector4
 
 #ifdef DISABLE_LENS
 
-data Vector2' = Vector2' Float Float deriving (Eq, Show, Freeable)
+data Vector2' = Vector2' Float Float deriving (Eq, Show, Read, Freeable)
 instance Storable Vector2' where
   sizeOf _ = 8
   alignment _ = 4
@@ -691,7 +691,7 @@ pattern Vector2
   } = Vector2' vector2'x vector2'y
 {-# COMPLETE Vector2 :: Vector2' #-}
 
-data Vector3' = Vector3' Float Float Float deriving (Eq, Show, Freeable)
+data Vector3' = Vector3' Float Float Float deriving (Eq, Show, Read, Freeable)
 
 instance Storable Vector3' where
   sizeOf _ = 12
@@ -716,7 +716,7 @@ pattern Vector3
   } = Vector3' vector3'x vector3'y vector3'z
 {-# COMPLETE Vector3 :: Vector3' #-}
 
-data Vector4' = Vector4' Float Float Float Float deriving (Eq, Show, Freeable)
+data Vector4' = Vector4' Float Float Float Float deriving (Eq, Show, Read, Freeable)
 
 instance Storable Vector4' where
   sizeOf _ = 16
@@ -825,7 +825,7 @@ data Matrix = Matrix
     matrix'm11 :: Float,
     matrix'm15 :: Float
   }
-  deriving (Eq, Show, Freeable)
+  deriving (Eq, Show, Read, Freeable)
 
 instance Storable Matrix where
   sizeOf _ = 64
@@ -921,7 +921,7 @@ data Color = Color
     color'b :: Word8,
     color'a :: Word8
   }
-  deriving (Eq, Show, Freeable)
+  deriving (Eq, Show, Read, Freeable)
 
 instance Storable Color where
   sizeOf _ = 4
@@ -957,7 +957,7 @@ data Rectangle = Rectangle
     rectangle'width :: Float,
     rectangle'height :: Float
   }
-  deriving (Eq, Show, Freeable)
+  deriving (Eq, Show, Read, Freeable)
 
 instance Storable Rectangle where
   sizeOf _ = 16
@@ -998,7 +998,7 @@ data VrDeviceInfo = VrDeviceInfo
     vrDeviceInfo'lensDistortionValues :: [Float],
     vrDeviceInfo'chromaAbCorrection :: [Float]
   }
-  deriving (Eq, Show, Freeable)
+  deriving (Eq, Show, Read, Freeable)
 
 instance Storable VrDeviceInfo where
   sizeOf _ = 60
@@ -1065,7 +1065,7 @@ data VrStereoConfig = VrStereoConfig
     vrStereoConfig'scale :: [Float],
     vrStereoConfig'scaleIn :: [Float]
   }
-  deriving (Eq, Show, Freeable)
+  deriving (Eq, Show, Read, Freeable)
 
 instance Storable VrStereoConfig where
   sizeOf _ = 304
@@ -1127,7 +1127,7 @@ data FilePathList = FilePathList
   { filePathList'capacity :: Integer,
     filePathList'paths :: [String]
   }
-  deriving (Eq, Show)
+  deriving (Eq, Show, Read)
 
 instance Storable FilePathList where
   sizeOf _ = 16
@@ -1168,7 +1168,7 @@ data AutomationEvent = AutomationEvent
     automationEvent'type :: Integer,
     automationEvent'params :: [Int]
   }
-  deriving (Eq, Show, Freeable)
+  deriving (Eq, Show, Read, Freeable)
 
 instance Storable AutomationEvent where
   sizeOf _ = 24
@@ -1198,7 +1198,7 @@ data AutomationEventList = AutomationEventList
   { automationEventList'capacity :: Integer,
     automationEventList'events :: [AutomationEvent]
   }
-  deriving (Eq, Show)
+  deriving (Eq, Show, Read)
 
 instance Storable AutomationEventList where
   sizeOf _ = 16
