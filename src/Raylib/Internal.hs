@@ -62,6 +62,7 @@ module Raylib.Internal
 
     -- * Miscellaneous
     c'rlGetShaderIdDefault,
+    c'rlGetShaderLocsDefault,
     getPixelDataSize,
   )
 where
@@ -151,6 +152,7 @@ defaultWindowResources = do
 
 $( genNative
      [ ("c'rlGetShaderIdDefault", "rlGetShaderIdDefault_", "rlgl_bindings.h", [t|IO CUInt|]),
+       ("c'rlGetShaderLocsDefault", "rlGetShaderLocsDefault_", "rlgl_bindings.h", [t|IO (Ptr CInt)|]),
        ("c'rlUnloadShaderProgram", "rlUnloadShaderProgram_", "rlgl_bindings.h", [t|CUInt -> IO ()|]),
        ("c'rlUnloadTexture", "rlUnloadTexture_", "rlgl_bindings.h", [t|CUInt -> IO ()|]),
        ("c'rlUnloadFramebuffer", "rlUnloadFramebuffer_", "rlgl_bindings.h", [t|CUInt -> IO ()|]),

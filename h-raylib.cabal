@@ -249,15 +249,15 @@ library
   if !flag(disable-lens)
     other-modules:
       Raylib.Util.Lenses.TH
-  
+
   build-depends:
-    , base              >=4.0      && <4.22
+    , base              >=4.0      && <4.23
     , bytestring        >=0.11.0   && <0.13
     , containers        >=0.6.0    && <0.9
     , template-haskell  >=2.16.0.0 && <2.24
     , text              >=2.0      && <2.2
-  
-  
+
+
   if !flag(disable-lens)
     build-depends:
       , linear            >=1.22     && <1.24
@@ -316,7 +316,7 @@ library
       Xext
 
     cc-options:
-      -Wno-implicit-function-declaration -Wno-unused-result -D_GLFW_X11
+      -Wno-implicit-function-declaration -Wno-unused-result -Wno-discarded-qualifiers -D_GLFW_X11
 
   elif (flag(platform-mac) || (flag(detect-platform) && os(osx)))
     frameworks: OpenGL Cocoa IOKit CoreVideo CoreAudio CoreFoundation
@@ -378,6 +378,6 @@ library
 
   if flag(ghci)
     cpp-options: -DGHCI
-  
+
   if flag(disable-lens)
     cpp-options: -DDISABLE_LENS

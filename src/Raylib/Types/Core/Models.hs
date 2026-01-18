@@ -94,7 +94,6 @@ import Foreign
     mallocForeignPtr,
     mallocForeignPtrArray,
     newArray,
-    newForeignPtr,
     peekArray,
     plusPtr,
     pokeArray,
@@ -112,8 +111,8 @@ import Foreign.C
     castCharToCChar,
     peekCString,
   )
-import Raylib.Internal (Closeable (addToWindowResources, close), addShaderId, addTextureId, addVaoId, addVboIds, c'rlGetShaderIdDefault, c'rlUnloadShaderProgram, c'rlUnloadTexture, c'rlUnloadVertexArray, c'rlUnloadVertexBuffer)
-import Raylib.Internal.Foreign (Freeable (rlFreeDependents), c'free, freeMaybePtr, newMaybeArray, p'free, peekMaybeArray, peekStaticArray, pokeStaticArray, rightPad, rlFree, rlFreeMaybeArray)
+import Raylib.Internal (Closeable (addToWindowResources, close), addShaderId, addTextureId, addVaoId, addVboIds, c'rlGetShaderIdDefault, c'rlGetShaderLocsDefault, c'rlUnloadShaderProgram, c'rlUnloadTexture, c'rlUnloadVertexArray, c'rlUnloadVertexBuffer)
+import Raylib.Internal.Foreign (Freeable (rlFreeDependents), c'free, freeMaybePtr, newMaybeArray, peekMaybeArray, peekStaticArray, pokeStaticArray, rightPad, rlFree, rlFreeMaybeArray)
 import Raylib.Types.Core (Color, Matrix, Quaternion, Vector2, Vector3, Vector4, pattern Vector2, pattern Vector3, pattern Vector4)
 import Raylib.Types.Core.Textures (Texture (texture'id))
 
@@ -133,7 +132,7 @@ data MaterialMapIndex
   | MaterialMapIrradiance
   | MaterialMapPrefilter
   | MaterialMapBrdf
-  deriving (Eq, Show, Enum)
+  deriving (Eq, Show, Read, Enum)
 
 data DefaultShaderAttributeLocation
   = DefaultShaderAttribLocationPosition
@@ -145,7 +144,7 @@ data DefaultShaderAttributeLocation
   | DefaultShaderAttribLocationIndices
   | DefaultShaderAttribLocationBoneIds
   | DefaultShaderAttribLocationBoneWeights
-  deriving (Eq, Show, Enum)
+  deriving (Eq, Show, Read, Enum)
 
 data ShaderLocationIndex
   = ShaderLocVertexPosition
@@ -177,7 +176,7 @@ data ShaderLocationIndex
   | ShaderLocVertexBoneIds
   | ShaderLocVertexBoneWeights
   | ShaderLocBoneMatrices
-  deriving (Eq, Show, Enum)
+  deriving (Eq, Show, Read, Enum)
 
 data ShaderUniformDataType
   = ShaderUniformFloatType
@@ -189,7 +188,7 @@ data ShaderUniformDataType
   | ShaderUniformIVec3Type
   | ShaderUniformIVec4Type
   | ShaderUniformSampler2DType
-  deriving (Eq, Show, Enum)
+  deriving (Eq, Show, Read, Enum)
 
 data ShaderUniformData
   = ShaderUniformFloat Float
@@ -201,7 +200,7 @@ data ShaderUniformData
   | ShaderUniformIVec3 (Int, Int, Int)
   | ShaderUniformIVec4 (Int, Int, Int, Int)
   | ShaderUniformSampler2D Texture
-  deriving (Eq, Show)
+  deriving (Eq, Show, Read)
 
 data ShaderUniformDataV
   = ShaderUniformFloatV [Float]
@@ -213,7 +212,7 @@ data ShaderUniformDataV
   | ShaderUniformIVec3V [(Int, Int, Int)]
   | ShaderUniformIVec4V [(Int, Int, Int, Int)]
   | ShaderUniformSampler2DV [Texture]
-  deriving (Eq, Show)
+  deriving (Eq, Show, Read)
 
 -- | Internal use
 unpackShaderUniformData :: ShaderUniformData -> IO (ShaderUniformDataType, ForeignPtr ())
@@ -321,7 +320,7 @@ data ShaderAttributeDataType
   | ShaderAttribVec2
   | ShaderAttribVec3
   | ShaderAttribVec4
-  deriving (Eq, Show, Enum)
+  deriving (Eq, Show, Read, Enum)
 
 ---------------------------------------
 -- models structures ------------------
@@ -331,7 +330,7 @@ data Mesh = Mesh
   { mesh'vertexCount :: Int,
     mesh'triangleCount :: Int,
     mesh'vertices :: [Vector3],
-    mesh'texcoords :: [Vector2],
+    mesh'texcoords :: Maybe [Vector2],
     mesh'texcoords2 :: Maybe [Vector2],
     mesh'normals :: [Vector3],
     mesh'tangents :: Maybe [Vector4],
@@ -347,7 +346,7 @@ data Mesh = Mesh
     -- | Use `toEnum` on `DefaultShaderAttributeLocation` for indices
     mesh'vboId :: Maybe [Integer]
   }
-  deriving (Eq, Show)
+  deriving (Eq, Show, Read)
 
 instance Storable Mesh where
   sizeOf _ = 120
@@ -356,7 +355,7 @@ instance Storable Mesh where
     vertexCount <- fromIntegral <$> peek (p'mesh'vertexCount _p)
     triangleCount <- fromIntegral <$> peek (p'mesh'triangleCount _p)
     vertices <- peekArray vertexCount =<< peek (p'mesh'vertices _p)
-    texcoords <- peekArray vertexCount =<< peek (p'mesh'texcoords _p)
+    texcoords <- peekMaybeArray vertexCount =<< peek (p'mesh'texcoords _p)
     texcoords2 <- peekMaybeArray vertexCount =<< peek (p'mesh'texcoords2 _p)
     normals <- peekArray vertexCount =<< peek (p'mesh'normals _p)
     tangents <- peekMaybeArray vertexCount =<< peek (p'mesh'tangents _p)
@@ -365,8 +364,8 @@ instance Storable Mesh where
     animVertices <- peekMaybeArray vertexCount =<< peek (p'mesh'animVertices _p)
     animNormals <- peekMaybeArray vertexCount =<< peek (p'mesh'animNormals _p)
     boneCount <- fromIntegral <$> peek (p'mesh'boneCount _p)
-    boneIds <- (map fromIntegral <$>) <$> (peekMaybeArray boneCount =<< peek (p'mesh'boneIds _p))
-    boneWeights <- (map realToFrac <$>) <$> (peekMaybeArray boneCount =<< peek (p'mesh'boneWeights _p))
+    boneIds <- (map fromIntegral <$>) <$> (peekMaybeArray (4 * vertexCount) =<< peek (p'mesh'boneIds _p))
+    boneWeights <- (map realToFrac <$>) <$> (peekMaybeArray (4 * vertexCount) =<< peek (p'mesh'boneWeights _p))
     boneMatrices <- peekMaybeArray boneCount =<< peek (p'mesh'boneMatrices _p)
     vaoId <- fromIntegral <$> peek (p'mesh'vaoId _p)
     vboId <- (map fromIntegral <$>) <$> (peekMaybeArray 9 =<< peek (p'mesh'vboId _p))
@@ -375,7 +374,7 @@ instance Storable Mesh where
     poke (p'mesh'vertexCount _p) (fromIntegral vertexCount)
     poke (p'mesh'triangleCount _p) (fromIntegral triangleCount)
     poke (p'mesh'vertices _p) =<< newArray vertices
-    poke (p'mesh'texcoords _p) =<< newArray texcoords
+    poke (p'mesh'texcoords _p) =<< newMaybeArray texcoords
     poke (p'mesh'texcoords2 _p) =<< newMaybeArray texcoords2
     poke (p'mesh'normals _p) =<< newArray normals
     poke (p'mesh'tangents _p) =<< newMaybeArray tangents
@@ -411,7 +410,7 @@ p'mesh'triangleCount = (`plusPtr` 4)
 p'mesh'vertices :: Ptr Mesh -> Ptr (Ptr Vector3)
 p'mesh'vertices = (`plusPtr` 8)
 
--- array (mesh'vertexCount)
+-- maybe array (mesh'vertexCount)
 p'mesh'texcoords :: Ptr Mesh -> Ptr (Ptr Vector2)
 p'mesh'texcoords = (`plusPtr` 16)
 
@@ -496,7 +495,7 @@ data Shader = Shader
   { shader'id :: Integer,
     shader'locs :: [Int]
   }
-  deriving (Eq, Show)
+  deriving (Eq, Show, Read)
 
 instance Storable Shader where
   sizeOf _ = 16
@@ -507,13 +506,7 @@ instance Storable Shader where
     return $ Shader sId locs
   poke _p (Shader sId locs) = do
     poke (p'shader'id _p) (fromIntegral sId)
-    defaultShaderId <- c'rlGetShaderIdDefault
-    locsArr <- newArray (map fromIntegral locs)
-    if sId == fromIntegral defaultShaderId
-      then do
-        locsPtr <- newForeignPtr p'free locsArr
-        withForeignPtr locsPtr $ poke (p'shader'locs _p)
-      else poke (p'shader'locs _p) locsArr
+    poke (p'shader'locs _p) =<< newArray (map fromIntegral locs)
     return ()
 
 instance Closeable Shader where
@@ -531,21 +524,19 @@ p'shader'locs :: Ptr Shader -> Ptr (Ptr CInt)
 p'shader'locs = (`plusPtr` 8)
 
 instance Freeable Shader where
-  rlFreeDependents val ptr = do
-    defaultShaderId <- c'rlGetShaderIdDefault
+  rlFreeDependents _ ptr = do
+    defaultShaderLocs <- c'rlGetShaderLocsDefault
+    locsPtr <- peek (p'shader'locs ptr)
     unless
-      (shader'id val == fromIntegral defaultShaderId)
-      ( do
-          locsPtr <- peek (p'shader'locs ptr)
-          c'free $ castPtr locsPtr
-      )
+      (locsPtr == defaultShaderLocs)
+      (c'free $ castPtr locsPtr)
 
 data MaterialMap = MaterialMap
   { materialMap'texture :: Texture,
     materialMap'color :: Color,
     materialMap'value :: Float
   }
-  deriving (Eq, Show, Freeable)
+  deriving (Eq, Show, Read, Freeable)
 
 instance Storable MaterialMap where
   sizeOf _ = 28
@@ -575,7 +566,7 @@ data Material = Material
     material'maps :: Maybe [MaterialMap],
     material'params :: [Float]
   }
-  deriving (Eq, Show)
+  deriving (Eq, Show, Read)
 
 instance Storable Material where
   sizeOf _ = 40
@@ -633,7 +624,7 @@ data Transform = Transform
     transform'rotation :: Quaternion,
     transform'scale :: Vector3
   }
-  deriving (Eq, Show, Freeable)
+  deriving (Eq, Show, Read, Freeable)
 
 instance Storable Transform where
   sizeOf _ = 40
@@ -662,7 +653,7 @@ data BoneInfo = BoneInfo
   { boneInfo'name :: String,
     boneInfo'parent :: Int
   }
-  deriving (Eq, Show, Freeable)
+  deriving (Eq, Show, Read, Freeable)
 
 instance Storable BoneInfo where
   sizeOf _ = 36
@@ -692,7 +683,7 @@ data Model = Model
     model'bones :: Maybe [BoneInfo],
     model'bindPose :: Maybe [Transform]
   }
-  deriving (Eq, Show)
+  deriving (Eq, Show, Read)
 
 instance Storable Model where
   sizeOf _ = 120
@@ -775,7 +766,7 @@ data ModelAnimation = ModelAnimation
     modelAnimation'framePoses :: [[Transform]],
     modelAnimation'name :: String
   }
-  deriving (Eq, Show)
+  deriving (Eq, Show, Read)
 
 instance Storable ModelAnimation where
   sizeOf _ = 56
@@ -827,7 +818,7 @@ data Ray = Ray
   { ray'position :: Vector3,
     ray'direction :: Vector3
   }
-  deriving (Eq, Show, Freeable)
+  deriving (Eq, Show, Read, Freeable)
 
 instance Storable Ray where
   sizeOf _ = 24
@@ -853,7 +844,7 @@ data RayCollision = RayCollision
     rayCollision'point :: Vector3,
     rayCollision'normal :: Vector3
   }
-  deriving (Eq, Show, Freeable)
+  deriving (Eq, Show, Read, Freeable)
 
 instance Storable RayCollision where
   sizeOf _ = 32
@@ -887,7 +878,7 @@ data BoundingBox = BoundingBox
   { boundingBox'min :: Vector3,
     boundingBox'max :: Vector3
   }
-  deriving (Eq, Show, Freeable)
+  deriving (Eq, Show, Read, Freeable)
 
 instance Storable BoundingBox where
   sizeOf _ = 24
