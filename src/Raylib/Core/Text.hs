@@ -103,7 +103,7 @@ $( genNative
        ("c'loadFontEx", "LoadFontEx_", "rl_bindings.h", [t|CString -> CInt -> Ptr CInt -> CInt -> IO (Ptr Font)|]),
        ("c'loadFontFromImage", "LoadFontFromImage_", "rl_bindings.h", [t|Ptr Image -> Ptr Color -> CInt -> IO (Ptr Font)|]),
        ("c'loadFontFromMemory", "LoadFontFromMemory_", "rl_bindings.h", [t|CString -> Ptr CUChar -> CInt -> CInt -> Ptr CInt -> CInt -> IO (Ptr Font)|]),
-       ("c'loadFontData", "LoadFontData_", "rl_bindings.h", [t|Ptr CUChar -> CInt -> CInt -> Ptr CInt -> CInt -> CInt -> IO (Ptr GlyphInfo)|]),
+       ("c'loadFontData", "LoadFontData_", "rl_bindings.h", [t|Ptr CUChar -> CInt -> CInt -> Ptr CInt -> CInt -> CInt -> Ptr CInt -> IO (Ptr GlyphInfo)|]),
        ("c'genImageFontAtlas", "GenImageFontAtlas_", "rl_bindings.h", [t|Ptr GlyphInfo -> Ptr (Ptr Rectangle) -> CInt -> CInt -> CInt -> CInt -> IO (Ptr Image)|]),
        ("c'unloadFontData", "UnloadFontData_", "rl_bindings.h", [t|Ptr GlyphInfo -> CInt -> IO ()|]),
        ("c'isFontValid", "IsFontValid_", "rl_bindings.h", [t|Ptr Font -> IO CBool|]),
@@ -168,17 +168,28 @@ loadFontFromMemory fileType fileData fontSize codepoints =
     )
     >>= pop
 
-loadFontData :: [Integer] -> Int -> Maybe [Int] -> FontType -> IO GlyphInfo
+loadFontData :: [Integer] -> Int -> Maybe [Int] -> FontType -> IO [GlyphInfo]
 loadFontData fileData fontSize codepoints fontType =
   withFreeableArrayLen
     (map fromIntegral fileData)
     ( \size d ->
         case codepoints of
           Just codepoints' ->
-            withFreeableArrayLen (map fromIntegral codepoints') (\l c -> c'loadFontData d (fromIntegral (size * sizeOf (0 :: CUChar))) (fromIntegral fontSize) c (fromIntegral l) (fromIntegral (fromEnum fontType)))
-          Nothing -> c'loadFontData d (fromIntegral (size * sizeOf (0 :: CUChar))) (fromIntegral fontSize) nullPtr 0 (fromIntegral (fromEnum fontType))
+            withFreeableArrayLen
+              (map fromIntegral codepoints')
+              (\l c ->
+                withFreeable 0
+                  (\i -> do
+                    arr <- c'loadFontData d (fromIntegral (size * sizeOf (0 :: CUChar))) (fromIntegral fontSize) c (fromIntegral l) (fromIntegral (fromEnum fontType)) i
+                    al <- peek i
+                    popCArray (fromIntegral al) arr))
+          Nothing ->
+            withFreeable 0
+              (\i -> do
+                arr <- c'loadFontData d (fromIntegral (size * sizeOf (0 :: CUChar))) (fromIntegral fontSize) nullPtr 0 (fromIntegral (fromEnum fontType)) i
+                al <- peek i
+                popCArray (fromIntegral al) arr)
     )
-    >>= pop
 
 genImageFontAtlas :: [GlyphInfo] -> [[Rectangle]] -> Int -> Int -> Int -> Int -> IO Image
 genImageFontAtlas chars recs glyphCount fontSize padding packMethod = withFreeableArray chars (\c -> withFreeableArray2D recs (\r -> c'genImageFontAtlas c r (fromIntegral glyphCount) (fromIntegral fontSize) (fromIntegral padding) (fromIntegral packMethod))) >>= pop

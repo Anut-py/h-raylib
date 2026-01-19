@@ -126,6 +126,8 @@ void rlglInit_(int a, int b);
 
 void rlLoadExtensions_(void *a);
 
+void *rlGetProcAddress_(char *a);
+
 int rlGetVersion_();
 
 void rlSetFramebufferWidth_(int a);
@@ -182,7 +184,7 @@ unsigned int rlLoadTexture_(const void *a, int b, int c, int d, int e);
 
 unsigned int rlLoadTextureDepth_(int a, int b, bool c);
 
-unsigned int rlLoadTextureCubemap_(const void *a, int b, int c);
+unsigned int rlLoadTextureCubemap_(const void *a, int b, int c, int d);
 
 void rlUpdateTexture_(unsigned int a, int b, int c, int d, int e, int f, const void *g);
 
@@ -203,6 +205,10 @@ unsigned int rlLoadFramebuffer_();
 void rlFramebufferAttach_(unsigned int a, unsigned int b, int c, int d, int e);
 
 bool rlFramebufferComplete_(unsigned int a);
+
+void rlCopyFramebuffer_(int a, int b, int c, int d, int e, void *f);
+
+void rlResizeFramebuffer_(int a, int b);
 
 void rlUnloadFramebuffer_(unsigned int a);
 
@@ -288,9 +294,15 @@ void rlEnableScissorTest_();
 
 void rlDisableScissorTest_();
 
-void rlEnableWireMode_();
-
 void rlEnablePointMode_();
+
+void rlDisablePointMode_();
+
+void rlSetPointSize_(float a);
+
+float rlGetPointSize_();
+
+void rlEnableWireMode_();
 
 void rlDisableWireMode_();
 

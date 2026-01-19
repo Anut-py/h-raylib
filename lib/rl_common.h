@@ -1,7 +1,7 @@
 #include <raylib.h>
 #include <rlgl.h>
 #include <raygui.h>
-#include <config.h>
+// #include <config.h>
 #include <stdlib.h>
 
 #ifndef RLBIND

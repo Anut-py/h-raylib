@@ -69,7 +69,7 @@ module Raylib.Core.Models
     loadModelAnimations,
     updateModelAnimation,
     isModelAnimationValid,
-    updateModelAnimationBoneMatrices,
+    updateModelAnimationBones,
     checkCollisionSpheres,
     checkCollisionBoxes,
     checkCollisionBoxSphere,
@@ -147,7 +147,7 @@ module Raylib.Core.Models
     c'unloadModelAnimation,
     c'unloadModelAnimations,
     c'isModelAnimationValid,
-    c'updateModelAnimationBoneMatrices,
+    c'updateModelAnimationBones,
     c'checkCollisionSpheres,
     c'checkCollisionBoxes,
     c'checkCollisionBoxSphere,
@@ -266,7 +266,7 @@ $( genNative
        ("c'unloadModelAnimation", "UnloadModelAnimation_", "rl_bindings.h", [t|Ptr ModelAnimation -> IO ()|]),
        ("c'unloadModelAnimations", "UnloadModelAnimations_", "rl_bindings.h", [t|Ptr ModelAnimation -> CInt -> IO ()|]),
        ("c'isModelAnimationValid", "IsModelAnimationValid_", "rl_bindings.h", [t|Ptr Model -> Ptr ModelAnimation -> IO CBool|]),
-       ("c'updateModelAnimationBoneMatrices", "UpdateModelAnimationBoneMatrices_", "rl_bindings.h", [t|Ptr Model -> Ptr ModelAnimation -> CInt -> IO ()|]),
+       ("c'updateModelAnimationBones", "UpdateModelAnimationBones_", "rl_bindings.h", [t|Ptr Model -> Ptr ModelAnimation -> CInt -> IO ()|]),
        ("c'checkCollisionSpheres", "CheckCollisionSpheres_", "rl_bindings.h", [t|Ptr Vector3 -> CFloat -> Ptr Vector3 -> CFloat -> IO CBool|]),
        ("c'checkCollisionBoxes", "CheckCollisionBoxes_", "rl_bindings.h", [t|Ptr BoundingBox -> Ptr BoundingBox -> IO CBool|]),
        ("c'checkCollisionBoxSphere", "CheckCollisionBoxSphere_", "rl_bindings.h", [t|Ptr BoundingBox -> Ptr Vector3 -> CFloat -> IO CBool|]),
@@ -514,8 +514,8 @@ updateModelAnimation model animation frame = withFreeable model (\m -> withFreea
 isModelAnimationValid :: Model -> ModelAnimation -> IO Bool
 isModelAnimationValid model animation = toBool <$> withFreeable model (withFreeable animation . c'isModelAnimationValid)
 
-updateModelAnimationBoneMatrices :: Model -> ModelAnimation -> Int -> IO ()
-updateModelAnimationBoneMatrices model animation frame = withFreeable model (\m -> withFreeable animation (\a -> c'updateModelAnimationBoneMatrices m a (fromIntegral frame)))
+updateModelAnimationBones :: Model -> ModelAnimation -> Int -> IO ()
+updateModelAnimationBones model animation frame = withFreeable model (\m -> withFreeable animation (\a -> c'updateModelAnimationBones m a (fromIntegral frame)))
 
 checkCollisionSpheres :: Vector3 -> Float -> Vector3 -> Float -> Bool
 checkCollisionSpheres center1 radius1 center2 radius2 = toBool $ unsafePerformIO (withFreeable center1 (\c1 -> withFreeable center2 (\c2 -> c'checkCollisionSpheres c1 (realToFrac radius1) c2 (realToFrac radius2))))

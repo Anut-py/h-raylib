@@ -14,6 +14,7 @@ module Raylib.Core.Shapes
     drawLineEx,
     drawLineStrip,
     drawLineBezier,
+    drawLineDashed,
     drawCircle,
     drawCircleSector,
     drawCircleSectorLines,
@@ -22,7 +23,9 @@ module Raylib.Core.Shapes
     drawCircleLines,
     drawCircleLinesV,
     drawEllipse,
+    drawEllipseV,
     drawEllipseLines,
+    drawEllipseLinesV,
     drawRing,
     drawRingLines,
     drawRectangle,
@@ -82,6 +85,7 @@ module Raylib.Core.Shapes
     c'drawLineEx,
     c'drawLineStrip,
     c'drawLineBezier,
+    c'drawLineDashed,
     c'drawCircle,
     c'drawCircleSector,
     c'drawCircleSectorLines,
@@ -90,7 +94,9 @@ module Raylib.Core.Shapes
     c'drawCircleLines,
     c'drawCircleLinesV,
     c'drawEllipse,
+    c'drawEllipseV,
     c'drawEllipseLines,
+    c'drawEllipseLinesV,
     c'drawRing,
     c'drawRingLines,
     c'drawRectangle,
@@ -164,6 +170,7 @@ $( genNative
        ("c'drawLineEx", "DrawLineEx_", "rl_bindings.h", [t|Ptr Vector2 -> Ptr Vector2 -> CFloat -> Ptr Color -> IO ()|]),
        ("c'drawLineStrip", "DrawLineStrip_", "rl_bindings.h", [t|Ptr Vector2 -> CInt -> Ptr Color -> IO ()|]),
        ("c'drawLineBezier", "DrawLineBezier_", "rl_bindings.h", [t|Ptr Vector2 -> Ptr Vector2 -> CFloat -> Ptr Color -> IO ()|]),
+       ("c'drawLineDashed", "DrawLineDashed_", "rl_bindings.h", [t|Ptr Vector2 -> Ptr Vector2 -> CInt -> CInt -> Ptr Color -> IO ()|]),
        ("c'drawCircle", "DrawCircle_", "rl_bindings.h", [t|CInt -> CInt -> CFloat -> Ptr Color -> IO ()|]),
        ("c'drawCircleSector", "DrawCircleSector_", "rl_bindings.h", [t|Ptr Vector2 -> CFloat -> CFloat -> CFloat -> CInt -> Ptr Color -> IO ()|]),
        ("c'drawCircleSectorLines", "DrawCircleSectorLines_", "rl_bindings.h", [t|Ptr Vector2 -> CFloat -> CFloat -> CFloat -> CInt -> Ptr Color -> IO ()|]),
@@ -172,7 +179,9 @@ $( genNative
        ("c'drawCircleLines", "DrawCircleLines_", "rl_bindings.h", [t|CInt -> CInt -> CFloat -> Ptr Color -> IO ()|]),
        ("c'drawCircleLinesV", "DrawCircleLinesV_", "rl_bindings.h", [t|Ptr Vector2 -> CFloat -> Ptr Color -> IO ()|]),
        ("c'drawEllipse", "DrawEllipse_", "rl_bindings.h", [t|CInt -> CInt -> CFloat -> CFloat -> Ptr Color -> IO ()|]),
+       ("c'drawEllipseV", "DrawEllipseV_", "rl_bindings.h", [t|Ptr Vector2 -> CFloat -> CFloat -> Ptr Color -> IO ()|]),
        ("c'drawEllipseLines", "DrawEllipseLines_", "rl_bindings.h", [t|CInt -> CInt -> CFloat -> CFloat -> Ptr Color -> IO ()|]),
+       ("c'drawEllipseLinesV", "DrawEllipseLinesV_", "rl_bindings.h", [t|Ptr Vector2 -> CFloat -> CFloat -> Ptr Color -> IO ()|]),
        ("c'drawRing", "DrawRing_", "rl_bindings.h", [t|Ptr Vector2 -> CFloat -> CFloat -> CFloat -> CFloat -> CInt -> Ptr Color -> IO ()|]),
        ("c'drawRingLines", "DrawRingLines_", "rl_bindings.h", [t|Ptr Vector2 -> CFloat -> CFloat -> CFloat -> CFloat -> CInt -> Ptr Color -> IO ()|]),
        ("c'drawRectangle", "DrawRectangle_", "rl_bindings.h", [t|CInt -> CInt -> CInt -> CInt -> Ptr Color -> IO ()|]),
@@ -256,6 +265,10 @@ drawLineBezier :: Vector2 -> Vector2 -> Float -> Color -> IO ()
 drawLineBezier start end thickness color =
   withFreeable start (\s -> withFreeable end (\e -> withFreeable color (c'drawLineBezier s e (realToFrac thickness))))
 
+drawLineDashed :: Vector2 -> Vector2 -> Int -> Int -> Color -> IO ()
+drawLineDashed start end dashSize spaceSize color =
+  withFreeable start (\s -> withFreeable end (\e -> withFreeable color (c'drawLineDashed s e (fromIntegral dashSize) (fromIntegral spaceSize))))
+
 drawCircle :: Int -> Int -> Float -> Color -> IO ()
 drawCircle centerX centerY radius color = withFreeable color (c'drawCircle (fromIntegral centerX) (fromIntegral centerY) (realToFrac radius))
 
@@ -301,9 +314,17 @@ drawEllipse :: Int -> Int -> Float -> Float -> Color -> IO ()
 drawEllipse centerX centerY radiusH radiusV color =
   withFreeable color (c'drawEllipse (fromIntegral centerX) (fromIntegral centerY) (realToFrac radiusH) (realToFrac radiusV))
 
+drawEllipseV :: Vector2 -> Float -> Float -> Color -> IO ()
+drawEllipseV center radiusH radiusV color =
+  withFreeable center (\c -> withFreeable color (c'drawEllipseV c (realToFrac radiusH) (realToFrac radiusV)))
+
 drawEllipseLines :: Int -> Int -> Float -> Float -> Color -> IO ()
 drawEllipseLines centerX centerY radiusH radiusV color =
   withFreeable color (c'drawEllipseLines (fromIntegral centerX) (fromIntegral centerY) (realToFrac radiusH) (realToFrac radiusV))
+
+drawEllipseLinesV :: Vector2 -> Float -> Float -> Color -> IO ()
+drawEllipseLinesV center radiusH radiusV color =
+  withFreeable center (\c -> withFreeable color (c'drawEllipseLinesV c (realToFrac radiusH) (realToFrac radiusV)))
 
 drawRing :: Vector2 -> Float -> Float -> Float -> Float -> Int -> Color -> IO ()
 drawRing center innerRadius outerRadius startAngle endAngle segments color =
@@ -378,7 +399,7 @@ drawRectangleGradientH posX posY width height left right =
     )
 
 drawRectangleGradientEx :: Rectangle -> Color -> Color -> Color -> Color -> IO ()
-drawRectangleGradientEx rect topLeft bottomLeft topRight bottomRight =
+drawRectangleGradientEx rect topLeft bottomLeft bottomRight topRight =
   withFreeable
     rect
     ( \r ->
@@ -388,7 +409,7 @@ drawRectangleGradientEx rect topLeft bottomLeft topRight bottomRight =
               withFreeable
                 bottomLeft
                 ( \c2 ->
-                    withFreeable topRight (withFreeable bottomRight . c'drawRectangleGradientEx r c1 c2)
+                    withFreeable bottomRight (withFreeable topRight . c'drawRectangleGradientEx r c1 c2)
                 )
           )
     )

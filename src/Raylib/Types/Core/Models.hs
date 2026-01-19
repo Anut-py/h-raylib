@@ -176,6 +176,7 @@ data ShaderLocationIndex
   | ShaderLocVertexBoneIds
   | ShaderLocVertexBoneWeights
   | ShaderLocBoneMatrices
+  | ShaderLocVertexInstanceTx
   deriving (Eq, Show, Read, Enum)
 
 data ShaderUniformDataType
@@ -187,6 +188,10 @@ data ShaderUniformDataType
   | ShaderUniformIVec2Type
   | ShaderUniformIVec3Type
   | ShaderUniformIVec4Type
+  | ShaderUniformUIntType
+  | ShaderUniformUIVec2Type
+  | ShaderUniformUIVec3Type
+  | ShaderUniformUIVec4Type
   | ShaderUniformSampler2DType
   deriving (Eq, Show, Read, Enum)
 

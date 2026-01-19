@@ -51,6 +51,7 @@ module Raylib.Core
     getMonitorName,
     setClipboardText,
     getClipboardText,
+    getClipboardImage,
     enableEventWaiting,
     disableEventWaiting,
     swapScreenBuffer,
@@ -122,6 +123,12 @@ module Raylib.Core
     exportDataAsCode,
     loadFileText,
     saveFileText,
+    fileRename,
+    fileRemove,
+    fileCopy,
+    fileMove,
+    fileTextReplace,
+    fileTextFindIndex,
     fileExists,
     directoryExists,
     isFileExtension,
@@ -253,6 +260,7 @@ module Raylib.Core
     c'getMonitorName,
     c'setClipboardText,
     c'getClipboardText,
+    c'getClipboardImage,
     c'enableEventWaiting,
     c'disableEventWaiting,
     c'swapScreenBuffer,
@@ -328,6 +336,12 @@ module Raylib.Core
     c'unloadFileText,
     c'saveFileText,
     c'fileExists,
+    c'fileRename,
+    c'fileRemove,
+    c'fileCopy,
+    c'fileMove,
+    c'fileTextReplace,
+    c'fileTextFindIndex,
     c'directoryExists,
     c'isFileExtension,
     c'getFileLength,
@@ -438,6 +452,7 @@ import Foreign
   )
 import Foreign.C
   ( CBool (..),
+    CChar (..),
     CDouble (..),
     CFloat (..),
     CInt (..),
@@ -544,6 +559,7 @@ $( genNative
        ("c'getMonitorName", "GetMonitorName_", "rl_bindings.h", [t|CInt -> IO CString|]),
        ("c'setClipboardText", "SetClipboardText_", "rl_bindings.h", [t|CString -> IO ()|]),
        ("c'getClipboardText", "GetClipboardText_", "rl_bindings.h", [t|IO CString|]),
+       ("c'getClipboardImage", "GetClipboardImage_", "rl_bindings.h", [t|IO (Ptr Image)|]),
        ("c'enableEventWaiting", "EnableEventWaiting_", "rl_bindings.h", [t|IO ()|]),
        ("c'disableEventWaiting", "DisableEventWaiting_", "rl_bindings.h", [t|IO ()|]),
        ("c'swapScreenBuffer", "SwapScreenBuffer_", "rl_bindings.h", [t|IO ()|]),
@@ -620,6 +636,12 @@ $( genNative
        ("c'unloadFileText", "UnloadFileText_", "rl_bindings.h", [t|CString -> IO ()|]),
        ("c'saveFileText", "SaveFileText_", "rl_bindings.h", [t|CString -> CString -> IO CBool|]),
        ("c'fileExists", "FileExists_", "rl_bindings.h", [t|CString -> IO CBool|]),
+       ("c'fileRename", "FileRename_", "rl_bindings.h", [t|CString -> CString -> IO CInt|]),
+       ("c'fileRemove", "FileRemove_", "rl_bindings.h", [t|CString -> IO CInt|]),
+       ("c'fileCopy", "FileCopy_", "rl_bindings.h", [t|CString -> CString -> IO CInt|]),
+       ("c'fileMove", "FileMove_", "rl_bindings.h", [t|CString -> CString -> IO CInt|]),
+       ("c'fileTextReplace", "FileTextReplace_", "rl_bindings.h", [t|CString -> CString -> CString -> IO CInt|]),
+       ("c'fileTextFindIndex", "FileTextFindIndex_", "rl_bindings.h", [t|CString -> CString -> IO CInt|]),
        ("c'directoryExists", "DirectoryExists_", "rl_bindings.h", [t|CString -> IO CBool|]),
        ("c'isFileExtension", "IsFileExtension_", "rl_bindings.h", [t|CString -> CString -> IO CBool|]),
        ("c'getFileLength", "GetFileLength_", "rl_bindings.h", [t|CString -> IO CBool|]),
@@ -644,7 +666,7 @@ $( genNative
        ("c'compressData", "CompressData_", "rl_bindings.h", [t|Ptr CUChar -> CInt -> Ptr CInt -> IO (Ptr CUChar)|]),
        ("c'decompressData", "DecompressData_", "rl_bindings.h", [t|Ptr CUChar -> CInt -> Ptr CInt -> IO (Ptr CUChar)|]),
        ("c'encodeDataBase64", "EncodeDataBase64_", "rl_bindings.h", [t|Ptr CUChar -> CInt -> Ptr CInt -> IO CString|]),
-       ("c'decodeDataBase64", "DecodeDataBase64_", "rl_bindings.h", [t|Ptr CUChar -> Ptr CInt -> IO (Ptr CUChar)|]),
+       ("c'decodeDataBase64", "DecodeDataBase64_", "rl_bindings.h", [t|Ptr CChar -> Ptr CInt -> IO (Ptr CUChar)|]),
        ("c'computeCRC32", "ComputeCRC32_", "rl_bindings.h", [t|Ptr CUChar -> CInt -> IO CUInt|]),
        ("c'computeMD5", "ComputeMD5_", "rl_bindings.h", [t|Ptr CUChar -> CInt -> IO (Ptr CUInt)|]),
        ("c'computeSHA1", "ComputeSHA1_", "rl_bindings.h", [t|Ptr CUChar -> CInt -> IO (Ptr CUInt)|]),
@@ -856,6 +878,9 @@ setClipboardText text = withCString text c'setClipboardText
 
 getClipboardText :: IO String
 getClipboardText = c'getClipboardText >>= peekCString
+
+getClipboardImage :: IO Image
+getClipboardImage = c'getClipboardImage >>= pop
 
 enableEventWaiting :: IO ()
 enableEventWaiting = c'enableEventWaiting
@@ -1079,7 +1104,7 @@ setLoadFileDataCallback callback = do
   c <- createLoadFileDataCallback callback
   c'setLoadFileDataCallback c
 
-setSaveFileDataCallback :: (Storable a) => SaveFileDataCallback a -> IO ()
+setSaveFileDataCallback :: SaveFileDataCallback a -> IO ()
 setSaveFileDataCallback callback = do
   c <- createSaveFileDataCallback callback
   c'setSaveFileDataCallback c
@@ -1108,7 +1133,7 @@ loadFileData fileName =
           )
     )
 
-saveFileData :: (Storable a) => String -> Ptr a -> Integer -> IO Bool
+saveFileData :: String -> Ptr a -> Integer -> IO Bool
 saveFileData fileName contents bytesToWrite =
   toBool <$> withCString fileName (\s -> c'saveFileData s (castPtr contents) (fromIntegral bytesToWrite))
 
@@ -1124,6 +1149,29 @@ saveFileText fileName text = toBool <$> withCString fileName (withCString text .
 
 fileExists :: String -> IO Bool
 fileExists fileName = toBool <$> withCString fileName c'fileExists
+
+fileRename :: String -> String -> IO Int
+fileRename fileName fileRename_ = fromIntegral <$> withCString fileName (\fn -> withCString fileRename_ (\rn -> c'fileRename fn rn))
+
+fileRemove :: String -> IO Int
+fileRemove fileName = fromIntegral <$> withCString fileName c'fileRemove
+
+fileCopy :: String -> String -> IO Int
+fileCopy srcPath dstPath = fromIntegral <$> withCString srcPath (\sp -> withCString dstPath (\dp -> c'fileCopy sp dp))
+
+fileMove :: String -> String -> IO Int
+fileMove srcPath dstPath = fromIntegral <$> withCString srcPath (\sp -> withCString dstPath (\dp -> c'fileMove sp dp))
+
+fileTextReplace :: String -> String -> String -> IO Int
+fileTextReplace fileName search replacement = fromIntegral <$>
+  withCString fileName (\fn ->
+    withCString search (\s ->
+      withCString replacement (\r -> c'fileTextReplace fn s r)))
+
+fileTextFindIndex :: String -> String -> IO Int
+fileTextFindIndex fileName search = fromIntegral <$>
+  withCString fileName (\fn ->
+    withCString search (\s -> c'fileTextFindIndex fn s))
 
 directoryExists :: String -> IO Bool
 directoryExists dirPath = toBool <$> withCString dirPath c'directoryExists
@@ -1486,7 +1534,7 @@ createLoadFileDataCallback callback =
           newArray (map fromIntegral arr :: [CUChar])
     )
 
-createSaveFileDataCallback :: (Storable a) => SaveFileDataCallback a -> IO C'SaveFileDataCallback
+createSaveFileDataCallback :: SaveFileDataCallback a -> IO C'SaveFileDataCallback
 createSaveFileDataCallback callback =
   mk'saveFileDataCallback
     ( \fileName contents bytesToWrite ->

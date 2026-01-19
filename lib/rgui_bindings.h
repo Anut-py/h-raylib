@@ -86,6 +86,8 @@ char **GuiLoadIcons_(const char *fileName, bool loadIconsName);
 
 void GuiDrawIcon_(int iconId, int posX, int posY, int pixelSize, Color *color);
 
+int GuiGetTextWidth_(char *a);
+
 int GuiWindowBox_(Rectangle *bounds, const char *title);
 
 int GuiGroupBox_(Rectangle *bounds, const char *text);

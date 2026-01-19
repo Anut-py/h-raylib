@@ -82,8 +82,11 @@ module Raylib.Util.RLGL
     rlEnableScissorTest,
     rlDisableScissorTest,
     rlScissor,
-    rlEnableWireMode,
     rlEnablePointMode,
+    rlDisablePointMode,
+    rlSetPointSize,
+    rlGetPointSize,
+    rlEnableWireMode,
     rlDisableWireMode,
     rlSetLineWidth,
     rlGetLineWidth,
@@ -105,6 +108,7 @@ module Raylib.Util.RLGL
     rlglInit,
     rlglClose,
     rlLoadExtensions,
+    rlGetProcAddress,
     rlGetVersion,
     rlSetFramebufferWidth,
     rlGetFramebufferWidth,
@@ -158,6 +162,8 @@ module Raylib.Util.RLGL
     rlLoadFramebuffer,
     rlFramebufferAttach,
     rlFramebufferComplete,
+    rlCopyFramebuffer,
+    rlResizeFramebuffer,
     rlUnloadFramebuffer,
 
     -- *** Shaders management
@@ -251,6 +257,7 @@ module Raylib.Util.RLGL
     c'rlSetBlendFactorsSeparate,
     c'rlglInit,
     c'rlLoadExtensions,
+    c'rlGetProcAddress,
     c'rlGetVersion,
     c'rlSetFramebufferWidth,
     c'rlGetFramebufferWidth,
@@ -292,6 +299,8 @@ module Raylib.Util.RLGL
     c'rlLoadFramebuffer,
     c'rlFramebufferAttach,
     c'rlFramebufferComplete,
+    c'rlCopyFramebuffer,
+    c'rlResizeFramebuffer,
     c'rlUnloadFramebuffer,
     c'rlLoadShaderCode,
     c'rlCompileShader,
@@ -346,8 +355,11 @@ module Raylib.Util.RLGL
     c'rlDisableBackfaceCulling,
     c'rlEnableScissorTest,
     c'rlDisableScissorTest,
-    c'rlEnableWireMode,
     c'rlEnablePointMode,
+    c'rlDisablePointMode,
+    c'rlSetPointSize,
+    c'rlGetPointSize,
+    c'rlEnableWireMode,
     c'rlDisableWireMode,
     c'rlEnableSmoothLines,
     c'rlDisableSmoothLines,
@@ -461,6 +473,7 @@ $( genNative
        ("c'rlSetBlendFactorsSeparate", "rlSetBlendFactorsSeparate_", "rlgl_bindings.h", [t|CInt -> CInt -> CInt -> CInt -> CInt -> CInt -> IO ()|]),
        ("c'rlglInit", "rlglInit_", "rlgl_bindings.h", [t|CInt -> CInt -> IO ()|]),
        ("c'rlLoadExtensions", "rlLoadExtensions_", "rlgl_bindings.h", [t|Ptr () -> IO ()|]),
+       ("c'rlGetProcAddress", "rlGetProcAddress_", "rlgl_bindings.h", [t|CString -> IO (Ptr ())|]),
        ("c'rlGetVersion", "rlGetVersion_", "rlgl_bindings.h", [t|IO CInt|]),
        ("c'rlSetFramebufferWidth", "rlSetFramebufferWidth_", "rlgl_bindings.h", [t|CInt -> IO ()|]),
        ("c'rlGetFramebufferWidth", "rlGetFramebufferWidth_", "rlgl_bindings.h", [t|IO CInt|]),
@@ -491,7 +504,7 @@ $( genNative
        ("c'rlDrawVertexArrayElementsInstanced", "rlDrawVertexArrayElementsInstanced_", "rlgl_bindings.h", [t|CInt -> CInt -> Ptr () -> CInt -> IO ()|]),
        ("c'rlLoadTexture", "rlLoadTexture_", "rlgl_bindings.h", [t|Ptr () -> CInt -> CInt -> CInt -> CInt -> IO CUInt|]),
        ("c'rlLoadTextureDepth", "rlLoadTextureDepth_", "rlgl_bindings.h", [t|CInt -> CInt -> CBool -> IO CUInt|]),
-       ("c'rlLoadTextureCubemap", "rlLoadTextureCubemap_", "rlgl_bindings.h", [t|Ptr () -> CInt -> CInt -> IO CUInt|]),
+       ("c'rlLoadTextureCubemap", "rlLoadTextureCubemap_", "rlgl_bindings.h", [t|Ptr () -> CInt -> CInt -> CInt -> IO CUInt|]),
        ("c'rlUpdateTexture", "rlUpdateTexture_", "rlgl_bindings.h", [t|CUInt -> CInt -> CInt -> CInt -> CInt -> CInt -> Ptr () -> IO ()|]),
        ("c'rlGetGlTextureFormats", "rlGetGlTextureFormats_", "rlgl_bindings.h", [t|CInt -> Ptr CUInt -> Ptr CUInt -> Ptr CUInt -> IO ()|]),
        ("c'rlGetPixelFormatName", "rlGetPixelFormatName_", "rlgl_bindings.h", [t|CUInt -> IO CString|]),
@@ -502,6 +515,8 @@ $( genNative
        ("c'rlLoadFramebuffer", "rlLoadFramebuffer_", "rlgl_bindings.h", [t|IO CUInt|]),
        ("c'rlFramebufferAttach", "rlFramebufferAttach_", "rlgl_bindings.h", [t|CUInt -> CUInt -> CInt -> CInt -> CInt -> IO ()|]),
        ("c'rlFramebufferComplete", "rlFramebufferComplete_", "rlgl_bindings.h", [t|CUInt -> IO CBool|]),
+       ("c'rlCopyFramebuffer", "rlCopyFramebuffer_", "rlgl_bindings.h", [t|CInt -> CInt -> CInt -> CInt -> CInt -> Ptr CUChar -> IO ()|]),
+       ("c'rlResizeFramebuffer", "rlResizeFramebuffer_", "rlgl_bindings.h", [t|CInt -> CInt -> IO ()|]),
        ("c'rlUnloadFramebuffer", "rlUnloadFramebuffer_", "rlgl_bindings.h", [t|CUInt -> IO ()|]),
        ("c'rlLoadShaderCode", "rlLoadShaderCode_", "rlgl_bindings.h", [t|CString -> CString -> IO CUInt|]),
        ("c'rlCompileShader", "rlCompileShader_", "rlgl_bindings.h", [t|CString -> CInt -> IO CUInt|]),
@@ -556,8 +571,11 @@ $( genNative
        ("c'rlDisableBackfaceCulling", "rlDisableBackfaceCulling_", "rlgl_bindings.h", [t|IO ()|]),
        ("c'rlEnableScissorTest", "rlEnableScissorTest_", "rlgl_bindings.h", [t|IO ()|]),
        ("c'rlDisableScissorTest", "rlDisableScissorTest_", "rlgl_bindings.h", [t|IO ()|]),
-       ("c'rlEnableWireMode", "rlEnableWireMode_", "rlgl_bindings.h", [t|IO ()|]),
        ("c'rlEnablePointMode", "rlEnablePointMode_", "rlgl_bindings.h", [t|IO ()|]),
+       ("c'rlDisablePointMode", "rlDisablePointMode_", "rlgl_bindings.h", [t|IO ()|]),
+       ("c'rlSetPointSize", "rlSetPointSize_", "rlgl_bindings.h", [t|CFloat -> IO ()|]),
+       ("c'rlGetPointSize", "rlGetPointSize_", "rlgl_bindings.h", [t|IO CFloat|]),
+       ("c'rlEnableWireMode", "rlEnableWireMode_", "rlgl_bindings.h", [t|IO ()|]),
        ("c'rlDisableWireMode", "rlDisableWireMode_", "rlgl_bindings.h", [t|IO ()|]),
        ("c'rlEnableSmoothLines", "rlEnableSmoothLines_", "rlgl_bindings.h", [t|IO ()|]),
        ("c'rlDisableSmoothLines", "rlDisableSmoothLines_", "rlgl_bindings.h", [t|IO ()|]),
@@ -820,13 +838,25 @@ rlDisableScissorTest = c'rlDisableScissorTest
 rlScissor :: Int -> Int -> Int -> Int -> IO ()
 rlScissor x y width height = c'rlScissor (fromIntegral x) (fromIntegral y) (fromIntegral width) (fromIntegral height)
 
--- | Enable wire mode
-rlEnableWireMode :: IO ()
-rlEnableWireMode = c'rlEnableWireMode
-
 -- | Enable point mode
 rlEnablePointMode :: IO ()
 rlEnablePointMode = c'rlEnablePointMode
+
+-- | Disable point mode
+rlDisablePointMode :: IO ()
+rlDisablePointMode = c'rlDisablePointMode
+
+-- | Set the point drawing size
+rlSetPointSize :: Float -> IO ()
+rlSetPointSize size = c'rlSetPointSize (realToFrac size)
+
+-- | Get the point drawing size
+rlGetPointSize :: IO Float
+rlGetPointSize = realToFrac <$> c'rlGetPointSize
+
+-- | Enable wire mode
+rlEnableWireMode :: IO ()
+rlEnableWireMode = c'rlEnableWireMode
 
 -- | Disable wire and point mode
 rlDisableWireMode :: IO ()
@@ -896,6 +926,10 @@ rlglClose = c'rlglClose
 -- | Load OpenGL extensions (loader function required)
 rlLoadExtensions :: Ptr () -> IO ()
 rlLoadExtensions = c'rlLoadExtensions
+
+-- | Get OpenGL procedure address
+rlGetProcAddress :: String -> IO (Ptr ())
+rlGetProcAddress procName = withCString procName c'rlGetProcAddress
 
 -- | Get current OpenGL version
 rlGetVersion :: IO Int
@@ -1048,10 +1082,10 @@ rlLoadTextureDepth :: Int -> Int -> Bool -> IO Integer
 rlLoadTextureDepth width height useRenderBuffer = fromIntegral <$> c'rlLoadTextureDepth (fromIntegral width) (fromIntegral height) (fromBool useRenderBuffer)
 
 -- | Load texture cubemap
-rlLoadTextureCubemap :: [Int] -> RLPixelFormat -> IO Integer
-rlLoadTextureCubemap tData format =
+rlLoadTextureCubemap :: [Int] -> RLPixelFormat -> Int -> IO Integer
+rlLoadTextureCubemap tData format mipmapCount =
   fromIntegral
-    <$> withFreeableArrayLen (map fromIntegral tData :: [CUShort]) (\l p -> c'rlLoadTextureCubemap (castPtr p) (fromIntegral $ l * sizeOf (0 :: CUShort)) (fromIntegral $ fromEnum format))
+    <$> withFreeableArrayLen (map fromIntegral tData :: [CUShort]) (\l p -> c'rlLoadTextureCubemap (castPtr p) (fromIntegral $ l * sizeOf (0 :: CUShort)) (fromIntegral $ fromEnum format) (fromIntegral mipmapCount))
 
 -- | Update GPU texture with new data
 rlUpdateTexture :: (Freeable a, Storable a) => Integer -> Int -> Int -> Int -> Int -> RLPixelFormat -> [a] -> IO ()
@@ -1150,6 +1184,14 @@ rlFramebufferAttach fboId texId attachType texType mipLevel =
 -- | Verify framebuffer is complete
 rlFramebufferComplete :: Integer -> IO Bool
 rlFramebufferComplete fboId = toBool <$> c'rlFramebufferComplete (fromIntegral fboId)
+
+-- | Copy framebuffer pixel data to internal buffer
+rlCopyFramebuffer :: Int -> Int -> Int -> Int -> RLPixelFormat -> [Word8] -> IO ()
+rlCopyFramebuffer x y width height format pixels = withFreeableArray (map fromIntegral pixels) $ c'rlCopyFramebuffer (fromIntegral x) (fromIntegral y) (fromIntegral width) (fromIntegral height) (fromIntegral $ fromEnum format)
+
+-- | Resize internal framebuffer
+rlResizeFramebuffer :: Int -> Int -> IO ()
+rlResizeFramebuffer width height = c'rlResizeFramebuffer (fromIntegral width) (fromIntegral height)
 
 -- | Delete framebuffer from GPU
 rlUnloadFramebuffer :: Integer -> IO ()

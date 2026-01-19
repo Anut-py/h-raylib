@@ -4,6 +4,7 @@
 
 #include "rl_bindings.h"
 #include <stdio.h>
+#include <string.h>
 
 RLBIND void SetWindowIcon_(Image *a)
 {
@@ -337,6 +338,11 @@ RLBIND void DrawLineBezier_(Vector2 *a, Vector2 *b, float c, Color *d)
     DrawLineBezier(*a, *b, c, *d);
 }
 
+RLBIND void DrawLineDashed_(Vector2 *a, Vector2 *b, int c, int d, Color *e)
+{
+    DrawLineDashed(*a, *b, c, d, *e);
+}
+
 RLBIND void DrawCircle_(int a, int b, float c, Color *d)
 {
     DrawCircle(a, b, c, *d);
@@ -377,9 +383,19 @@ RLBIND void DrawEllipse_(int a, int b, float c, float d, Color *e)
     DrawEllipse(a, b, c, d, *e);
 }
 
+RLBIND void DrawEllipseV_(Vector2 *a, float b, float c, Color *d)
+{
+    DrawEllipseV(*a, b, c, *d);
+}
+
 RLBIND void DrawEllipseLines_(int a, int b, float c, float d, Color *e)
 {
     DrawEllipseLines(a, b, c, d, *e);
+}
+
+RLBIND void DrawEllipseLinesV_(Vector2 *a, float b, float c, Color *d)
+{
+    DrawEllipseLinesV(*a, b, c, *d);
 }
 
 RLBIND void DrawRing_(Vector2 *a, float b, float c, float d, float e, int f, Color *g)
@@ -1625,9 +1641,9 @@ RLBIND bool IsModelAnimationValid_(Model *a, ModelAnimation *b)
     return IsModelAnimationValid(*a, *b);
 }
 
-RLBIND void UpdateModelAnimationBoneMatrices_(Model *a, ModelAnimation *b, int c)
+RLBIND void UpdateModelAnimationBones_(Model *a, ModelAnimation *b, int c)
 {
-    UpdateModelAnimationBoneMatrices(*a, *b, c);
+    UpdateModelAnimationBones(*a, *b, c);
 }
 
 RLBIND bool CheckCollisionSpheres_(Vector3 *a, float b, Vector3 *c, float d)
@@ -2193,6 +2209,13 @@ RLBIND const char *GetClipboardText_()
     return GetClipboardText();
 }
 
+RLBIND Image *GetClipboardImage_()
+{
+    Image *ptr = (Image *) malloc(sizeof(Image));
+    *ptr = GetClipboardImage();
+    return ptr;
+}
+
 RLBIND void EnableEventWaiting_()
 {
     EnableEventWaiting();
@@ -2382,8 +2405,20 @@ TraceLogCallback_ customCallback;
 
 void CustomCallback(int logLevel, const char *text, va_list args)
 {
-    char *formatted = TextFormat(text, args);
+    va_list args_copy;
+    va_copy(args_copy, args);
+
+    int len = vsnprintf(NULL, 0, text, args_copy);
+    va_end(args_copy);
+
+    if (len < 0) return;
+
+    char *formatted = malloc(len + 1);
+
+    vsnprintf(formatted, len + 1, text, args);
     customCallback(logLevel, formatted);
+
+    free(formatted);
 }
 
 RLBIND void SetTraceLogCallback_(TraceLogCallback_ a)
@@ -2450,6 +2485,36 @@ RLBIND bool SaveFileText_(const char *a, char *b)
 RLBIND bool FileExists_(const char *a)
 {
     return FileExists(a);
+}
+
+RLBIND int FileRename_(const char *a, const char *b)
+{
+    return FileRename(a, b);
+}
+
+RLBIND int FileRemove_(const char *a)
+{
+    return FileRemove(a);
+}
+
+RLBIND int FileCopy_(const char *a, const char *b)
+{
+    return FileCopy(a, b);
+}
+
+RLBIND int FileMove_(const char *a, const char *b)
+{
+    return FileMove(a, b);
+}
+
+RLBIND int FileTextReplace_(const char *a, const char *b, const char *c)
+{
+    return FileTextReplace(a, b, c);
+}
+
+RLBIND int FileTextFindIndex_(const char *a, const char *b)
+{
+    return FileTextFindIndex(a, b);
 }
 
 RLBIND bool DirectoryExists_(const char *a)
@@ -2547,7 +2612,7 @@ RLBIND char *EncodeDataBase64_(const unsigned char *a, int b, int *c)
     return EncodeDataBase64(a, b, c);
 }
 
-RLBIND unsigned char *DecodeDataBase64_(const unsigned char *a, int *b)
+RLBIND unsigned char *DecodeDataBase64_(const char *a, int *b)
 {
     return DecodeDataBase64(a, b);
 }
@@ -2887,9 +2952,9 @@ RLBIND void GenTextureMipmaps_(Texture2D *a)
     GenTextureMipmaps(a);
 }
 
-RLBIND GlyphInfo *LoadFontData_(const unsigned char *a, int b, int c, int *d, int e, int f)
+RLBIND GlyphInfo *LoadFontData_(const unsigned char *a, int b, int c, int *d, int e, int f, int *g)
 {
-    return LoadFontData(a, b, c, d, e, f);
+    return LoadFontData(a, b, c, d, e, f, g);
 }
 
 RLBIND void UnloadFontData_(GlyphInfo *a, int b)

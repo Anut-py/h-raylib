@@ -136,7 +136,7 @@ pop ptr = do
   rlFree val ptr
   return val
 
-popCArray :: (Freeable a, Storable a) => Int -> Ptr a -> IO [a]
+popCArray :: (Storable a) => Int -> Ptr a -> IO [a]
 popCArray count ptr = do
   str <- peekArray count ptr
   c'free $ castPtr ptr

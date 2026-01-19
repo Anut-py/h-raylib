@@ -114,6 +114,9 @@ module Raylib.Util.GUI
     guiLoadIcons,
     guiDrawIcon,
 
+    -- ** Utility functions
+    guiGetTextWidth,
+
     -- ** Controls
 
     -- *** Container/separator controls, useful for controls organization
@@ -180,6 +183,7 @@ module Raylib.Util.GUI
     c'guiGetIcons,
     c'guiLoadIcons,
     c'guiDrawIcon,
+    c'guiGetTextWidth,
     c'guiWindowBox,
     c'guiGroupBox,
     c'guiLine,
@@ -258,6 +262,7 @@ $( genNative
        ("c'guiGetIcons", "GuiGetIcons_", "rgui_bindings.h", [t|IO (Ptr CUInt)|]),
        ("c'guiLoadIcons", "GuiLoadIcons_", "rgui_bindings.h", [t|CString -> CBool -> IO (Ptr CString)|]),
        ("c'guiDrawIcon", "GuiDrawIcon_", "rgui_bindings.h", [t|CInt -> CInt -> CInt -> CInt -> Ptr Color -> IO ()|]),
+       ("c'guiGetTextWidth", "GuiGetTextWidth_", "rgui_bindings.h", [t|CString -> IO CInt|]),
        ("c'guiWindowBox", "GuiWindowBox_", "rgui_bindings.h", [t|Ptr Rectangle -> CString -> IO CInt|]),
        ("c'guiGroupBox", "GuiGroupBox_", "rgui_bindings.h", [t|Ptr Rectangle -> CString -> IO CInt|]),
        ("c'guiLine", "GuiLine_", "rgui_bindings.h", [t|Ptr Rectangle -> CString -> IO CInt|]),
@@ -627,6 +632,10 @@ guiLoadIcons fileName loadIconsName count = do
 -- | Draw icon using pixel size at specified position
 guiDrawIcon :: GuiIconName -> Int -> Int -> Int -> Color -> IO ()
 guiDrawIcon icon posX posY pixelSize color = withFreeable color (c'guiDrawIcon (fromIntegral (fromEnum icon)) (fromIntegral posX) (fromIntegral posY) (fromIntegral pixelSize))
+
+-- | Get text width considering gui style and icon size (if required)
+guiGetTextWidth :: String -> IO Int
+guiGetTextWidth text = fromIntegral <$> withCString text c'guiGetTextWidth
 
 -- | Window Box control, shows a window that can be closed
 guiWindowBox ::

@@ -179,7 +179,6 @@ data CubemapLayout
   | CubemapLayoutLineHorizontal
   | CubemapLayoutCrossThreeByFour
   | CubemapLayoutCrossThreeByThree
-  | CubemapLayoutPanorama
   deriving (Enum)
 
 data NPatchLayout = NPatchNinePatch | NPatchThreePatchVertical | NPatchThreePatchHorizontal deriving (Eq, Show, Read, Enum)

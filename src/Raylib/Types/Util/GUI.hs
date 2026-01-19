@@ -18,7 +18,7 @@ module Raylib.Types.Util.GUI
     GuiComboBoxProperty (..),
     GuiDropdownBoxProperty (..),
     GuiTextBoxProperty (..),
-    GuiSpinnerProperty (..),
+    GuiValueBoxProperty (..),
     GuiListViewProperty (..),
     GuiColorPickerProperty (..),
     GuiIconName (..),
@@ -174,8 +174,7 @@ data GuiControl
   | -- | Used also for: TEXTBOXMULTI
     Textbox
   | Valuebox
-  | -- | Uses: BUTTON, VALUEBOX
-    Spinner
+  | Control11
   | Listview
   | Colorpicker
   | Scrollbar
@@ -195,7 +194,7 @@ instance Enum GuiControl where
     Dropdownbox -> 8
     Textbox -> 9
     Valuebox -> 10
-    Spinner -> 11
+    Control11 -> 11
     Listview -> 12
     Colorpicker -> 13
     Scrollbar -> 14
@@ -212,7 +211,7 @@ instance Enum GuiControl where
     8 -> Dropdownbox
     9 -> Textbox
     10 -> Valuebox
-    11 -> Spinner
+    11 -> Control11
     12 -> Listview
     13 -> Colorpicker
     14 -> Scrollbar
@@ -557,24 +556,24 @@ instance Storable GuiTextBoxProperty where
     return $ toEnum $ fromEnum (val :: CInt)
   poke ptr v = poke (castPtr ptr) (fromIntegral (fromEnum v) :: CInt)
 
--- | Spinner
-data GuiSpinnerProperty
+-- | ValueBox/Spinner
+data GuiValueBoxProperty
   = -- | Spinner left/right buttons width
     SpinButtonWidth
   | -- | Spinner buttons separation
     SpinButtonSpacing
   deriving (Eq, Show, Read)
 
-instance Enum GuiSpinnerProperty where
+instance Enum GuiValueBoxProperty where
   fromEnum x = case x of
     SpinButtonWidth -> 16
     SpinButtonSpacing -> 17
   toEnum x = case x of
     16 -> SpinButtonWidth
     17 -> SpinButtonSpacing
-    n -> error $ "(GuiSpinnerProperty.toEnum) Invalid value: " ++ show n
+    n -> error $ "(GuiValueBoxProperty.toEnum) Invalid value: " ++ show n
 
-instance Storable GuiSpinnerProperty where
+instance Storable GuiValueBoxProperty where
   sizeOf _ = 4
   alignment _ = 4
   peek ptr = do
@@ -592,6 +591,8 @@ data GuiListViewProperty
     ScrollbarWidth
   | -- | ListView scrollbar side (0-SCROLLBAR_LEFT_SIDE, 1-SCROLLBAR_RIGHT_SIDE)
     ScrollbarSide
+  | -- | ListView items border enabled in normal state
+    ListItemsBorderNormal
   | -- | ListView items border width
     ListItemsBorderWidth
   deriving (Eq, Show, Read)
@@ -602,13 +603,15 @@ instance Enum GuiListViewProperty where
     ListItemsSpacing -> 17
     ScrollbarWidth -> 18
     ScrollbarSide -> 19
-    ListItemsBorderWidth -> 20
+    ListItemsBorderNormal -> 20
+    ListItemsBorderWidth -> 21
   toEnum x = case x of
     16 -> ListItemsHeight
     17 -> ListItemsSpacing
     18 -> ScrollbarWidth
     19 -> ScrollbarSide
-    20 -> ListItemsBorderWidth
+    20 -> ListItemsBorderNormal
+    21 -> ListItemsBorderWidth
     n -> error $ "(GuiListViewProperty.toEnum) Invalid value: " ++ show n
 
 instance Storable GuiListViewProperty where
@@ -885,27 +888,27 @@ data GuiIconName
   | IconMLayers
   | IconMaps
   | IconHot
-  | Icon229
-  | Icon230
-  | Icon231
-  | Icon232
-  | Icon233
-  | Icon234
-  | Icon235
-  | Icon236
-  | Icon237
-  | Icon238
-  | Icon239
-  | Icon240
-  | Icon241
-  | Icon242
-  | Icon243
-  | Icon244
-  | Icon245
-  | Icon246
-  | Icon247
-  | Icon248
-  | Icon249
+  | IconLabel
+  | IconNameId
+  | IconSlicing
+  | IconManualControl
+  | IconCollision
+  | IconCircleAdd
+  | IconCircleAddFill
+  | IconCircleWarning
+  | IconCircleWarningFill
+  | IconBoxMore
+  | IconBoxMoreFill
+  | IconBoxMinus
+  | IconBoxMinusFill
+  | IconUnion
+  | IconIntersection
+  | IconDifference
+  | IconSphere
+  | IconCylinder
+  | IconCone
+  | IconEllipsoid
+  | IconCapsule
   | Icon250
   | Icon251
   | Icon252
@@ -1145,27 +1148,27 @@ instance Enum GuiIconName where
     IconMLayers -> 226
     IconMaps -> 227
     IconHot -> 228
-    Icon229 -> 229
-    Icon230 -> 230
-    Icon231 -> 231
-    Icon232 -> 232
-    Icon233 -> 233
-    Icon234 -> 234
-    Icon235 -> 235
-    Icon236 -> 236
-    Icon237 -> 237
-    Icon238 -> 238
-    Icon239 -> 239
-    Icon240 -> 240
-    Icon241 -> 241
-    Icon242 -> 242
-    Icon243 -> 243
-    Icon244 -> 244
-    Icon245 -> 245
-    Icon246 -> 246
-    Icon247 -> 247
-    Icon248 -> 248
-    Icon249 -> 249
+    IconLabel -> 229
+    IconNameId -> 230
+    IconSlicing -> 231
+    IconManualControl -> 232
+    IconCollision -> 233
+    IconCircleAdd -> 234
+    IconCircleAddFill -> 235
+    IconCircleWarning -> 236
+    IconCircleWarningFill -> 237
+    IconBoxMore -> 238
+    IconBoxMoreFill -> 239
+    IconBoxMinus -> 240
+    IconBoxMinusFill -> 241
+    IconUnion -> 242
+    IconIntersection -> 243
+    IconDifference -> 244
+    IconSphere -> 245
+    IconCylinder -> 246
+    IconCone -> 247
+    IconEllipsoid -> 248
+    IconCapsule -> 249
     Icon250 -> 250
     Icon251 -> 251
     Icon252 -> 252
@@ -1402,27 +1405,27 @@ instance Enum GuiIconName where
     226 -> IconMLayers
     227 -> IconMaps
     228 -> IconHot
-    229 -> Icon229
-    230 -> Icon230
-    231 -> Icon231
-    232 -> Icon232
-    233 -> Icon233
-    234 -> Icon234
-    235 -> Icon235
-    236 -> Icon236
-    237 -> Icon237
-    238 -> Icon238
-    239 -> Icon239
-    240 -> Icon240
-    241 -> Icon241
-    242 -> Icon242
-    243 -> Icon243
-    244 -> Icon244
-    245 -> Icon245
-    246 -> Icon246
-    247 -> Icon247
-    248 -> Icon248
-    249 -> Icon249
+    229 -> IconLabel
+    230 -> IconNameId
+    231 -> IconSlicing
+    232 -> IconManualControl
+    233 -> IconCollision
+    234 -> IconCircleAdd
+    235 -> IconCircleAddFill
+    236 -> IconCircleWarning
+    237 -> IconCircleWarningFill
+    238 -> IconBoxMore
+    239 -> IconBoxMoreFill
+    240 -> IconBoxMinus
+    241 -> IconBoxMinusFill
+    242 -> IconUnion
+    243 -> IconIntersection
+    244 -> IconDifference
+    245 -> IconSphere
+    246 -> IconCylinder
+    247 -> IconCone
+    248 -> IconEllipsoid
+    249 -> IconCapsule
     250 -> Icon250
     251 -> Icon251
     252 -> Icon252

@@ -124,6 +124,8 @@ void DrawLineStrip_(const Vector2 *a, int b, Color *c);
 
 void DrawLineBezier_(Vector2 *a, Vector2 *b, float c, Color *d);
 
+void DrawLineDashed_(Vector2 *a, Vector2 *b, int c, int d, Color *e);
+
 void DrawCircle_(int a, int b, float c, Color *d);
 
 void DrawCircleSector_(Vector2 *a, float b, float c, float d, int e, Color *f);
@@ -140,7 +142,11 @@ void DrawCircleLinesV_(Vector2 *a, float b, Color *c);
 
 void DrawEllipse_(int a, int b, float c, float d, Color *e);
 
+void DrawEllipseV_(Vector2 *a, float b, float c, Color *d);
+
 void DrawEllipseLines_(int a, int b, float c, float d, Color *e);
+
+void DrawEllipseLinesV_(Vector2 *a, float b, float c, Color *d);
 
 void DrawRing_(Vector2 *a, float b, float c, float d, float e, int f, Color *g);
 
@@ -574,7 +580,7 @@ void UnloadModelAnimation_(ModelAnimation *a);
 
 bool IsModelAnimationValid_(Model *a, ModelAnimation *b);
 
-void UpdateModelAnimationBoneMatrices_(Model *a, ModelAnimation *b, int c);
+void UpdateModelAnimationBones_(Model *a, ModelAnimation *b, int c);
 
 bool CheckCollisionSpheres_(Vector3 *a, float b, Vector3 *c, float d);
 
@@ -790,6 +796,8 @@ void SetClipboardText_(const char *a);
 
 const char *GetClipboardText_();
 
+Image *GetClipboardImage_();
+
 void EnableEventWaiting_();
 
 void DisableEventWaiting_();
@@ -890,7 +898,17 @@ bool SaveFileText_(const char *a, char *b);
 
 bool FileExists_(const char *a);
 
-bool DirectoryExists_(const char *a);
+int FileRename_(const char *a, const char *b);
+
+int FileRemove_(const char *a);
+
+int FileCopy_(const char *a, const char *b);
+
+int FileMove_(const char *a, const char *b);
+
+int FileTextReplace_(const char *a, const char *b, const char *c);
+
+int FileTextFindIndex_(const char *a, const char *b);
 
 bool IsFileExtension_(const char *a, const char *b);
 
@@ -928,7 +946,7 @@ unsigned char *DecompressData_(const unsigned char *a, int b, int *c);
 
 char *EncodeDataBase64_(const unsigned char *a, int b, int *c);
 
-unsigned char *DecodeDataBase64_(const unsigned char *a, int *b);
+unsigned char *DecodeDataBase64_(const char *a, int *b);
 
 unsigned int ComputeCRC32_(unsigned char *a, int b);
 
@@ -1064,7 +1082,7 @@ void ImageColorBrightness_(Image *a, int b);
 
 void GenTextureMipmaps_(Texture2D *a);
 
-GlyphInfo *LoadFontData_(const unsigned char *a, int b, int c, int *d, int e, int f);
+GlyphInfo *LoadFontData_(const unsigned char *a, int b, int c, int *d, int e, int f, int *g);
 
 void UnloadFontData_(GlyphInfo *a, int b);
 

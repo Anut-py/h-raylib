@@ -26,6 +26,7 @@ module Raylib.Util.Math
     Vector (..),
 
     -- ** Vector2 math
+    vector2CrossProduct,
     vector2Angle,
     vector2LineAngle,
     vector2Transform,
@@ -74,6 +75,7 @@ module Raylib.Util.Math
     matrixPerspective,
     matrixOrtho,
     matrixLookAt,
+    matrixCompose,
     matrixDecompose,
 
     -- * Quaternion math
@@ -378,7 +380,11 @@ instance Vector Vector4 where
 -- Vector2 math --------------------------------
 ------------------------------------------------
 
--- | Angle between two 2D vectors
+-- | 2D vector cross-product
+vector2CrossProduct :: Vector2 -> Vector2 -> Float
+vector2CrossProduct (Vector2 x1 y1) (Vector2 x2 y2) = x1 * y2 - y1 * x2
+
+-- | Angle between two 2D vectors (positive angles are clockwise)
 vector2Angle :: Vector2 -> Vector2 -> Float
 vector2Angle (Vector2 x1 y1) (Vector2 x2 y2) = atan2 (x1 * x2 + y1 * y2) (x1 * y2 - y1 * x2)
 
@@ -650,32 +656,7 @@ matrixConstant n = matrixFromList $ repeat n
 
 -- | Compute matrix determinant
 matrixDeterminant :: Matrix -> Float
-matrixDeterminant
-  (Matrix a00 a10 a20 a30 a01 a11 a21 a31 a02 a12 a22 a32 a03 a13 a23 a33) =
-    a30 * a21 * a12 * a03
-      - a20 * a31 * a12 * a03
-      - a30 * a11 * a22 * a03
-      + a10 * a31 * a22 * a03
-      + a20 * a11 * a32 * a03
-      - a10 * a21 * a32 * a03
-      - a30 * a21 * a02 * a13
-      + a20 * a31 * a02 * a13
-      + a30 * a01 * a22 * a13
-      - a00 * a31 * a22 * a13
-      - a20 * a01 * a32 * a13
-      + a00 * a21 * a32 * a13
-      + a30 * a11 * a02 * a23
-      - a10 * a31 * a02 * a23
-      - a30 * a01 * a12 * a23
-      + a00 * a31 * a12 * a23
-      + a10 * a01 * a32 * a23
-      - a00 * a11 * a32 * a23
-      - a20 * a11 * a02 * a33
-      + a10 * a21 * a02 * a33
-      + a20 * a01 * a12 * a33
-      - a00 * a21 * a12 * a33
-      - a10 * a01 * a22 * a33
-      + a00 * a11 * a22 * a33
+matrixDeterminant (Matrix a0 a4 a8 a12 a1 a5 a9 a13 a2 a6 a10 a14 a3 a7 a11 a15) = (a0*((a5*(a10*a15 - a11*a14) - a9*(a6*a15 - a7*a14) + a13*(a6*a11 - a7*a10))) - a4*((a1*(a10*a15 - a11*a14) - a9*(a2*a15 - a3*a14) + a13*(a2*a11 - a3*a10))) + a8*((a1*(a6*a15 - a7*a14) - a5*(a2*a15 - a3*a14) + a13*(a2*a7 - a3*a6))) - a12*((a1*(a6*a11 - a7*a10) - a5*(a2*a11 - a3*a10) + a9*(a2*a7 - a3*a6))));
 
 -- | Trace of a matrix (sum of the values along the diagonal)
 matrixTrace :: Matrix -> Float
@@ -935,34 +916,49 @@ matrixLookAt eye target up = Matrix xx xy xz (-vx |.| eye) yx yy yz (-vy |.| eye
     vx@(Vector3 xx xy xz) = vectorNormalize $ vector3CrossProduct up vz
     vy@(Vector3 yx yy yz) = vector3CrossProduct vz vx
 
+-- | Compose a transformation matrix from rotational, translational and scaling components
+matrixCompose :: Vector3 -> Quaternion -> Vector3 -> Matrix
+matrixCompose (Vector3 tx ty tz) rotation (Vector3 sx sy sz) =
+  Matrix rx ux fx tx ry uy fy ty rz uz fz tz 0 0 0 1
+  where
+    (Vector3 rx ry rz) = vector3RotateByQuaternion (Vector3 sx 0 0) rotation
+    (Vector3 ux uy uz) = vector3RotateByQuaternion (Vector3 0 sy 0) rotation
+    (Vector3 fx fy fz) = vector3RotateByQuaternion (Vector3 0 0 sz) rotation
+
 -- | Decompose a transformation matrix into its rotational, translational and scaling components
 matrixDecompose :: Matrix -> (Vector3, Quaternion, Vector3)
-matrixDecompose (Matrix m0 m4 m8 m12 m1 m5 m9 m13 m2 m6 m10 m14 m3 m7 m11 m15) =
-  (translation, rotation, scale)
+matrixDecompose (Matrix m0 m4 m8 m12 m1 m5 m9 m13 m2 m6 m10 m14 _ _ _ _) =
+  (translation, rotation, scale')
   where
-    a = m0
-    b = m4
-    c = m8
-    d = m1
-    e = m5
-    f = m9
-    g = m2
-    h = m6
-    i = m10
+    eps = 1e-9
     translation = Vector3 m12 m13 m14
-    a' = e*i - f*h
-    b' = f*g - d*i
-    c' = d*h - e*g
-    det = a*a' + b*b' + c*c'
-    abc = Vector3 a b c
-    def = Vector3 d e f
-    ghi = Vector3 g h i
-    scalex = magnitude abc
-    scaley = magnitude def
-    scalez = magnitude ghi
-    s = Vector3 scalex scaley scalez
-    scale@(Vector3 sx sy sz) = if det < 0 then additiveInverse s else s
-    rotation = if floatEquals det 0 then quaternionIdentity else quaternionFromMatrix (Matrix (m0 / sx) m4 m8 m12 m1 (m5 / sy) m9 m13 m2 m6 (m10 / sz) m14 m3 m7 m11 m15)
+    stabilizer = maximum (eps : map abs [m0, m1, m2, m4, m5, m6, m8, m9, m10])
+    (scl1, col1) =
+      let c = (Vector3 m0 m4 m8) |/ stabilizer
+          m = magnitude c
+      in (m, if m > eps then c |/ m else c)
+    (scl2, col2) =
+      let c = (Vector3 m1 m5 m9) |/ stabilizer
+          shr = col1 |.| c
+          c' = c |-| (col1 |* shr)
+          m = magnitude c'
+      in (m, if m > eps then c' |/ m else c')
+    (scl3, col3) =
+      let c = (Vector3 m2 m6 m10) |/ stabilizer
+          shr2 = col1 |.| c
+          c' = c |-| (col1 |* shr2)
+          shr3 = col2 |.| c'
+          c'' = c' |-| (col2 |* shr3)
+          m = magnitude c''
+      in if m > eps
+        then (m, c'' |/ m)
+        else (m, c'')
+    scale = (Vector3 scl1 scl2 scl3) |* stabilizer
+    ((Vector3 c1x c1y c1z), (Vector3 c2x c2y c2z), (Vector3 c3x c3y c3z), scale') =
+      if (col1 |.| vector3CrossProduct col2 col3) < 0
+        then (additiveInverse col1, additiveInverse col2, additiveInverse col3, additiveInverse scale)
+        else (col1, col2, col3, scale)
+    rotation = quaternionFromMatrix (Matrix c1x c1y c1z 0 c2x c2y c2z 0 c3x c3y c3z 0 0 0 0 1)
 
 ------------------------------------------------
 -- Quaternion math -----------------------------
@@ -1088,7 +1084,7 @@ quaternionFromMatrix mat
           fourZSquaredMinus1
         ]
     biggestVal = sqrt (fourBiggestSquaredMinus1 + 1) / 2
-    mult = 0.5 / biggestVal
+    mult = 0.25 / biggestVal
 
 -- | Create a rotation matrix from a quaternion
 quaternionToMatrix :: Quaternion -> Matrix

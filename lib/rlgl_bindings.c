@@ -314,6 +314,11 @@ RLBIND void rlLoadExtensions_(void *a)
   rlLoadExtensions(a);
 }
 
+RLBIND void *rlGetProcAddress_(char *a)
+{
+  return rlGetProcAddress(a);
+}
+
 RLBIND int rlGetVersion_()
 {
   return rlGetVersion();
@@ -454,9 +459,9 @@ RLBIND unsigned int rlLoadTextureDepth_(int a, int b, bool c)
   return rlLoadTextureDepth(a, b, c);
 }
 
-RLBIND unsigned int rlLoadTextureCubemap_(const void *a, int b, int c)
+RLBIND unsigned int rlLoadTextureCubemap_(const void *a, int b, int c, int d)
 {
-  return rlLoadTextureCubemap(a, b, c);
+  return rlLoadTextureCubemap(a, b, c, d);
 }
 
 RLBIND void rlUpdateTexture_(unsigned int a, int b, int c, int d, int e, int f, const void *g)
@@ -507,6 +512,16 @@ RLBIND void rlFramebufferAttach_(unsigned int a, unsigned int b, int c, int d, i
 RLBIND bool rlFramebufferComplete_(unsigned int a)
 {
   return rlFramebufferComplete(a);
+}
+
+RLBIND void rlCopyFramebuffer_(int a, int b, int c, int d, int e, void *f)
+{
+  return rlCopyFramebuffer(a, b, c, d, e, f);
+}
+
+RLBIND void rlResizeFramebuffer_(int a, int b)
+{
+  return rlResizeFramebuffer(a, b);
 }
 
 RLBIND void rlUnloadFramebuffer_(unsigned int a)
@@ -719,14 +734,29 @@ RLBIND void rlDisableScissorTest_()
   rlDisableScissorTest();
 }
 
-RLBIND void rlEnableWireMode_()
-{
-  rlEnableWireMode();
-}
-
 RLBIND void rlEnablePointMode_()
 {
   rlEnablePointMode();
+}
+
+RLBIND void rlDisablePointMode_()
+{
+  rlDisablePointMode();
+}
+
+RLBIND void rlSetPointSize_(float a)
+{
+  rlSetPointSize(a);
+}
+
+RLBIND float rlGetPointSize_()
+{
+  return rlGetPointSize();
+}
+
+RLBIND void rlEnableWireMode_()
+{
+  rlEnableWireMode();
 }
 
 RLBIND void rlDisableWireMode_()

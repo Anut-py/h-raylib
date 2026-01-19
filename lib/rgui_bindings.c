@@ -178,6 +178,11 @@ RLBIND void GuiDrawIcon_(int iconId, int posX, int posY, int pixelSize, Color *c
   return GuiDrawIcon(iconId, posX, posY, pixelSize, *color);
 }
 
+RLBIND int GuiGetTextWidth_(char *a)
+{
+  return GuiGetTextWidth(a);
+}
+
 RLBIND int GuiWindowBox_(Rectangle *bounds, const char *title)
 {
   return GuiWindowBox(*bounds, title);
