@@ -9,6 +9,6 @@ other/
 
 # IDE files
 .vscode/
-
 hie.yaml
 Session.vim
+.clangd
