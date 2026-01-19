@@ -52,6 +52,7 @@
         with pkgs; (
           [raylib raygui]
           ++ lib.optionals stdenv.isLinux (with xorg; [libGL libX11 libXcursor libXext libXi libXinerama libXrandr])
+          ++ lib.optionals stdenv.isDarwin (with darwin.apple-sdk; [OpenGL Cocoa IOKit CoreVideo CoreAudio CoreFoundation])
         );
     in
       {
