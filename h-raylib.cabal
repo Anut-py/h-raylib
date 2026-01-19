@@ -1,6 +1,6 @@
 cabal-version:      2.4
 name:               h-raylib
-version:            5.5.3.1
+version:            5.6.0.0
 synopsis:           Raylib bindings for Haskell
 category:           graphics
 description:
@@ -316,7 +316,7 @@ library
       Xext
 
     cc-options:
-      -Wno-implicit-function-declaration -Wno-unused-result -Wno-discarded-qualifiers -D_GLFW_X11
+      -Wno-implicit-function-declaration -Wno-unused-result -Wno-ignored-qualifiers -D_GLFW_X11
 
   elif (flag(platform-mac) || (flag(detect-platform) && os(osx)))
     frameworks: OpenGL Cocoa IOKit CoreVideo CoreAudio CoreFoundation
@@ -340,7 +340,7 @@ library
 
   else
     cc-options:
-      -DPLATFORM_DESKTOP_GLFW -Wno-int-to-void-pointer-cast -Wno-discarded-qualifiers
+      -DPLATFORM_DESKTOP_GLFW -Wno-int-to-void-pointer-cast -Wno-ignored-qualifiers
 
     c-sources:
       lib/rgui_bindings.c
@@ -364,7 +364,6 @@ library
         raylib/src/rshapes.c
         raylib/src/rtext.c
         raylib/src/rtextures.c
-        raylib/src/utils.c
 
       if (flag(platform-mac) || (flag(detect-platform) && os(osx)))
         -- Use rgflw.m instead of .c on Mac to force objective-c
