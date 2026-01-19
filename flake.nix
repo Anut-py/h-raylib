@@ -52,7 +52,7 @@
         with pkgs; (
           [raylib raygui]
           ++ lib.optionals stdenv.isLinux (with xorg; [libGL libX11 libXcursor libXext libXi libXinerama libXrandr])
-          ++ lib.optionals stdenv.isDarwin (with darwin.apple-sdk; [OpenGL Cocoa IOKit CoreVideo CoreAudio CoreFoundation])
+          # ++ lib.optionals stdenv.isDarwin (with darwin.apple-sdk; [OpenGL Cocoa IOKit CoreVideo CoreAudio CoreFoundation])
         );
     in
       {
@@ -70,7 +70,7 @@
         );
         packages = forAllSystems (system: let
           pkgs = pkgsForSystem system;
-          baseInputs = pkgs // pkgs.xorg // pkgs.haskellPackages // rec { systemDeps = depsForSystem system pkgs; buildExamples = false; };
+          baseInputs = pkgs // pkgs.xorg // pks.apple-sdk // pkgs.haskellPackages // rec { systemDeps = depsForSystem system pkgs; buildExamples = false; };
         in {
           default = import ./default.nix baseInputs;
           examples = import ./default.nix (baseInputs // rec { buildExamples = true; });
