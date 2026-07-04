@@ -88,7 +88,7 @@ import Raylib.Internal.Foreign
 import Raylib.Internal.TH (genNative)
 import Raylib.Types
   ( Color,
-    Font (font'texture),
+    Font (font'texture, font'glyphs),
     FontType,
     GlyphInfo,
     Image,
@@ -235,7 +235,7 @@ getGlyphIndex :: Font -> Int -> IO Int
 getGlyphIndex font codepoint = fromIntegral <$> withFreeable font (\f -> c'getGlyphIndex f (fromIntegral codepoint))
 
 getGlyphInfo :: Font -> Int -> IO GlyphInfo
-getGlyphInfo font codepoint = withFreeable font (\f -> c'getGlyphInfo f (fromIntegral codepoint)) >>= pop
+getGlyphInfo font codepoint = ((font'glyphs font) !!) <$> getGlyphIndex font codepoint
 
 getGlyphAtlasRec :: Font -> Int -> IO Rectangle
 getGlyphAtlasRec font codepoint = withFreeable font (\f -> c'getGlyphAtlasRec f (fromIntegral codepoint)) >>= pop

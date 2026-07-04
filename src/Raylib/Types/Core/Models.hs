@@ -447,7 +447,7 @@ p'mesh'animVertices = (`plusPtr` 64)
 p'mesh'animNormals :: Ptr Mesh -> Ptr (Ptr Vector3)
 p'mesh'animNormals = (`plusPtr` 72)
 
--- maybe array (mesh'boneCount)
+-- maybe array (4 * mesh'vertexCount)
 p'mesh'boneIds :: Ptr Mesh -> Ptr (Ptr CUChar)
 p'mesh'boneIds = (`plusPtr` 80)
 
