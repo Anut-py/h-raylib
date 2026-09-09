@@ -96,7 +96,6 @@ module Raylib.Types.Core
     p'vrStereoConfig'rightScreenCenter,
     p'vrStereoConfig'scale,
     p'vrStereoConfig'scaleIn,
-    p'filePathList'capacity,
     p'filePathList'count,
     p'filePathList'paths,
     p'automationEvent'frame,
@@ -1124,33 +1123,27 @@ p'vrStereoConfig'scaleIn :: Ptr VrStereoConfig -> Ptr CFloat
 p'vrStereoConfig'scaleIn = (`plusPtr` 296)
 
 data FilePathList = FilePathList
-  { filePathList'capacity :: Integer,
-    filePathList'paths :: [String]
+  { filePathList'paths :: [String]
   }
   deriving (Eq, Show, Read)
 
 instance Storable FilePathList where
   sizeOf _ = 16
-  alignment _ = 4
+  alignment _ = 8
   peek _p = do
-    capacity <- fromIntegral <$> peek (p'filePathList'capacity _p)
     count <- fromIntegral <$> peek (p'filePathList'count _p)
     pathsPtr <- peek (p'filePathList'paths _p)
     pathsCStrings <- peekArray count pathsPtr
     paths <- mapM peekCString pathsCStrings
-    return $ FilePathList capacity paths
-  poke _p (FilePathList capacity paths) = do
-    poke (p'filePathList'capacity _p) (fromIntegral capacity)
+    return $ FilePathList paths
+  poke _p (FilePathList paths) = do
     poke (p'filePathList'count _p) (fromIntegral (length paths))
     pathsCStrings <- mapM newCString paths
     poke (p'filePathList'paths _p) =<< newArray pathsCStrings
     return ()
 
-p'filePathList'capacity :: Ptr FilePathList -> Ptr CUInt
-p'filePathList'capacity = (`plusPtr` 0)
-
 p'filePathList'count :: Ptr FilePathList -> Ptr CUInt
-p'filePathList'count = (`plusPtr` 4)
+p'filePathList'count = (`plusPtr` 0)
 
 -- array (filePathList'count)
 p'filePathList'paths :: Ptr FilePathList -> Ptr (Ptr CString)

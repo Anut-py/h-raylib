@@ -132,7 +132,9 @@ module Raylib.Core
     fileExists,
     directoryExists,
     isFileExtension,
+    isFileHidden,
     getFileLength,
+    getFileModTime,
     getFileExtension,
     getFileName,
     getFileNameWithoutExt,
@@ -148,7 +150,8 @@ module Raylib.Core
     loadDirectoryFilesEx,
     isFileDropped,
     loadDroppedFiles,
-    getFileModTime,
+    getDirectoryFileCount,
+    getDirectoryFileCountEx,
     compressData,
     decompressData,
     encodeDataBase64,
@@ -156,6 +159,7 @@ module Raylib.Core
     computeCRC32,
     computeMD5,
     computeSHA1,
+    computeSHA256,
     loadAutomationEventList,
     newAutomationEventList,
     exportAutomationEventList,
@@ -344,7 +348,9 @@ module Raylib.Core
     c'fileTextFindIndex,
     c'directoryExists,
     c'isFileExtension,
+    c'isFileHidden,
     c'getFileLength,
+    c'getFileModTime,
     c'getFileExtension,
     c'getFileName,
     c'getFileNameWithoutExt,
@@ -361,8 +367,9 @@ module Raylib.Core
     c'unloadDirectoryFiles,
     c'isFileDropped,
     c'loadDroppedFiles,
+    c'getDirectoryFileCount,
+    c'getDirectoryFileCountEx,
     c'unloadDroppedFiles,
-    c'getFileModTime,
     c'compressData,
     c'decompressData,
     c'encodeDataBase64,
@@ -370,6 +377,7 @@ module Raylib.Core
     c'computeCRC32,
     c'computeMD5,
     c'computeSHA1,
+    c'computeSHA256,
     c'loadAutomationEventList,
     c'exportAutomationEventList,
     c'setAutomationEventList,
@@ -644,7 +652,9 @@ $( genNative
        ("c'fileTextFindIndex", "FileTextFindIndex_", "rl_bindings.h", [t|CString -> CString -> IO CInt|]),
        ("c'directoryExists", "DirectoryExists_", "rl_bindings.h", [t|CString -> IO CBool|]),
        ("c'isFileExtension", "IsFileExtension_", "rl_bindings.h", [t|CString -> CString -> IO CBool|]),
+       ("c'isFileHidden", "IsFileHidden_", "rl_bindings.h", [t|CString -> IO CBool|]),
        ("c'getFileLength", "GetFileLength_", "rl_bindings.h", [t|CString -> IO CBool|]),
+       ("c'getFileModTime", "GetFileModTime_", "rl_bindings.h", [t|CString -> IO CLong|]),
        ("c'getFileExtension", "GetFileExtension_", "rl_bindings.h", [t|CString -> IO CString|]),
        ("c'getFileName", "GetFileName_", "rl_bindings.h", [t|CString -> IO CString|]),
        ("c'getFileNameWithoutExt", "GetFileNameWithoutExt_", "rl_bindings.h", [t|CString -> IO CString|]),
@@ -653,7 +663,7 @@ $( genNative
        ("c'getWorkingDirectory", "GetWorkingDirectory_", "rl_bindings.h", [t|IO CString|]),
        ("c'getApplicationDirectory", "GetApplicationDirectory_", "rl_bindings.h", [t|IO CString|]),
        ("c'makeDirectory", "MakeDirectory_", "rl_bindings.h", [t|CString -> IO CInt|]),
-       ("c'changeDirectory", "ChangeDirectory_", "rl_bindings.h", [t|CString -> IO CBool|]),
+       ("c'changeDirectory", "ChangeDirectory_", "rl_bindings.h", [t|CString -> IO CInt|]),
        ("c'isPathFile", "IsPathFile_", "rl_bindings.h", [t|CString -> IO CBool|]),
        ("c'isFileNameValid", "IsFileNameValid_", "rl_bindings.h", [t|CString -> IO CBool|]),
        ("c'loadDirectoryFiles", "LoadDirectoryFiles_", "rl_bindings.h", [t|CString -> IO (Ptr FilePathList)|]),
@@ -662,7 +672,8 @@ $( genNative
        ("c'isFileDropped", "IsFileDropped_", "rl_bindings.h", [t|IO CBool|]),
        ("c'loadDroppedFiles", "LoadDroppedFiles_", "rl_bindings.h", [t|IO (Ptr FilePathList)|]),
        ("c'unloadDroppedFiles", "UnloadDroppedFiles_", "rl_bindings.h", [t|Ptr FilePathList -> IO ()|]),
-       ("c'getFileModTime", "GetFileModTime_", "rl_bindings.h", [t|CString -> IO CLong|]),
+       ("c'getDirectoryFileCount", "GetDirectoryFileCount_", "rl_bindings.h", [t|CString -> IO CUInt|]),
+       ("c'getDirectoryFileCountEx", "GetDirectoryFileCountEx_", "rl_bindings.h", [t|CString -> CString -> CBool -> IO CUInt|]),
        ("c'compressData", "CompressData_", "rl_bindings.h", [t|Ptr CUChar -> CInt -> Ptr CInt -> IO (Ptr CUChar)|]),
        ("c'decompressData", "DecompressData_", "rl_bindings.h", [t|Ptr CUChar -> CInt -> Ptr CInt -> IO (Ptr CUChar)|]),
        ("c'encodeDataBase64", "EncodeDataBase64_", "rl_bindings.h", [t|Ptr CUChar -> CInt -> Ptr CInt -> IO CString|]),
@@ -670,6 +681,7 @@ $( genNative
        ("c'computeCRC32", "ComputeCRC32_", "rl_bindings.h", [t|Ptr CUChar -> CInt -> IO CUInt|]),
        ("c'computeMD5", "ComputeMD5_", "rl_bindings.h", [t|Ptr CUChar -> CInt -> IO (Ptr CUInt)|]),
        ("c'computeSHA1", "ComputeSHA1_", "rl_bindings.h", [t|Ptr CUChar -> CInt -> IO (Ptr CUInt)|]),
+       ("c'computeSHA256", "ComputeSHA256_", "rl_bindings.h", [t|Ptr CUChar -> CInt -> IO (Ptr CUInt)|]),
        ("c'loadAutomationEventList", "LoadAutomationEventList_", "rl_bindings.h", [t|CString -> IO (Ptr AutomationEventList)|]),
        ("c'exportAutomationEventList", "ExportAutomationEventList_", "rl_bindings.h", [t|Ptr AutomationEventList -> CString -> IO CBool|]),
        ("c'setAutomationEventList", "SetAutomationEventList_", "rl_bindings.h", [t|Ptr AutomationEventList -> IO ()|]),
@@ -1179,8 +1191,14 @@ directoryExists dirPath = toBool <$> withCString dirPath c'directoryExists
 isFileExtension :: String -> String -> IO Bool
 isFileExtension fileName ext = toBool <$> withCString fileName (withCString ext . c'isFileExtension)
 
+isFileHidden :: String -> IO Bool
+isFileHidden fileName = toBool <$> withCString fileName c'isFileHidden
+
 getFileLength :: String -> IO Bool
 getFileLength fileName = toBool <$> withCString fileName c'getFileLength
+
+getFileModTime :: String -> IO Integer
+getFileModTime fileName = fromIntegral <$> withCString fileName c'getFileModTime
 
 getFileExtension :: String -> IO String
 getFileExtension fileName = withCString fileName c'getFileExtension >>= peekCString
@@ -1206,8 +1224,8 @@ getApplicationDirectory = c'getApplicationDirectory >>= peekCString
 makeDirectory :: String -> IO Bool
 makeDirectory dirPath = (== 0) <$> withCString dirPath c'makeDirectory
 
-changeDirectory :: String -> IO Bool
-changeDirectory dir = toBool <$> withCString dir c'changeDirectory
+changeDirectory :: String -> IO Int
+changeDirectory dir = fromIntegral <$> withCString dir c'changeDirectory
 
 isPathFile :: String -> IO Bool
 isPathFile path = toBool <$> withCString path c'isPathFile
@@ -1232,8 +1250,11 @@ loadDroppedFiles = do
   c'unloadDroppedFiles ptr
   return val
 
-getFileModTime :: String -> IO Integer
-getFileModTime fileName = fromIntegral <$> withCString fileName c'getFileModTime
+getDirectoryFileCount :: String -> IO Integer
+getDirectoryFileCount dirPath = fromIntegral <$> withCString dirPath c'getDirectoryFileCount
+
+getDirectoryFileCountEx :: String -> String -> Bool -> IO Integer
+getDirectoryFileCountEx basePath filter scanSubdirs = fromIntegral <$> withCString basePath (\b -> withCString filter (\f -> c'getDirectoryFileCountEx b f (fromBool scanSubdirs)))
 
 compressData :: [Integer] -> IO [Integer]
 compressData contents = do
@@ -1317,6 +1338,16 @@ computeSHA1 contents = do
     (map fromIntegral contents)
     ( \size c -> do
         encoded <- c'computeSHA1 c (fromIntegral $ size * sizeOf (0 :: CUChar))
+        arr <- peekArray 5 encoded
+        return $ map fromIntegral arr
+    )
+
+computeSHA256 :: [Integer] -> IO [Integer]
+computeSHA256 contents = do
+  withFreeableArrayLen
+    (map fromIntegral contents)
+    ( \size c -> do
+        encoded <- c'computeSHA256 c (fromIntegral $ size * sizeOf (0 :: CUChar))
         arr <- peekArray 5 encoded
         return $ map fromIntegral arr
     )

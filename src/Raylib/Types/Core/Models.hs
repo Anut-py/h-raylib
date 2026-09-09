@@ -20,7 +20,9 @@ module Raylib.Types.Core.Models
     MaterialMap (..),
     Material (..),
     Transform (..),
+    ModelAnimPose,
     BoneInfo (..),
+    ModelSkeleton (..),
     Model (..),
     ModelAnimation (..),
     Ray (..),
@@ -37,10 +39,11 @@ module Raylib.Types.Core.Models
     p'mesh'tangents,
     p'mesh'colors,
     p'mesh'indices,
+    p'mesh'boneCount,
+    p'mesh'boneIndices,
+    p'mesh'boneWeights,
     p'mesh'animVertices,
     p'mesh'animNormals,
-    p'mesh'boneIds,
-    p'mesh'boneWeights,
     p'mesh'vaoId,
     p'mesh'vboId,
     p'shader'id,
@@ -62,14 +65,13 @@ module Raylib.Types.Core.Models
     p'model'meshes,
     p'model'materials,
     p'model'meshMaterial,
-    p'model'boneCount,
-    p'model'bones,
-    p'model'bindPose,
-    p'modelAnimation'boneCount,
-    p'modelAnimation'frameCount,
-    p'modelAnimation'bones,
-    p'modelAnimation'framePoses,
+    p'model'skeleton,
+    p'model'currentPose,
+    p'model'boneMatrices,
     p'modelAnimation'name,
+    p'modelAnimation'boneCount,
+    p'modelAnimation'keyframeCount,
+    p'modelAnimation'keyframePoses,
     p'ray'position,
     p'ray'direction,
     p'rayCollision'hit,
@@ -175,8 +177,8 @@ data ShaderLocationIndex
   | ShaderLocMapBrdf
   | ShaderLocVertexBoneIds
   | ShaderLocVertexBoneWeights
-  | ShaderLocBoneMatrices
-  | ShaderLocVertexInstanceTx
+  | ShaderLocBoneWeights
+  | ShaderLocVertexInstanceTransform
   deriving (Eq, Show, Read, Enum)
 
 data ShaderUniformDataType
@@ -341,12 +343,11 @@ data Mesh = Mesh
     mesh'tangents :: Maybe [Vector4],
     mesh'colors :: Maybe [Color],
     mesh'indices :: Maybe [Word16],
+    mesh'boneCount :: Int,
+    mesh'boneIndices :: Maybe [Word8],
+    mesh'boneWeights :: Maybe [CFloat],
     mesh'animVertices :: Maybe [Vector3],
     mesh'animNormals :: Maybe [Vector3],
-    mesh'boneIds :: Maybe [Word8],
-    mesh'boneWeights :: Maybe [Float],
-    mesh'boneMatrices :: Maybe [Matrix],
-    mesh'boneCount :: Int,
     mesh'vaoId :: Integer,
     -- | Use `toEnum` on `DefaultShaderAttributeLocation` for indices
     mesh'vboId :: Maybe [Integer]
@@ -366,16 +367,15 @@ instance Storable Mesh where
     tangents <- peekMaybeArray vertexCount =<< peek (p'mesh'tangents _p)
     colors <- peekMaybeArray vertexCount =<< peek (p'mesh'colors _p)
     indices <- (map fromIntegral <$>) <$> (peekMaybeArray vertexCount =<< peek (p'mesh'indices _p))
+    boneCount <- fromIntegral <$> peek (p'mesh'boneCount _p)
+    boneIndices <- (map fromIntegral <$>) <$> (peekMaybeArray (4 * vertexCount) =<< peek (p'mesh'boneIndices _p))
+    boneWeights <- (map realToFrac <$>) <$> (peekMaybeArray (4 * vertexCount) =<< peek (p'mesh'boneWeights _p))
     animVertices <- peekMaybeArray vertexCount =<< peek (p'mesh'animVertices _p)
     animNormals <- peekMaybeArray vertexCount =<< peek (p'mesh'animNormals _p)
-    boneCount <- fromIntegral <$> peek (p'mesh'boneCount _p)
-    boneIds <- (map fromIntegral <$>) <$> (peekMaybeArray (4 * vertexCount) =<< peek (p'mesh'boneIds _p))
-    boneWeights <- (map realToFrac <$>) <$> (peekMaybeArray (4 * vertexCount) =<< peek (p'mesh'boneWeights _p))
-    boneMatrices <- peekMaybeArray boneCount =<< peek (p'mesh'boneMatrices _p)
     vaoId <- fromIntegral <$> peek (p'mesh'vaoId _p)
     vboId <- (map fromIntegral <$>) <$> (peekMaybeArray 9 =<< peek (p'mesh'vboId _p))
-    return $ Mesh vertexCount triangleCount vertices texcoords texcoords2 normals tangents colors indices animVertices animNormals boneIds boneWeights boneMatrices boneCount vaoId vboId
-  poke _p (Mesh vertexCount triangleCount vertices texcoords texcoords2 normals tangents colors indices animVertices animNormals boneIds boneWeights boneMatrices boneCount vaoId vboId) = do
+    return $ Mesh vertexCount triangleCount vertices texcoords texcoords2 normals tangents colors indices boneCount boneIndices boneWeights animVertices animNormals vaoId vboId
+  poke _p (Mesh vertexCount triangleCount vertices texcoords texcoords2 normals tangents colors indices boneCount boneIndices boneWeights animVertices animNormals vaoId vboId) = do
     poke (p'mesh'vertexCount _p) (fromIntegral vertexCount)
     poke (p'mesh'triangleCount _p) (fromIntegral triangleCount)
     poke (p'mesh'vertices _p) =<< newArray vertices
@@ -385,12 +385,11 @@ instance Storable Mesh where
     poke (p'mesh'tangents _p) =<< newMaybeArray tangents
     poke (p'mesh'colors _p) =<< newMaybeArray colors
     poke (p'mesh'indices _p) =<< newMaybeArray (map fromIntegral <$> indices)
+    poke (p'mesh'boneCount _p) (fromIntegral boneCount)
+    poke (p'mesh'boneIndices _p) =<< newMaybeArray (map fromIntegral <$> boneIndices)
+    poke (p'mesh'boneWeights _p) =<< newMaybeArray (map realToFrac <$> boneWeights)
     poke (p'mesh'animVertices _p) =<< newMaybeArray animVertices
     poke (p'mesh'animNormals _p) =<< newMaybeArray animNormals
-    poke (p'mesh'boneIds _p) =<< newMaybeArray (map fromIntegral <$> boneIds)
-    poke (p'mesh'boneWeights _p) =<< newMaybeArray (map realToFrac <$> boneWeights)
-    poke (p'mesh'boneMatrices _p) =<< newMaybeArray boneMatrices
-    poke (p'mesh'boneCount _p) (fromIntegral boneCount)
     poke (p'mesh'vaoId _p) (fromIntegral vaoId)
     poke (p'mesh'vboId _p) =<< newMaybeArray (map fromIntegral <$> vboId)
     return ()
@@ -439,31 +438,27 @@ p'mesh'colors = (`plusPtr` 48)
 p'mesh'indices :: Ptr Mesh -> Ptr (Ptr CUShort)
 p'mesh'indices = (`plusPtr` 56)
 
+p'mesh'boneCount :: Ptr Mesh -> Ptr CInt
+p'mesh'boneCount = (`plusPtr` 64)
+
+-- maybe array (4 * mesh'vertexCount)
+p'mesh'boneIndices :: Ptr Mesh -> Ptr (Ptr CUChar)
+p'mesh'boneIndices = (`plusPtr` 72)
+
+-- maybe array (4 * mesh'vertexCount)
+p'mesh'boneWeights :: Ptr Mesh -> Ptr (Ptr CFloat)
+p'mesh'boneWeights = (`plusPtr` 80)
+
 -- maybe array (mesh'vertexCount)
 p'mesh'animVertices :: Ptr Mesh -> Ptr (Ptr Vector3)
-p'mesh'animVertices = (`plusPtr` 64)
+p'mesh'animVertices = (`plusPtr` 88)
 
 -- maybe array (mesh'vertexCount)
 p'mesh'animNormals :: Ptr Mesh -> Ptr (Ptr Vector3)
-p'mesh'animNormals = (`plusPtr` 72)
-
--- maybe array (4 * mesh'vertexCount)
-p'mesh'boneIds :: Ptr Mesh -> Ptr (Ptr CUChar)
-p'mesh'boneIds = (`plusPtr` 80)
-
--- maybe array (mesh'boneCount)
-p'mesh'boneWeights :: Ptr Mesh -> Ptr (Ptr CFloat)
-p'mesh'boneWeights = (`plusPtr` 88)
-
--- maybe array (mesh'boneCount)
-p'mesh'boneMatrices :: Ptr Mesh -> Ptr (Ptr Matrix)
-p'mesh'boneMatrices = (`plusPtr` 96)
-
-p'mesh'boneCount :: Ptr Mesh -> Ptr CInt
-p'mesh'boneCount = (`plusPtr` 104)
+p'mesh'animNormals = (`plusPtr` 96)
 
 p'mesh'vaoId :: Ptr Mesh -> Ptr CUInt
-p'mesh'vaoId = (`plusPtr` 108)
+p'mesh'vaoId = (`plusPtr` 104)
 
 -- maybe array (9)
 p'mesh'vboId :: Ptr Mesh -> Ptr (Ptr CUInt)
@@ -484,15 +479,15 @@ instance Freeable Mesh where
     colorsPtr <- peek (p'mesh'colors ptr)
     freeMaybePtr $ castPtr colorsPtr
     indicesPtr <- peek (p'mesh'indices ptr)
+    boneIndicesPtr <- peek (p'mesh'boneIndices ptr)
+    freeMaybePtr $ castPtr boneIndicesPtr
+    boneWeightsPtr <- peek (p'mesh'boneWeights ptr)
+    freeMaybePtr $ castPtr boneWeightsPtr
     freeMaybePtr $ castPtr indicesPtr
     animVerticesPtr <- peek (p'mesh'animVertices ptr)
     freeMaybePtr $ castPtr animVerticesPtr
     animNormalsPtr <- peek (p'mesh'animNormals ptr)
     freeMaybePtr $ castPtr animNormalsPtr
-    boneIdsPtr <- peek (p'mesh'boneIds ptr)
-    freeMaybePtr $ castPtr boneIdsPtr
-    boneWeightsPtr <- peek (p'mesh'boneWeights ptr)
-    freeMaybePtr $ castPtr boneWeightsPtr
     vboIdPtr <- peek (p'mesh'vboId ptr)
     c'free $ castPtr vboIdPtr
 
@@ -654,6 +649,8 @@ p'transform'rotation = (`plusPtr` 12)
 p'transform'scale :: Ptr Transform -> Ptr Vector3
 p'transform'scale = (`plusPtr` 28)
 
+type ModelAnimPose = [Transform]
+
 data BoneInfo = BoneInfo
   { boneInfo'name :: String,
     boneInfo'parent :: Int
@@ -679,20 +676,57 @@ p'boneInfo'name = (`plusPtr` 0)
 p'boneInfo'parent :: Ptr BoneInfo -> Ptr CInt
 p'boneInfo'parent = (`plusPtr` 32)
 
+data ModelSkeleton = ModelSkeleton
+  { modelSkeleton'boneCount :: Int,
+    modelSkeleton'bones :: [BoneInfo],
+    modelSkeleton'bindPose :: ModelAnimPose
+  }
+  deriving (Eq, Show, Read)
+
+instance Storable ModelSkeleton where
+  sizeOf _ = 24
+  alignment _ = 8
+  peek _p = do
+    boneCount <- fromIntegral <$> peek (p'modelSkeleton'boneCount _p)
+    bones <- peekArray boneCount =<< peek (p'modelSkeleton'bones _p)
+    bindPose <- peekArray boneCount =<< peek (p'modelSkeleton'bindPose _p)
+    return $ ModelSkeleton boneCount bones bindPose
+  poke _p (ModelSkeleton boneCount bones bindPose) = do
+    poke (p'modelSkeleton'boneCount _p) (fromIntegral boneCount)
+    poke (p'modelSkeleton'bones _p) =<< newArray bones
+    poke (p'modelSkeleton'bindPose _p) =<< newArray bindPose
+    return ()
+
+p'modelSkeleton'boneCount :: Ptr ModelSkeleton -> Ptr CUInt
+p'modelSkeleton'boneCount = (`plusPtr` 0)
+
+-- array (modelSkeleton'boneCount)
+p'modelSkeleton'bones :: Ptr ModelSkeleton -> Ptr (Ptr BoneInfo)
+p'modelSkeleton'bones = (`plusPtr` 8)
+
+-- array (modelSkeleton'boneCount)
+p'modelSkeleton'bindPose :: Ptr ModelSkeleton -> Ptr (Ptr Transform)
+p'modelSkeleton'bindPose = (`plusPtr` 16)
+
+instance Freeable ModelSkeleton where
+  rlFreeDependents _ ptr = do
+    (c'free . castPtr) =<< peek (p'modelSkeleton'bones ptr)
+    (c'free . castPtr) =<< peek (p'modelSkeleton'bindPose ptr)
+
 data Model = Model
   { model'transform :: Matrix,
     model'meshes :: [Mesh],
     model'materials :: [Material],
     model'meshMaterial :: [Int],
-    model'boneCount :: Int,
-    model'bones :: Maybe [BoneInfo],
-    model'bindPose :: Maybe [Transform]
+    model'skeleton :: ModelSkeleton,
+    model'currentPose :: Maybe ModelAnimPose,
+    model'boneMatrices :: Maybe [Matrix]
   }
   deriving (Eq, Show, Read)
 
 instance Storable Model where
-  sizeOf _ = 120
-  alignment _ = 4
+  sizeOf _ = 136
+  alignment _ = 8
   peek _p = do
     transform <- peek (p'model'transform _p)
     meshCount <- fromIntegral <$> peek (p'model'meshCount _p)
@@ -700,20 +734,21 @@ instance Storable Model where
     meshes <- peekArray meshCount =<< peek (p'model'meshes _p)
     materials <- peekArray materialCount =<< peek (p'model'materials _p)
     meshMaterial <- map fromIntegral <$> (peekArray meshCount =<< peek (p'model'meshMaterial _p))
-    boneCount <- fromIntegral <$> peek (p'model'boneCount _p)
-    bones <- peekMaybeArray boneCount =<< peek (p'model'bones _p)
-    bindPose <- peekMaybeArray boneCount =<< peek (p'model'bindPose _p)
-    return $ Model transform meshes materials meshMaterial boneCount bones bindPose
-  poke _p (Model transform meshes materials meshMaterial boneCount bones bindPose) = do
+    skeleton <- peek (p'model'skeleton _p)
+    let boneCount = modelSkeleton'boneCount skeleton
+    currentPose <- peekMaybeArray boneCount =<< peek (p'model'currentPose _p)
+    boneMatrices <- peekMaybeArray boneCount =<< peek (p'model'boneMatrices _p)
+    return $ Model transform meshes materials meshMaterial skeleton currentPose boneMatrices
+  poke _p (Model transform meshes materials meshMaterial skeleton currentPose boneMatrices) = do
     poke (p'model'transform _p) transform
     poke (p'model'meshCount _p) (fromIntegral (length meshes))
     poke (p'model'materialCount _p) (fromIntegral (length materials))
     poke (p'model'meshes _p) =<< newArray meshes
     poke (p'model'materials _p) =<< newArray materials
     poke (p'model'meshMaterial _p) =<< newArray (map fromIntegral meshMaterial)
-    poke (p'model'boneCount _p) (fromIntegral boneCount)
-    poke (p'model'bones _p) =<< newMaybeArray bones
-    poke (p'model'bindPose _p) =<< newMaybeArray bindPose
+    poke (p'model'skeleton _p) skeleton
+    poke (p'model'currentPose _p) =<< newMaybeArray currentPose
+    poke (p'model'boneMatrices _p) =<< newMaybeArray boneMatrices
     return ()
 
 instance Closeable Model where
@@ -745,79 +780,71 @@ p'model'materials = (`plusPtr` 80)
 p'model'meshMaterial :: Ptr Model -> Ptr (Ptr CInt)
 p'model'meshMaterial = (`plusPtr` 88)
 
-p'model'boneCount :: Ptr Model -> Ptr CInt
-p'model'boneCount = (`plusPtr` 96)
+p'model'skeleton :: Ptr Model -> Ptr ModelSkeleton
+p'model'skeleton = (`plusPtr` 96)
 
--- maybe array (model'boneCount)
-p'model'bones :: Ptr Model -> Ptr (Ptr BoneInfo)
-p'model'bones = (`plusPtr` 104)
+-- maybe array (modelSkeleton'boneCount . model'skeleton)
+p'model'currentPose :: Ptr Model -> Ptr (Ptr Transform)
+p'model'currentPose = (`plusPtr` 120)
 
--- maybe array (model'boneCount)
-p'model'bindPose :: Ptr Model -> Ptr (Ptr Transform)
-p'model'bindPose = (`plusPtr` 112)
+-- maybe array (modelSkeleton'boneCount . model'skeleton)
+p'model'boneMatrices :: Ptr Model -> Ptr (Ptr Matrix)
+p'model'boneMatrices = (`plusPtr` 128)
 
 instance Freeable Model where
   rlFreeDependents val ptr = do
     rlFree (model'meshes val) . castPtr =<< peek (p'model'meshes ptr)
     rlFree (model'materials val) . castPtr =<< peek (p'model'materials ptr)
     c'free . castPtr =<< peek (p'model'meshMaterial ptr)
-    freeMaybePtr . castPtr =<< peek (p'model'bones ptr)
-    freeMaybePtr . castPtr =<< peek (p'model'bindPose ptr)
+    rlFreeMaybeArray (model'currentPose val) =<< peek (p'model'currentPose ptr)
+    rlFreeMaybeArray (model'boneMatrices val) =<< peek (p'model'boneMatrices ptr)
+    rlFreeDependents (model'skeleton val) (p'model'skeleton ptr)
 
 data ModelAnimation = ModelAnimation
-  { modelAnimation'boneCount :: Int,
-    modelAnimation'frameCount :: Int,
-    modelAnimation'bones :: [BoneInfo],
-    modelAnimation'framePoses :: [[Transform]],
-    modelAnimation'name :: String
+  { modelAnimation'name :: String,
+    modelAnimation'boneCount :: Int,
+    modelAnimation'keyframeCount :: Int,
+    modelAnimation'keyframePoses :: [ModelAnimPose]
   }
   deriving (Eq, Show, Read)
 
 instance Storable ModelAnimation where
-  sizeOf _ = 56
-  alignment _ = 4
+  sizeOf _ = 48
+  alignment _ = 8
   peek _p = do
-    boneCount <- fromIntegral <$> peek (p'modelAnimation'boneCount _p)
-    frameCount <- fromIntegral <$> peek (p'modelAnimation'frameCount _p)
-    bones <- peekArray boneCount =<< peek (p'modelAnimation'bones _p)
-    framePosesPtr <- peek (p'modelAnimation'framePoses _p)
-    framePosesPtrArr <- peekArray frameCount framePosesPtr
-    framePoses <- mapM (peekArray boneCount) framePosesPtrArr
     name <- peekCString (p'modelAnimation'name _p)
-    return $ ModelAnimation boneCount frameCount bones framePoses name
-  poke _p (ModelAnimation boneCount frameCount bones framePoses name) = do
-    poke (p'modelAnimation'boneCount _p) (fromIntegral boneCount)
-    poke (p'modelAnimation'frameCount _p) (fromIntegral frameCount)
-    poke (p'modelAnimation'bones _p) =<< newArray bones
-    poke (p'modelAnimation'framePoses _p) =<< newArray =<< mapM newArray framePoses
+    boneCount <- fromIntegral <$> peek (p'modelAnimation'boneCount _p)
+    keyframeCount <- fromIntegral <$> peek (p'modelAnimation'keyframeCount _p)
+    keyframePosesPtrs <- peekArray keyframeCount =<< peek (p'modelAnimation'keyframePoses _p)
+    keyframePoses <- mapM (peekArray boneCount) keyframePosesPtrs
+    return $ ModelAnimation name boneCount keyframeCount keyframePoses
+  poke _p (ModelAnimation name boneCount keyframeCount keyframePoses) = do
     pokeStaticArray (p'modelAnimation'name _p) (rightPad 32 0 $ map castCharToCChar name)
+    poke (p'modelAnimation'boneCount _p) (fromIntegral boneCount)
+    poke (p'modelAnimation'keyframeCount _p) (fromIntegral keyframeCount)
+    poke (p'modelAnimation'keyframePoses _p) =<< newArray =<< mapM newArray keyframePoses
     return ()
-
-p'modelAnimation'boneCount :: Ptr ModelAnimation -> Ptr CInt
-p'modelAnimation'boneCount = (`plusPtr` 0)
-
-p'modelAnimation'frameCount :: Ptr ModelAnimation -> Ptr CInt
-p'modelAnimation'frameCount = (`plusPtr` 4)
-
--- array (modelAnimation'boneCount)
-p'modelAnimation'bones :: Ptr ModelAnimation -> Ptr (Ptr BoneInfo)
-p'modelAnimation'bones = (`plusPtr` 8)
-
--- array 2d (rows: modelAnimation'frameCount, cols: modelAnimation'boneCount)
-p'modelAnimation'framePoses :: Ptr ModelAnimation -> Ptr (Ptr (Ptr Transform))
-p'modelAnimation'framePoses = (`plusPtr` 16)
 
 -- static string (32)
 p'modelAnimation'name :: Ptr ModelAnimation -> Ptr CChar
-p'modelAnimation'name = (`plusPtr` 24)
+p'modelAnimation'name = (`plusPtr` 0)
+
+p'modelAnimation'boneCount :: Ptr ModelAnimation -> Ptr CUInt
+p'modelAnimation'boneCount = (`plusPtr` 32)
+
+p'modelAnimation'keyframeCount :: Ptr ModelAnimation -> Ptr CInt
+p'modelAnimation'keyframeCount = (`plusPtr` 36)
+
+-- array 2d (rows: modelAnimation'frameCount, cols: modelAnimation'boneCount)
+p'modelAnimation'keyframePoses :: Ptr ModelAnimation -> Ptr (Ptr (Ptr Transform))
+p'modelAnimation'keyframePoses = (`plusPtr` 40)
 
 instance Freeable ModelAnimation where
   rlFreeDependents val ptr = do
-    c'free . castPtr =<< peek (p'modelAnimation'bones ptr)
-    framePosesPtr <- peek (p'modelAnimation'framePoses ptr)
-    framePosesPtrArr <- peekArray (modelAnimation'frameCount val) framePosesPtr
-    forM_ framePosesPtrArr (c'free . castPtr)
-    c'free $ castPtr framePosesPtr
+    keyframePosesPtr <- peek (p'modelAnimation'keyframePoses ptr)
+    keyframePosesPtrArr <- peekArray (modelAnimation'keyframeCount val) keyframePosesPtr
+    forM_ keyframePosesPtrArr (c'free . castPtr)
+    c'free $ castPtr keyframePosesPtr
 
 data Ray = Ray
   { ray'position :: Vector3,

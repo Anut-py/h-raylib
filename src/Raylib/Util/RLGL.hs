@@ -167,9 +167,11 @@ module Raylib.Util.RLGL
     rlUnloadFramebuffer,
 
     -- *** Shaders management
-    rlLoadShaderCode,
-    rlCompileShader,
+    rlLoadShader,
     rlLoadShaderProgram,
+    rlLoadShaderProgramEx,
+    rlLoadShaderProgramCompute,
+    rlUnloadShader,
     rlUnloadShaderProgram,
     rlGetLocationUniform,
     rlGetLocationAttrib,
@@ -180,7 +182,6 @@ module Raylib.Util.RLGL
     rlSetShader,
 
     -- *** Compute shader management
-    rlLoadComputeShaderProgram,
     rlComputeShaderDispatch,
 
     -- *** Shader buffer storage object management (ssbo)
@@ -302,9 +303,11 @@ module Raylib.Util.RLGL
     c'rlCopyFramebuffer,
     c'rlResizeFramebuffer,
     c'rlUnloadFramebuffer,
-    c'rlLoadShaderCode,
-    c'rlCompileShader,
+    c'rlLoadShader,
     c'rlLoadShaderProgram,
+    c'rlLoadShaderProgramEx,
+    c'rlLoadShaderProgramCompute,
+    c'rlUnloadShader,
     c'rlUnloadShaderProgram,
     c'rlGetLocationUniform,
     c'rlGetLocationAttrib,
@@ -313,7 +316,6 @@ module Raylib.Util.RLGL
     c'rlSetUniformMatrices,
     c'rlSetUniformSampler,
     c'rlSetShader,
-    c'rlLoadComputeShaderProgram,
     c'rlComputeShaderDispatch,
     c'rlLoadShaderBuffer,
     c'rlUnloadShaderBuffer,
@@ -518,9 +520,11 @@ $( genNative
        ("c'rlCopyFramebuffer", "rlCopyFramebuffer_", "rlgl_bindings.h", [t|CInt -> CInt -> CInt -> CInt -> CInt -> Ptr CUChar -> IO ()|]),
        ("c'rlResizeFramebuffer", "rlResizeFramebuffer_", "rlgl_bindings.h", [t|CInt -> CInt -> IO ()|]),
        ("c'rlUnloadFramebuffer", "rlUnloadFramebuffer_", "rlgl_bindings.h", [t|CUInt -> IO ()|]),
-       ("c'rlLoadShaderCode", "rlLoadShaderCode_", "rlgl_bindings.h", [t|CString -> CString -> IO CUInt|]),
-       ("c'rlCompileShader", "rlCompileShader_", "rlgl_bindings.h", [t|CString -> CInt -> IO CUInt|]),
-       ("c'rlLoadShaderProgram", "rlLoadShaderProgram_", "rlgl_bindings.h", [t|CUInt -> CUInt -> IO CUInt|]),
+       ("c'rlLoadShader", "rlLoadShader_", "rlgl_bindings.h", [t|CString -> CInt -> IO CUInt|]),
+       ("c'rlLoadShaderProgram", "rlLoadShaderProgram_", "rlgl_bindings.h", [t|CString -> CString -> IO CUInt|]),
+       ("c'rlLoadShaderProgramEx", "rlLoadShaderProgramEx_", "rlgl_bindings.h", [t|CUInt -> CUInt -> IO CUInt|]),
+       ("c'rlLoadShaderProgramCompute", "rlLoadShaderProgramCompute_", "rlgl_bindings.h", [t|CUInt -> IO CUInt|]),
+       ("c'rlUnloadShader", "rlUnloadShader_", "rlgl_bindings.h", [t|CUInt -> IO ()|]),
        ("c'rlUnloadShaderProgram", "rlUnloadShaderProgram_", "rlgl_bindings.h", [t|CUInt -> IO ()|]),
        ("c'rlGetLocationUniform", "rlGetLocationUniform_", "rlgl_bindings.h", [t|CUInt -> CString -> IO CInt|]),
        ("c'rlGetLocationAttrib", "rlGetLocationAttrib_", "rlgl_bindings.h", [t|CUInt -> CString -> IO CInt|]),
@@ -529,7 +533,6 @@ $( genNative
        ("c'rlSetUniformMatrices", "rlSetUniformMatrices_", "rlgl_bindings.h", [t|CInt -> Ptr Matrix -> CInt -> IO ()|]),
        ("c'rlSetUniformSampler", "rlSetUniformSampler_", "rlgl_bindings.h", [t|CInt -> CUInt -> IO ()|]),
        ("c'rlSetShader", "rlSetShader_", "rlgl_bindings.h", [t|CUInt -> Ptr CInt -> IO ()|]),
-       ("c'rlLoadComputeShaderProgram", "rlLoadComputeShaderProgram_", "rlgl_bindings.h", [t|CUInt -> IO CUInt|]),
        ("c'rlComputeShaderDispatch", "rlComputeShaderDispatch_", "rlgl_bindings.h", [t|CUInt -> CUInt -> CUInt -> IO ()|]),
        ("c'rlLoadShaderBuffer", "rlLoadShaderBuffer_", "rlgl_bindings.h", [t|CUInt -> Ptr () -> CInt -> IO CUInt|]),
        ("c'rlUnloadShaderBuffer", "rlUnloadShaderBuffer_", "rlgl_bindings.h", [t|CUInt -> IO ()|]),
@@ -1197,20 +1200,29 @@ rlResizeFramebuffer width height = c'rlResizeFramebuffer (fromIntegral width) (f
 rlUnloadFramebuffer :: Integer -> IO ()
 rlUnloadFramebuffer fboId = c'rlUnloadFramebuffer (fromIntegral fboId)
 
+-- | Load (compile) shader and return shader id
+rlLoadShader :: String -> RLShaderType -> IO Integer
+rlLoadShader shaderCode shaderType =
+  fromIntegral <$> withCString shaderCode (\s -> c'rlLoadShader s (fromIntegral $ fromEnum shaderType))
+
 -- | Load shader from code strings
-rlLoadShaderCode :: String -> String -> IO Integer
-rlLoadShaderCode vsCode fsCode =
-  fromIntegral <$> withCString vsCode (withCString fsCode . c'rlLoadShaderCode)
+rlLoadShaderProgram :: String -> String -> IO Integer
+rlLoadShaderProgram vsCode fsCode =
+  fromIntegral <$> withCString vsCode (withCString fsCode . c'rlLoadShaderProgram)
 
--- | Compile custom shader and return shader id
-rlCompileShader :: String -> RLShaderType -> IO Integer
-rlCompileShader shaderCode shaderType =
-  fromIntegral <$> withCString shaderCode (\s -> c'rlCompileShader s (fromIntegral $ fromEnum shaderType))
+-- | Load shader program, using already loaded shader ids
+rlLoadShaderProgramEx :: Integer -> Integer -> IO Integer
+rlLoadShaderProgramEx vsShaderId fsShaderId =
+  fromIntegral <$> c'rlLoadShaderProgramEx (fromIntegral vsShaderId) (fromIntegral fsShaderId)
 
--- | Load custom shader program
-rlLoadShaderProgram :: Integer -> Integer -> IO Integer
-rlLoadShaderProgram vsShaderId fsShaderId =
-  fromIntegral <$> c'rlLoadShaderProgram (fromIntegral vsShaderId) (fromIntegral fsShaderId)
+-- | Load compute shader program
+rlLoadShaderProgramCompute :: Integer -> IO Integer
+rlLoadShaderProgramCompute csId =
+  fromIntegral <$> c'rlLoadShaderProgramCompute (fromIntegral csId)
+
+-- | Unload shader, loaded with rlLoadShader
+rlUnloadShader :: Integer -> IO ()
+rlUnloadShader shaderId = c'rlUnloadShader (fromIntegral shaderId)
 
 -- | Unload shader program
 rlUnloadShaderProgram :: Integer -> IO ()
@@ -1248,10 +1260,6 @@ rlSetUniformSampler locIndex textureId = c'rlSetUniformSampler (fromIntegral loc
 -- | Set shader currently active (id and locations)
 rlSetShader :: Integer -> [Int] -> IO ()
 rlSetShader shaderId locs = withFreeableArray (map fromIntegral locs :: [CInt]) (c'rlSetShader (fromIntegral shaderId))
-
--- | Load compute shader program
-rlLoadComputeShaderProgram :: Integer -> IO Integer
-rlLoadComputeShaderProgram shaderId = fromIntegral <$> c'rlLoadComputeShaderProgram (fromIntegral shaderId)
 
 -- | Dispatch compute shader (equivalent to *draw* for graphics pipeline)
 rlComputeShaderDispatch :: Integer -> Integer -> Integer -> IO ()

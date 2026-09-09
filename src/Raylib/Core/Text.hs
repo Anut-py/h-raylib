@@ -22,6 +22,7 @@ module Raylib.Core.Text
     setTextLineSpacing,
     measureText,
     measureTextEx,
+    measureTextCodepoints,
     getGlyphIndex,
     getGlyphInfo,
     getGlyphAtlasRec,
@@ -53,6 +54,7 @@ module Raylib.Core.Text
     c'setTextLineSpacing,
     c'measureText,
     c'measureTextEx,
+    c'measureTextCodepoints,
     c'getGlyphIndex,
     c'getGlyphInfo,
     c'getGlyphAtlasRec,
@@ -118,6 +120,7 @@ $( genNative
        ("c'setTextLineSpacing", "SetTextLineSpacing_", "rl_bindings.h", [t|CInt -> IO ()|]),
        ("c'measureText", "MeasureText_", "rl_bindings.h", [t|CString -> CInt -> IO CInt|]),
        ("c'measureTextEx", "MeasureTextEx_", "rl_bindings.h", [t|Ptr Font -> CString -> CFloat -> CFloat -> IO (Ptr Vector2)|]),
+       ("c'measureTextCodepoints", "MeasureTextCodepoints_", "rl_bindings.h", [t|Ptr Font -> Ptr CInt -> CInt -> CFloat -> CFloat -> IO (Ptr Vector2)|]),
        ("c'getGlyphIndex", "GetGlyphIndex_", "rl_bindings.h", [t|Ptr Font -> CInt -> IO CInt|]),
        ("c'getGlyphInfo", "GetGlyphInfo_", "rl_bindings.h", [t|Ptr Font -> CInt -> IO (Ptr GlyphInfo)|]),
        ("c'getGlyphAtlasRec", "GetGlyphAtlasRec_", "rl_bindings.h", [t|Ptr Font -> CInt -> IO (Ptr Rectangle)|]),
@@ -230,6 +233,9 @@ measureText text fontSize = fromIntegral <$> withCString text (\t -> c'measureTe
 
 measureTextEx :: Font -> String -> Float -> Float -> IO Vector2
 measureTextEx font text fontSize spacing = withFreeable font (\f -> withCString text (\t -> c'measureTextEx f t (realToFrac fontSize) (realToFrac spacing))) >>= pop
+
+measureTextCodepoints :: Font -> [Int] -> Float -> Float -> IO Vector2
+measureTextCodepoints font codepoints fontSize spacing = withFreeable font (\f -> withFreeableArrayLen (map fromIntegral codepoints) (\l c -> c'measureTextCodepoints f c (fromIntegral l) (realToFrac fontSize) (realToFrac spacing))) >>= pop
 
 getGlyphIndex :: Font -> Int -> IO Int
 getGlyphIndex font codepoint = fromIntegral <$> withFreeable font (\f -> c'getGlyphIndex f (fromIntegral codepoint))

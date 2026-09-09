@@ -69,7 +69,9 @@ import Raylib.Types.Core (Color, Vector2, Vector3)
 
 -- | OpenGL version
 data RLGLVersion
-  = -- | OpenGL 1.1
+  = -- | Software rendering
+    RLOpenGLSoftware
+  | -- | OpenGL 1.1
     RLOpenGL11
   | -- | OpenGL 2.1 (GLSL 120)
     RLOpenGL21
@@ -83,17 +85,19 @@ data RLGLVersion
 
 instance Enum RLGLVersion where
   fromEnum n = case n of
-    RLOpenGL11 -> 0
-    RLOpenGL21 -> 1
-    RLOpenGL33 -> 2
-    RLOpenGL43 -> 3
-    RLOpenGLES20 -> 4
+    RLOpenGLSoftware -> 0
+    RLOpenGL11 -> 1
+    RLOpenGL21 -> 2
+    RLOpenGL33 -> 3
+    RLOpenGL43 -> 4
+    RLOpenGLES20 -> 5
   toEnum n = case n of
-    0 -> RLOpenGL11
-    1 -> RLOpenGL21
-    2 -> RLOpenGL33
-    3 -> RLOpenGL43
-    4 -> RLOpenGLES20
+    0 -> RLOpenGLSoftware
+    1 -> RLOpenGL11
+    2 -> RLOpenGL21
+    3 -> RLOpenGL33
+    4 -> RLOpenGL43
+    5 -> RLOpenGLES20
     _ -> error $ "(RLGLVersion.toEnum) Invalid value: " ++ show n
 
 instance Storable RLGLVersion where

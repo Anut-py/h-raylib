@@ -34,8 +34,6 @@ module Raylib.Core.Models
     drawModelEx,
     drawModelWires,
     drawModelWiresEx,
-    drawModelPoints,
-    drawModelPointsEx,
     drawBoundingBox,
     drawBillboard,
     drawBillboardRec,
@@ -68,8 +66,8 @@ module Raylib.Core.Models
     setModelMeshMaterial,
     loadModelAnimations,
     updateModelAnimation,
+    updateModelAnimationEx,
     isModelAnimationValid,
-    updateModelAnimationBones,
     checkCollisionSpheres,
     checkCollisionBoxes,
     checkCollisionBoxSphere,
@@ -110,8 +108,6 @@ module Raylib.Core.Models
     c'drawModelEx,
     c'drawModelWires,
     c'drawModelWiresEx,
-    c'drawModelPoints,
-    c'drawModelPointsEx,
     c'drawBoundingBox,
     c'drawBillboard,
     c'drawBillboardRec,
@@ -144,10 +140,9 @@ module Raylib.Core.Models
     c'setModelMeshMaterial,
     c'loadModelAnimations,
     c'updateModelAnimation,
-    c'unloadModelAnimation,
+    c'updateModelAnimationEx,
     c'unloadModelAnimations,
     c'isModelAnimationValid,
-    c'updateModelAnimationBones,
     c'checkCollisionSpheres,
     c'checkCollisionBoxes,
     c'checkCollisionBoxSphere,
@@ -229,8 +224,6 @@ $( genNative
        ("c'drawModelEx", "DrawModelEx_", "rl_bindings.h", [t|Ptr Model -> Ptr Vector3 -> Ptr Vector3 -> CFloat -> Ptr Vector3 -> Ptr Color -> IO ()|]),
        ("c'drawModelWires", "DrawModelWires_", "rl_bindings.h", [t|Ptr Model -> Ptr Vector3 -> CFloat -> Ptr Color -> IO ()|]),
        ("c'drawModelWiresEx", "DrawModelWiresEx_", "rl_bindings.h", [t|Ptr Model -> Ptr Vector3 -> Ptr Vector3 -> CFloat -> Ptr Vector3 -> Ptr Color -> IO ()|]),
-       ("c'drawModelPoints", "DrawModelPoints_", "rl_bindings.h", [t|Ptr Model -> Ptr Vector3 -> CFloat -> Ptr Color -> IO ()|]),
-       ("c'drawModelPointsEx", "DrawModelPointsEx_", "rl_bindings.h", [t|Ptr Model -> Ptr Vector3 -> Ptr Vector3 -> CFloat -> Ptr Vector3 -> Ptr Color -> IO ()|]),
        ("c'drawBoundingBox", "DrawBoundingBox_", "rl_bindings.h", [t|Ptr BoundingBox -> Ptr Color -> IO ()|]),
        ("c'drawBillboard", "DrawBillboard_", "rl_bindings.h", [t|Ptr Camera3D -> Ptr Texture -> Ptr Vector3 -> CFloat -> Ptr Color -> IO ()|]),
        ("c'drawBillboardRec", "DrawBillboardRec_", "rl_bindings.h", [t|Ptr Camera3D -> Ptr Texture -> Ptr Rectangle -> Ptr Vector3 -> Ptr Vector2 -> Ptr Color -> IO ()|]),
@@ -262,11 +255,10 @@ $( genNative
        ("c'setMaterialTexture", "SetMaterialTexture_", "rl_bindings.h", [t|Ptr Material -> CInt -> Ptr Texture -> IO ()|]),
        ("c'setModelMeshMaterial", "SetModelMeshMaterial_", "rl_bindings.h", [t|Ptr Model -> CInt -> CInt -> IO ()|]),
        ("c'loadModelAnimations", "LoadModelAnimations_", "rl_bindings.h", [t|CString -> Ptr CInt -> IO (Ptr ModelAnimation)|]),
-       ("c'updateModelAnimation", "UpdateModelAnimation_", "rl_bindings.h", [t|Ptr Model -> Ptr ModelAnimation -> CInt -> IO ()|]),
-       ("c'unloadModelAnimation", "UnloadModelAnimation_", "rl_bindings.h", [t|Ptr ModelAnimation -> IO ()|]),
+       ("c'updateModelAnimation", "UpdateModelAnimation_", "rl_bindings.h", [t|Ptr Model -> Ptr ModelAnimation -> CFloat -> IO ()|]),
+       ("c'updateModelAnimationEx", "UpdateModelAnimationEx_", "rl_bindings.h", [t|Ptr Model -> Ptr ModelAnimation -> CFloat -> Ptr ModelAnimation -> CFloat -> CFloat -> IO ()|]),
        ("c'unloadModelAnimations", "UnloadModelAnimations_", "rl_bindings.h", [t|Ptr ModelAnimation -> CInt -> IO ()|]),
        ("c'isModelAnimationValid", "IsModelAnimationValid_", "rl_bindings.h", [t|Ptr Model -> Ptr ModelAnimation -> IO CBool|]),
-       ("c'updateModelAnimationBones", "UpdateModelAnimationBones_", "rl_bindings.h", [t|Ptr Model -> Ptr ModelAnimation -> CInt -> IO ()|]),
        ("c'checkCollisionSpheres", "CheckCollisionSpheres_", "rl_bindings.h", [t|Ptr Vector3 -> CFloat -> Ptr Vector3 -> CFloat -> IO CBool|]),
        ("c'checkCollisionBoxes", "CheckCollisionBoxes_", "rl_bindings.h", [t|Ptr BoundingBox -> Ptr BoundingBox -> IO CBool|]),
        ("c'checkCollisionBoxSphere", "CheckCollisionBoxSphere_", "rl_bindings.h", [t|Ptr BoundingBox -> Ptr Vector3 -> CFloat -> IO CBool|]),
@@ -327,10 +319,10 @@ drawCylinderWiresEx :: Vector3 -> Vector3 -> Float -> Float -> Int -> Color -> I
 drawCylinderWiresEx start end startRadius endRadius sides color = withFreeable start (\s -> withFreeable end (\e -> withFreeable color (c'drawCylinderWiresEx s e (realToFrac startRadius) (realToFrac endRadius) (fromIntegral sides))))
 
 drawCapsule :: Vector3 -> Vector3 -> Float -> Int -> Int -> Color -> IO ()
-drawCapsule start end radius slices rings color = withFreeable start (\s -> withFreeable end (\e -> withFreeable color (c'drawCapsule s e (realToFrac radius) (fromIntegral slices) (fromIntegral rings))))
+drawCapsule start end radius rings slices color = withFreeable start (\s -> withFreeable end (\e -> withFreeable color (c'drawCapsule s e (realToFrac radius) (fromIntegral rings) (fromIntegral slices))))
 
 drawCapsuleWires :: Vector3 -> Vector3 -> Float -> Int -> Int -> Color -> IO ()
-drawCapsuleWires start end radius slices rings color = withFreeable start (\s -> withFreeable end (\e -> withFreeable color (c'drawCapsuleWires s e (realToFrac radius) (fromIntegral slices) (fromIntegral rings))))
+drawCapsuleWires start end radius rings slices color = withFreeable start (\s -> withFreeable end (\e -> withFreeable color (c'drawCapsuleWires s e (realToFrac radius) (fromIntegral rings) (fromIntegral slices))))
 
 drawPlane :: Vector3 -> Vector2 -> Color -> IO ()
 drawPlane center size color = withFreeable center (\c -> withFreeable size (withFreeable color . c'drawPlane c))
@@ -377,12 +369,6 @@ drawModelWires model position scale tint = withFreeable model (\m -> withFreeabl
 
 drawModelWiresEx :: Model -> Vector3 -> Vector3 -> Float -> Vector3 -> Color -> IO ()
 drawModelWiresEx model position rotationAxis rotationAngle scale tint = withFreeable model (\m -> withFreeable position (\p -> withFreeable rotationAxis (\r -> withFreeable scale (withFreeable tint . c'drawModelWiresEx m p r (realToFrac rotationAngle)))))
-
-drawModelPoints :: Model -> Vector3 -> Float -> Color -> IO ()
-drawModelPoints model position scale tint = withFreeable model (\m -> withFreeable position (\p -> withFreeable tint (c'drawModelPoints m p (realToFrac scale))))
-
-drawModelPointsEx :: Model -> Vector3 -> Vector3 -> Float -> Vector3 -> Color -> IO ()
-drawModelPointsEx model position rotationAxis rotationAngle scale tint = withFreeable model (\m -> withFreeable position (\p -> withFreeable rotationAxis (\r -> withFreeable scale (withFreeable tint . c'drawModelPointsEx m p r (realToFrac rotationAngle)))))
 
 drawBoundingBox :: BoundingBox -> Color -> IO ()
 drawBoundingBox box color = withFreeable box (withFreeable color . c'drawBoundingBox)
@@ -508,14 +494,14 @@ loadModelAnimations fileName =
           )
     )
 
-updateModelAnimation :: Model -> ModelAnimation -> Int -> IO ()
-updateModelAnimation model animation frame = withFreeable model (\m -> withFreeable animation (\a -> c'updateModelAnimation m a (fromIntegral frame)))
+updateModelAnimation :: Model -> ModelAnimation -> Float -> IO ()
+updateModelAnimation model animation frame = withFreeable model (\m -> withFreeable animation (\a -> c'updateModelAnimation m a (realToFrac frame)))
+
+updateModelAnimationEx :: Model -> ModelAnimation -> Float -> ModelAnimation -> Float -> Float -> IO ()
+updateModelAnimationEx model animA frameA animB frameB blend = withFreeable model (\m -> withFreeable animA (\aa -> withFreeable animB (\ab -> c'updateModelAnimationEx m aa (realToFrac frameA) ab (realToFrac frameB) (realToFrac blend))))
 
 isModelAnimationValid :: Model -> ModelAnimation -> IO Bool
 isModelAnimationValid model animation = toBool <$> withFreeable model (withFreeable animation . c'isModelAnimationValid)
-
-updateModelAnimationBones :: Model -> ModelAnimation -> Int -> IO ()
-updateModelAnimationBones model animation frame = withFreeable model (\m -> withFreeable animation (\a -> c'updateModelAnimationBones m a (fromIntegral frame)))
 
 checkCollisionSpheres :: Vector3 -> Float -> Vector3 -> Float -> Bool
 checkCollisionSpheres center1 radius1 center2 radius2 = toBool $ unsafePerformIO (withFreeable center1 (\c1 -> withFreeable center2 (\c2 -> c'checkCollisionSpheres c1 (realToFrac radius1) c2 (realToFrac radius2))))

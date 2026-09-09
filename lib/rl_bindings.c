@@ -215,6 +215,16 @@ RLBIND void UnloadDroppedFiles_(FilePathList *a)
     UnloadDroppedFiles(*a);
 }
 
+RLBIND unsigned int GetDirectoryFileCount_(const char *a)
+{
+    return GetDirectoryFileCount(a);
+}
+
+RLBIND unsigned int GetDirectoryFileCountEx_(const char *a, const char *b, bool c)
+{
+    return GetDirectoryFileCountEx(a, b, c);
+}
+
 RLBIND AutomationEventList *LoadAutomationEventList_(char *a)
 {
     AutomationEventList *ptr = (AutomationEventList *)malloc(sizeof(AutomationEventList));
@@ -358,9 +368,14 @@ RLBIND void DrawCircleSectorLines_(Vector2 *a, float b, float c, float d, int e,
     DrawCircleSectorLines(*a, b, c, d, e, *f);
 }
 
-RLBIND void DrawCircleGradient_(int a, int b, float c, Color *d, Color *e)
+RLBIND void DrawCircleSectorLinesEx_(Vector2 *a, float b, float c, float d, int e, float f, Color *g)
 {
-    DrawCircleGradient(a, b, c, *d, *e);
+    DrawCircleSectorLinesEx(*a, b, c, d, e, f, *g);
+}
+
+RLBIND void DrawCircleGradient_(Vector2 *a, float b, Color *c, Color *d)
+{
+    DrawCircleGradient(*a, b, *c, *d);
 }
 
 RLBIND void DrawCircleV_(Vector2 *a, float b, Color *c)
@@ -376,6 +391,11 @@ RLBIND void DrawCircleLines_(int a, int b, float c, Color *d)
 RLBIND void DrawCircleLinesV_(Vector2 *a, float b, Color *c)
 {
     DrawCircleLinesV(*a, b, *c);
+}
+
+RLBIND void DrawCircleLinesEx_(Vector2 *a, float b, float c, Color *d)
+{
+    DrawCircleLinesEx(*a, b, c, *d);
 }
 
 RLBIND void DrawEllipse_(int a, int b, float c, float d, Color *e)
@@ -406,6 +426,11 @@ RLBIND void DrawRing_(Vector2 *a, float b, float c, float d, float e, int f, Col
 RLBIND void DrawRingLines_(Vector2 *a, float b, float c, float d, float e, int f, Color *g)
 {
     DrawRingLines(*a, b, c, d, e, f, *g);
+}
+
+RLBIND void DrawRingLinesEx_(Vector2 *a, float b, float c, float d, float e, int f, float g, Color *h)
+{
+    DrawRingLinesEx(*a, b, c, d, e, f, g, *h);
 }
 
 RLBIND void DrawRectangle_(int a, int b, int c, int d, Color *e)
@@ -473,9 +498,19 @@ RLBIND void DrawTriangle_(Vector2 *a, Vector2 *b, Vector2 *c, Color *d)
     DrawTriangle(*a, *b, *c, *d);
 }
 
+RLBIND void DrawTriangleGradient_(Vector2 *a, Vector2 *b, Vector2 *c, Color *d, Color *e, Color *f)
+{
+    DrawTriangleGradient(*a, *b, *c, *d, *e, *f);
+}
+
 RLBIND void DrawTriangleLines_(Vector2 *a, Vector2 *b, Vector2 *c, Color *d)
 {
     DrawTriangleLines(*a, *b, *c, *d);
+}
+
+RLBIND void DrawTriangleLinesEx_(Vector2 *a, Vector2 *b, Vector2 *c, float d, Color *e)
+{
+    DrawTriangleLinesEx(*a, *b, *c, d, *e);
 }
 
 RLBIND void DrawTriangleFan_(const Vector2 *a, int b, Color *c)
@@ -574,10 +609,10 @@ RLBIND Vector2 *GetSplinePointCatmullRom_(Vector2 *a, Vector2 *b, Vector2 *c, Ve
     return ptr;
 }
 
-RLBIND Vector2 *GetSplinePointBezierQuad_(Vector2 *a, Vector2 *b, Vector2 *c, float d)
+RLBIND Vector2 *GetSplinePointBezierQuadratic_(Vector2 *a, Vector2 *b, Vector2 *c, float d)
 {
     Vector2 *ptr = (Vector2 *)malloc(sizeof(Vector2));
-    *ptr = GetSplinePointBezierQuad(*a, *b, *c, d);
+    *ptr = GetSplinePointBezierQuadratic(*a, *b, *c, d);
     return ptr;
 }
 
@@ -901,6 +936,16 @@ RLBIND void ImageDrawLineV_(Image *a, Vector2 *b, Vector2 *c, Color *d)
     ImageDrawLineV(a, *b, *c, *d);
 }
 
+RLBIND void ImageDrawLineEx_(Image *a, Vector2 *b, Vector2 *c, int d, Color *e)
+{
+    ImageDrawLineEx(a, *b, *c, d, *e);
+}
+
+RLBIND void ImageDrawLineStrip_(Image *a, Vector2 *b, int c, Color *d)
+{
+    ImageDrawLineStrip(a, b, c, *d);
+}
+
 RLBIND void ImageDrawCircle_(Image *a, int b, int c, int d, Color *e)
 {
     ImageDrawCircle(a, b, c, d, *e);
@@ -921,6 +966,31 @@ RLBIND void ImageDrawCircleLinesV_(Image *a, Vector2 *b, int c, Color *d)
     ImageDrawCircleLinesV(a, *b, c, *d);
 }
 
+RLBIND void ImageDrawCircleGradient_(Image *a, Vector2 *b, float c, Color *d, Color *e)
+{
+    ImageDrawCircleGradient(a, *b, c, *d, *e);
+}
+
+RLBIND void ImageDrawImage_(Image *a, Image *b, int c, int d, Color *e)
+{
+    ImageDrawImage(a, *b, c, d, *e);
+}
+
+RLBIND void ImageDrawImageEx_(Image *a, Image *b, Vector2 *c, float d, float e, Color *f)
+{
+    ImageDrawImageEx(a, *b, *c, d, e, *f);
+}
+
+RLBIND void ImageDrawImageRec_(Image *a, Image *b, Rectangle *c, Vector2 *d, Color *e)
+{
+    ImageDrawImageRec(a, *b, *c, *d, *e);
+}
+
+RLBIND void ImageDrawImagePro_(Image *a, Image *b, Rectangle *c, Rectangle *d, Vector2 *e, float f, Color *g)
+{
+    ImageDrawImagePro(a, *b, *c, *d, *e, f, *g);
+}
+
 RLBIND void ImageDrawRectangle_(Image *a, int b, int c, int d, int e, Color *f)
 {
     ImageDrawRectangle(a, b, c, d, e, *f);
@@ -936,9 +1006,24 @@ RLBIND void ImageDrawRectangleRec_(Image *a, Rectangle *b, Color *c)
     ImageDrawRectangleRec(a, *b, *c);
 }
 
-RLBIND void ImageDrawRectangleLines_(Image *a, Rectangle *b, int c, Color *d)
+RLBIND void ImageDrawRectanglePro_(Image *a, Rectangle *b, Vector2 *c, float d, Color *e)
 {
-    ImageDrawRectangleLines(a, *b, c, *d);
+    ImageDrawRectanglePro(a, *b, *c, d, *e);
+}
+
+RLBIND void ImageDrawRectangleLines_(Image *a, int b, int c, int d, int e, Color *f)
+{
+    ImageDrawRectangleLines(a, b, c, d, e, *f);
+}
+
+RLBIND void ImageDrawRectangleLinesEx_(Image *a, Rectangle *b, int c, Color *d)
+{
+    ImageDrawRectangleLinesEx(a, *b, c, *d);
+}
+
+RLBIND void ImageDrawRectangleGradientEx_(Image *a, Rectangle *b, Color *c, Color *d, Color *e, Color *f)
+{
+    ImageDrawRectangleGradientEx(a, *b, *c, *d, *e, *f);
 }
 
 RLBIND void ImageDrawTriangle_(Image *a, Vector2 *b, Vector2 *c, Vector2 *d, Color *e)
@@ -946,9 +1031,9 @@ RLBIND void ImageDrawTriangle_(Image *a, Vector2 *b, Vector2 *c, Vector2 *d, Col
     ImageDrawTriangle(a, *b, *c, *d, *e);
 }
 
-RLBIND void ImageDrawTriangleEx_(Image *a, Vector2 *b, Vector2 *c, Vector2 *d, Color *e, Color *f, Color *g)
+RLBIND void ImageDrawTriangleGradient_(Image *a, Vector2 *b, Vector2 *c, Vector2 *d, Color *e, Color *f, Color *g)
 {
-    ImageDrawTriangleEx(a, *b, *c, *d, *e, *f, *g);
+    ImageDrawTriangleGradient(a, *b, *c, *d, *e, *f, *g);
 }
 
 RLBIND void ImageDrawTriangleLines_(Image *a, Vector2 *b, Vector2 *c, Vector2 *d, Color *e)
@@ -966,11 +1051,6 @@ RLBIND void ImageDrawTriangleStrip_(Image *a, Vector2 *b, int c, Color *d)
     ImageDrawTriangleStrip(a, b, c, *d);
 }
 
-RLBIND void ImageDraw_(Image *a, Image *b, Rectangle *c, Rectangle *d, Color *e)
-{
-    ImageDraw(a, *b, *c, *d, *e);
-}
-
 RLBIND void ImageDrawText_(Image *a, char *b, int c, int d, int e, Color *f)
 {
     ImageDrawText(a, b, c, d, e, *f);
@@ -979,6 +1059,11 @@ RLBIND void ImageDrawText_(Image *a, char *b, int c, int d, int e, Color *f)
 RLBIND void ImageDrawTextEx_(Image *a, Font *b, char *c, Vector2 *d, float e, float f, Color *g)
 {
     ImageDrawTextEx(a, *b, c, *d, e, f, *g);
+}
+
+RLBIND void ImageDrawTextPro_(Image *a, Font *b, char *c, Vector2 *d, Vector2 *e, float f, float g, float h, Color *i)
+{
+    ImageDrawTextPro(a, *b, c, *d, *e, f, g, h, *i);
 }
 
 RLBIND Texture *LoadTexture_(char *a)
@@ -1006,6 +1091,13 @@ RLBIND RenderTexture *LoadRenderTexture_(int a, int b)
 {
     RenderTexture *ptr = (RenderTexture *)malloc(sizeof(RenderTexture));
     *ptr = LoadRenderTexture(a, b);
+    return ptr;
+}
+
+RLBIND RenderTexture *LoadRenderTextureEx_(int a, int b, int c)
+{
+    RenderTexture *ptr = (RenderTexture *)malloc(sizeof(RenderTexture));
+    *ptr = LoadRenderTextureEx(a, b, c);
     return ptr;
 }
 
@@ -1290,6 +1382,13 @@ RLBIND Vector2 *MeasureTextEx_(Font *a, char *b, float c, float d)
     return ptr;
 }
 
+RLBIND Vector2 *MeasureTextCodepoints_(Font *a, int *b, int c, float d, float e)
+{
+    Vector2 *ptr = (Vector2 *)malloc(sizeof(Vector2));
+    *ptr = MeasureTextCodepoints(*a, b, c, d, e);
+    return ptr;
+}
+
 RLBIND int GetGlyphIndex_(Font *a, int b)
 {
     return GetGlyphIndex(*a, b);
@@ -1460,16 +1559,6 @@ RLBIND void DrawModelWiresEx_(Model *a, Vector3 *b, Vector3 *c, float d, Vector3
     DrawModelWiresEx(*a, *b, *c, d, *e, *f);
 }
 
-RLBIND void DrawModelPoints_(Model *a, Vector3 *b, float c, Color *d)
-{
-    DrawModelPoints(*a, *b, c, *d);
-}
-
-RLBIND void DrawModelPointsEx_(Model *a, Vector3 *b, Vector3 *c, float d, Vector3 *e, Color *f)
-{
-    DrawModelPointsEx(*a, *b, *c, d, *e, *f);
-}
-
 RLBIND void DrawBoundingBox_(BoundingBox *a, Color *b)
 {
     DrawBoundingBox(*a, *b);
@@ -1631,19 +1720,14 @@ RLBIND void UpdateModelAnimation_(Model *a, ModelAnimation *b, int c)
     UpdateModelAnimation(*a, *b, c);
 }
 
-RLBIND void UnloadModelAnimation_(ModelAnimation *a)
+RLBIND void UpdateModelAnimationEx_(Model *a, ModelAnimation *b, float c, ModelAnimation *d, float e, float f)
 {
-    UnloadModelAnimation(*a);
+    UpdateModelAnimationEx(*a, *b, c, *d, e, f);
 }
 
 RLBIND bool IsModelAnimationValid_(Model *a, ModelAnimation *b)
 {
     return IsModelAnimationValid(*a, *b);
-}
-
-RLBIND void UpdateModelAnimationBones_(Model *a, ModelAnimation *b, int c)
-{
-    UpdateModelAnimationBones(*a, *b, c);
 }
 
 RLBIND bool CheckCollisionSpheres_(Vector3 *a, float b, Vector3 *c, float d)
@@ -2527,9 +2611,19 @@ RLBIND bool IsFileExtension_(const char *a, const char *b)
     return IsFileExtension(a, b);
 }
 
+RLBIND bool IsFileHidden_(const char *a)
+{
+    return IsFileHidden(a);
+}
+
 RLBIND int GetFileLength_(const char *a)
 {
     return GetFileLength(a);
+}
+
+RLBIND long GetFileModTime_(const char *a)
+{
+    return GetFileModTime(a);
 }
 
 RLBIND const char *GetFileExtension_(const char *a)
@@ -2572,7 +2666,7 @@ RLBIND int MakeDirectory_(const char *a)
     return MakeDirectory(a);
 }
 
-RLBIND bool ChangeDirectory_(const char *a)
+RLBIND int ChangeDirectory_(const char *a)
 {
     return ChangeDirectory(a);
 }
@@ -2590,11 +2684,6 @@ RLBIND bool IsFileNameValid_(const char *a)
 RLBIND bool IsFileDropped_()
 {
     return IsFileDropped();
-}
-
-RLBIND long GetFileModTime_(const char *a)
-{
-    return GetFileModTime(a);
 }
 
 RLBIND unsigned char *CompressData_(const unsigned char *a, int b, int *c)
@@ -2617,19 +2706,24 @@ RLBIND unsigned char *DecodeDataBase64_(const char *a, int *b)
     return DecodeDataBase64(a, b);
 }
 
-RLBIND unsigned int ComputeCRC32_(unsigned char *a, int b)
+RLBIND unsigned int ComputeCRC32_(const unsigned char *a, int b)
 {
     return ComputeCRC32(a, b);
 }
 
-RLBIND unsigned int *ComputeMD5_(unsigned char *a, int b)
+RLBIND unsigned int *ComputeMD5_(const unsigned char *a, int b)
 {
     return ComputeMD5(a, b);
 }
 
-RLBIND unsigned int *ComputeSHA1_(unsigned char *a, int b)
+RLBIND unsigned int *ComputeSHA1_(const unsigned char *a, int b)
 {
     return ComputeSHA1(a, b);
+}
+
+RLBIND unsigned int *ComputeSHA256_(const unsigned char *a, int b)
+{
+    return ComputeSHA256(a, b);
 }
 
 RLBIND void SetAutomationEventList_(AutomationEventList *a)
@@ -2937,7 +3031,7 @@ RLBIND void ImageColorGrayscale_(Image *a)
     ImageColorGrayscale(a);
 }
 
-RLBIND void ImageColorContrast_(Image *a, float b)
+RLBIND void ImageColorContrast_(Image *a, int b)
 {
     ImageColorContrast(a, b);
 }

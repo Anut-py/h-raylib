@@ -82,6 +82,10 @@ FilePathList *LoadDroppedFiles_();
 
 void UnloadDroppedFiles_(FilePathList *a);
 
+unsigned int GetDirectoryFileCount_(const char *a);
+
+unsigned int GetDirectoryFileCountEx_(const char *a, const char *b, bool c);
+
 AutomationEventList *LoadAutomationEventList_(char *a);
 
 void UnloadAutomationEventList_(AutomationEventList *a);
@@ -132,13 +136,17 @@ void DrawCircleSector_(Vector2 *a, float b, float c, float d, int e, Color *f);
 
 void DrawCircleSectorLines_(Vector2 *a, float b, float c, float d, int e, Color *f);
 
-void DrawCircleGradient_(int a, int b, float c, Color *d, Color *e);
+void DrawCircleSectorLinesEx_(Vector2 *a, float b, float c, float d, int e, float f, Color *g);
+
+void DrawCircleGradient_(Vector2 *a, float b, Color *c, Color *d);
 
 void DrawCircleV_(Vector2 *a, float b, Color *c);
 
 void DrawCircleLines_(int a, int b, float c, Color *d);
 
 void DrawCircleLinesV_(Vector2 *a, float b, Color *c);
+
+void DrawCircleLinesEx_(Vector2 *a, float b, float c, Color *d);
 
 void DrawEllipse_(int a, int b, float c, float d, Color *e);
 
@@ -151,6 +159,8 @@ void DrawEllipseLinesV_(Vector2 *a, float b, float c, Color *d);
 void DrawRing_(Vector2 *a, float b, float c, float d, float e, int f, Color *g);
 
 void DrawRingLines_(Vector2 *a, float b, float c, float d, float e, int f, Color *g);
+
+void DrawRingLinesEx_(Vector2 *a, float b, float c, float d, float e, int f, float g, Color *h);
 
 void DrawRectangle_(int a, int b, int c, int d, Color *e);
 
@@ -178,7 +188,11 @@ void DrawRectangleRoundedLinesEx_(Rectangle *a, float b, int c, float d, Color *
 
 void DrawTriangle_(Vector2 *a, Vector2 *b, Vector2 *c, Color *d);
 
+void DrawTriangleGradient_(Vector2 *a, Vector2 *b, Vector2 *c, Color *d, Color *e, Color *f);
+
 void DrawTriangleLines_(Vector2 *a, Vector2 *b, Vector2 *c, Color *d);
+
+void DrawTriangleLinesEx_(Vector2 *a, Vector2 *b, Vector2 *c, float d, Color *e);
 
 void DrawTriangleFan_(const Vector2 *a, int b, Color *c);
 
@@ -216,7 +230,7 @@ Vector2 *GetSplinePointBasis_(Vector2 *a, Vector2 *b, Vector2 *c, Vector2 *d, fl
 
 Vector2 *GetSplinePointCatmullRom_(Vector2 *a, Vector2 *b, Vector2 *c, Vector2 *d, float e);
 
-Vector2 *GetSplinePointBezierQuad_(Vector2 *a, Vector2 *b, Vector2 *c, float d);
+Vector2 *GetSplinePointBezierQuadratic_(Vector2 *a, Vector2 *b, Vector2 *c, float d);
 
 Vector2 *GetSplinePointBezierCubic_(Vector2 *a, Vector2 *b, Vector2 *c, Vector2 *d, float e);
 
@@ -326,6 +340,10 @@ void ImageDrawLine_(Image *a, int b, int c, int d, int e, Color *f);
 
 void ImageDrawLineV_(Image *a, Vector2 *b, Vector2 *c, Color *d);
 
+void ImageDrawLineEx_(Image *a, Vector2 *b, Vector2 *c, int d, Color *e);
+
+void ImageDrawLineStrip_(Image *a, Vector2 *b, int c, Color *d);
+
 void ImageDrawCircle_(Image *a, int b, int c, int d, Color *e);
 
 void ImageDrawCircleV_(Image *a, Vector2 *b, int c, Color *d);
@@ -334,17 +352,33 @@ void ImageDrawCircleLines_(Image *a, int b, int c, int d, Color *e);
 
 void ImageDrawCircleLinesV_(Image *a, Vector2 *b, int c, Color *d);
 
+void ImageDrawCircleGradient_(Image *a, Vector2 *b, float c, Color *d, Color *e);
+
+void ImageDrawImage_(Image *a, Image *b, int c, int d, Color *e);
+
+void ImageDrawImageEx_(Image *a, Image *b, Vector2 *c, float d, float e, Color *f);
+
+void ImageDrawImageRec_(Image *a, Image *b, Rectangle *c, Vector2 *d, Color *e);
+
+void ImageDrawImagePro_(Image *a, Image *b, Rectangle *c, Rectangle *d, Vector2 *e, float f, Color *g);
+
 void ImageDrawRectangle_(Image *a, int b, int c, int d, int e, Color *f);
 
 void ImageDrawRectangleV_(Image *a, Vector2 *b, Vector2 *c, Color *d);
 
 void ImageDrawRectangleRec_(Image *a, Rectangle *b, Color *c);
 
-void ImageDrawRectangleLines_(Image *a, Rectangle *b, int c, Color *d);
+void ImageDrawRectanglePro_(Image *a, Rectangle *b, Vector2 *c, float d, Color *e);
+
+void ImageDrawRectangleLines_(Image *a, int b, int c, int d, int e, Color *f);
+
+void ImageDrawRectangleLinesEx_(Image *a, Rectangle *b, int c, Color *d);
+
+void ImageDrawRectangleGradientEx_(Image *a, Rectangle *b, Color *c, Color *d, Color *e, Color *f);
 
 void ImageDrawTriangle_(Image *a, Vector2 *b, Vector2 *c, Vector2 *d, Color *e);
 
-void ImageDrawTriangleEx_(Image *a, Vector2 *b, Vector2 *c, Vector2 *d, Color *e, Color *f, Color *g);
+void ImageDrawTriangleGradient_(Image *a, Vector2 *b, Vector2 *c, Vector2 *d, Color *e, Color *f, Color *g);
 
 void ImageDrawTriangleLines_(Image *a, Vector2 *b, Vector2 *c, Vector2 *d, Color *e);
 
@@ -352,11 +386,11 @@ void ImageDrawTriangleFan_(Image *a, Vector2 *b, int c, Color *d);
 
 void ImageDrawTriangleStrip_(Image *a, Vector2 *b, int c, Color *d);
 
-void ImageDraw_(Image *a, Image *b, Rectangle *c, Rectangle *d, Color *e);
-
 void ImageDrawText_(Image *a, char *b, int c, int d, int e, Color *f);
 
 void ImageDrawTextEx_(Image *a, Font *b, char *c, Vector2 *d, float e, float f, Color *g);
+
+void ImageDrawTextPro_(Image *a, Font *b, char *c, Vector2 *d, Vector2 *e, float f, float g, float h, Color *i);
 
 Texture *LoadTexture_(char *a);
 
@@ -365,6 +399,8 @@ Texture *LoadTextureFromImage_(Image *a);
 Texture *LoadTextureCubemap_(Image *a, int b);
 
 RenderTexture *LoadRenderTexture_(int a, int b);
+
+RenderTexture *LoadRenderTextureEx_(int a, int b, int c);
 
 bool IsTextureValid_(Texture *a);
 
@@ -450,6 +486,8 @@ void DrawTextCodepoints_(Font *a, int *b, int c, Vector2 *d, float e, float f, C
 
 Vector2 *MeasureTextEx_(Font *a, char *b, float c, float d);
 
+Vector2 *MeasureTextCodepoints_(Font *a, int *b, int c, float d, float e);
+
 int GetGlyphIndex_(Font *a, int b);
 
 GlyphInfo *GetGlyphInfo_(Font *a, int b);
@@ -518,10 +556,6 @@ void DrawModelWires_(Model *a, Vector3 *b, float c, Color *d);
 
 void DrawModelWiresEx_(Model *a, Vector3 *b, Vector3 *c, float d, Vector3 *e, Color *f);
 
-void DrawModelPoints_(Model *a, Vector3 *b, float c, Color *d);
-
-void DrawModelPointsEx_(Model *a, Vector3 *b, Vector3 *c, float d, Vector3 *e, Color *f);
-
 void DrawBoundingBox_(BoundingBox *a, Color *b);
 
 void DrawBillboard_(Camera3D *a, Texture *b, Vector3 *c, float d, Color *e);
@@ -576,11 +610,9 @@ void SetMaterialTexture_(Material *a, int b, Texture *c);
 
 void UpdateModelAnimation_(Model *a, ModelAnimation *b, int c);
 
-void UnloadModelAnimation_(ModelAnimation *a);
+void UpdateModelAnimationEx_(Model *a, ModelAnimation *b, float c, ModelAnimation *d, float e, float f);
 
 bool IsModelAnimationValid_(Model *a, ModelAnimation *b);
-
-void UpdateModelAnimationBones_(Model *a, ModelAnimation *b, int c);
 
 bool CheckCollisionSpheres_(Vector3 *a, float b, Vector3 *c, float d);
 
@@ -912,7 +944,11 @@ int FileTextFindIndex_(const char *a, const char *b);
 
 bool IsFileExtension_(const char *a, const char *b);
 
+bool IsFileHidden_(const char *a);
+
 int GetFileLength_(const char *a);
+
+long GetFileModTime_(const char *a);
 
 const char *GetFileExtension_(const char *a);
 
@@ -930,15 +966,13 @@ const char *GetApplicationDirectory_();
 
 int MakeDirectory_(const char *a);
 
-bool ChangeDirectory_(const char *a);
+int ChangeDirectory_(const char *a);
 
 bool IsPathFile_(const char *a);
 
 bool IsFileNameValid_(const char *a);
 
 bool IsFileDropped_();
-
-long GetFileModTime_(const char *a);
 
 unsigned char *CompressData_(const unsigned char *a, int b, int *c);
 
@@ -948,11 +982,13 @@ char *EncodeDataBase64_(const unsigned char *a, int b, int *c);
 
 unsigned char *DecodeDataBase64_(const char *a, int *b);
 
-unsigned int ComputeCRC32_(unsigned char *a, int b);
+unsigned int ComputeCRC32_(const unsigned char *a, int b);
 
-unsigned int *ComputeMD5_(unsigned char *a, int b);
+unsigned int *ComputeMD5_(const unsigned char *a, int b);
 
-unsigned int *ComputeSHA1_(unsigned char *a, int b);
+unsigned int *ComputeSHA1_(const unsigned char *a, int b);
+
+unsigned int *ComputeSHA256_(const unsigned char *a, int b);
 
 void SetAutomationEventList_(AutomationEventList *a);
 
@@ -1076,7 +1112,7 @@ void ImageColorInvert_(Image *a);
 
 void ImageColorGrayscale_(Image *a);
 
-void ImageColorContrast_(Image *a, float b);
+void ImageColorContrast_(Image *a, int b);
 
 void ImageColorBrightness_(Image *a, int b);
 

@@ -3,7 +3,7 @@
 }:
 mkDerivation {
   pname = "h-raylib";
-  version = "5.6.0.0";
+  version = "6.1.0.0";
   src = ./.;
   isLibrary = true;
   isExecutable = buildExamples;

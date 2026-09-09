@@ -63,6 +63,8 @@ module Raylib.Util.Math
     (/-/),
     matrixMultiply,
     (/*/),
+    matrixMultiplyValue,
+    (/*),
     matrixTranslate,
     matrixRotate,
     matrixRotateX,
@@ -750,6 +752,16 @@ matrixMultiply
 -- | Alias for 'matrixMultiply'
 (/*/) :: Matrix -> Matrix -> Matrix
 (/*/) = matrixMultiply
+
+-- | Multiply matrix components by value
+matrixMultiplyValue :: Matrix -> Float -> Matrix
+matrixMultiplyValue
+  (Matrix m0 m4 m8 m12 m1 m5 m9 m13 m2 m6 m10 m14 m3 m7 m11 m15) value =
+  (Matrix (value * m0) (value * m4) (value * m8) (value * m12) (value * m1) (value * m5) (value * m9) (value * m13) (value * m2) (value * m6) (value * m10) (value * m14) (value * m3) (value * m7) (value * m11) (value * m15))
+
+-- | Alias for 'matrixMultiplyValue'
+(/*) :: Matrix -> Float -> Matrix
+(/*) = matrixMultiplyValue
 
 -- | Translation matrix
 matrixTranslate ::

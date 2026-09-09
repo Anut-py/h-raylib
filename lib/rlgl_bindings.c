@@ -529,19 +529,29 @@ RLBIND void rlUnloadFramebuffer_(unsigned int a)
   rlUnloadFramebuffer(a);
 }
 
-RLBIND unsigned int rlLoadShaderCode_(const char *a, const char *b)
+RLBIND unsigned int rlLoadShader_(const char *a, int b)
 {
-  return rlLoadShaderCode(a, b);
+  return rlLoadShader(a, b);
 }
 
-RLBIND unsigned int rlCompileShader_(const char *a, int b)
-{
-  return rlCompileShader(a, b);
-}
-
-RLBIND unsigned int rlLoadShaderProgram_(unsigned int a, unsigned int b)
+RLBIND unsigned int rlLoadShaderProgram_(const char *a, const char *b)
 {
   return rlLoadShaderProgram(a, b);
+}
+
+RLBIND unsigned int rlLoadShaderProgramEx_(unsigned int a, unsigned int b)
+{
+  return rlLoadShaderProgramEx(a, b);
+}
+
+RLBIND unsigned int rlLoadShaderProgramCompute_(unsigned int a)
+{
+  return rlLoadShaderProgramCompute(a);
+}
+
+RLBIND void rlUnloadShader_(unsigned int a)
+{
+  rlUnloadShader(a);
 }
 
 RLBIND void rlUnloadShaderProgram_(unsigned int a)
@@ -572,11 +582,6 @@ RLBIND void rlSetUniformSampler_(int a, unsigned int b)
 RLBIND void rlSetShader_(unsigned int a, int *b)
 {
   rlSetShader(a, b);
-}
-
-RLBIND unsigned int rlLoadComputeShaderProgram_(unsigned int a)
-{
-  return rlLoadComputeShaderProgram(a);
 }
 
 RLBIND void rlComputeShaderDispatch_(unsigned int a, unsigned int b, unsigned int c)

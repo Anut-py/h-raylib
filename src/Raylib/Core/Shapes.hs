@@ -18,16 +18,19 @@ module Raylib.Core.Shapes
     drawCircle,
     drawCircleSector,
     drawCircleSectorLines,
+    drawCircleSectorLinesEx,
     drawCircleGradient,
     drawCircleV,
     drawCircleLines,
     drawCircleLinesV,
+    drawCircleLinesEx,
     drawEllipse,
     drawEllipseV,
     drawEllipseLines,
     drawEllipseLinesV,
     drawRing,
     drawRingLines,
+    drawRingLinesEx,
     drawRectangle,
     drawRectangleV,
     drawRectangleRec,
@@ -41,7 +44,9 @@ module Raylib.Core.Shapes
     drawRectangleRoundedLines,
     drawRectangleRoundedLinesEx,
     drawTriangle,
+    drawTriangleGradient,
     drawTriangleLines,
+    drawTriangleLinesEx,
     drawTriangleFan,
     drawTriangleStrip,
     drawPoly,
@@ -60,7 +65,7 @@ module Raylib.Core.Shapes
     getSplinePointLinear,
     getSplinePointBasis,
     getSplinePointCatmullRom,
-    getSplinePointBezierQuad,
+    getSplinePointBezierQuadratic,
     getSplinePointBezierCubic,
     checkCollisionRecs,
     checkCollisionCircles,
@@ -89,16 +94,19 @@ module Raylib.Core.Shapes
     c'drawCircle,
     c'drawCircleSector,
     c'drawCircleSectorLines,
+    c'drawCircleSectorLinesEx,
     c'drawCircleGradient,
     c'drawCircleV,
     c'drawCircleLines,
     c'drawCircleLinesV,
+    c'drawCircleLinesEx,
     c'drawEllipse,
     c'drawEllipseV,
     c'drawEllipseLines,
     c'drawEllipseLinesV,
     c'drawRing,
     c'drawRingLines,
+    c'drawRingLinesEx,
     c'drawRectangle,
     c'drawRectangleV,
     c'drawRectangleRec,
@@ -112,7 +120,9 @@ module Raylib.Core.Shapes
     c'drawRectangleRoundedLines,
     c'drawRectangleRoundedLinesEx,
     c'drawTriangle,
+    c'drawTriangleGradient,
     c'drawTriangleLines,
+    c'drawTriangleLinesEx,
     c'drawTriangleFan,
     c'drawTriangleStrip,
     c'drawPoly,
@@ -131,7 +141,7 @@ module Raylib.Core.Shapes
     c'getSplinePointLinear,
     c'getSplinePointBasis,
     c'getSplinePointCatmullRom,
-    c'getSplinePointBezierQuad,
+    c'getSplinePointBezierQuadratic,
     c'getSplinePointBezierCubic,
     c'checkCollisionRecs,
     c'checkCollisionCircles,
@@ -174,16 +184,19 @@ $( genNative
        ("c'drawCircle", "DrawCircle_", "rl_bindings.h", [t|CInt -> CInt -> CFloat -> Ptr Color -> IO ()|]),
        ("c'drawCircleSector", "DrawCircleSector_", "rl_bindings.h", [t|Ptr Vector2 -> CFloat -> CFloat -> CFloat -> CInt -> Ptr Color -> IO ()|]),
        ("c'drawCircleSectorLines", "DrawCircleSectorLines_", "rl_bindings.h", [t|Ptr Vector2 -> CFloat -> CFloat -> CFloat -> CInt -> Ptr Color -> IO ()|]),
-       ("c'drawCircleGradient", "DrawCircleGradient_", "rl_bindings.h", [t|CInt -> CInt -> CFloat -> Ptr Color -> Ptr Color -> IO ()|]),
+       ("c'drawCircleSectorLinesEx", "DrawCircleSectorLinesEx_", "rl_bindings.h", [t|Ptr Vector2 -> CFloat -> CFloat -> CFloat -> CInt -> CFloat -> Ptr Color -> IO ()|]),
+       ("c'drawCircleGradient", "DrawCircleGradient_", "rl_bindings.h", [t|Ptr Vector2 -> CFloat -> Ptr Color -> Ptr Color -> IO ()|]),
        ("c'drawCircleV", "DrawCircleV_", "rl_bindings.h", [t|Ptr Vector2 -> CFloat -> Ptr Color -> IO ()|]),
        ("c'drawCircleLines", "DrawCircleLines_", "rl_bindings.h", [t|CInt -> CInt -> CFloat -> Ptr Color -> IO ()|]),
        ("c'drawCircleLinesV", "DrawCircleLinesV_", "rl_bindings.h", [t|Ptr Vector2 -> CFloat -> Ptr Color -> IO ()|]),
+       ("c'drawCircleLinesEx", "DrawCircleLinesEx_", "rl_bindings.h", [t|Ptr Vector2 -> CFloat -> CFloat -> Ptr Color -> IO ()|]),
        ("c'drawEllipse", "DrawEllipse_", "rl_bindings.h", [t|CInt -> CInt -> CFloat -> CFloat -> Ptr Color -> IO ()|]),
        ("c'drawEllipseV", "DrawEllipseV_", "rl_bindings.h", [t|Ptr Vector2 -> CFloat -> CFloat -> Ptr Color -> IO ()|]),
        ("c'drawEllipseLines", "DrawEllipseLines_", "rl_bindings.h", [t|CInt -> CInt -> CFloat -> CFloat -> Ptr Color -> IO ()|]),
        ("c'drawEllipseLinesV", "DrawEllipseLinesV_", "rl_bindings.h", [t|Ptr Vector2 -> CFloat -> CFloat -> Ptr Color -> IO ()|]),
        ("c'drawRing", "DrawRing_", "rl_bindings.h", [t|Ptr Vector2 -> CFloat -> CFloat -> CFloat -> CFloat -> CInt -> Ptr Color -> IO ()|]),
        ("c'drawRingLines", "DrawRingLines_", "rl_bindings.h", [t|Ptr Vector2 -> CFloat -> CFloat -> CFloat -> CFloat -> CInt -> Ptr Color -> IO ()|]),
+       ("c'drawRingLinesEx", "DrawRingLinesEx_", "rl_bindings.h", [t|Ptr Vector2 -> CFloat -> CFloat -> CFloat -> CFloat -> CInt -> CFloat -> Ptr Color -> IO ()|]),
        ("c'drawRectangle", "DrawRectangle_", "rl_bindings.h", [t|CInt -> CInt -> CInt -> CInt -> Ptr Color -> IO ()|]),
        ("c'drawRectangleV", "DrawRectangleV_", "rl_bindings.h", [t|Ptr Vector2 -> Ptr Vector2 -> Ptr Color -> IO ()|]),
        ("c'drawRectangleRec", "DrawRectangleRec_", "rl_bindings.h", [t|Ptr Rectangle -> Ptr Color -> IO ()|]),
@@ -197,7 +210,9 @@ $( genNative
        ("c'drawRectangleRoundedLines", "DrawRectangleRoundedLines_", "rl_bindings.h", [t|Ptr Rectangle -> CFloat -> CInt -> Ptr Color -> IO ()|]),
        ("c'drawRectangleRoundedLinesEx", "DrawRectangleRoundedLinesEx_", "rl_bindings.h", [t|Ptr Rectangle -> CFloat -> CInt -> CFloat -> Ptr Color -> IO ()|]),
        ("c'drawTriangle", "DrawTriangle_", "rl_bindings.h", [t|Ptr Vector2 -> Ptr Vector2 -> Ptr Vector2 -> Ptr Color -> IO ()|]),
+       ("c'drawTriangleGradient", "DrawTriangleGradient_", "rl_bindings.h", [t|Ptr Vector2 -> Ptr Vector2 -> Ptr Vector2 -> Ptr Color -> Ptr Color -> Ptr Color -> IO ()|]),
        ("c'drawTriangleLines", "DrawTriangleLines_", "rl_bindings.h", [t|Ptr Vector2 -> Ptr Vector2 -> Ptr Vector2 -> Ptr Color -> IO ()|]),
+       ("c'drawTriangleLinesEx", "DrawTriangleLinesEx_", "rl_bindings.h", [t|Ptr Vector2 -> Ptr Vector2 -> Ptr Vector2 -> CFloat -> Ptr Color -> IO ()|]),
        ("c'drawTriangleFan", "DrawTriangleFan_", "rl_bindings.h", [t|Ptr Vector2 -> CInt -> Ptr Color -> IO ()|]),
        ("c'drawTriangleStrip", "DrawTriangleStrip_", "rl_bindings.h", [t|Ptr Vector2 -> CInt -> Ptr Color -> IO ()|]),
        ("c'drawPoly", "DrawPoly_", "rl_bindings.h", [t|Ptr Vector2 -> CInt -> CFloat -> CFloat -> Ptr Color -> IO ()|]),
@@ -216,7 +231,7 @@ $( genNative
        ("c'getSplinePointLinear", "GetSplinePointLinear_", "rl_bindings.h", [t|Ptr Vector2 -> Ptr Vector2 -> CFloat -> IO (Ptr Vector2)|]),
        ("c'getSplinePointBasis", "GetSplinePointBasis_", "rl_bindings.h", [t|Ptr Vector2 -> Ptr Vector2 -> Ptr Vector2 -> Ptr Vector2 -> CFloat -> IO (Ptr Vector2)|]),
        ("c'getSplinePointCatmullRom", "GetSplinePointCatmullRom_", "rl_bindings.h", [t|Ptr Vector2 -> Ptr Vector2 -> Ptr Vector2 -> Ptr Vector2 -> CFloat -> IO (Ptr Vector2)|]),
-       ("c'getSplinePointBezierQuad", "GetSplinePointBezierQuad_", "rl_bindings.h", [t|Ptr Vector2 -> Ptr Vector2 -> Ptr Vector2 -> CFloat -> IO (Ptr Vector2)|]),
+       ("c'getSplinePointBezierQuadratic", "GetSplinePointBezierQuadratic_", "rl_bindings.h", [t|Ptr Vector2 -> Ptr Vector2 -> Ptr Vector2 -> CFloat -> IO (Ptr Vector2)|]),
        ("c'getSplinePointBezierCubic", "GetSplinePointBezierCubic_", "rl_bindings.h", [t|Ptr Vector2 -> Ptr Vector2 -> Ptr Vector2 -> Ptr Vector2 -> CFloat -> IO (Ptr Vector2)|]),
        ("c'checkCollisionRecs", "CheckCollisionRecs_", "rl_bindings.h", [t|Ptr Rectangle -> Ptr Rectangle -> IO CBool|]),
        ("c'checkCollisionCircles", "CheckCollisionCircles_", "rl_bindings.h", [t|Ptr Vector2 -> CFloat -> Ptr Vector2 -> CFloat -> IO CBool|]),
@@ -294,9 +309,20 @@ drawCircleSectorLines center radius startAngle endAngle segments color =
           )
     )
 
-drawCircleGradient :: Int -> Int -> Float -> Color -> Color -> IO ()
-drawCircleGradient centerX centerY radius inner outer =
-  withFreeable inner (withFreeable outer . c'drawCircleGradient (fromIntegral centerX) (fromIntegral centerY) (realToFrac radius))
+drawCircleSectorLinesEx :: Vector2 -> Float -> Float -> Float -> Int -> Float -> Color -> IO ()
+drawCircleSectorLinesEx center radius startAngle endAngle segments thick color =
+  withFreeable
+    center
+    ( \c ->
+        withFreeable
+          color
+          ( c'drawCircleSectorLinesEx c (realToFrac radius) (realToFrac startAngle) (realToFrac endAngle) (fromIntegral segments) (realToFrac thick)
+          )
+    )
+
+drawCircleGradient :: Vector2 -> Float -> Color -> Color -> IO ()
+drawCircleGradient center radius inner outer =
+  withFreeable center (\c -> withFreeable inner (withFreeable outer . c'drawCircleGradient c (realToFrac radius)))
 
 drawCircleV :: Vector2 -> Float -> Color -> IO ()
 drawCircleV center radius color =
@@ -309,6 +335,10 @@ drawCircleLines centerX centerY radius color =
 drawCircleLinesV :: Vector2 -> Float -> Color -> IO ()
 drawCircleLinesV center radius color =
   withFreeable center (\c -> withFreeable color (c'drawCircleLinesV c (realToFrac radius)))
+
+drawCircleLinesEx :: Vector2 -> Float -> Float -> Color -> IO ()
+drawCircleLinesEx center radius thick color =
+  withFreeable center (\c -> withFreeable color (c'drawCircleLinesEx c (realToFrac radius) (realToFrac thick)))
 
 drawEllipse :: Int -> Int -> Float -> Float -> Color -> IO ()
 drawEllipse centerX centerY radiusH radiusV color =
@@ -357,6 +387,24 @@ drawRingLines center innerRadius outerRadius startAngle endAngle segments color 
               (realToFrac startAngle)
               (realToFrac endAngle)
               (fromIntegral segments)
+          )
+    )
+
+drawRingLinesEx :: Vector2 -> Float -> Float -> Float -> Float -> Int -> Float -> Color -> IO ()
+drawRingLinesEx center innerRadius outerRadius startAngle endAngle segments thick color =
+  withFreeable
+    center
+    ( \c ->
+        withFreeable
+          color
+          ( c'drawRingLinesEx
+              c
+              (realToFrac innerRadius)
+              (realToFrac outerRadius)
+              (realToFrac startAngle)
+              (realToFrac endAngle)
+              (fromIntegral segments)
+              (realToFrac thick)
           )
     )
 
@@ -445,6 +493,34 @@ drawTriangle v1 v2 v3 color =
           )
     )
 
+drawTriangleGradient :: Vector2 -> Vector2 -> Vector2 -> Color -> Color -> Color -> IO ()
+drawTriangleGradient v1 v2 v3 c1 c2 c3 =
+  withFreeable
+    v1
+    ( \p1 ->
+        withFreeable
+          v2
+          ( \p2 ->
+              withFreeable
+                v3
+                ( \p3 ->
+                    withFreeable
+                      c1
+                      ( \q1 ->
+                          withFreeable
+                            c2
+                            ( \q2 ->
+                                withFreeable
+                                  c3
+                                  ( \q3 ->
+                                    c'drawTriangleGradient p1 p2 p3 q1 q2 q3
+                                  )
+                            )
+                      )
+                )
+          )
+    )
+
 drawTriangleLines :: Vector2 -> Vector2 -> Vector2 -> Color -> IO ()
 drawTriangleLines v1 v2 v3 color =
   withFreeable
@@ -453,6 +529,22 @@ drawTriangleLines v1 v2 v3 color =
         withFreeable
           v2
           ( \p2 -> withFreeable v3 (withFreeable color . c'drawTriangleLines p1 p2)
+          )
+    )
+
+drawTriangleLinesEx :: Vector2 -> Vector2 -> Vector2 -> Float -> Color -> IO ()
+drawTriangleLinesEx v1 v2 v3 thick color =
+  withFreeable
+    v1
+    ( \p1 ->
+        withFreeable
+          v2
+          ( \p2 ->
+              withFreeable
+                v3
+                ( \p3 ->
+                    withFreeable color (c'drawTriangleLinesEx p1 p2 p3 (realToFrac thick))
+                )
           )
     )
 
@@ -524,8 +616,8 @@ getSplinePointBasis p1 p2 p3 p4 t = unsafePerformIO $ withFreeable p1 (\q1 -> wi
 getSplinePointCatmullRom :: Vector2 -> Vector2 -> Vector2 -> Vector2 -> Float -> Vector2
 getSplinePointCatmullRom p1 p2 p3 p4 t = unsafePerformIO $ withFreeable p1 (\q1 -> withFreeable p2 (\q2 -> withFreeable p3 (\q3 -> withFreeable p4 (\q4 -> c'getSplinePointCatmullRom q1 q2 q3 q4 (realToFrac t))))) >>= pop
 
-getSplinePointBezierQuad :: Vector2 -> Vector2 -> Vector2 -> Float -> Vector2
-getSplinePointBezierQuad p1 p2 p3 t = unsafePerformIO $ withFreeable p1 (\q1 -> withFreeable p2 (\q2 -> withFreeable p3 (\q3 -> c'getSplinePointBezierQuad q1 q2 q3 (realToFrac t)))) >>= pop
+getSplinePointBezierQuadratic :: Vector2 -> Vector2 -> Vector2 -> Float -> Vector2
+getSplinePointBezierQuadratic p1 p2 p3 t = unsafePerformIO $ withFreeable p1 (\q1 -> withFreeable p2 (\q2 -> withFreeable p3 (\q3 -> c'getSplinePointBezierQuadratic q1 q2 q3 (realToFrac t)))) >>= pop
 
 getSplinePointBezierCubic :: Vector2 -> Vector2 -> Vector2 -> Vector2 -> Float -> Vector2
 getSplinePointBezierCubic p1 p2 p3 p4 t = unsafePerformIO $ withFreeable p1 (\q1 -> withFreeable p2 (\q2 -> withFreeable p3 (\q3 -> withFreeable p4 (\q4 -> c'getSplinePointBezierCubic q1 q2 q3 q4 (realToFrac t))))) >>= pop

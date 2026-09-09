@@ -212,11 +212,15 @@ void rlResizeFramebuffer_(int a, int b);
 
 void rlUnloadFramebuffer_(unsigned int a);
 
-unsigned int rlLoadShaderCode_(const char *a, const char *b);
+unsigned int rlLoadShader_(const char *a, int b);
 
-unsigned int rlCompileShader_(const char *a, int b);
+unsigned int rlLoadShaderProgram_(const char *a, const char *b);
 
-unsigned int rlLoadShaderProgram_(unsigned int a, unsigned int b);
+unsigned int rlLoadShaderProgramEx_(unsigned int a, unsigned int b);
+
+unsigned int rlLoadShaderProgramCompute_(unsigned int a);
+
+void rlUnloadShader_(unsigned int a);
 
 void rlUnloadShaderProgram_(unsigned int a);
 
@@ -229,8 +233,6 @@ void rlSetUniform_(int a, const void *b, int c, int d);
 void rlSetUniformSampler_(int a, unsigned int b);
 
 void rlSetShader_(unsigned int a, int *b);
-
-unsigned int rlLoadComputeShaderProgram_(unsigned int a);
 
 void rlComputeShaderDispatch_(unsigned int a, unsigned int b, unsigned int c);
 
