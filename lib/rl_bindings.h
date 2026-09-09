@@ -274,11 +274,11 @@ bool IsImageValid_(Image *a);
 
 void UnloadImage_(Image *a);
 
-int ExportImage_(Image *a, char *b);
+bool ExportImage_(Image *a, char *b);
 
 unsigned char *ExportImageToMemory_(Image *a, char *fileType, int *fileSize);
 
-int ExportImageAsCode_(Image *a, char *b);
+bool ExportImageAsCode_(Image *a, char *b);
 
 Image *GenImageColor_(int a, int b, Color *c);
 
@@ -442,6 +442,12 @@ Vector3 *ColorToHSV_(Color *a);
 
 Color *ColorFromHSV_(float a, float b, float c);
 
+Color *ColorTint_(Color *a, Color *b);
+
+Color *ColorBrightness_(Color *a, float b);
+
+Color *ColorContrast_(Color *a, float b);
+
 Color *ColorAlpha_(Color *a, float b);
 
 Color *ColorAlphaBlend_(Color *a, Color *b, Color *c);
@@ -472,7 +478,7 @@ bool IsFontValid_(Font *a);
 
 void UnloadFont_(Font *a);
 
-int ExportFontAsCode_(Font *a, char *b);
+bool ExportFontAsCode_(Font *a, char *b);
 
 void DrawText_(char *a, int b, int c, int d, Color *e);
 
@@ -512,10 +518,6 @@ void DrawCubeWires_(Vector3 *a, float b, float c, float d, Color *e);
 
 void DrawCubeWiresV_(Vector3 *a, Vector3 *b, Color *c);
 
-void DrawCubeTexture_(Texture *a, Vector3 *b, float c, float d, float e, Color *f);
-
-void DrawCubeTextureRec_(Texture *a, Rectangle *b, Vector3 *c, float d, float e, float f, Color *g);
-
 void DrawSphere_(Vector3 *a, float b, Color *c);
 
 void DrawSphereEx_(Vector3 *a, float b, int c, int d, Color *e);
@@ -531,8 +533,6 @@ void DrawCylinderWires_(Vector3 *a, float b, float c, float d, int e, Color *f);
 void DrawCylinderWiresEx_(Vector3 *a, Vector3 *b, float c, float d, int e, Color *f);
 
 void DrawCapsule_(Vector3 *a, Vector3 *b, float c, int d, int e, Color *f);
-
-void DrawCapsuleEx_(Vector3 *a, Vector3 *b, float c, int d, int e, Color *f);
 
 void DrawPlane_(Vector3 *a, Vector2 *b, Color *c);
 
@@ -608,7 +608,7 @@ void UnloadMaterial_(Material *a);
 
 void SetMaterialTexture_(Material *a, int b, Texture *c);
 
-void UpdateModelAnimation_(Model *a, ModelAnimation *b, int c);
+void UpdateModelAnimation_(Model *a, ModelAnimation *b, float c);
 
 void UpdateModelAnimationEx_(Model *a, ModelAnimation *b, float c, ModelAnimation *d, float e, float f);
 
@@ -652,9 +652,9 @@ void UnloadSound_(Sound *a);
 
 void UnloadSoundAlias_(Sound *a);
 
-int ExportWave_(Wave *a, char *b);
+bool ExportWave_(Wave *a, char *b);
 
-int ExportWaveAsCode_(Wave *a, char *b);
+bool ExportWaveAsCode_(Wave *a, char *b);
 
 void PlaySound_(Sound *a);
 
@@ -664,7 +664,7 @@ void PauseSound_(Sound *a);
 
 void ResumeSound_(Sound *a);
 
-int IsSoundPlaying_(Sound *a);
+bool IsSoundPlaying_(Sound *a);
 
 void SetSoundVolume_(Sound *a, float b);
 
@@ -686,7 +686,7 @@ void UnloadMusicStream_(Music *a);
 
 void PlayMusicStream_(Music *a);
 
-int IsMusicStreamPlaying_(Music *a);
+bool IsMusicStreamPlaying_(Music *a);
 
 void UpdateMusicStream_(Music *a);
 
@@ -716,7 +716,7 @@ void UnloadAudioStream_(AudioStream *a);
 
 void UpdateAudioStream_(AudioStream *a, const void *b, int c);
 
-int IsAudioStreamProcessed_(AudioStream *a);
+bool IsAudioStreamProcessed_(AudioStream *a);
 
 void PlayAudioStream_(AudioStream *a);
 
@@ -724,7 +724,7 @@ void PauseAudioStream_(AudioStream *a);
 
 void ResumeAudioStream_(AudioStream *a);
 
-int IsAudioStreamPlaying_(AudioStream *a);
+bool IsAudioStreamPlaying_(AudioStream *a);
 
 void StopAudioStream_(AudioStream *a);
 
@@ -941,6 +941,8 @@ int FileMove_(const char *a, const char *b);
 int FileTextReplace_(const char *a, const char *b, const char *c);
 
 int FileTextFindIndex_(const char *a, const char *b);
+
+bool DirectoryExists_(const char *a);
 
 bool IsFileExtension_(const char *a, const char *b);
 

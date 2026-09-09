@@ -228,7 +228,7 @@ $( genNative
        ("c'drawBillboard", "DrawBillboard_", "rl_bindings.h", [t|Ptr Camera3D -> Ptr Texture -> Ptr Vector3 -> CFloat -> Ptr Color -> IO ()|]),
        ("c'drawBillboardRec", "DrawBillboardRec_", "rl_bindings.h", [t|Ptr Camera3D -> Ptr Texture -> Ptr Rectangle -> Ptr Vector3 -> Ptr Vector2 -> Ptr Color -> IO ()|]),
        ("c'drawBillboardPro", "DrawBillboardPro_", "rl_bindings.h", [t|Ptr Camera3D -> Ptr Texture -> Ptr Rectangle -> Ptr Vector3 -> Ptr Vector3 -> Ptr Vector2 -> Ptr Vector2 -> CFloat -> Ptr Color -> IO ()|]),
-       ("c'uploadMesh", "UploadMesh_", "rl_bindings.h", [t|Ptr Mesh -> CInt -> IO ()|]),
+       ("c'uploadMesh", "UploadMesh_", "rl_bindings.h", [t|Ptr Mesh -> CBool -> IO ()|]),
        ("c'updateMeshBuffer", "UpdateMeshBuffer_", "rl_bindings.h", [t|Ptr Mesh -> CInt -> Ptr () -> CInt -> CInt -> IO ()|]),
        ("c'unloadMesh", "UnloadMesh_", "rl_bindings.h", [t|Ptr Mesh -> IO ()|]),
        ("c'drawMesh", "DrawMesh_", "rl_bindings.h", [t|Ptr Mesh -> Ptr Material -> Ptr Matrix -> IO ()|]),

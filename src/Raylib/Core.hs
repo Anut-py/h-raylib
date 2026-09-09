@@ -627,8 +627,8 @@ $( genNative
        ("c'setConfigFlags", "SetConfigFlags_", "rl_bindings.h", [t|CUInt -> IO ()|]),
        ("c'traceLog", "TraceLog_", "rl_bindings.h", [t|CInt -> CString -> IO ()|]), -- Uses varags, can't implement complete functionality
        ("c'setTraceLogLevel", "SetTraceLogLevel_", "rl_bindings.h", [t|CInt -> IO ()|]),
-       ("c'memAlloc", "MemAlloc_", "rl_bindings.h", [t|CInt -> IO (Ptr ())|]),
-       ("c'memRealloc", "MemRealloc_", "rl_bindings.h", [t|Ptr () -> CInt -> IO (Ptr ())|]),
+       ("c'memAlloc", "MemAlloc_", "rl_bindings.h", [t|CUInt -> IO (Ptr ())|]),
+       ("c'memRealloc", "MemRealloc_", "rl_bindings.h", [t|Ptr () -> CUInt -> IO (Ptr ())|]),
        ("c'memFree", "MemFree_", "rl_bindings.h", [t|Ptr () -> IO ()|]),
        ("c'openURL", "OpenURL_", "rl_bindings.h", [t|CString -> IO ()|]),
        ("c'setTraceLogCallback", "SetTraceLogCallback_", "rl_bindings.h", [t|C'TraceLogCallback -> IO ()|]),
@@ -653,7 +653,7 @@ $( genNative
        ("c'directoryExists", "DirectoryExists_", "rl_bindings.h", [t|CString -> IO CBool|]),
        ("c'isFileExtension", "IsFileExtension_", "rl_bindings.h", [t|CString -> CString -> IO CBool|]),
        ("c'isFileHidden", "IsFileHidden_", "rl_bindings.h", [t|CString -> IO CBool|]),
-       ("c'getFileLength", "GetFileLength_", "rl_bindings.h", [t|CString -> IO CBool|]),
+       ("c'getFileLength", "GetFileLength_", "rl_bindings.h", [t|CString -> IO CInt|]),
        ("c'getFileModTime", "GetFileModTime_", "rl_bindings.h", [t|CString -> IO CLong|]),
        ("c'getFileExtension", "GetFileExtension_", "rl_bindings.h", [t|CString -> IO CString|]),
        ("c'getFileName", "GetFileName_", "rl_bindings.h", [t|CString -> IO CString|]),
@@ -688,7 +688,7 @@ $( genNative
        ("c'setAutomationEventBaseFrame", "SetAutomationEventBaseFrame_", "rl_bindings.h", [t|CInt -> IO ()|]),
        ("c'startAutomationEventRecording", "StartAutomationEventRecording_", "rl_bindings.h", [t|IO ()|]),
        ("c'stopAutomationEventRecording", "StopAutomationEventRecording_", "rl_bindings.h", [t|IO ()|]),
-       ("c'playAutomationEvent", "PlayAutomationEvent", "rl_bindings.h", [t|Ptr AutomationEvent -> IO ()|]),
+       ("c'playAutomationEvent", "PlayAutomationEvent_", "rl_bindings.h", [t|Ptr AutomationEvent -> IO ()|]),
        ("c'isKeyPressed", "IsKeyPressed_", "rl_bindings.h", [t|CInt -> IO CBool|]),
        ("c'isKeyPressedRepeat", "IsKeyPressedRepeat_", "rl_bindings.h", [t|CInt -> IO CBool|]),
        ("c'isKeyDown", "IsKeyDown_", "rl_bindings.h", [t|CInt -> IO CBool|]),
@@ -1194,8 +1194,8 @@ isFileExtension fileName ext = toBool <$> withCString fileName (withCString ext 
 isFileHidden :: String -> IO Bool
 isFileHidden fileName = toBool <$> withCString fileName c'isFileHidden
 
-getFileLength :: String -> IO Bool
-getFileLength fileName = toBool <$> withCString fileName c'getFileLength
+getFileLength :: String -> IO Int
+getFileLength fileName = fromIntegral <$> withCString fileName c'getFileLength
 
 getFileModTime :: String -> IO Integer
 getFileModTime fileName = fromIntegral <$> withCString fileName c'getFileModTime
@@ -1348,7 +1348,7 @@ computeSHA256 contents = do
     (map fromIntegral contents)
     ( \size c -> do
         encoded <- c'computeSHA256 c (fromIntegral $ size * sizeOf (0 :: CUChar))
-        arr <- peekArray 5 encoded
+        arr <- peekArray 8 encoded
         return $ map fromIntegral arr
     )
 
@@ -1531,11 +1531,11 @@ foreign import ccall unsafe "wrapper"
 
 foreign import ccall unsafe "wrapper"
   mk'loadFileDataCallback ::
-    (CString -> Ptr CUInt -> IO (Ptr CUChar)) -> IO C'LoadFileDataCallback
+    (CString -> Ptr CInt -> IO (Ptr CUChar)) -> IO C'LoadFileDataCallback
 
 foreign import ccall unsafe "wrapper"
   mk'saveFileDataCallback ::
-    (CString -> Ptr () -> CUInt -> IO CInt) -> IO C'SaveFileDataCallback
+    (CString -> Ptr () -> CInt -> IO CBool) -> IO C'SaveFileDataCallback
 
 foreign import ccall unsafe "wrapper"
   mk'loadFileTextCallback ::
@@ -1543,7 +1543,7 @@ foreign import ccall unsafe "wrapper"
 
 foreign import ccall unsafe "wrapper"
   mk'saveFileTextCallback ::
-    (CString -> CString -> IO CInt) -> IO C'SaveFileTextCallback
+    (CString -> CString -> IO CBool) -> IO C'SaveFileTextCallback
 
 createTraceLogCallback :: TraceLogCallback -> IO C'TraceLogCallback
 createTraceLogCallback callback =
@@ -1561,7 +1561,7 @@ createLoadFileDataCallback callback =
         do
           fn <- peekCString fileName
           arr <- callback fn
-          poke dataSize (fromIntegral (length arr) :: CUInt)
+          poke dataSize (fromIntegral (length arr) :: CInt)
           newArray (map fromIntegral arr :: [CUChar])
     )
 

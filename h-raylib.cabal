@@ -180,6 +180,12 @@ executable basic-models
   hs-source-dirs: examples/basic-models/src
   main-is:        Main.hs
 
+-- animations
+executable basic-animations
+  import:         example-options
+  hs-source-dirs: examples/basic-animations/src
+  main-is:        Main.hs
+
 -- shaders
 executable basic-shaders
   import:         example-options

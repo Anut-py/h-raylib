@@ -34,6 +34,7 @@ cabal run custom-font-text
 
 # models
 cabal run basic-models
+cabal run basic-animations
 
 # shaders
 cabal run basic-shaders

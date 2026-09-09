@@ -739,7 +739,7 @@ RLBIND void UnloadImage_(Image *a)
     UnloadImage(*a);
 }
 
-RLBIND int ExportImage_(Image *a, char *b)
+RLBIND bool ExportImage_(Image *a, char *b)
 {
     return ExportImage(*a, b);
 }
@@ -749,7 +749,7 @@ RLBIND unsigned char *ExportImageToMemory_(Image *a, char *fileType, int *fileSi
     return ExportImageToMemory(*a, fileType, fileSize);
 }
 
-RLBIND int ExportImageAsCode_(Image *a, char *b)
+RLBIND bool ExportImageAsCode_(Image *a, char *b)
 {
     return ExportImageAsCode(*a, b);
 }
@@ -1345,7 +1345,7 @@ RLBIND void UnloadFont_(Font *a)
     UnloadFont(*a);
 }
 
-RLBIND int ExportFontAsCode_(Font *a, char *b)
+RLBIND bool ExportFontAsCode_(Font *a, char *b)
 {
     return ExportFontAsCode(*a, b);
 }
@@ -1715,7 +1715,7 @@ RLBIND void SetMaterialTexture_(Material *a, int b, Texture *c)
     SetMaterialTexture(a, b, *c);
 }
 
-RLBIND void UpdateModelAnimation_(Model *a, ModelAnimation *b, int c)
+RLBIND void UpdateModelAnimation_(Model *a, ModelAnimation *b, float c)
 {
     UpdateModelAnimation(*a, *b, c);
 }
@@ -1845,12 +1845,12 @@ RLBIND void UnloadSoundAlias_(Sound *a)
     UnloadSoundAlias(*a);
 }
 
-RLBIND int ExportWave_(Wave *a, char *b)
+RLBIND bool ExportWave_(Wave *a, char *b)
 {
     return ExportWave(*a, b);
 }
 
-RLBIND int ExportWaveAsCode_(Wave *a, char *b)
+RLBIND bool ExportWaveAsCode_(Wave *a, char *b)
 {
     return ExportWaveAsCode(*a, b);
 }
@@ -1875,7 +1875,7 @@ RLBIND void ResumeSound_(Sound *a)
     ResumeSound(*a);
 }
 
-RLBIND int IsSoundPlaying_(Sound *a)
+RLBIND bool IsSoundPlaying_(Sound *a)
 {
     return IsSoundPlaying(*a);
 }
@@ -1936,7 +1936,7 @@ RLBIND void PlayMusicStream_(Music *a)
     PlayMusicStream(*a);
 }
 
-RLBIND int IsMusicStreamPlaying_(Music *a)
+RLBIND bool IsMusicStreamPlaying_(Music *a)
 {
     return IsMusicStreamPlaying(*a);
 }
@@ -2013,7 +2013,7 @@ RLBIND void UpdateAudioStream_(AudioStream *a, const void *b, int c)
     UpdateAudioStream(*a, b, c);
 }
 
-RLBIND int IsAudioStreamProcessed_(AudioStream *a)
+RLBIND bool IsAudioStreamProcessed_(AudioStream *a)
 {
     return IsAudioStreamProcessed(*a);
 }
@@ -2033,7 +2033,7 @@ RLBIND void ResumeAudioStream_(AudioStream *a)
     ResumeAudioStream(*a);
 }
 
-RLBIND int IsAudioStreamPlaying_(AudioStream *a)
+RLBIND bool IsAudioStreamPlaying_(AudioStream *a)
 {
     return IsAudioStreamPlaying(*a);
 }

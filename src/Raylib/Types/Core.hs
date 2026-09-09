@@ -132,7 +132,8 @@ import Foreign
     pokeArray,
   )
 import Foreign.C
-  ( CFloat,
+  ( CBool,
+    CFloat,
     CInt (..),
     CString,
     CUChar,
@@ -1237,7 +1238,7 @@ type TraceLogCallback = TraceLogLevel -> String -> IO ()
 
 type LoadFileDataCallback = String -> IO [Integer]
 
-type SaveFileDataCallback a = String -> Ptr a -> Integer -> IO Bool
+type SaveFileDataCallback a = String -> Ptr a -> Int -> IO Bool
 
 type LoadFileTextCallback = String -> IO String
 
@@ -1245,10 +1246,10 @@ type SaveFileTextCallback = String -> String -> IO Bool
 
 type C'TraceLogCallback = FunPtr (CInt -> CString -> IO ())
 
-type C'LoadFileDataCallback = FunPtr (CString -> Ptr CUInt -> IO (Ptr CUChar))
+type C'LoadFileDataCallback = FunPtr (CString -> Ptr CInt -> IO (Ptr CUChar))
 
-type C'SaveFileDataCallback = FunPtr (CString -> Ptr () -> CUInt -> IO CInt)
+type C'SaveFileDataCallback = FunPtr (CString -> Ptr () -> CInt -> IO CBool)
 
 type C'LoadFileTextCallback = FunPtr (CString -> IO CString)
 
-type C'SaveFileTextCallback = FunPtr (CString -> CString -> IO CInt)
+type C'SaveFileTextCallback = FunPtr (CString -> CString -> IO CBool)
