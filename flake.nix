@@ -57,7 +57,7 @@
         pkgs:
         with pkgs; (
           [raylib raygui]
-          ++ lib.optionals stdenv.hostPlatform.isLinux [libGL libx11 libxcursor libxext libxi libxinerama libxrandr]
+          ++ lib.optionals stdenv.hostPlatform.isLinux [libGL libx11 libxcursor libxi libxinerama libxrandr]
           ++ lib.optionals stdenv.hostPlatform.isDarwin [apple-sdk]
         );
     in
