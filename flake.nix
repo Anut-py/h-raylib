@@ -22,13 +22,18 @@
             (self: super: {
               raylib = super.raylib.overrideAttrs (old: {
                 patches = [];
-                version = "5.0.0";
+                version = "6.1.0";
                 src = self.fetchFromGitHub {
                   owner = "raysan5";
                   repo = "raylib";
                   rev = raylibRev;
                   sha256 = raylibHash;
                 };
+
+                cmakeFlags = (old.cmakeFlags or []) ++ [
+                  "-DCMAKE_EXE_LINKER_FLAGS=-lGL"
+                ];
+
                 postFixup = "cp ../src/*.h $out/include/";
               });
               raygui = super.stdenv.mkDerivation { # A bit of a hack to get raygui working
@@ -51,8 +56,8 @@
         pkgs:
         with pkgs; (
           [raylib raygui]
-          ++ lib.optionals stdenv.isLinux (with xorg; [libGL libX11 libXcursor libXext libXi libXinerama libXrandr])
-          ++ lib.optionals stdenv.isDarwin [apple-sdk]
+          ++ lib.optionals stdenv.hostPlatform.isLinux [libGL libx11 libxcursor libxext libxi libxinerama libxrandr]
+          ++ lib.optionals stdenv.hostPlatform.isDarwin [apple-sdk]
         );
     in
       {
@@ -70,7 +75,7 @@
         );
         packages = forAllSystems (system: let
           pkgs = pkgsForSystem system;
-          baseInputs = pkgs // pkgs.xorg // pkgs.haskellPackages // rec { systemDeps = depsForSystem system pkgs; buildExamples = false; };
+          baseInputs = pkgs // pkgs.haskellPackages // rec { systemDeps = depsForSystem system pkgs; buildExamples = false; };
         in {
           default = import ./default.nix baseInputs;
           examples = import ./default.nix (baseInputs // rec { buildExamples = true; });
