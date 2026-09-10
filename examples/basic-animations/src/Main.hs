@@ -41,7 +41,7 @@ main = do
                   mode3D
                     camera
                     ( do
-                        drawModel model 0 1 white
+                        drawModel model (Vector3 0 0 0) 1 white
                         drawGrid 10 1
                         updateModelAnimation model (animations !! anim') frame
                     )
