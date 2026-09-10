@@ -35,6 +35,7 @@ $( genLenses
        ''RL.Material,
        ''RL.Transform,
        ''RL.BoneInfo,
+       ''RL.ModelSkeleton,
        ''RL.Model,
        ''RL.ModelAnimation,
        ''RL.Ray,

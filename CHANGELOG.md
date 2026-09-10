@@ -17,6 +17,10 @@ non-breaking changes (new functions or modules, bug fixes, etc). The safest
 version bound format to use is `h-raylib >=x.y.z.w && <x.y.(z+1)` (instead of
 the usual `^>=` bound).
 
+## Version 6.1.0.0 _10 September 2026_
+
+- **BREAKING CHANGE** Updated raylib to the master branch
+
 ## Version 5.6.0.0 _19 January 2026_
 
 - \[[#61](https://github.com/Anut-py/h-raylib/issues/61)\] Fixed a bug where

@@ -35,6 +35,7 @@ extra-source-files:
 
 data-files:
   examples/**/*.frag
+  examples/**/*.glb
   examples/**/*.mtl
   examples/**/*.obj
   examples/**/*.png
@@ -319,7 +320,6 @@ library
       Xcursor
       Xrandr
       Xi
-      Xext
 
     cc-options:
       -Wno-implicit-function-declaration -Wno-unused-result -Wno-ignored-qualifiers -D_GLFW_X11
