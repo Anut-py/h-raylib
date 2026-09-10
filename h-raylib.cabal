@@ -356,12 +356,29 @@ library
 
     if !flag(platform-nixos)
       include-dirs:
-        raylib/src raylib/src/external/glfw/src
-        raylib/src/external/glfw/include raygui/src raygui/styles/amber
-        raygui/styles/ashes raygui/styles/bluish raygui/styles/candy
-        raygui/styles/cherry raygui/styles/cyber raygui/styles/dark
-        raygui/styles/enefete raygui/styles/jungle raygui/styles/lavanda
-        raygui/styles/sunny raygui/styles/terminal
+        raylib/src
+        raylib/src/external/glfw/src
+        raylib/src/external/glfw/include
+        raygui/src
+        raygui/styles/advance
+        raygui/styles/amber
+        raygui/styles/ashes
+        raygui/styles/bluish
+        raygui/styles/brick
+        raygui/styles/candy
+        raygui/styles/cherry
+        raygui/styles/cyber
+        raygui/styles/dark
+        raygui/styles/enefete
+        raygui/styles/genesis
+        raygui/styles/jungle
+        raygui/styles/lavanda
+        raygui/styles/pocket
+        raygui/styles/rltech
+        raygui/styles/sunny
+        raygui/styles/terminal
+        raygui/styles/turbo
+        raygui/styles/wisteria
 
       c-sources:
         raylib/src/raudio.c

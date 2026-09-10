@@ -19,6 +19,7 @@ module Raylib.Types.Util.GUI
     GuiDropdownBoxProperty (..),
     GuiTextBoxProperty (..),
     GuiValueBoxProperty (..),
+    GuiTabBarProperty (..),
     GuiListViewProperty (..),
     GuiColorPickerProperty (..),
     GuiIconName (..),
@@ -258,6 +259,8 @@ data GuiControlProperty
     TextPadding
   | -- | Control text horizontal alignment inside control text bound (after border and padding)
     TextAlignment
+  | -- | Not used yet...
+    BaseProp16
   deriving (Eq, Show, Read)
 
 instance Enum GuiControlProperty where
@@ -277,6 +280,7 @@ instance Enum GuiControlProperty where
     BorderWidth -> 12
     TextPadding -> 13
     TextAlignment -> 14
+    BaseProp16 -> 15
   toEnum x = case x of
     0 -> BorderColorNormal
     1 -> BaseColorNormal
@@ -293,6 +297,7 @@ instance Enum GuiControlProperty where
     12 -> BorderWidth
     13 -> TextPadding
     14 -> TextAlignment
+    15 -> BaseProp16
     n -> error $ "(GuiControlProperty.toEnum) Invalid value: " ++ show n
 
 instance Storable GuiControlProperty where
@@ -319,6 +324,8 @@ data GuiDefaultProperty
     TextAlignmentVertical
   | -- | Text wrap-mode inside text bounds
     TextWrapMode
+  | -- | Not used yet...
+    ExtProp08
   deriving (Eq, Show, Read)
 
 instance Enum GuiDefaultProperty where
@@ -330,6 +337,7 @@ instance Enum GuiDefaultProperty where
     TextLineSpacing -> 20
     TextAlignmentVertical -> 21
     TextWrapMode -> 22
+    ExtProp08 -> 23
   toEnum x = case x of
     16 -> TextSize
     17 -> TextSpacing
@@ -338,6 +346,7 @@ instance Enum GuiDefaultProperty where
     20 -> TextLineSpacing
     21 -> TextAlignmentVertical
     22 -> TextWrapMode
+    23 -> ExtProp08
     n -> error $ "(GuiDefaultProperty.toEnum) Invalid value: " ++ show n
 
 instance Storable GuiDefaultProperty where
@@ -352,13 +361,17 @@ instance Storable GuiDefaultProperty where
 data GuiToggleProperty
   = -- | ToggleGroup separation between toggles
     GroupPadding
+  | -- | ToggleGroup bounds width considers all items: 0-Width per item, 1-Full width
+    GroupWidthFull
   deriving (Eq, Show, Read)
 
 instance Enum GuiToggleProperty where
   fromEnum x = case x of
     GroupPadding -> 16
+    GroupWidthFull -> 17
   toEnum x = case x of
     16 -> GroupPadding
+    17 -> GroupWidthFull
     n -> error $ "(GuiToggleProperty.toEnum) Invalid value: " ++ show n
 
 instance Storable GuiToggleProperty where
@@ -398,13 +411,17 @@ instance Storable GuiSliderProperty where
 data GuiProgressBarProperty
   = -- | ProgressBar internal padding
     ProgressPadding
+  | -- | ProgressBar increment side: 0-Left->Right, 1-Right->Left
+    ProgressSide
   deriving (Eq, Show, Read)
 
 instance Enum GuiProgressBarProperty where
   fromEnum x = case x of
     ProgressPadding -> 16
+    ProgressSide -> 17
   toEnum x = case x of
     16 -> ProgressPadding
+    17 -> ProgressSide
     n -> error $ "(GuiProgressBarProperty.toEnum) Invalid value: " ++ show n
 
 instance Storable GuiProgressBarProperty where
@@ -574,6 +591,35 @@ instance Enum GuiValueBoxProperty where
     n -> error $ "(GuiValueBoxProperty.toEnum) Invalid value: " ++ show n
 
 instance Storable GuiValueBoxProperty where
+  sizeOf _ = 4
+  alignment _ = 4
+  peek ptr = do
+    val <- peek (castPtr ptr)
+    return $ toEnum $ fromEnum (val :: CInt)
+  poke ptr v = poke (castPtr ptr) (fromIntegral (fromEnum v) :: CInt)
+
+-- | TabBar
+data GuiTabBarProperty
+  = -- | TabBar tab items width
+    TabItemsWidth
+  | -- | TabBar tab close button: 0-Not shown, 1-Shown
+    TabCloseButton
+  | -- | TabBar tabs side: 0-Bottom, 1-Top
+    TabLineSide
+  deriving (Eq, Show, Read)
+
+instance Enum GuiTabBarProperty where
+  fromEnum x = case x of
+    TabItemsWidth -> 16
+    TabCloseButton -> 17
+    TabLineSide -> 17
+  toEnum x = case x of
+    16 -> TabItemsWidth
+    17 -> TabCloseButton
+    18 -> TabLineSide
+    n -> error $ "(GuiTabBarProperty.toEnum) Invalid value: " ++ show n
+
+instance Storable GuiTabBarProperty where
   sizeOf _ = 4
   alignment _ = 4
   peek ptr = do
@@ -909,12 +955,13 @@ data GuiIconName
   | IconCone
   | IconEllipsoid
   | IconCapsule
-  | Icon250
-  | Icon251
-  | Icon252
-  | Icon253
-  | Icon254
-  | Icon255
+  | IconFiletypeFont
+  | IconFiletype3D
+  | IconFiletypeCodeXML
+  | IconFiletypeCodeC
+  | IconFiletypeCodePython
+  | IconFiletypeCodeJS
+  | IconFiletypeIcon
   deriving (Eq, Show, Read)
 
 instance Enum GuiIconName where
@@ -1169,12 +1216,13 @@ instance Enum GuiIconName where
     IconCone -> 247
     IconEllipsoid -> 248
     IconCapsule -> 249
-    Icon250 -> 250
-    Icon251 -> 251
-    Icon252 -> 252
-    Icon253 -> 253
-    Icon254 -> 254
-    Icon255 -> 255
+    IconFiletypeFont -> 250
+    IconFiletype3D -> 251
+    IconFiletypeCodeXML -> 252
+    IconFiletypeCodeC -> 253
+    IconFiletypeCodePython -> 254
+    IconFiletypeCodeJS -> 255
+    IconFiletypeIcon -> 256
   toEnum x = case x of
     0 -> IconNone
     1 -> IconFolderFileOpen
@@ -1426,12 +1474,13 @@ instance Enum GuiIconName where
     247 -> IconCone
     248 -> IconEllipsoid
     249 -> IconCapsule
-    250 -> Icon250
-    251 -> Icon251
-    252 -> Icon252
-    253 -> Icon253
-    254 -> Icon254
-    255 -> Icon255
+    250 -> IconFiletypeFont
+    251 -> IconFiletype3D
+    252 -> IconFiletypeCodeXML
+    253 -> IconFiletypeCodeC
+    254 -> IconFiletypeCodePython
+    255 -> IconFiletypeCodeJS
+    256 -> IconFiletypeIcon
     n -> error $ "(GuiIconName.toEnum) Invalid value: " ++ show n
 
 instance Storable GuiIconName where

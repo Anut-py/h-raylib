@@ -100,6 +100,7 @@ module Raylib.Util.GUI
 
     -- ** Styles loading functions
     guiLoadStyle,
+    guiLoadStyleFromMemory,
     guiLoadStyleDefault,
 
     -- ** Tooltips management functions
@@ -112,6 +113,7 @@ module Raylib.Util.GUI
     guiSetIconScale,
     guiGetIcons,
     guiLoadIcons,
+    guiLoadIconsFromMemory,
     guiDrawIcon,
 
     -- ** Utility functions
@@ -124,7 +126,6 @@ module Raylib.Util.GUI
     guiGroupBox,
     guiLine,
     guiPanel,
-    guiTabBar,
     guiScrollPanel,
 
     -- *** Basic controls set
@@ -151,6 +152,8 @@ module Raylib.Util.GUI
     -- *** Advanced controls set
     guiListView,
     guiListViewEx,
+    guiTabBar,
+    guiTabBarEx,
     guiMessageBox,
     guiTextInputBox,
     guiColorPicker,
@@ -174,6 +177,7 @@ module Raylib.Util.GUI
     c'guiSetStyle,
     c'guiGetStyle,
     c'guiLoadStyle,
+    c'guiLoadStyleFromMemory,
     c'guiLoadStyleDefault,
     c'guiEnableTooltip,
     c'guiDisableTooltip,
@@ -182,13 +186,13 @@ module Raylib.Util.GUI
     c'guiSetIconScale,
     c'guiGetIcons,
     c'guiLoadIcons,
+    c'guiLoadIconsFromMemory,
     c'guiDrawIcon,
     c'guiGetTextWidth,
     c'guiWindowBox,
     c'guiGroupBox,
     c'guiLine,
     c'guiPanel,
-    c'guiTabBar,
     c'guiScrollPanel,
     c'guiLabel,
     c'guiButton,
@@ -211,6 +215,8 @@ module Raylib.Util.GUI
     c'guiGrid,
     c'guiListView,
     c'guiListViewEx,
+    c'guiTabBar,
+    c'guiTabBarEx,
     c'guiMessageBox,
     c'guiTextInputBox,
     c'guiColorPicker,
@@ -230,6 +236,7 @@ import Foreign.C
     CFloat (..),
     CInt (..),
     CString,
+    CUChar,
     CUInt (..),
     newCString,
     peekCString,
@@ -253,6 +260,7 @@ $( genNative
        ("c'guiSetStyle", "GuiSetStyle_", "rgui_bindings.h", [t|CInt -> CInt -> CInt -> IO ()|]),
        ("c'guiGetStyle", "GuiGetStyle_", "rgui_bindings.h", [t|CInt -> CInt -> IO CInt|]),
        ("c'guiLoadStyle", "GuiLoadStyle_", "rgui_bindings.h", [t|CString -> IO ()|]),
+       ("c'guiLoadStyleFromMemory", "GuiLoadStyleFromMemory_", "rgui_bindings.h", [t|Ptr CUChar -> CInt -> IO ()|]),
        ("c'guiLoadStyleDefault", "GuiLoadStyleDefault_", "rgui_bindings.h", [t|IO ()|]),
        ("c'guiEnableTooltip", "GuiEnableTooltip_", "rgui_bindings.h", [t|IO ()|]),
        ("c'guiDisableTooltip", "GuiDisableTooltip_", "rgui_bindings.h", [t|IO ()|]),
@@ -261,13 +269,13 @@ $( genNative
        ("c'guiSetIconScale", "GuiSetIconScale_", "rgui_bindings.h", [t|CInt -> IO ()|]),
        ("c'guiGetIcons", "GuiGetIcons_", "rgui_bindings.h", [t|IO (Ptr CUInt)|]),
        ("c'guiLoadIcons", "GuiLoadIcons_", "rgui_bindings.h", [t|CString -> CBool -> IO (Ptr CString)|]),
+       ("c'guiLoadIconsFromMemory", "GuiLoadIconsFromMemory_", "rgui_bindings.h", [t|Ptr CUChar -> CInt -> CBool -> IO (Ptr CString)|]),
        ("c'guiDrawIcon", "GuiDrawIcon_", "rgui_bindings.h", [t|CInt -> CInt -> CInt -> CInt -> Ptr Color -> IO ()|]),
        ("c'guiGetTextWidth", "GuiGetTextWidth_", "rgui_bindings.h", [t|CString -> IO CInt|]),
        ("c'guiWindowBox", "GuiWindowBox_", "rgui_bindings.h", [t|Ptr Rectangle -> CString -> IO CInt|]),
        ("c'guiGroupBox", "GuiGroupBox_", "rgui_bindings.h", [t|Ptr Rectangle -> CString -> IO CInt|]),
        ("c'guiLine", "GuiLine_", "rgui_bindings.h", [t|Ptr Rectangle -> CString -> IO CInt|]),
        ("c'guiPanel", "GuiPanel_", "rgui_bindings.h", [t|Ptr Rectangle -> CString -> IO CInt|]),
-       ("c'guiTabBar", "GuiTabBar_", "rgui_bindings.h", [t|Ptr Rectangle -> Ptr CString -> CInt -> Ptr CInt -> IO CInt|]),
        ("c'guiScrollPanel", "GuiScrollPanel_", "rgui_bindings.h", [t|Ptr Rectangle -> CString -> Ptr Rectangle -> Ptr Vector2 -> Ptr Rectangle -> IO CInt|]),
        ("c'guiLabel", "GuiLabel_", "rgui_bindings.h", [t|Ptr Rectangle -> CString -> IO CInt|]),
        ("c'guiButton", "GuiButton_", "rgui_bindings.h", [t|Ptr Rectangle -> CString -> IO CInt|]),
@@ -290,8 +298,10 @@ $( genNative
        ("c'guiGrid", "GuiGrid_", "rgui_bindings.h", [t|Ptr Rectangle -> CString -> CFloat -> CInt -> Ptr Vector2 -> IO CInt|]),
        ("c'guiListView", "GuiListView_", "rgui_bindings.h", [t|Ptr Rectangle -> CString -> Ptr CInt -> Ptr CInt -> IO CInt|]),
        ("c'guiListViewEx", "GuiListViewEx_", "rgui_bindings.h", [t|Ptr Rectangle -> Ptr CString -> CInt -> Ptr CInt -> Ptr CInt -> Ptr CInt -> IO CInt|]),
-       ("c'guiMessageBox", "GuiMessageBox_", "rgui_bindings.h", [t|Ptr Rectangle -> CString -> CString -> CString -> IO CInt|]),
-       ("c'guiTextInputBox", "GuiTextInputBox_", "rgui_bindings.h", [t|Ptr Rectangle -> CString -> CString -> CString -> CString -> CInt -> Ptr CBool -> IO CInt|]),
+       ("c'guiTabBar", "GuiTabBar_", "rgui_bindings.h", [t|Ptr Rectangle -> CString -> Ptr CInt -> Ptr CInt -> IO CInt|]),
+       ("c'guiTabBarEx", "GuiTabBarEx_", "rgui_bindings.h", [t|Ptr Rectangle -> Ptr CString -> CInt -> Ptr CInt -> Ptr CInt -> Ptr CInt -> IO CInt|]),
+       ("c'guiMessageBox", "GuiMessageBox_", "rgui_bindings.h", [t|Ptr Rectangle -> CString -> CString -> CString -> Ptr CInt -> IO CInt|]),
+       ("c'guiTextInputBox", "GuiTextInputBox_", "rgui_bindings.h", [t|Ptr Rectangle -> CString -> CString -> CString -> CInt -> CString -> Ptr CInt -> Ptr CBool -> IO CInt|]),
        ("c'guiColorPicker", "GuiColorPicker_", "rgui_bindings.h", [t|Ptr Rectangle -> CString -> Ptr Color -> IO CInt|]),
        ("c'guiColorPanel", "GuiColorPanel_", "rgui_bindings.h", [t|Ptr Rectangle -> CString -> Ptr Color -> IO CInt|]),
        ("c'guiColorBarAlpha", "GuiColorBarAlpha_", "rgui_bindings.h", [t|Ptr Rectangle -> CString -> Ptr CFloat -> IO CInt|]),
@@ -589,6 +599,10 @@ guiGetStyleTextWrapMode = guiGetStyleE Default TextWrapMode
 guiLoadStyle :: String -> IO ()
 guiLoadStyle fileName = withCString fileName c'guiLoadStyle
 
+-- | Load style from memory (binary only)
+guiLoadStyleFromMemory :: [Integer] -> IO ()
+guiLoadStyleFromMemory fileData = withFreeableArrayLen (map fromIntegral fileData) (\l f -> c'guiLoadStyleFromMemory f (fromIntegral l))
+
 -- | Load style default over global style
 guiLoadStyleDefault :: IO ()
 guiLoadStyleDefault = c'guiLoadStyleDefault
@@ -629,6 +643,18 @@ guiLoadIcons fileName loadIconsName count = do
   cStrings <- popCArray count raw
   mapM popCString cStrings
 
+-- | Load raygui icons file (.rgi) from memory into internal icons data
+guiLoadIconsFromMemory ::
+  [Integer] ->
+  Bool ->
+  -- | The number of icons in the file
+  Int ->
+  IO [String]
+guiLoadIconsFromMemory fileData loadIconsName count = do
+  raw <- withFreeableArrayLen (map fromIntegral fileData) (\l f -> c'guiLoadIconsFromMemory f (fromIntegral l) (fromBool loadIconsName))
+  cStrings <- popCArray count raw
+  mapM popCString cStrings
+
 -- | Draw icon using pixel size at specified position
 guiDrawIcon :: GuiIconName -> Int -> Int -> Int -> Color -> IO ()
 guiDrawIcon icon posX posY pixelSize color = withFreeable color (c'guiDrawIcon (fromIntegral (fromEnum icon)) (fromIntegral posX) (fromIntegral posY) (fromIntegral pixelSize))
@@ -656,34 +682,6 @@ guiLine bounds text = void (withFreeable bounds (withMaybeCString text . c'guiLi
 -- | Panel control, useful to group controls
 guiPanel :: Rectangle -> Maybe String -> IO ()
 guiPanel bounds text = void (withFreeable bounds (withMaybeCString text . c'guiPanel))
-
--- | Tab Bar control
-guiTabBar ::
-  Rectangle ->
-  [String] ->
-  -- | The currently active tab's index, use `Nothing` if creating the tab bar
-  --   for the first time
-  Maybe Int ->
-  -- | A tuple, the first element is the index of the active tab, the second
-  --   element is the tab whose close button is pressed (if any)
-  IO (Int, Maybe Int)
-guiTabBar bounds tabNames active = do
-  cStrings <- mapM newCString tabNames
-  withFreeable
-    bounds
-    ( \b ->
-        withFreeableArrayLen
-          cStrings
-          ( \l t ->
-              withFreeable
-                (fromIntegral (fromMaybe 0 active))
-                ( \a -> do
-                    close <- c'guiTabBar b t (fromIntegral l) a
-                    active' <- peek a
-                    return (fromIntegral active', if close == (-1) then Nothing else Just (fromIntegral close))
-                )
-          )
-    )
 
 -- | Scroll Panel control
 guiScrollPanel ::
@@ -1165,6 +1163,61 @@ guiListViewEx bounds text scrollIndex active focus = do
           )
     )
 
+-- | Tab Bar control
+guiTabBar ::
+  Rectangle ->
+  String ->
+  -- | The currently active tab's index, use `Nothing` if creating the tab bar
+  --   for the first time
+  Maybe Int ->
+  -- | A tuple, the first element is the index of the active tab, the second
+  --   element is the tab whose close button is pressed (if any)
+  IO (Int, Maybe Int)
+guiTabBar bounds text active = do
+  withFreeable
+    bounds
+    ( \b ->
+        withCString
+          text
+          ( \t ->
+              withFreeable
+                (fromIntegral (fromMaybe 0 active))
+                ( \a -> do
+                    close <- c'guiTabBar b t nullPtr a
+                    active' <- peek a
+                    return (fromIntegral active', if close == (-1) then Nothing else Just (fromIntegral close))
+                )
+          )
+    )
+
+-- | Tab Bar control, using text entries list an returning focus entry
+guiTabBarEx ::
+  Rectangle ->
+  [String] ->
+  -- | The currently active tab's index, use `Nothing` if creating the tab bar
+  --   for the first time
+  Maybe Int ->
+  -- | A tuple, the first element is the index of the active tab, the second
+  --   element is the tab whose close button is pressed (if any)
+  IO (Int, Maybe Int)
+guiTabBarEx bounds text active = do
+  cStrings <- mapM newCString text
+  withFreeable
+    bounds
+    ( \b ->
+        withFreeableArrayLen
+          cStrings
+          ( \l t ->
+              withFreeable
+                (fromIntegral (fromMaybe 0 active))
+                ( \a -> do
+                    close <- c'guiTabBarEx b t (fromIntegral l) nullPtr a nullPtr
+                    active' <- peek a
+                    return (fromIntegral active', if close == (-1) then Nothing else Just (fromIntegral close))
+                )
+          )
+    )
+
 -- | Message Box control, displays a message
 guiMessageBox ::
   Rectangle ->
@@ -1172,10 +1225,12 @@ guiMessageBox ::
   String ->
   -- | Button labels separated by semicolons
   String ->
-  -- | The index of the clicked button, if any (0 = close message box,
-  --   1,2,... = custom button)
-  IO (Maybe Int)
-guiMessageBox bounds title message buttons =
+  -- | The currently active button's index, use `Nothing` if creating the
+  -- message box for the first time
+  Maybe Int ->
+  -- | The index of the active button and whether it is clicked
+  IO (Maybe Int, Bool)
+guiMessageBox bounds title message btnText btnActive =
   withFreeable
     bounds
     ( \b ->
@@ -1186,10 +1241,15 @@ guiMessageBox bounds title message buttons =
                 message
                 ( \m ->
                     withCString
-                      buttons
-                      ( \bu -> do
-                          res <- c'guiMessageBox b t m bu
-                          if res == (-1) then return Nothing else return (Just (fromIntegral res))
+                      btnText
+                      ( \bu ->
+                          withFreeable
+                            (fromIntegral (fromMaybe 0 btnActive))
+                            ( \a -> do
+                                res <- c'guiMessageBox b t m bu a
+                                a' <- fromIntegral <$> peek a
+                                return (Just a', toBool res)
+                            )
                       )
                 )
           )
@@ -1200,12 +1260,12 @@ guiTextInputBox ::
   Rectangle ->
   Maybe String ->
   String ->
-  -- | Button names, separated by semicolons
-  String ->
   -- | Current text box value
   String ->
-  -- | Text box buffer size; if `Nothing`, then it will automatically allocate
-  --   a buffer large enough to fit the text
+  Maybe Int ->
+  String ->
+  -- | The currently active button's index, use `Nothing` if creating the
+  -- text input box for the first time
   Maybe Int ->
   -- | Secret (password) mode; `Just True` if the value should be censored;
   --   `Just False` if it should not be censored but there should still be a
@@ -1213,11 +1273,10 @@ guiTextInputBox ::
   Maybe Bool ->
   -- | A tuple, the first element is the updated secret mode, the second
   --   element is the updated text box value, the third element is the index
-  --   of the clicked button, if any (0 = close input box, 1,2,... = custom
-  --   button)
-  IO (Maybe Bool, String, Maybe Int)
-guiTextInputBox bounds title message buttons value bufferSize secret = do
-  ((clicked, secret'), value') <-
+  --   of the active button, the fourth element is whether it is clicked
+  IO (Maybe Bool, String, Maybe Int, Bool)
+guiTextInputBox bounds title message value textSize btnText btnActive secret = do
+  ((clicked, secret', active'), value') <-
     withFreeable
       bounds
       ( \b ->
@@ -1227,42 +1286,51 @@ guiTextInputBox bounds title message buttons value bufferSize secret = do
                 withCString
                   message
                   ( \m ->
-                      withCString
-                        buttons
-                        ( \bu ->
-                            withCStringBuffer
-                              value
-                              bufferSize
-                              ( \s te ->
-                                  withMaybe
-                                    (fromBool <$> secret)
-                                    ( \sec -> do
-                                        clicked <- c'guiTextInputBox b t m bu te (fromIntegral s) sec
-                                        secret' <- if sec == nullPtr then return Nothing else Just . toBool <$> peek sec
-                                        return (if clicked == (-1) then Nothing else Just (fromIntegral clicked), secret')
+                      withCStringBuffer
+                        value
+                        textSize
+                        ( \s te ->
+                            withCString
+                              btnText
+                              ( \bu ->
+                                  withFreeable
+                                    (fromIntegral (fromMaybe 0 btnActive))
+                                    ( \a -> do
+                                        withMaybe
+                                          (fromBool <$> secret)
+                                          ( \sec -> do
+                                              clicked <- toBool <$> c'guiTextInputBox b t m te (fromIntegral s) bu a sec
+                                              secret' <- if sec == nullPtr then return Nothing else Just . toBool <$> peek sec
+                                              active' <- Just . fromIntegral <$> peek a
+                                              return (clicked, secret', active')
+                                          )
                                     )
                               )
                         )
                   )
             )
       )
-  return (secret', value', clicked)
+  return (secret', value', active', clicked)
 
 -- | Color Picker control (multiple color controls)
 guiColorPicker ::
   Rectangle ->
+  Maybe String ->
   -- | Currently selected color, use `Nothing` if creating the color picker for
   --   the first time
   Maybe Color ->
   -- | Updated color
   IO Color
-guiColorPicker bounds color =
+guiColorPicker bounds text color =
   withFreeable
     bounds
     ( \b ->
-        withFreeable
-          (fromMaybe (Color 200 0 0 255) color)
-          ( \c -> c'guiColorPicker b nullPtr c >> peek c
+        withMaybeCString
+          text
+          ( \t ->
+              withFreeable
+                (fromMaybe (Color 200 0 0 255) color)
+                (\c -> c'guiColorPicker b t c >> peek c)
           )
     )
 

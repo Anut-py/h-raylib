@@ -298,7 +298,7 @@ mainLoop state = do
 
       oldState <- guiGetState
       unless custom' guiDisable
-      color' <- guiColorPicker (Rectangle 20 (height - 470) 374 360) (customBackground ps)
+      color' <- guiColorPicker (Rectangle 20 (height - 470) 374 360) Nothing (customBackground ps)
       unless (oldState == StateDisabled) guiEnable
 
       when (theme' /= theme ps) (themes !! (fromMaybe 0 theme'))

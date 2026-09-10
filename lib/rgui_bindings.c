@@ -73,69 +73,109 @@ RLBIND void GuiLoadStyle_(const char *fileName)
   return GuiLoadStyle(fileName);
 }
 
+RLBIND void GuiLoadStyleFromMemory_(const unsigned char *fileData, int dataSize)
+{
+  return GuiLoadStyleFromMemory(fileData, dataSize);
+}
+
 RLBIND void GuiLoadStyleDefault_(void)
 {
   return GuiLoadStyleDefault();
 }
 
+RLBIND void GuiLoadStyleAdvance_(void)
+{
+  return GuiLoadStyleAdvance();
+}
+
 RLBIND void GuiLoadStyleAmber_(void)
 {
-  GuiLoadStyleAmber();
+  return GuiLoadStyleAmber();
 }
 
 RLBIND void GuiLoadStyleAshes_(void)
 {
-  GuiLoadStyleAshes();
+  return GuiLoadStyleAshes();
 }
 
 RLBIND void GuiLoadStyleBluish_(void)
 {
-  GuiLoadStyleBluish();
+  return GuiLoadStyleBluish();
+}
+
+RLBIND void GuiLoadStyleBrick_(void)
+{
+  return GuiLoadStyleBrick();
 }
 
 RLBIND void GuiLoadStyleCandy_(void)
 {
-  GuiLoadStyleCandy();
+  return GuiLoadStyleCandy();
 }
 
 RLBIND void GuiLoadStyleCherry_(void)
 {
-  GuiLoadStyleCherry();
+  return GuiLoadStyleCherry();
 }
 
 RLBIND void GuiLoadStyleCyber_(void)
 {
-  GuiLoadStyleCyber();
+  return GuiLoadStyleCyber();
 }
 
 RLBIND void GuiLoadStyleDark_(void)
 {
-  GuiLoadStyleDark();
+  return GuiLoadStyleDark();
 }
 
 RLBIND void GuiLoadStyleEnefete_(void)
 {
-  GuiLoadStyleEnefete();
+  return GuiLoadStyleEnefete();
+}
+
+RLBIND void GuiLoadStyleGenesis_(void)
+{
+  return GuiLoadStyleGenesis();
 }
 
 RLBIND void GuiLoadStyleJungle_(void)
 {
-  GuiLoadStyleJungle();
+  return GuiLoadStyleJungle();
 }
 
 RLBIND void GuiLoadStyleLavanda_(void)
 {
-  GuiLoadStyleLavanda();
+  return GuiLoadStyleLavanda();
+}
+
+RLBIND void GuiLoadStylePocket_(void)
+{
+  return GuiLoadStylePocket();
+}
+
+RLBIND void GuiLoadStyleRLTech_(void)
+{
+  return GuiLoadStyleRLTech();
 }
 
 RLBIND void GuiLoadStyleSunny_(void)
 {
-  GuiLoadStyleSunny();
+  return GuiLoadStyleSunny();
 }
 
 RLBIND void GuiLoadStyleTerminal_(void)
 {
-  GuiLoadStyleTerminal();
+  return GuiLoadStyleTerminal();
+}
+
+RLBIND void GuiLoadStyleTurbo_(void)
+{
+  return GuiLoadStyleTurbo();
+}
+
+RLBIND void GuiLoadStyleWisteria_(void)
+{
+  return GuiLoadStyleWisteria();
 }
 
 RLBIND void GuiEnableTooltip_(void)
@@ -173,6 +213,11 @@ RLBIND char **GuiLoadIcons_(const char *fileName, bool loadIconsName)
   return GuiLoadIcons(fileName, loadIconsName);
 }
 
+RLBIND char **GuiLoadIconsFromMemory_(const unsigned char *fileData, int dataSize, bool loadIconsName)
+{
+  return GuiLoadIconsFromMemory(fileData, dataSize, loadIconsName);
+}
+
 RLBIND void GuiDrawIcon_(int iconId, int posX, int posY, int pixelSize, Color *color)
 {
   return GuiDrawIcon(iconId, posX, posY, pixelSize, *color);
@@ -201,11 +246,6 @@ RLBIND int GuiLine_(Rectangle *bounds, const char *text)
 RLBIND int GuiPanel_(Rectangle *bounds, const char *text)
 {
   return GuiPanel(*bounds, text);
-}
-
-RLBIND int GuiTabBar_(Rectangle *bounds, const char **text, int count, int *active)
-{
-  return GuiTabBar(*bounds, text, count, active);
 }
 
 RLBIND int GuiScrollPanel_(Rectangle *bounds, const char *text, Rectangle *content, Vector2 *scroll, Rectangle *view)
@@ -312,19 +352,29 @@ RLBIND int GuiListView_(Rectangle *bounds, const char *text, int *scrollIndex, i
   return GuiListView(*bounds, text, scrollIndex, active);
 }
 
-RLBIND int GuiListViewEx_(Rectangle *bounds, const char **text, int count, int *scrollIndex, int *active, int *focus)
+RLBIND int GuiListViewEx_(Rectangle *bounds, char **text, int count, int *scrollIndex, int *active, int *focus)
 {
   return GuiListViewEx(*bounds, text, count, scrollIndex, active, focus);
 }
 
-RLBIND int GuiMessageBox_(Rectangle *bounds, const char *title, const char *message, const char *buttons)
+RLBIND int GuiTabBar_(Rectangle *bounds, const char *text, int *hscroll, int *active)
 {
-  return GuiMessageBox(*bounds, title, message, buttons);
+  return GuiTabBar(*bounds, text, hscroll, active);
 }
 
-RLBIND int GuiTextInputBox_(Rectangle *bounds, const char *title, const char *message, const char *buttons, char *text, int textMaxSize, bool *secretViewActive)
+int GuiTabBarEx_(Rectangle *bounds, char **text, int count, int *hscroll, int *active, int *focus)
 {
-  return GuiTextInputBox(*bounds, title, message, buttons, text, textMaxSize, secretViewActive);
+  return GuiTabBarEx(*bounds, text, count, hscroll, active, focus);
+}
+
+RLBIND int GuiMessageBox_(Rectangle *bounds, const char *title, const char *message, const char *btnText, int *btnActive)
+{
+  return GuiMessageBox(*bounds, title, message, btnText, btnActive);
+}
+
+RLBIND int GuiTextInputBox_(Rectangle *bounds, const char *title, const char *message, char *text, int textSize, const char *btnText, int *btnActive, bool *secretViewActive)
+{
+  return GuiTextInputBox(*bounds, title, message, text, textSize, btnText, btnActive, secretViewActive);
 }
 
 RLBIND int GuiColorPicker_(Rectangle *bounds, const char *text, Color *color)

@@ -5,18 +5,25 @@
  */
 
 #include "rl_common.h"
+#include <style_advance.h>
 #include <style_amber.h>
 #include <style_ashes.h>
 #include <style_bluish.h>
+#include <style_brick.h>
 #include <style_candy.h>
 #include <style_cherry.h>
 #include <style_cyber.h>
 #include <style_dark.h>
 #include <style_enefete.h>
+#include <style_genesis.h>
 #include <style_jungle.h>
 #include <style_lavanda.h>
+#include <style_pocket.h>
+#include <style_rltech.h>
 #include <style_sunny.h>
 #include <style_terminal.h>
+#include <style_turbo.h>
+#include <style_wisteria.h>
 
 void GuiEnable_(void);
 
@@ -44,13 +51,19 @@ int GuiGetStyle_(int control, int property);
 
 void GuiLoadStyle_(const char *fileName);
 
+void GuiLoadStyleFromMemory_(const unsigned char *fileData, int dataSize);
+
 void GuiLoadStyleDefault_(void);
+
+void GuiLoadStyleAdvance_(void);
 
 void GuiLoadStyleAmber_(void);
 
 void GuiLoadStyleAshes_(void);
 
 void GuiLoadStyleBluish_(void);
+
+void GuiLoadStyleBrick_(void);
 
 void GuiLoadStyleCandy_(void);
 
@@ -62,13 +75,23 @@ void GuiLoadStyleDark_(void);
 
 void GuiLoadStyleEnefete_(void);
 
+void GuiLoadStyleGenesis_(void);
+
 void GuiLoadStyleJungle_(void);
 
 void GuiLoadStyleLavanda_(void);
 
+void GuiLoadStylePocket_(void);
+
+void GuiLoadStyleRLTech_(void);
+
 void GuiLoadStyleSunny_(void);
 
 void GuiLoadStyleTerminal_(void);
+
+void GuiLoadStyleTurbo_(void);
+
+void GuiLoadStyleWisteria_(void);
 
 void GuiEnableTooltip_(void);
 
@@ -84,6 +107,8 @@ unsigned int *GuiGetIcons_(void);
 
 char **GuiLoadIcons_(const char *fileName, bool loadIconsName);
 
+char **GuiLoadIconsFromMemory_(const unsigned char *fileData, int dataSize, bool loadIconsName);
+
 void GuiDrawIcon_(int iconId, int posX, int posY, int pixelSize, Color *color);
 
 int GuiGetTextWidth_(char *a);
@@ -95,8 +120,6 @@ int GuiGroupBox_(Rectangle *bounds, const char *text);
 int GuiLine_(Rectangle *bounds, const char *text);
 
 int GuiPanel_(Rectangle *bounds, const char *text);
-
-int GuiTabBar_(Rectangle *bounds, const char **text, int count, int *active);
 
 int GuiScrollPanel_(Rectangle *bounds, const char *text, Rectangle *content, Vector2 *scroll, Rectangle *view);
 
@@ -140,11 +163,15 @@ int GuiGrid_(Rectangle *bounds, const char *text, float spacing, int subdivs, Ve
 
 int GuiListView_(Rectangle *bounds, const char *text, int *scrollIndex, int *active);
 
-int GuiListViewEx_(Rectangle *bounds, const char **text, int count, int *scrollIndex, int *active, int *focus);
+int GuiListViewEx_(Rectangle *bounds, char **text, int count, int *scrollIndex, int *active, int *focus);
 
-int GuiMessageBox_(Rectangle *bounds, const char *title, const char *message, const char *buttons);
+int GuiTabBar_(Rectangle *bounds, const char *text, int *hscroll, int *active);
 
-int GuiTextInputBox_(Rectangle *bounds, const char *title, const char *message, const char *buttons, char *text, int textMaxSize, bool *secretViewActive);
+int GuiTabBarEx_(Rectangle *bounds, char **text, int count, int *hscroll, int *active, int *focus);
+
+int GuiMessageBox_(Rectangle *bounds, const char *title, const char *message, const char *btnText, int *btnActive);
+
+int GuiTextInputBox_(Rectangle *bounds, const char *title, const char *message, char *text, int textSize, const char *btnText, int *btnActive, bool *secretViewActive);
 
 int GuiColorPicker_(Rectangle *bounds, const char *text, Color *color);
 
