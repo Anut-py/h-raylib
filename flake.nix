@@ -30,9 +30,10 @@
                   sha256 = raylibHash;
                 };
 
-                cmakeFlags = (old.cmakeFlags or []) ++ [
-                  "-DCMAKE_EXE_LINKER_FLAGS=-lGL"
-                ];
+                cmakeFlags = (old.cmakeFlags or [])
+                    ++ (if self.stdenv.hostPlatform.isLinux then
+                        [ "-DCMAKE_EXE_LINKER_FLAGS=-lGL" ]
+                        else []);
 
                 postFixup = "cp ../src/*.h $out/include/";
               });
